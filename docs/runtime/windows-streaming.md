@@ -150,3 +150,10 @@ It does not substitute for the listening scenario above. See the
 [Phase 2 assessment](phase-2-assessment.md) for measured results and remaining gaps.
 Use `-FragmentFrames 24` on the launch command to reproduce the initial transport
 granularity; the current player's initial-buffer policy remains in effect.
+
+Development verification also checks the plain browser JavaScript/HTML with
+hash-locked Biome 2.6.6 and Node.js 24.14.1; Node is not needed to launch the demo.
+There is no TypeScript compilation or bundling stage. One narrow
+`lint/a11y/useMediaCaption` exception is beside the video element: the experiment's
+declared speech cuts have no verified transcript. Remove it when verified captions
+cover all three cuts. This does not suppress other accessibility checks.

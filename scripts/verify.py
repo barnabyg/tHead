@@ -19,8 +19,15 @@ from prepare import ROOT, run
 def main() -> None:
     python = sys.executable
     run([python, "-m", "ruff", "format", "--check", "scripts", "tests"], 120)
+    biome = str(ROOT / "node_modules/.bin/biome.cmd")
+    run([biome, "format", "scripts/streaming.js", "scripts/streaming.html"], 120)
     run([python, "-m", "ruff", "check", "scripts", "tests"], 120)
+    run(
+        [biome, "lint", "--error-on-warnings", "scripts/streaming.js", "scripts/streaming.html"],
+        120,
+    )
     run([python, "-m", "mypy"], 180)
+    run(["node", "--check", "scripts/streaming.js"], 120)
     run([python, "-m", "bandit", "-q", "-c", "pyproject.toml", "-r", "scripts", "tests"], 120)
     modules = sorted((ROOT / "tests").glob("test_*.py"))
     # Independent command suites have separate temporary directories and ports.
@@ -59,6 +66,8 @@ def main() -> None:
     if failures:
         raise RuntimeError(f"{len(failures)} test suites failed") from failures[0]
     run(["uv", "lock", "--check"], 180)
+    run(["npm.cmd", "ls", "--depth=0"], 180)
+    run(["npm.cmd", "audit", "--audit-level=low"], 600)
     run([python, "-m", "pip_audit", "--progress-spinner", "off"], 600)
     # PyPI advisories identify the base PyTorch release, not its official CUDA local suffix.
     requirements = (ROOT / "requirements-runtime.lock").read_text(encoding="utf-8")
@@ -121,6 +130,9 @@ def main() -> None:
         ".github",
         "pyproject.toml",
         "runtime-lock.json",
+        "package.json",
+        "package-lock.json",
+        "biome.json",
     ]
     secrets = subprocess.check_output(command, cwd=ROOT, text=True, timeout=180)  # nosec B603
     if json.loads(secrets)["results"]:

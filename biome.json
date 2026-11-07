@@ -1,0 +1,7 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.6.6/schema.json",
+  "formatter": { "indentStyle": "space", "lineWidth": 100 },
+  "javascript": { "formatter": { "quoteStyle": "single" } },
+  "html": { "formatter": { "enabled": true } },
+  "linter": { "rules": { "preset": "recommended" } }
+}

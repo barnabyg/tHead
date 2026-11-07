@@ -435,6 +435,8 @@ def handler(demo: Demonstration) -> type[BaseHTTPRequestHandler]:
             query = parse_qs(parsed.query)
             if parsed.path == "/":
                 self.reply(200, (ROOT / "scripts/streaming.html").read_bytes(), "text/html")
+            elif parsed.path == "/player.js":
+                self.reply(200, (ROOT / "scripts/streaming.js").read_bytes(), "text/javascript")
             elif parsed.path == "/status":
                 self.reply(200, json.dumps(demo.status()).encode())
             elif parsed.path == "/audio":
