@@ -80,6 +80,7 @@ def summarise(report: dict[str, Any]) -> dict[str, Any]:
         else False,
         "stop": first("stop-handled"),
         "client_pause": first("client-paused"),
+        "digital_silence": first("digital-silence"),
         "abandoned": first("generation-abandoned"),
         "error": report["error"],
     }

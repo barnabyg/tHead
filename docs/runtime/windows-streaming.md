@@ -39,6 +39,13 @@ a replacement run. `--test-backend` is explicitly a CPU protocol diagnostic that
 produces no playable media; it cannot establish GPU or playback feasibility.
 Client pause-call duration is recorded separately from server abandonment;
 neither browser state nor telemetry measures the physical speaker's decay.
+The selected player additionally routes audio through a local Web Audio analyser.
+Stop samples this digital output every approximately 10 ms until two consecutive
+256-sample windows have RMS below 0.00001, recording the first silent observation
+and last non-silent observation separately from the pause call and GPU release.
+An already silent source is labelled accordingly. Browser scheduling limits this
+measurement; it does not measure DAC, speaker or room acoustics. No microphone,
+recording permission or external audio service is involved.
 
 ## Progressively arriving speech
 

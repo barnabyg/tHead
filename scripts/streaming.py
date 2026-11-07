@@ -487,6 +487,8 @@ def handler(demo: Demonstration) -> type[BaseHTTPRequestHandler]:
                 elif self.path == "/stop":
                     stopped = demo.stop(str(data.get("run", "")))
                     stopped.event("client-paused", milliseconds=data.get("clientPauseMilliseconds"))
+                    if isinstance(data.get("digitalSilence"), dict):
+                        stopped.event("digital-silence", **data["digitalSilence"])
                     stopped.save()
                     result = stopped.snapshot()
                 elif self.path == "/telemetry":

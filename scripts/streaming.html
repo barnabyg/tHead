@@ -26,6 +26,46 @@ const statusText = document.querySelector('#status');
 const report = document.querySelector('#report');
 let active = null;
 let epoch = 0;
+let audioOutput = null;
+function prepareAudioOutput() {
+  if (!audioOutput) {
+    const context = new AudioContext();
+    const source = context.createMediaElementSource(video);
+    const analyser = context.createAnalyser();
+    analyser.fftSize = 256;
+    source.connect(analyser);
+    analyser.connect(context.destination);
+    audioOutput = {context, analyser, samples:new Float32Array(256)};
+  }
+  return audioOutput;
+}
+function outputRms() {
+  if (!audioOutput || audioOutput.context.state !== 'running') return null;
+  audioOutput.analyser.getFloatTimeDomainData(audioOutput.samples);
+  return Math.sqrt(audioOutput.samples.reduce((sum, value) => sum + value*value, 0) / audioOutput.samples.length);
+}
+function observeSilence(run, actionTime, beforeRms) {
+  if (!run || beforeRms === null) return;
+  const threshold = 0.00001;
+  let firstSilent = null, lastNonSilent = 0, consecutive = 0;
+  const sample = () => {
+    const elapsed = performance.now()-actionTime;
+    const rms = outputRms();
+    if (rms !== null && rms < threshold) {
+      if (firstSilent === null) firstSilent = elapsed;
+      consecutive++;
+    } else {lastNonSilent=elapsed; firstSilent=null; consecutive=0;}
+    if (consecutive >= 2 || elapsed > 5000) {
+      post('/stop', {run:run.id, digitalSilence:{
+        status:consecutive>=2 ? (beforeRms<threshold ? 'already-silent' : 'observed') : 'not-observed',
+        firstSilentMilliseconds:firstSilent, lastNonSilentMilliseconds:lastNonSilent,
+        preStopRms:beforeRms, threshold, sampleRate:audioOutput.context.sampleRate,
+        analyserSamples:audioOutput.samples.length, measurement:'browser-audio-graph'
+      }}).catch(() => {});
+    } else setTimeout(sample, 10);
+  };
+  setTimeout(sample, 10);
+}
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 async function post(path, data) {
   const response = await fetch(path, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)});
@@ -68,9 +108,11 @@ function release() {
 document.querySelector('#stop').onclick = () => {
   epoch++;
   const before = performance.now();
+  const beforeRms = outputRms();
   const run = active;
   telemetry('stop-action');
   release();
+  observeSilence(run, before, beforeRms);
   statusText.textContent = 'Stopped; waiting for inference resources if needed';
   if (run) post('/stop', {run: run.id, clientPauseMilliseconds: performance.now() - before}).catch(error => {statusText.textContent = String(error);});
 };
@@ -117,6 +159,7 @@ start.onclick = async () => {
   start.disabled = true;
   play.hidden = true;
   try {
+    await prepareAudioOutput().context.resume();
     const clip = document.querySelector('#clip').value;
     const mode = document.querySelector('#mode').value;
     const run = await post('/start', {clip, progressive:mode !== 'complete'});
