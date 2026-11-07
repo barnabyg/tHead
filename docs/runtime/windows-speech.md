@@ -16,7 +16,8 @@ voices, Add voices, then verify the desktop voice exists. See Microsoft's
 [voice acquisition guide](https://support.microsoft.com/en-us/accessibility/windows/narrator/appendix-a-supported-languages-and-voices).
 The launcher prepares the same pinned source, public portrait, GPU environment
 and FFmpeg as Phase 2, then opens `http://127.0.0.1:8765`. Stop other servers on
-that port first. Server lifetime is bounded to two hours, including child cleanup.
+that port first. Server shutdown begins after two hours; the outer supervisor
+allows five more minutes for startup/cleanup before killing the child process tree.
 Declared caches/assets live in `.runtime/`, as documented for the offline demo.
 
 Select **Entered English text**, enter a passage, and click Start. Empty text and
@@ -80,7 +81,7 @@ its worker and waits at most 10 s plus a 5 s pipe-reader join; the next submissi
 reloads the voice. The producer must join within 30 s before accepting another
 run. Encoder shutdown kills FFmpeg, waits at most 30 s and joins its three
 threads for at most 5 s each. Inference has no reliable thread-level kill: if it
-hangs, the outer two-hour process-tree supervisor is the final limit. Stop
+hangs, the outer two-hour-plus-five-minute process-tree supervisor is the final limit. Stop
 silence should not be confused with those resource-release limits. PCM, pending
 phrase, media queues and per-run events (2000) are bounded; repeated runs reuse
 one GPU pipeline and one TTS worker rather than accumulating loaded copies.

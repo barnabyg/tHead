@@ -114,3 +114,8 @@ dependency/secret audits and script packaging/syntax gates. Public UUID and PCM
 hash exceptions extend the existing exact-file/exact-field secret-scan filter;
 no vulnerability exceptions were added. Manual testing uses the single launch
 command and the short scenario in [windows-speech.md](windows-speech.md).
+
+The final two-axis review found and fixed a late-producer state race, with a
+deterministic Stop-before-dispatch HTTP regression, and added five minutes of
+outer supervisor margin for graceful server teardown. The long-lifetime expiry
+was checked by deadline inspection rather than waiting two hours in this session.

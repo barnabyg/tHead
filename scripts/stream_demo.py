@@ -44,7 +44,8 @@ def main() -> None:
     )
     if not args.no_browser:
         threading.Timer(2, lambda: webbrowser.open("http://127.0.0.1:8765")).start()
-    # Two-hour server lifetime; prepare.run kills the process tree on expiry.
+    # The server shuts down after two hours. Allow five more minutes for imports,
+    # request teardown and its 120-second worker join before killing the tree.
     run(
         [
             str(RUNTIME / "venv/Scripts/python.exe"),
@@ -54,7 +55,7 @@ def main() -> None:
             *(["--speech", "--output", str(RUNTIME / "speech")] if args.speech else []),
             *(["--diagnostics"] if args.diagnostics else []),
         ],
-        7200,
+        7500,
     )
 
 
