@@ -375,22 +375,35 @@ class Demonstration:
             self.voice.prepare(self.shutdown)
             self.loading["tts"] = self.voice.metadata
 
+    def load_assets(self, pipeline: Any, inference: Any) -> None:
+        self.prepare_assets(pipeline, inference)
+        with self.condition:
+            self.ready = True
+            self.state = "idle"
+            self.condition.notify_all()
+
+    def wait_for_session(self, pipeline: Any, inference: Any) -> Session | None:
+        while not self.shutdown.is_set():
+            with self.condition:
+                self.condition.wait_for(
+                    lambda: self.state in ("generating", "selecting") or self.shutdown.is_set()
+                )
+                if self.shutdown.is_set():
+                    return None
+                if self.state == "generating":
+                    return self.current
+            self.load_assets(pipeline, inference)
+        return None
+
     def work(self) -> None:
         try:
             if self.test_backend:
-                self.prepare_assets(None, None)
-                self.ready = True
-                self.state = "idle"
+                self.load_assets(None, None)
                 self.loading["ready_seconds"] = time.perf_counter() - self.startup
                 while not self.shutdown.is_set():
-                    with self.condition:
-                        self.condition.wait_for(
-                            lambda: self.state == "generating" or self.shutdown.is_set()
-                        )
-                        if self.shutdown.is_set():
-                            return
-                        session = self.current
-                    assert session is not None  # nosec B101
+                    session = self.wait_for_session(None, None)
+                    if session is None:
+                        return
                     producer = self.begin_speech(session)
                     session.event("diagnostic-delay")
                     chunks = session.chunks() if session.progressive else iter([b"diagnostic"])
@@ -430,24 +443,17 @@ class Demonstration:
                 RUNTIME / "models", RUNTIME / "FlashHead", self.loading
             )
             np = importlib.import_module("numpy")
-            self.prepare_assets(pipeline, inference)
+            self.load_assets(pipeline, inference)
             with self.condition:
-                self.ready = True
-                self.state = "idle"
                 self.loading["ready_seconds"] = time.perf_counter() - self.startup
                 (self.directory / "readiness.json").write_text(
                     json.dumps(self.readiness(), indent=2) + "\n", encoding="utf-8"
                 )
                 self.condition.notify_all()
             while not self.shutdown.is_set():
-                with self.condition:
-                    self.condition.wait_for(
-                        lambda: self.state == "generating" or self.shutdown.is_set()
-                    )
-                    if self.shutdown.is_set():
-                        return
-                    session = self.current
-                assert session is not None  # nosec B101
+                session = self.wait_for_session(pipeline, inference)
+                if session is None:
+                    return
                 producer = self.begin_speech(session)
                 self.generate(session, pipeline, inference, torch, np)
                 self.finish_speech(session, producer)
@@ -677,7 +683,7 @@ def handler(demo: Demonstration) -> type[BaseHTTPRequestHandler]:
                 if self.path == "/shutdown" and demo.diagnostics:
                     threading.Thread(target=self.server.shutdown, daemon=True).start()
                     result = {"ok": True}
-                elif self.path in ("/ask", "/reset", "/cancel"):
+                elif self.path in ("/ask", "/reset", "/cancel", "/select"):
                     result = demo.command(self.path, data)
                 elif demo.page == "conversation.html" and self.path in (
                     "/speak",

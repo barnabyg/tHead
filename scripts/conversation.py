@@ -6,6 +6,7 @@ import argparse
 import os
 import re
 import threading
+import time
 import uuid
 from collections.abc import Iterator
 from http.server import ThreadingHTTPServer
@@ -64,6 +65,12 @@ class Conversation(Demonstration):
             return self.reset(str(data.get("session", "")))
         if path == "/cancel":
             return self.cancel(str(data.get("session", "")), str(data.get("request", "")))
+        if path == "/select":
+            return self.select(
+                str(data.get("session", "")),
+                str(data.get("pair", "")),
+                str(data.get("fault", "")),
+            )
         return self.ask(
             str(data.get("session", "")),
             data.get("question"),
@@ -85,6 +92,9 @@ class Conversation(Demonstration):
     ) -> None:
         self.selected_pair = configured_pair(pair)
         self.active_pair = ""
+        self.pair_sequence = 0
+        self.pair_preparation_seconds = 0.0
+        self.pair_fault = ""
         self.identity = uuid.uuid4().hex
         self.transcript: list[Turn] = []
         self.cancelled_requests: set[str] = set()
@@ -101,7 +111,10 @@ class Conversation(Demonstration):
         super().__init__(inputs, directory, test_backend, 8, True, diagnostics or fixture)
 
     def prepare_assets(self, pipeline: Any, inference: Any) -> None:
+        started = time.perf_counter()
         pair = self.selected_pair
+        if self.pair_fault == "pair-delay":
+            time.sleep(2)  # Simulated preparation completing after Stop/reset.
         if not self.test_backend:
             self.portrait_path = pair.validate_portrait(self.inputs)
             self.voice.close()
@@ -110,6 +123,33 @@ class Conversation(Demonstration):
             self.loading["tts"] = self.voice.metadata
             inference.get_base_data(pipeline, str(self.portrait_path), 42, False)
         self.active_pair = pair.id
+        self.pair_preparation_seconds = time.perf_counter() - started
+
+    def select(self, identity: str, pair_id: str, fault: str = "") -> dict[str, Any]:
+        pair = configured_pair(pair_id)
+        if fault and (not self.diagnostics or fault != "pair-delay"):
+            raise ValueError("Unknown pair diagnostic; launch with --diagnostics")
+        with self.condition:
+            if identity != self.identity:
+                raise ValueError("Stale session")
+            current = self.current
+            playback = (
+                current
+                and current.state == "complete"
+                and not any(e["event"] == "ended" for e in current.events)
+            )
+            if self.state != "idle" or playback:
+                raise ValueError("Select between turns; Stop and wait for resource release")
+            if self.ready and pair.id == self.active_pair:
+                return self.status()
+            self.selected_pair = pair
+            self.pair_fault = fault
+            self.pair_sequence += 1
+            self.ready = False
+            self.state = "selecting"
+            self.current = None
+            self.condition.notify_all()
+            return self.status()
 
     def readiness(self) -> dict[str, Any]:
         return {
@@ -133,6 +173,8 @@ class Conversation(Demonstration):
                 "pairs": [{"id": p.id, "name": p.name} for p in configured_pairs().values()],
                 "activePair": self.active_pair,
                 "selectedPair": self.selected_pair.id,
+                "pairSequence": self.pair_sequence,
+                "pairPreparationSeconds": self.pair_preparation_seconds,
                 "session": self.identity,
                 "model": self.provider.model,
                 "fixtureProvider": self.provider.fixture,

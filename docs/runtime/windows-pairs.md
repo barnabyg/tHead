@@ -1,4 +1,4 @@
-# Configured avatars and local voices (#30)
+# Configured avatars and local voices (#30–#32)
 
 From `C:/docs/git/tHead` in PowerShell 7:
 
@@ -62,3 +62,24 @@ while busy: old media must remain absent and the fresh answer must have no prior
 context. Listen/view for clear continuous speech, moving lips, approximate
 synchronisation and complete endings. Phase 6 evidence distinguishes native
 digital results from listening confirmation.
+
+## Between-turn selection (#31)
+
+Choose **Avatar and voice** after playback ends or after Stop releases resources.
+The labelled active pair changes only when portrait and voice preparation finish;
+Ask and the selector remain disabled during preparation. Stop and New conversation
+remain usable. Switching keeps the transcript/context; New conversation clears
+context while retaining the chosen pair, including during preparation. No model
+reload occurs. Old media routes expire when a switch is accepted. Each response
+records its selected pair, session and unique response identity.
+
+Concurrent selection requests are **rejected**, never queued or superseded. Wait
+for readiness or an error before another selection. An API selection during
+generation or unended playback returns a conflict; Stop permits recovery after
+resource release. Preparation performs no LLM request and changes no budget.
+
+Demo: complete the black-hole answer with JFK/Zira, select Hopper/Hazel, ask the
+contextual follow-up, Stop an answer, switch back and ask a replacement. For a
+loading check with `-Diagnostics`, choose **Pair diagnostic → Delay preparation**,
+switch, then click New conversation and Stop during loading. Expect the chosen
+pair to become ready in the new empty conversation, without old playback.

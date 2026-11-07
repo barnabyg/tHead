@@ -96,6 +96,90 @@ test.afterEach(async ({ page }, info) => {
   }
 });
 
+test('switch both directions between turns, reject busy selection, retain context after Stop and reset', async ({
+  page,
+  request,
+}, info) => {
+  const ask = page.getByRole('button', { name: 'Ask', exact: true });
+  const pair = page.getByLabel('Avatar and voice', { exact: true });
+  await expect(pair).toHaveValue('jfk-zira');
+  await ask.click();
+  await expect(pair).toBeDisabled();
+  const busy = await (await request.get(`${info.url}/status`)).json();
+  const conflict = await request.post(`${info.url}/select`, {
+    data: { session: busy.session, pair: 'hopper-hazel' },
+  });
+  expect(conflict.status()).toBe(409);
+  await expect(page.locator('#status')).toHaveText('Playback ended');
+  await expect(pair).toBeEnabled();
+  await pair.selectOption('hopper-hazel');
+  await expect(page.locator('#pair-status')).toContainText('Active: Grace Hopper');
+  await expect(ask).toBeEnabled();
+  await page.getByLabel('Question', { exact: true }).fill('How do we detect one?');
+  await ask.click();
+  await expect(page.locator('#status')).toHaveText('Playback ended');
+  const followup = await (await request.get(`${info.url}/status`)).json();
+  expect(followup.run.pair).toBe('hopper-hazel');
+  expect(followup.run.answer).toContain('Earlier question: What is a black hole?');
+  await page.getByLabel('Diagnostic fault').selectOption('llm-delay');
+  await expect(ask).toBeEnabled();
+  await ask.click();
+  await page.getByRole('button', { name: 'Stop', exact: true }).click();
+  await expect(pair).toBeEnabled();
+  const selected = page.waitForResponse(
+    (response) => new URL(response.url()).pathname === '/select',
+  );
+  await pair.selectOption('jfk-zira');
+  const selectedResponse = await selected;
+  expect((await selectedResponse.json()).error).toBe('');
+  await expect(page.locator('#pair-status')).toContainText('Active: JFK');
+  await expect(ask).toBeEnabled();
+  await page.getByRole('button', { name: 'New conversation' }).click();
+  await expect(page.locator('#transcript')).toBeEmpty();
+  await expect(pair).toHaveValue('jfk-zira');
+  const fresh = await (await request.get(`${info.url}/status`)).json();
+  expect(fresh.transcript).toHaveLength(0);
+  expect(fresh.activePair).toBe('jfk-zira');
+});
+
+test('reset and Stop during loading retain choice, reject overlapping selection and expire old media', async ({
+  page,
+  request,
+}, info) => {
+  const ask = page.getByRole('button', { name: 'Ask', exact: true });
+  const pair = page.getByLabel('Avatar and voice', { exact: true });
+  await ask.click();
+  await expect(page.locator('#status')).toHaveText('Playback ended');
+  const before = await (await request.get(`${info.url}/status`)).json();
+  await page.getByLabel('Pair diagnostic', { exact: true }).selectOption('pair-delay');
+  await expect(pair).toBeEnabled();
+  await pair.selectOption('hopper-hazel');
+  await expect(page.locator('#pair-status')).toContainText('Preparing Grace Hopper');
+  await expect(ask).toBeDisabled();
+  await expect(pair).toBeDisabled();
+  const conflict = await request.post(`${info.url}/select`, {
+    data: { session: before.session, pair: 'jfk-zira' },
+  });
+  expect(conflict.status()).toBe(409);
+  const stale = await request.get(`${info.url}/segment?run=${before.run.id}&index=0`);
+  expect(stale.status()).toBe(410);
+  await page.getByRole('button', { name: 'New conversation' }).click();
+  await expect(page.locator('#transcript')).toBeEmpty();
+  await page.getByRole('button', { name: 'Stop', exact: true }).click();
+  await expect(ask).toBeEnabled();
+  await expect(pair).toHaveValue('hopper-hazel');
+  const ready = await (await request.get(`${info.url}/status`)).json();
+  expect(ready.session).not.toBe(before.session);
+  expect(ready.budget.estimated_usd).toBe(before.budget.estimated_usd);
+  expect(ready.activePair).toBe('hopper-hazel');
+  await ask.click();
+  await expect(page.locator('#status')).toHaveText('Playback ended');
+  const after = await (await request.get(`${info.url}/status`)).json();
+  const dispatched = after.run.events.find((event) => event.event === 'provider-request');
+  expect(dispatched.messages).toHaveLength(1);
+  expect(after.run.pair).toBe('hopper-hazel');
+});
+
 test('complete answer, contextual follow-up, idle Stop and fresh conversation', async ({
   page,
   request,
