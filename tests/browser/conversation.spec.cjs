@@ -266,9 +266,12 @@ test('provider, TTS and media failures recover, then budget rejection prevents d
     { timeout: 30_000 },
   );
   await page.getByLabel('Diagnostic fault').selectOption('');
-  const before = (await (await request.get(`${info.url}/status`)).json()).transcript.length;
+  const before = await (await request.get(`${info.url}/status`)).json();
   await page.getByRole('button', { name: 'Ask', exact: true }).click();
   await expect(page.locator('#status')).toContainText('budget');
-  const after = (await (await request.get(`${info.url}/status`)).json()).transcript.length;
-  expect(after).toBe(before);
+  const after = await (await request.get(`${info.url}/status`)).json();
+  expect(after.transcript.length).toBe(before.transcript.length);
+  expect(after.run.id).toBe(before.run.id);
+  expect(after.budget.estimated_usd).toBe(before.budget.estimated_usd);
+  expect(after.budget.reserved_usd).toBe(before.budget.reserved_usd);
 });
