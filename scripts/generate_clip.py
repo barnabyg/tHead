@@ -28,7 +28,6 @@ def main() -> int:
     args.inputs = args.inputs.resolve()
     started = time.perf_counter()
     output = RUNTIME / "demo"
-    output.mkdir(parents=True, exist_ok=True)
     result: dict[str, Any] = {"status": "blocked", "stage": "inputs"}
     report = args.report.resolve()
     report.parent.mkdir(parents=True, exist_ok=True)
@@ -80,6 +79,7 @@ def main() -> int:
         raw_path = output / "frames.rgb"
         result["stage"] = "inference"
         inference_started = time.perf_counter()
+        output.mkdir(parents=True, exist_ok=True)
         with raw_path.open("wb") as raw:
             for index, chunk in enumerate(speech.reshape(chunks, samples_per_chunk)):
                 history.extend(chunk.tolist())
