@@ -124,6 +124,45 @@ class ConversationTests(unittest.TestCase):
         self.assertGreater(done["contextOmitted"], 0)
         self.assertLessEqual(done["run"]["inputBound"], 8192)
 
+    def test_stop_at_async_stages_rejects_stale_results_and_recovers(self) -> None:
+        for fault, event in (
+            ("llm-connect", "llm-connect"),
+            ("llm-delay", "llm-first-text"),
+            ("tts-delay", "tts-start"),
+            ("buffer-delay", "media-ready"),
+            ("dispatch-delay", "dispatch-delay"),
+        ):
+            run = self.ask(fault=fault)
+            self.wait(
+                lambda s, expected=event: any(e["event"] == expected for e in s["run"]["events"])
+            )
+            self.request("/stop", {"run": run["id"]})
+            self.request("/stop", {"run": run["id"]})
+            stopped = self.wait(lambda s: s["state"] == "idle")
+            self.assertEqual(stopped["transcript"][-1]["state"], "stopped")
+            self.ask("Replacement question")
+            done = self.wait(lambda s: s["state"] == "idle")
+            request = next(e for e in done["run"]["events"] if e["event"] == "provider-request")
+            self.assertEqual(request["messages"][-2]["role"], "user")
+            with self.assertRaises(urllib.error.HTTPError):
+                self.request("/telemetry", {"run": run["id"], "currentTime": 90})
+
+    def test_busy_reset_and_provider_speech_media_failure_recovery(self) -> None:
+        run = self.ask(fault="tts-delay")
+        self.wait(lambda s: any(e["event"] == "tts-start" for e in s["run"]["events"]))
+        fresh = self.request("/reset", {"session": run["session"]})
+        self.assertEqual(fresh["transcript"], [])
+        self.assertNotEqual(fresh["session"], run["session"])
+        self.assertIsNone(fresh["run"])
+        self.wait(lambda s: s["state"] == "idle")
+        for fault in ("llm", "missing-completion", "tts", "media"):
+            self.ask(fault=fault)
+            done = self.wait(lambda s: s["state"] == "idle")
+            self.assertEqual(done["run"]["state"], "failed")
+            self.ask("Recovery question")
+            done = self.wait(lambda s: s["state"] == "idle")
+            self.assertEqual(done["run"]["state"], "complete")
+
 
 if __name__ == "__main__":
     unittest.main()

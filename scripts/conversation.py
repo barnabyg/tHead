@@ -82,7 +82,7 @@ class Conversation(Demonstration):
 
     def status(self) -> dict[str, Any]:
         with self.condition:
-            return {
+            result = {
                 **super().status(),
                 "conversationEnabled": True,
                 "session": self.identity,
@@ -103,16 +103,20 @@ class Conversation(Demonstration):
                     for t in self.transcript
                 ],
             }
+            if isinstance(self.current, Turn) and self.current.conversation != self.identity:
+                result["run"] = None
+            return result
 
     def reset(self, identity: str) -> dict[str, Any]:
         with self.condition:
             if identity != self.identity:
                 raise ValueError("Session was lost or reset; reload the conversation")
-            if self.state != "idle":
-                raise ValueError("Wait until idle to start a new conversation")
+            if self.current and not self.current.cancelled.is_set():
+                self.stop(self.current.id)
             self.identity = uuid.uuid4().hex
             self.transcript.clear()
-            self.current = None
+            if self.state == "idle":
+                self.current = None
             return self.status()
 
     def context(self, question: str) -> tuple[list[dict[str, str]], int, int]:
@@ -132,8 +136,6 @@ class Conversation(Demonstration):
             exchange = [{"role": "user", "content": turn.question}]
             if turn.state == "complete":
                 exchange.append({"role": "assistant", "content": turn.answer})
-            else:
-                continue
             if bound(exchange + messages) > INPUT_BOUND:
                 break
             messages = exchange + messages
@@ -189,6 +191,8 @@ class Conversation(Demonstration):
         pending = ""
         done = False
         session.event("llm-connect")
+        if self.provider.fixture:
+            session.event("provider-request", messages=session.messages)
         for event in self.provider.stream(session.messages, session.cancelled, session.fault):
             if session.cancelled.is_set():
                 return

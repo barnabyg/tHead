@@ -68,3 +68,24 @@ rather than assuming four characters per token. Oldest exchanges are dropped who
 the transcript remains visible and states how many exchanges were omitted. A
 100-turn in-memory session limit requires New conversation rather than growing
 memory indefinitely. Provider-stored histories and conversation files are unused.
+
+Stop and New conversation remain usable during provider connection, text streaming,
+synthesis, inference, buffering and playback. Both synchronously detach the browser
+player before network requests. A client epoch rejects delayed start responses;
+unique session/response IDs reject old media, text and telemetry. New conversation
+clears visible/backend context immediately while the old worker releases; Ask
+remains disabled until resources are idle. Repeated Stop is harmless. A stopped
+or failed answer retains its user question but excludes unfinished assistant text
+from later context. Its transcript label does not claim everything was spoken.
+
+Cancellation shuts down the provider socket where connected; connect/read timeouts
+are 15 seconds and stream deadline 180 seconds. Non-preemptible local inference
+finishes its current window and discards the result; synthesis cancellation and
+handoff waits observe the cancellation flag. The speech producer has a 30-second
+release join and server shutdown allows 120 seconds. Browser media waits are
+bounded to 120 seconds and a response to ten minutes. Browser digital silence
+telemetry is separate from resource release and cannot measure physical speaker
+latency. No automatic retries replay partial speech. For recovery, select a provider,
+TTS or media failure under `-FixtureProvider -Diagnostics`, Ask, observe a clear
+failure, select None and Ask again without restarting. Repeat Stop during the
+delayed-provider and delayed-TTS probes; then try New conversation while busy.

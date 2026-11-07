@@ -11,10 +11,15 @@ let audioOutput = null;
 const conversation = document.querySelector('#conversation');
 let sessionIdentity = null;
 document.querySelector('#reset')?.addEventListener('click', async () => {
+  epoch++;
+  const before = performance.now();
+  const beforeRms = outputRms();
+  const run = active;
+  release();
+  observeSilence(run, before, beforeRms);
+  document.querySelector('#transcript').textContent = '';
   try {
     const fresh = await post('/reset', { session: sessionIdentity });
-    epoch++;
-    release();
     sessionIdentity = fresh.session;
     document.querySelector('#transcript').textContent = '';
     notice = 'New conversation';
@@ -88,6 +93,7 @@ async function post(path, data) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
+    signal: AbortSignal.timeout(30000),
   });
   const result = await response.json();
   if (!response.ok) {
@@ -176,7 +182,9 @@ document.querySelector('#stop').onclick = () => {
 };
 function waitEvent(target, event, signal) {
   return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => failure(), 120000);
     const cleanup = () => {
+      clearTimeout(timer);
       target.removeEventListener(event, success);
       target.removeEventListener('error', failure);
       signal.removeEventListener('abort', failure);
@@ -286,7 +294,9 @@ start.onclick = async () => {
       });
     let index = 0,
       requested = false;
+    const deadline = performance.now() + 600000;
     while (active === run) {
+      if (performance.now() > deadline) throw Error('Response exceeded ten minutes; ask again');
       if (
         video.buffered.length &&
         video.buffered.end(video.buffered.length - 1) - video.currentTime > 2.88
@@ -295,7 +305,7 @@ start.onclick = async () => {
         continue;
       }
       const response = await fetch(`/segment?run=${run.id}&index=${index}`, {
-        signal: run.controller.signal,
+        signal: AbortSignal.any([run.controller.signal, AbortSignal.timeout(30000)]),
       });
       if (active !== run) return;
       if (response.status === 202) {
@@ -374,18 +384,26 @@ play.onclick = () => {
       statusText.textContent = String(error);
     });
 };
+let polling = false;
 setInterval(async () => {
+  if (polling) return;
+  polling = true;
   const ticket = epoch;
   try {
-    const status = await (await fetch('/status')).json();
+    const status = await (await fetch('/status', { signal: AbortSignal.timeout(10000) })).json();
     if (ticket !== epoch) return;
     if (conversation) {
+      if (sessionIdentity && status.session !== sessionIdentity) {
+        epoch++;
+        release();
+        notice = 'Server session lost or reset; conversation cleared';
+      }
       sessionIdentity = status.session;
       const transcript = document.querySelector('#transcript');
       transcript.textContent = '';
       for (const turn of status.transcript) {
         const entry = document.createElement('p');
-        entry.textContent = `You: ${turn.question}\nAvatar: ${turn.answer}\n${turn.state}${turn.truncated ? ' (output limit reached)' : ''} — Generated text may not all have been spoken.`;
+        entry.textContent = `You: ${turn.question}\nAvatar: ${turn.answer}\n${turn.state === 'stopped' ? 'Interrupted' : turn.state}${turn.truncated ? ' (output limit reached)' : ''} — Generated text may not all have been spoken.`;
         transcript.append(entry);
       }
       document.querySelector('#usage').textContent = status.budget
@@ -412,5 +430,7 @@ setInterval(async () => {
     report.textContent = JSON.stringify(status, null, 2);
   } catch (error) {
     statusText.textContent = String(error);
+  } finally {
+    polling = false;
   }
 }, 500);

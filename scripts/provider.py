@@ -5,6 +5,7 @@ from __future__ import annotations
 import http.client
 import json
 import os
+import socket
 import threading
 import time
 from collections.abc import Iterator
@@ -35,8 +36,28 @@ class Provider:
             raise ValueError("Set OPENAI_API_KEY in the backend environment and restart")
         connection = http.client.HTTPSConnection("api.openai.com", timeout=15)
         started = time.monotonic()
+        finished = threading.Event()
+
+        def disconnect() -> None:
+            # Wake a blocked read; closing a buffered HTTPResponse alone can wait for it.
+            stream = connection.sock
+            if stream is not None:
+                try:
+                    stream.shutdown(socket.SHUT_RDWR)
+                except OSError:
+                    pass
+            connection.close()
+
+        def watch() -> None:
+            while not finished.wait(0.05):
+                if cancelled.is_set():
+                    disconnect()
+                    return
+
+        watcher = threading.Thread(target=watch, daemon=True)
+        watcher.start()
         # Hard deadline also interrupts a server that sends endless non-text events.
-        deadline = threading.Timer(180, connection.close)
+        deadline = threading.Timer(180, disconnect)
         deadline.daemon = True
         deadline.start()
         try:
@@ -89,8 +110,10 @@ class Provider:
         except (OSError, http.client.HTTPException) as error:
             raise ValueError("OpenAI connection failed or timed out; check connectivity") from error
         finally:
+            finished.set()
             deadline.cancel()
             connection.close()
+            watcher.join(timeout=5)
 
     @staticmethod
     def synthetic(
