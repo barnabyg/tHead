@@ -75,6 +75,12 @@ class Session:
             temporary.write_text(json.dumps(self.snapshot(), indent=2) + "\n", encoding="utf-8")
             temporary.replace(self.directory / "result.json")
 
+    def abandon(self) -> None:
+        with self.condition:
+            self.cancelled.set()
+            self.input.clear()
+            self.condition.notify_all()
+
     def output(self, data: bytes) -> None:
         with self.condition:
             deadline = time.monotonic() + 300
@@ -209,10 +215,8 @@ class Demonstration:
             with session.condition:
                 if not session.cancelled.is_set():
                     session.event("stop-handled")
-                    session.cancelled.set()
                     session.state = "stopped"
-                    session.input.clear()
-                    session.condition.notify_all()
+                    session.abandon()
                     session.save()
             return session
 
@@ -384,6 +388,7 @@ class Demonstration:
                 session.state = "failed"
                 session.error = f"{type(error).__name__}: {error}"
                 session.event("failure", error=session.error)
+                session.abandon()
         finally:
             if mux:
                 try:
