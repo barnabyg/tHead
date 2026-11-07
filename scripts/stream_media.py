@@ -7,6 +7,7 @@ import socket
 import struct
 import subprocess  # nosec B404
 import threading
+import time
 from collections.abc import Callable
 from pathlib import Path
 from typing import IO
@@ -16,11 +17,17 @@ class Mux:
     """One encoder per run; two loopback PCM/RGB feeds, one continuous MP4 timeline."""
 
     def __init__(
-        self, ffmpeg: Path, output: Callable[[bytes], None], log: Path, fragment_frames: int = 8
+        self,
+        ffmpeg: Path,
+        output: Callable[[bytes], None],
+        log: Path,
+        cancelled: threading.Event,
+        fragment_frames: int = 8,
     ) -> None:
         self.output = output
         self.error: Exception | None = None
         self.stopped = threading.Event()
+        self.cancelled = cancelled
         self.queues: list[queue.Queue[bytes | None]] = [queue.Queue(2), queue.Queue(2)]
         self.sockets: list[socket.socket] = []
         self.threads: list[threading.Thread] = []
@@ -112,7 +119,10 @@ class Mux:
 
     def feed(self, listener: socket.socket, items: queue.Queue[bytes | None]) -> None:
         try:
-            while not self.stopped.is_set():
+            deadline = time.monotonic() + 300
+            while not self.stopped.is_set() and not self.cancelled.is_set():
+                if time.monotonic() > deadline:
+                    raise TimeoutError("Encoder did not connect within five minutes")
                 try:
                     connection, _ = listener.accept()
                     break
@@ -138,7 +148,10 @@ class Mux:
                 self.error = error
 
     def put(self, items: queue.Queue[bytes | None], value: bytes | None) -> None:
-        while not self.stopped.is_set():
+        deadline = time.monotonic() + 300
+        while not self.stopped.is_set() and not self.cancelled.is_set():
+            if time.monotonic() > deadline:
+                raise TimeoutError("Encoder input queue blocked for five minutes")
             if self.error:
                 raise self.error
             if self.process.poll() is not None:
@@ -191,7 +204,16 @@ class Mux:
         for items in self.queues:
             self.put(items, None)
         try:
-            if self.process.wait(timeout=300):
+            deadline = time.monotonic() + 300
+            while self.process.poll() is None:
+                if self.cancelled.is_set() or self.stopped.is_set():
+                    raise RuntimeError("Encoder abandoned while draining")
+                if self.error:
+                    raise self.error
+                if time.monotonic() > deadline:
+                    raise TimeoutError("Encoder did not finish within five minutes")
+                self.stopped.wait(0.1)
+            if self.process.returncode:
                 raise RuntimeError("Encoder failed; inspect ffmpeg.log")
             for thread in self.threads:
                 thread.join(timeout=15)

@@ -104,6 +104,8 @@ can overshoot that browser threshold by one fragment. Consumed browser
 media is removed after five seconds. Encoded fragments remain on disk as evidence
 (input is capped at 30 seconds per run). A missing consumer fails after five
 minutes. FFmpeg drain has a five-minute limit. These are hang limits, not targets.
+Encoder connection and each blocked input-queue write also have five-minute
+limits. Stop interrupts these waits and drain independently of encoder progress.
 
 The initial 24-frame profile needed the next model chunk to close a fragment.
 The selected eight-frame profile produces playable output from the first model

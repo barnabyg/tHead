@@ -321,7 +321,11 @@ class Demonstration:
             lock = json.loads((ROOT / "demo-lock.json").read_text(encoding="utf-8"))
             ffmpeg = RUNTIME / "media" / lock["media"]["directory"] / "bin/ffmpeg.exe"
             mux = Mux(
-                ffmpeg, session.output, session.directory / "ffmpeg.log", self.fragment_frames
+                ffmpeg,
+                session.output,
+                session.directory / "ffmpeg.log",
+                session.cancelled,
+                self.fragment_frames,
             )
             history: deque[float] = deque([0.0] * 128000, maxlen=128000)
             if session.progressive:
