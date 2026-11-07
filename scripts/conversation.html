@@ -1,0 +1,80 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>tHead conversation</title>
+<style>
+body {
+  font: 16px system-ui;
+  max-width: 1000px;
+  margin: 2rem auto;
+  background: #151923;
+  color: #eee;
+}
+button,
+select {
+  font: inherit;
+  padding: 0.6rem;
+  margin-right: 0.6rem;
+}
+video {
+  display: block;
+  width: 512px;
+  max-width: 100%;
+  background: black;
+  margin: 1rem 0;
+}
+pre {
+  white-space: pre-wrap;
+  max-height: 22rem;
+  overflow: auto;
+}
+</style>
+<h1>tHead conversation</h1>
+<p id="conversation">Local synthetic Zira voice and fixed JFK avatar. Ask a question.</p>
+<pre id="transcript" aria-live="polite"></pre>
+<p id="usage"></p>
+<label for="text">Question</label>
+<textarea id="text" maxlength="1200" rows="4" cols="70">What is a black hole?</textarea>
+<p id="status">Loading the native Windows model…</p>
+<label hidden
+  >Speech
+  <select id="clip">
+    <option value="text">Entered English text</option>
+    <option value="six">6 seconds</option>
+    <option value="long">20 seconds</option>
+    <option value="short">0.35 seconds</option>
+  </select></label
+>
+<label hidden
+  >Input
+  <select id="mode">
+    <option value="complete">Complete recording</option>
+    <option value="progressive">Arriving every 0.96 s</option>
+    <option value="delayed">Arriving with a 3 s pause</option>
+  </select></label
+>
+<button type="button" id="start" disabled>Ask</button>
+<label id="diagnostics" hidden
+  >Diagnostic fault
+  <select id="fault">
+    <option value="">None</option>
+    <option value="llm-delay">Delay provider stream</option>
+    <option value="llm">Fail provider</option>
+    <option value="missing-completion">Disconnect provider</option>
+    <option value="markup">Literal markup</option>
+    <option value="long">Long fixture answer</option>
+    <option value="tts-delay">Delay synthesis (Stop probe)</option>
+    <option value="buffer-delay">Delay buffering (Stop probe)</option>
+    <option value="tts">Fail local TTS</option>
+    <option value="media">Fail media</option>
+  </select>
+</label>
+<button type="button" id="stop">Stop</button>
+<button type="button" id="reset">New conversation</button>
+<button type="button" id="play" hidden>Play audio/video</button>
+<!-- biome-ignore lint/a11y/useMediaCaption: Generated transcript is not a word-timed caption track; review when aligned captions are available. -->
+<video id="video" playsinline></video>
+<details>
+  <summary>Timing diagnostics</summary>
+  <pre id="report"></pre>
+</details>
+<script src="/player.js"></script>

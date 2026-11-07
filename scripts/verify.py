@@ -21,14 +21,23 @@ def main() -> None:
     python = sys.executable
     run([python, "-m", "ruff", "format", "--check", "scripts", "tests"], 120)
     biome = str(ROOT / "node_modules/.bin/biome.cmd")
-    run([biome, "format", "scripts/streaming.js", "scripts/streaming.html"], 120)
+    browser_files = [
+        "scripts/streaming.js",
+        "scripts/streaming.html",
+        "scripts/conversation.html",
+        "playwright.config.cjs",
+        "tests/browser/conversation.spec.cjs",
+    ]
+    run([biome, "format", *browser_files], 120)
     run([python, "-m", "ruff", "check", "scripts", "tests"], 120)
     run(
-        [biome, "lint", "--error-on-warnings", "scripts/streaming.js", "scripts/streaming.html"],
+        [biome, "lint", "--error-on-warnings", *browser_files],
         120,
     )
     run([python, "-m", "mypy"], 180)
     run(["node", "--check", "scripts/streaming.js"], 120)
+    run(["node", "--check", "tests/browser/conversation.spec.cjs"], 120)
+    run(["node", "--check", "playwright.config.cjs"], 120)
     run([python, "-m", "bandit", "-q", "-c", "pyproject.toml", "-r", "scripts", "tests"], 120)
     modules = sorted((ROOT / "tests").glob("test_*.py"))
     # Independent command suites have separate temporary directories and ports.
@@ -37,6 +46,15 @@ def main() -> None:
     cancelled = threading.Event() if os.environ.get("CI") else None
     with ThreadPoolExecutor(max_workers=min(len(modules), os.cpu_count() or 1)) as pool:
         pending = []
+        os.environ["THEAD_TEST_PYTHON"] = python
+        pending.append(
+            pool.submit(
+                run,
+                [str(ROOT / "node_modules/.bin/playwright.cmd"), "test"],
+                600,
+                cancelled=cancelled,
+            )
+        )
         for module in modules:
             tests = [
                 python,
@@ -138,18 +156,19 @@ def main() -> None:
     ]
     secrets = subprocess.check_output(command, cwd=ROOT, text=True, timeout=180)  # nosec B603
     findings = json.loads(secrets)["results"]
-    # Public run UUIDs / fixture PCM digests in this one generated evidence file.
+    # Public run UUIDs / fixture PCM digests in the named evidence files and voice lock.
     # Do not suppress other fields or detector types; review if its schema changes.
     evidence_paths = {
         (ROOT / name).resolve()
         for name in (
             "docs/runtime/rtx3090-streaming.json",
             "docs/runtime/rtx3090-speech.json",
+            "docs/runtime/rtx3090-conversation.json",
             "speech-lock.json",
         )
     }
     public_metadata = re.compile(
-        r'\s*"(?:id)": "[0-9a-f]{32}",?\s*'
+        r'\s*"(?:id|session|request)": "[0-9a-f-]{32,36}",?\s*'
         r'|\s*"(?:sha256|declared_pcm_sha256)": "[0-9a-f]{64}",?\s*'
     )
     for filename in list(findings):

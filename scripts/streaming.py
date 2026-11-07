@@ -173,6 +173,11 @@ class Session:
 
 
 class Demonstration:
+    page = "streaming.html"
+
+    def command(self, path: str, data: dict[str, Any]) -> dict[str, Any]:
+        raise ValueError("Unknown command")
+
     def __init__(
         self,
         inputs: Path,
@@ -270,7 +275,7 @@ class Demonstration:
         pending = bytearray()
         total = 0
         digest = hashlib.sha256()
-        for index, text in enumerate(session.text):
+        for index, text in enumerate(self.phrases(session)):
             # Do not prepare another phrase while a previous phrase still has
             # queued windows. This bounds lookahead and keeps synthesis demand-driven.
             with session.condition:
@@ -317,6 +322,12 @@ class Demonstration:
         self.handoff(session, bytes(pending), True)
         session.event("tts-complete", samples=total // 2, sha256=digest.hexdigest())
 
+    def phrases(self, session: Session) -> Iterator[str]:
+        yield from session.text
+
+    def readiness(self) -> dict[str, Any]:
+        return self.status()
+
     @staticmethod
     def handoff(session: Session, chunk: bytes, final: bool) -> None:
         with session.condition:
@@ -350,8 +361,7 @@ class Demonstration:
         producer.start()
         return producer
 
-    @staticmethod
-    def finish_speech(session: Session, producer: threading.Thread | None) -> None:
+    def finish_speech(self, session: Session, producer: threading.Thread | None) -> None:
         if producer:
             producer.join(timeout=30)
             if producer.is_alive():
@@ -421,7 +431,7 @@ class Demonstration:
                 self.state = "idle"
                 self.loading["ready_seconds"] = time.perf_counter() - self.startup
                 (self.directory / "readiness.json").write_text(
-                    json.dumps(self.status(), indent=2) + "\n", encoding="utf-8"
+                    json.dumps(self.readiness(), indent=2) + "\n", encoding="utf-8"
                 )
                 self.condition.notify_all()
             while not self.shutdown.is_set():
@@ -447,7 +457,7 @@ class Demonstration:
         finally:
             self.voice.close()
             (self.directory / "readiness.json").write_text(
-                json.dumps(self.status(), indent=2) + "\n", encoding="utf-8"
+                json.dumps(self.readiness(), indent=2) + "\n", encoding="utf-8"
             )
 
     def generate(
@@ -578,6 +588,19 @@ class Demonstration:
 
 def handler(demo: Demonstration) -> type[BaseHTTPRequestHandler]:
     class Handler(BaseHTTPRequestHandler):
+        def parse_request(self) -> bool:
+            if not super().parse_request():
+                return False
+            assert isinstance(self.server, ThreadingHTTPServer)  # nosec B101
+            allowed = {
+                f"127.0.0.1:{self.server.server_port}",
+                f"localhost:{self.server.server_port}",
+            }
+            if self.headers.get("Host") not in allowed:
+                self.send_error(403, "Use the loopback application address")
+                return False
+            return True
+
         def log_message(self, format: str, *args: Any) -> None:
             pass
 
@@ -596,7 +619,7 @@ def handler(demo: Demonstration) -> type[BaseHTTPRequestHandler]:
             parsed = urlparse(self.path)
             query = parse_qs(parsed.query)
             if parsed.path == "/":
-                self.reply(200, (ROOT / "scripts/streaming.html").read_bytes(), "text/html")
+                self.reply(200, (ROOT / "scripts" / demo.page).read_bytes(), "text/html")
             elif parsed.path == "/player.js":
                 self.reply(200, (ROOT / "scripts/streaming.js").read_bytes(), "text/javascript")
             elif parsed.path == "/status":
@@ -639,7 +662,18 @@ def handler(demo: Demonstration) -> type[BaseHTTPRequestHandler]:
                 data = json.loads(self.rfile.read(size) or b"{}")
                 if not isinstance(data, dict):
                     raise ValueError("Expected a JSON object")
-                if self.path == "/speak":
+                if self.path == "/shutdown" and demo.diagnostics:
+                    threading.Thread(target=self.server.shutdown, daemon=True).start()
+                    result = {"ok": True}
+                elif self.path in ("/ask", "/reset", "/cancel"):
+                    result = demo.command(self.path, data)
+                elif demo.page == "conversation.html" and self.path in (
+                    "/speak",
+                    "/start",
+                    "/input",
+                ):
+                    raise ValueError("Use the conversation controls")
+                elif self.path == "/speak":
                     result = demo.speak(data.get("text", ""), str(data.get("fault", ""))).snapshot()
                 elif self.path == "/start":
                     result = demo.start(

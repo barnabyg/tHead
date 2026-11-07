@@ -8,6 +8,28 @@ let epoch = 0;
 let submitting = false;
 let notice = '';
 let audioOutput = null;
+const conversation = document.querySelector('#conversation');
+let sessionIdentity = null;
+let pendingRequest = null;
+let pendingController = null;
+document.querySelector('#reset')?.addEventListener('click', async () => {
+  epoch++;
+  pendingController?.abort();
+  const before = performance.now();
+  const beforeRms = outputRms();
+  const run = active;
+  release();
+  observeSilence(run, before, beforeRms);
+  document.querySelector('#transcript').textContent = '';
+  try {
+    const fresh = await post('/reset', { session: sessionIdentity });
+    sessionIdentity = fresh.session;
+    document.querySelector('#transcript').textContent = '';
+    notice = 'New conversation';
+  } catch (error) {
+    statusText.textContent = String(error);
+  }
+});
 function prepareAudioOutput() {
   if (!audioOutput) {
     const context = new AudioContext();
@@ -28,7 +50,7 @@ function outputRms() {
   );
 }
 function observeSilence(run, actionTime, beforeRms) {
-  if (!run || beforeRms === null) return;
+  if (!run || run.ended || beforeRms === null) return;
   const threshold = 0.00001;
   let firstSilent = null,
     lastNonSilent = 0,
@@ -69,11 +91,12 @@ function observeSilence(run, actionTime, beforeRms) {
   setTimeout(sample, 10);
 }
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-async function post(path, data) {
+async function post(path, data, signal = AbortSignal.timeout(30000)) {
   const response = await fetch(path, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
+    signal,
   });
   const result = await response.json();
   if (!response.ok) {
@@ -101,6 +124,7 @@ function telemetry(event, extra = {}) {
 }
 for (const event of ['playing', 'waiting', 'stalled', 'ended', 'error']) {
   video.addEventListener(event, () => {
+    if (!active) return;
     telemetry(event, { mediaError: video.error?.message });
     if (event === 'playing') statusText.textContent = 'Playing';
     if (event === 'waiting' && active) statusText.textContent = 'Buffering';
@@ -145,6 +169,7 @@ function release() {
 }
 document.querySelector('#stop').onclick = () => {
   epoch++;
+  pendingController?.abort();
   const before = performance.now();
   const beforeRms = outputRms();
   const run = active;
@@ -153,16 +178,22 @@ document.querySelector('#stop').onclick = () => {
   observeSilence(run, before, beforeRms);
   statusText.textContent = 'Stopped; waiting for inference resources if needed';
   notice = statusText.textContent;
-  if (run)
+  if (run && !run.ended)
     post('/stop', { run: run.id, clientPauseMilliseconds: performance.now() - before }).catch(
       (error) => {
         statusText.textContent = String(error);
       },
     );
+  if (conversation && pendingRequest)
+    post('/cancel', { session: sessionIdentity, request: pendingRequest }).catch((error) => {
+      statusText.textContent = String(error);
+    });
 };
 function waitEvent(target, event, signal) {
   return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => failure(), 120000);
     const cleanup = () => {
+      clearTimeout(timer);
       target.removeEventListener(event, success);
       target.removeEventListener('error', failure);
       signal.removeEventListener('abort', failure);
@@ -217,6 +248,10 @@ start.onclick = async () => {
   submitting = true;
   notice = '';
   const ticket = ++epoch;
+  const requestId = crypto.randomUUID();
+  const requestController = new AbortController();
+  pendingController = requestController;
+  if (conversation) pendingRequest = requestId;
   const previous = release();
   if (previous && !previous.ended) await post('/stop', { run: previous.id }).catch(() => {});
   start.disabled = true;
@@ -226,8 +261,18 @@ start.onclick = async () => {
     if (ticket !== epoch) return;
     const clip = document.querySelector('#clip').value;
     const mode = document.querySelector('#mode').value;
-    const run =
-      clip === 'text'
+    const run = conversation
+      ? await post(
+          '/ask',
+          {
+            question: document.querySelector('#text').value,
+            session: sessionIdentity,
+            request: requestId,
+            fault: document.querySelector('#fault').value,
+          },
+          AbortSignal.any([requestController.signal, AbortSignal.timeout(30000)]),
+        )
+      : clip === 'text'
         ? await post('/speak', {
             text: document.querySelector('#text').value,
             fault: document.querySelector('#fault').value,
@@ -267,7 +312,9 @@ start.onclick = async () => {
       });
     let index = 0,
       requested = false;
+    const deadline = performance.now() + 600000;
     while (active === run) {
+      if (performance.now() > deadline) throw Error('Response exceeded ten minutes; ask again');
       if (
         video.buffered.length &&
         video.buffered.end(video.buffered.length - 1) - video.currentTime > 2.88
@@ -276,7 +323,7 @@ start.onclick = async () => {
         continue;
       }
       const response = await fetch(`/segment?run=${run.id}&index=${index}`, {
-        signal: run.controller.signal,
+        signal: AbortSignal.any([run.controller.signal, AbortSignal.timeout(30000)]),
       });
       if (active !== run) return;
       if (response.status === 202) {
@@ -340,8 +387,12 @@ start.onclick = async () => {
     telemetry('client-failure', { message: String(error) });
     video.pause();
     if (active) await post('/stop', { run: active.id }).catch(() => {});
+    if (conversation)
+      await post('/cancel', { session: sessionIdentity, request: requestId }).catch(() => {});
     release();
   } finally {
+    if (pendingRequest === requestId) pendingRequest = null;
+    if (pendingController === requestController) pendingController = null;
     submitting = false;
   }
 };
@@ -355,18 +406,55 @@ play.onclick = () => {
       statusText.textContent = String(error);
     });
 };
+let polling = false;
 setInterval(async () => {
+  if (polling) return;
+  polling = true;
+  const ticket = epoch;
   try {
-    const status = await (await fetch('/status')).json();
+    const status = await (await fetch('/status', { signal: AbortSignal.timeout(10000) })).json();
+    if (ticket !== epoch) return;
+    if (conversation) {
+      if (sessionIdentity && status.session !== sessionIdentity) {
+        epoch++;
+        release();
+        notice = 'Server session lost or reset; conversation cleared';
+      }
+      sessionIdentity = status.session;
+      const transcript = document.querySelector('#transcript');
+      transcript.textContent = '';
+      for (const turn of status.transcript) {
+        const entry = document.createElement('p');
+        entry.textContent = `You: ${turn.question}\nAvatar: ${turn.answer}\n${turn.state === 'stopped' ? 'Interrupted' : turn.state}${turn.truncated ? ' (output limit reached)' : ''} — Generated text may not all have been spoken.`;
+        if (turn.usage?.estimated_usd !== undefined)
+          entry.textContent += `\nTokens: ${turn.usage.input_tokens ?? 'unknown'} input / ${turn.usage.output_tokens ?? 'unknown'} output; estimated USD ${turn.usage.estimated_usd.toFixed(6)}${turn.usage.estimated ? ' (conservative allowance; final usage unavailable)' : ''}.`;
+        transcript.append(entry);
+      }
+      document.querySelector('#usage').textContent = status.budget?.usable
+        ? `${status.budget.month} (UTC): estimated USD ${status.budget.estimated_usd.toFixed(6)} spent; USD ${status.budget.reserved_usd.toFixed(6)} reserved; USD ${status.budget.remaining_usd.toFixed(6)} remaining of USD 40. Application estimates, not authoritative billing.`
+        : status.budget?.error || '';
+      if (status.contextOmitted) {
+        const note = document.createElement('p');
+        note.textContent = `${status.contextOmitted} earlier exchanges omitted from model context to fit the input allowance.`;
+        transcript.append(note);
+      }
+    }
     document.querySelector('#clip option[value="text"]').disabled = !status.speechEnabled;
     document.querySelector('#diagnostics').hidden = !status.diagnostics;
     if (!status.speechEnabled && document.querySelector('#clip').value === 'text')
       document.querySelector('#clip').value = 'six';
     start.disabled =
-      !(status.ready && status.state === 'idle') || submitting || !!(active && !active.ended);
-    if (!active) statusText.textContent = status.error || notice || `Model: ${status.state}`;
+      !(status.ready && status.state === 'idle') ||
+      submitting ||
+      !!(active && !active.ended) ||
+      !!status.configurationError;
+    if (!active)
+      statusText.textContent =
+        status.configurationError || status.error || notice || `Model: ${status.state}`;
     report.textContent = JSON.stringify(status, null, 2);
   } catch (error) {
     statusText.textContent = String(error);
+  } finally {
+    polling = false;
   }
 }, 500);

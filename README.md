@@ -50,11 +50,24 @@ pwsh -NoProfile -File ./scripts/speech-demo.ps1
 The [Phase 3 assessment](docs/runtime/phase-3-assessment.md) records integrated
 RTX 3090/browser measurements, Stop/recovery evidence and the feasibility decision.
 
+The [conversational application](docs/runtime/windows-conversation.md) adds streamed
+OpenAI answers, bounded session context, Stop/reset, recovery and a durable USD 40
+monthly application guard. From the repository root, after setting the backend key:
+
+```powershell
+pwsh -NoProfile -File ./scripts/conversation.ps1
+```
+
+First use adds `-InitializeBudget`; normal restarts preserve the existing ledger.
+See the guide for prerequisites, no-cost fixtures and manual scenarios, and the
+[Phase 4 assessment](docs/runtime/phase-4-assessment.md) for measured results and limits.
+
 For development, install uv 0.11.7 and Node.js 24.14.1, then prepare the pinned
 browser-check tooling once:
 
 ```powershell
 npm.cmd ci --ignore-scripts
+npx.cmd playwright install chromium
 ```
 
 Run the canonical verification command:
