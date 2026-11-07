@@ -21,10 +21,11 @@ def main() -> None:
     python = sys.executable
     run([python, "-m", "ruff", "format", "--check", "scripts", "tests"], 120)
     biome = str(ROOT / "node_modules/.bin/biome.cmd")
-    run([biome, "format", "scripts/streaming.js", "scripts/streaming.html"], 120)
+    browser_files = ["scripts/streaming.js", "scripts/streaming.html", "scripts/conversation.html"]
+    run([biome, "format", *browser_files], 120)
     run([python, "-m", "ruff", "check", "scripts", "tests"], 120)
     run(
-        [biome, "lint", "--error-on-warnings", "scripts/streaming.js", "scripts/streaming.html"],
+        [biome, "lint", "--error-on-warnings", *browser_files],
         120,
     )
     run([python, "-m", "mypy"], 180)

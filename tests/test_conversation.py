@@ -1,0 +1,102 @@
+"""Conversation acceptance at the loopback HTTP boundary; no paid calls or GPU."""
+
+import json
+import subprocess  # nosec B404
+import sys
+import tempfile
+import time
+import unittest
+import urllib.error
+import urllib.request
+from pathlib import Path
+from typing import Any
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+class ConversationTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temporary.cleanup)
+        # Fixed task-owned executable and loopback server, isolated output and ephemeral port.
+        self.process = subprocess.Popen(  # nosec B603
+            [
+                sys.executable,
+                str(ROOT / "scripts/conversation.py"),
+                "--port",
+                "0",
+                "--output",
+                self.temporary.name,
+                "--test-backend",
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+        )
+        self.addCleanup(self.stop_process)
+        assert self.process.stdout is not None  # nosec B101
+        line = self.process.stdout.readline()
+        self.assertTrue(line.startswith("LISTEN "), line)
+        self.url = line.strip().split(" ")[1]
+        self.wait(lambda s: s["state"] == "idle")
+
+    def stop_process(self) -> None:
+        self.process.terminate()
+        self.process.communicate(timeout=30)
+
+    def request(self, path: str, data: dict[str, Any] | None = None) -> dict[str, Any]:
+        body = json.dumps(data).encode() if data is not None else None
+        # URL comes only from our loopback process.
+        with urllib.request.urlopen(self.url + path, data=body, timeout=30) as response:  # nosec B310
+            value: dict[str, Any] = json.load(response)
+            return value
+
+    def wait(self, predicate: Any) -> dict[str, Any]:
+        deadline = time.monotonic() + 45
+        while time.monotonic() < deadline:
+            status = self.request("/status")
+            if predicate(status):
+                return status
+            time.sleep(0.02)
+        self.fail("Conversation did not reach expected state")
+
+    def ask(self, question: str = "What is a black hole?", fault: str = "") -> dict[str, Any]:
+        return self.request(
+            "/ask",
+            {"question": question, "fault": fault, "session": self.request("/status")["session"]},
+        )
+
+    def test_streamed_answer_and_progressive_speech(self) -> None:
+        for question in ("", " \n", "x" * 1201):
+            with self.assertRaises(urllib.error.HTTPError):
+                self.ask(question)
+        run = self.ask(fault="llm-delay")
+        with self.assertRaises(urllib.error.HTTPError):
+            self.ask("Overlapping question")
+        streaming = self.wait(lambda s: s["transcript"] and s["transcript"][-1]["answer"])
+        self.assertEqual(streaming["transcript"][-1]["question"], "What is a black hole?")
+        done = self.wait(lambda s: s["state"] == "idle")
+        self.assertEqual(done["run"]["id"], run["id"])
+        self.assertEqual(done["run"]["state"], "complete")
+        events = done["run"]["events"]
+        media = next(e for e in events if e["event"] == "media-ready")
+        end = next(e for e in events if e["event"] == "llm-complete")
+        self.assertLess(media["seconds"], end["seconds"])
+        spoken = "".join(e["text"] for e in events if e["event"] == "tts-segment")
+        self.assertEqual("".join(spoken.split()), "".join(done["transcript"][-1]["answer"].split()))
+        self.assertFalse(list(Path(self.temporary.name).rglob("result.json")))
+
+    def test_token_boundaries_long_phrases_and_final_partial(self) -> None:
+        for fault in ("long", "unbroken", "truncate", "markup"):
+            self.ask(fault=fault)
+            done = self.wait(lambda s: s["state"] == "idle")
+            self.assertEqual(done["run"]["state"], "complete")
+            phrases = [e["text"] for e in done["run"]["events"] if e["event"] == "tts-segment"]
+            self.assertTrue(all(len(p) <= 180 for p in phrases))
+            answer = done["transcript"][-1]["answer"]
+            self.assertEqual("".join("".join(phrases).split()), "".join(answer.split()))
+            self.assertEqual(done["transcript"][-1]["truncated"], fault == "truncate")
+
+
+if __name__ == "__main__":
+    unittest.main()

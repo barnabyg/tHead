@@ -15,6 +15,8 @@ def main() -> None:
     parser.add_argument("--fragment-frames", type=int, choices=(8, 24), default=8)
     parser.add_argument("--speech", action="store_true")
     parser.add_argument("--diagnostics", action="store_true")
+    parser.add_argument("--conversation", action="store_true")
+    parser.add_argument("--fixture-provider", action="store_true")
     args = parser.parse_args()
     run([sys.executable, str(ROOT / "scripts/demo.py"), "--prepare-only"], 18000)
     lock = json.loads((ROOT / "demo-lock.json").read_text(encoding="utf-8"))
@@ -49,9 +51,11 @@ def main() -> None:
     run(
         [
             str(RUNTIME / "venv/Scripts/python.exe"),
-            str(ROOT / "scripts/streaming.py"),
-            "--fragment-frames",
-            str(args.fragment_frames),
+            str(
+                ROOT / ("scripts/conversation.py" if args.conversation else "scripts/streaming.py")
+            ),
+            *([] if args.conversation else ["--fragment-frames", str(args.fragment_frames)]),
+            *(["--fixture-provider"] if args.fixture_provider and args.conversation else []),
             *(["--speech", "--output", str(RUNTIME / "speech")] if args.speech else []),
             *(["--diagnostics"] if args.diagnostics else []),
         ],

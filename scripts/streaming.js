@@ -8,6 +8,8 @@ let epoch = 0;
 let submitting = false;
 let notice = '';
 let audioOutput = null;
+const conversation = document.querySelector('#conversation');
+let sessionIdentity = null;
 function prepareAudioOutput() {
   if (!audioOutput) {
     const context = new AudioContext();
@@ -226,8 +228,13 @@ start.onclick = async () => {
     if (ticket !== epoch) return;
     const clip = document.querySelector('#clip').value;
     const mode = document.querySelector('#mode').value;
-    const run =
-      clip === 'text'
+    const run = conversation
+      ? await post('/ask', {
+          question: document.querySelector('#text').value,
+          session: sessionIdentity,
+          fault: document.querySelector('#fault').value,
+        })
+      : clip === 'text'
         ? await post('/speak', {
             text: document.querySelector('#text').value,
             fault: document.querySelector('#fault').value,
@@ -356,15 +363,35 @@ play.onclick = () => {
     });
 };
 setInterval(async () => {
+  const ticket = epoch;
   try {
     const status = await (await fetch('/status')).json();
+    if (ticket !== epoch) return;
+    if (conversation) {
+      sessionIdentity = status.session;
+      const transcript = document.querySelector('#transcript');
+      transcript.textContent = '';
+      for (const turn of status.transcript) {
+        const entry = document.createElement('p');
+        entry.textContent = `You: ${turn.question}\nAvatar: ${turn.answer}\n${turn.state}${turn.truncated ? ' (output limit reached)' : ''} — Generated text may not all have been spoken.`;
+        transcript.append(entry);
+      }
+      document.querySelector('#usage').textContent = status.budget
+        ? JSON.stringify(status.budget)
+        : '';
+    }
     document.querySelector('#clip option[value="text"]').disabled = !status.speechEnabled;
     document.querySelector('#diagnostics').hidden = !status.diagnostics;
     if (!status.speechEnabled && document.querySelector('#clip').value === 'text')
       document.querySelector('#clip').value = 'six';
     start.disabled =
-      !(status.ready && status.state === 'idle') || submitting || !!(active && !active.ended);
-    if (!active) statusText.textContent = status.error || notice || `Model: ${status.state}`;
+      !(status.ready && status.state === 'idle') ||
+      submitting ||
+      !!(active && !active.ended) ||
+      !!status.configurationError;
+    if (!active)
+      statusText.textContent =
+        status.configurationError || status.error || notice || `Model: ${status.state}`;
     report.textContent = JSON.stringify(status, null, 2);
   } catch (error) {
     statusText.textContent = String(error);
