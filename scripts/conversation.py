@@ -179,13 +179,7 @@ class Conversation(Demonstration):
         with self.condition:
             if identity != self.identity:
                 raise ValueError("Stale session")
-            current = self.current
-            playback = (
-                current
-                and current.state == "complete"
-                and not any(e["event"] == "ended" for e in current.events)
-            )
-            if self.state != "idle" or playback:
+            if not self.pair_selectable():
                 raise ValueError("Select between turns; Stop and wait for resource release")
             if self.ready and pair.id == self.active_pair:
                 return self.status()
@@ -198,6 +192,15 @@ class Conversation(Demonstration):
             self.current = None
             self.condition.notify_all()
             return self.status()
+
+    def pair_selectable(self) -> bool:
+        current = self.current
+        playback = (
+            current
+            and current.state == "complete"
+            and not any(e["event"] == "ended" for e in current.events)
+        )
+        return self.state == "idle" and not playback
 
     def readiness(self) -> dict[str, Any]:
         return {
@@ -222,6 +225,7 @@ class Conversation(Demonstration):
                 "activePair": self.active_pair,
                 "selectedPair": self.selected_pair.id,
                 "pairSequence": self.pair_sequence,
+                "pairSelectable": self.pair_selectable(),
                 "pairPreparationSeconds": self.pair_preparation_seconds,
                 "session": self.identity,
                 "model": self.provider.model,

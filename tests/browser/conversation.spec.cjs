@@ -296,6 +296,33 @@ test('reset acknowledgement gates the next selection and response', async ({ pag
   await expect(ask).toBeEnabled();
 });
 
+test('selection waits for backend playback completion acknowledgement', async ({ page }) => {
+  let acknowledge;
+  const gate = new Promise((resolve) => {
+    acknowledge = resolve;
+  });
+  await page.route('**/telemetry', async (route) => {
+    if (route.request().postDataJSON().event === 'ended') await gate;
+    await route.continue();
+  });
+  const pair = page.getByLabel('Avatar and voice', { exact: true });
+  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await expect(page.locator('#status')).toHaveText('Playback ended');
+  try {
+    // Wait for a post-ending status poll while the backend's ended event is held.
+    await page.waitForResponse((response) => new URL(response.url()).pathname === '/status');
+    await page.waitForFunction(
+      () => JSON.parse(document.querySelector('#report').textContent).state === 'idle',
+    );
+    expect(await pair.isDisabled()).toBe(true);
+  } finally {
+    acknowledge();
+  }
+  await expect(pair).toBeEnabled();
+  await pair.selectOption('hopper-hazel');
+  await expect(page.locator('#pair-status')).toContainText('Active: Grace Hopper');
+});
+
 test('complete answer, contextual follow-up, idle Stop and fresh conversation', async ({
   page,
   request,

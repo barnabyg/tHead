@@ -489,6 +489,7 @@ setInterval(async () => {
         selecting ||
         stopping ||
         resetting ||
+        !status.pairSelectable ||
         submitting ||
         status.state !== 'idle' ||
         !!(active && !active.ended);
