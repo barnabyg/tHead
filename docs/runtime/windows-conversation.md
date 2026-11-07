@@ -48,11 +48,26 @@ spoken playback. A short response can finish generating before playback starts.
 Click Play if the browser blocks autoplay. Stop immediately detaches playback.
 
 For a controlled stream without paid calls, use the same command with
-`-FixtureProvider -Diagnostics`. This uses real local TTS/GPU/media but replaces
+`-FixtureProvider -Diagnostics -InitializeBudget` on first fixture use. This uses
+real local TTS/GPU/media but replaces
 the external text provider. Choose “Delay provider stream”; media should become
 available while later text is delayed. CPU protocol checks use `-TestBackend`
 instead: visit the printed loopback URL; those diagnostic bytes cannot establish
 playable media or GPU behaviour.
+
+The provider fixture uses `.runtime/conversation-fixture-budget.sqlite3` by default,
+separate from real accounting. Its usage/costs are simulated. The CPU fixture uses
+its output directory's ledger. An explicit `-Budget` path overrides these defaults.
+
+For the complete manual scenario, Ask the black-hole question, wait for the complete
+spoken ending, then ask “How do we detect one?”. While an answer plays, click Stop,
+then ask a replacement question. Click New conversation while a long answer is
+working and submit a new topic after resources release: the old transcript/media
+must stay absent. For repeatable no-cost Stop timing, select “Long fixture answer”.
+Choose each of Fail provider, Disconnect provider, Fail local TTS and Fail media;
+after the visible failure select None and Ask again. Expect recovery in the same
+process. Check budget totals survive Stop, reset and relaunch. These fixture checks
+do not assess answer quality or prove actual provider/network availability.
 
 Questions are limited to 1200 characters. Answers are limited to 4096 characters
 in addition to the provider token bound. Incremental phrases prefer sentence

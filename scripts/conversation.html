@@ -60,6 +60,8 @@ pre {
     <option value="llm-delay">Delay provider stream</option>
     <option value="llm">Fail provider</option>
     <option value="missing-completion">Disconnect provider</option>
+    <option value="markup">Literal markup</option>
+    <option value="long">Long fixture answer</option>
     <option value="tts-delay">Delay synthesis (Stop probe)</option>
     <option value="buffer-delay">Delay buffering (Stop probe)</option>
     <option value="tts">Fail local TTS</option>
@@ -69,7 +71,7 @@ pre {
 <button type="button" id="stop">Stop</button>
 <button type="button" id="reset">New conversation</button>
 <button type="button" id="play" hidden>Play audio/video</button>
-<!-- biome-ignore lint/a11y/useMediaCaption: Lip-sync fixture has no verified transcript; remove when captions cover all declared clips. -->
+<!-- biome-ignore lint/a11y/useMediaCaption: Generated transcript is not a word-timed caption track; review when aligned captions are available. -->
 <video id="video" playsinline></video>
 <details>
   <summary>Timing diagnostics</summary>

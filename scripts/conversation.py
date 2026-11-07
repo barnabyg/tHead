@@ -114,6 +114,7 @@ class Conversation(Demonstration):
                 "conversationEnabled": True,
                 "session": self.identity,
                 "model": self.provider.model,
+                "fixtureProvider": self.provider.fixture,
                 "budget": budget,
                 "contextOmitted": self.current.omitted if isinstance(self.current, Turn) else 0,
                 "configurationError": ""
@@ -325,7 +326,12 @@ def main() -> None:
         or (
             args.output / "budget.sqlite3"
             if args.test_backend
-            else RUNTIME / "conversation-budget.sqlite3"
+            else RUNTIME
+            / (
+                "conversation-fixture-budget.sqlite3"
+                if args.fixture_provider
+                else "conversation-budget.sqlite3"
+            )
         ),
         args.initialize_budget,
     )

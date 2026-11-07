@@ -11,8 +11,10 @@ let audioOutput = null;
 const conversation = document.querySelector('#conversation');
 let sessionIdentity = null;
 let pendingRequest = null;
+let pendingController = null;
 document.querySelector('#reset')?.addEventListener('click', async () => {
   epoch++;
+  pendingController?.abort();
   const before = performance.now();
   const beforeRms = outputRms();
   const run = active;
@@ -48,7 +50,7 @@ function outputRms() {
   );
 }
 function observeSilence(run, actionTime, beforeRms) {
-  if (!run || beforeRms === null) return;
+  if (!run || run.ended || beforeRms === null) return;
   const threshold = 0.00001;
   let firstSilent = null,
     lastNonSilent = 0,
@@ -89,12 +91,12 @@ function observeSilence(run, actionTime, beforeRms) {
   setTimeout(sample, 10);
 }
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-async function post(path, data) {
+async function post(path, data, signal = AbortSignal.timeout(30000)) {
   const response = await fetch(path, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
-    signal: AbortSignal.timeout(30000),
+    signal,
   });
   const result = await response.json();
   if (!response.ok) {
@@ -122,6 +124,7 @@ function telemetry(event, extra = {}) {
 }
 for (const event of ['playing', 'waiting', 'stalled', 'ended', 'error']) {
   video.addEventListener(event, () => {
+    if (!active) return;
     telemetry(event, { mediaError: video.error?.message });
     if (event === 'playing') statusText.textContent = 'Playing';
     if (event === 'waiting' && active) statusText.textContent = 'Buffering';
@@ -166,6 +169,7 @@ function release() {
 }
 document.querySelector('#stop').onclick = () => {
   epoch++;
+  pendingController?.abort();
   const before = performance.now();
   const beforeRms = outputRms();
   const run = active;
@@ -245,6 +249,8 @@ start.onclick = async () => {
   notice = '';
   const ticket = ++epoch;
   const requestId = crypto.randomUUID();
+  const requestController = new AbortController();
+  pendingController = requestController;
   if (conversation) pendingRequest = requestId;
   const previous = release();
   if (previous && !previous.ended) await post('/stop', { run: previous.id }).catch(() => {});
@@ -256,12 +262,16 @@ start.onclick = async () => {
     const clip = document.querySelector('#clip').value;
     const mode = document.querySelector('#mode').value;
     const run = conversation
-      ? await post('/ask', {
-          question: document.querySelector('#text').value,
-          session: sessionIdentity,
-          request: requestId,
-          fault: document.querySelector('#fault').value,
-        })
+      ? await post(
+          '/ask',
+          {
+            question: document.querySelector('#text').value,
+            session: sessionIdentity,
+            request: requestId,
+            fault: document.querySelector('#fault').value,
+          },
+          AbortSignal.any([requestController.signal, AbortSignal.timeout(30000)]),
+        )
       : clip === 'text'
         ? await post('/speak', {
             text: document.querySelector('#text').value,
@@ -382,6 +392,7 @@ start.onclick = async () => {
     release();
   } finally {
     if (pendingRequest === requestId) pendingRequest = null;
+    if (pendingController === requestController) pendingController = null;
     submitting = false;
   }
 };
@@ -419,9 +430,9 @@ setInterval(async () => {
           entry.textContent += `\nTokens: ${turn.usage.input_tokens ?? 'unknown'} input / ${turn.usage.output_tokens ?? 'unknown'} output; estimated USD ${turn.usage.estimated_usd.toFixed(6)}${turn.usage.estimated ? ' (conservative allowance; final usage unavailable)' : ''}.`;
         transcript.append(entry);
       }
-      document.querySelector('#usage').textContent = status.budget
-        ? JSON.stringify(status.budget)
-        : '';
+      document.querySelector('#usage').textContent = status.budget?.usable
+        ? `${status.budget.month} (UTC): estimated USD ${status.budget.estimated_usd.toFixed(6)} spent; USD ${status.budget.reserved_usd.toFixed(6)} reserved; USD ${status.budget.remaining_usd.toFixed(6)} remaining of USD 40. Application estimates, not authoritative billing.`
+        : status.budget?.error || '';
       if (status.contextOmitted) {
         const note = document.createElement('p');
         note.textContent = `${status.contextOmitted} earlier exchanges omitted from model context to fit the input allowance.`;

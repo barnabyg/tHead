@@ -17,5 +17,7 @@ jobs:
           cache: npm
       - run: npm.cmd ci --ignore-scripts
         shell: pwsh
+      - run: npx.cmd playwright install chromium
+        shell: pwsh
       - run: uv run --locked python scripts/verify.py
         shell: pwsh
