@@ -100,10 +100,11 @@ def main() -> None:
             "pwsh",
             "-NoProfile",
             "-Command",
-            "$errors = $null; $tokens = $null; "
+            "$errors = $null; $tokens = $null; foreach ($script in "
+            "(Get-ChildItem scripts/*.ps1)) { "
             "[System.Management.Automation.Language.Parser]::ParseFile("
-            "(Resolve-Path scripts/smoke.ps1), [ref]$tokens, [ref]$errors) | Out-Null; "
-            "if ($errors) { $errors | Write-Error; exit 1 }",
+            "$script.FullName, [ref]$tokens, [ref]$errors) | Out-Null; "
+            "if ($errors) { $errors | Write-Error; exit 1 } }",
         ],
         120,
     )

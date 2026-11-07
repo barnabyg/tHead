@@ -1,8 +1,21 @@
 # tHead
 
-Native Windows talking-head feasibility work. The current deliverable is the
+Native Windows talking-head feasibility work. Generate and play a six-second
+English clip using the [talking-head demonstration](docs/runtime/windows-demo.md)
+for [issue #3](https://github.com/barnabyg/tHead/issues/3):
+
+```powershell
+pwsh -NoProfile -File ./scripts/demo.ps1
+```
+
+The launcher prepares the pinned GPU runtime, public-domain inputs and native
+FFmpeg tools, generates a real 512 × 512 FlashHead Lite clip and opens FFplay.
+Check the guide's prerequisites first. Listening and lip-sync confirmation are
+manual checks; successful generation alone does not certify playback quality.
+
+The separate
 [FlashHead Lite model-loading smoke test](docs/runtime/windows-smoke.md) for
-[issue #2](https://github.com/barnabyg/tHead/issues/2).
+[issue #2](https://github.com/barnabyg/tHead/issues/2) remains available.
 
 Run from the repository root in PowerShell 7:
 
@@ -12,7 +25,7 @@ pwsh -NoProfile -File ./scripts/smoke.ps1
 
 Read the prerequisites and measured result in the runtime guide first. Readiness
 means the real Lite, LTX VAE and audio encoder weights loaded on the RTX 3090.
-Video generation, playback and streaming are subsequent work.
+The demo adds video generation and playback; streaming remains subsequent work.
 
 For development, install uv 0.11.7 and run the canonical verification command:
 

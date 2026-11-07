@@ -1,8 +1,15 @@
 diff --git a/flash_head/audio_analysis/wav2vec2.py b/flash_head/audio_analysis/wav2vec2.py
-index 1504ff3..a4f22f7 100644
+index 1504ff3..9a1d306 100644
 --- a/flash_head/audio_analysis/wav2vec2.py
 +++ b/flash_head/audio_analysis/wav2vec2.py
-@@ -7,6 +7,11 @@ from .torch_utils import linear_interpolation
+@@ -1,5 +1,6 @@
+ from transformers import Wav2Vec2Config, Wav2Vec2Model
+ from transformers.modeling_outputs import BaseModelOutput
++from transformers.utils.output_capturing import capture_outputs
+ 
+ from .torch_utils import linear_interpolation
+ 
+@@ -7,9 +8,16 @@ from .torch_utils import linear_interpolation
  # https://github.com/huggingface/transformers/blob/HEAD/src/transformers/models/wav2vec2/modeling_wav2vec2.py
  # initialize our encoder with the pre-trained wav2vec 2.0 weights.
  class Wav2Vec2Model(Wav2Vec2Model):
@@ -14,13 +21,39 @@ index 1504ff3..a4f22f7 100644
      def __init__(self, config: Wav2Vec2Config):
          super().__init__(config)
  
++    # Transformers 5 captures encoder layer outputs at the model boundary.
++    @capture_outputs(tie_last_hidden_states=False)
+     def forward(
+         self,
+         input_values,
+@@ -25,7 +33,7 @@ class Wav2Vec2Model(Wav2Vec2Model):
+         output_hidden_states = (
+             output_hidden_states if output_hidden_states is not None else self.config.output_hidden_states
+         )
+-        return_dict = return_dict if return_dict is not None else self.config.use_return_dict
++        return_dict = return_dict if return_dict is not None else self.config.return_dict
+ 
+         extract_features = self.feature_extractor(input_values)
+         extract_features = extract_features.transpose(1, 2)
+@@ -89,7 +97,7 @@ class Wav2Vec2Model(Wav2Vec2Model):
+         output_hidden_states = (
+             output_hidden_states if output_hidden_states is not None else self.config.output_hidden_states
+         )
+-        return_dict = return_dict if return_dict is not None else self.config.use_return_dict
++        return_dict = return_dict if return_dict is not None else self.config.return_dict
+ 
+         if attention_mask is not None:
+             # compute reduced attention_mask corresponding to feature vectors
 diff --git a/flash_head/src/modules/flash_head_model.py b/flash_head/src/modules/flash_head_model.py
-index 989cd7c..3f80cd1 100755
+index 989cd7c..eea9b30 100755
 --- a/flash_head/src/modules/flash_head_model.py
 +++ b/flash_head/src/modules/flash_head_model.py
-@@ -8,12 +8,13 @@ from diffusers import ModelMixin
+@@ -6,14 +6,15 @@ from typing import Tuple, Optional
+ from einops import rearrange
+ from diffusers import ModelMixin
  from diffusers.configuration_utils import ConfigMixin, register_to_config
- import torch.cuda.amp as amp
+-import torch.cuda.amp as amp
++import torch.amp as amp
  import torch.distributed as dist
 -from xfuser.core.distributed import (
 -    get_sequence_parallel_rank,
@@ -38,7 +71,12 @@ index 989cd7c..3f80cd1 100755
  try:
      import flash_attn_interface
      FLASH_ATTN_3_AVAILABLE = True
-@@ -545,4 +546,4 @@ class AudioProjModel(ModelMixin, ConfigMixin):
+@@ -541,8 +542,8 @@ class AudioProjModel(ModelMixin, ConfigMixin):
+         context_tokens = self.proj3(audio_embeds_c).reshape(batch_size_c*N_t, self.context_tokens, self.output_dim)
+ 
+         # normalization and reshape
+-        with amp.autocast(dtype=torch.float32):
++        with amp.autocast("cuda", enabled=False):
              context_tokens = self.norm(context_tokens)
          context_tokens = rearrange(context_tokens, "(bz f) m c -> bz f m c", f=video_length)
  
