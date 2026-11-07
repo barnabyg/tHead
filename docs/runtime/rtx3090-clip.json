@@ -1,0 +1,209 @@
+{
+  "status": "generated",
+  "stage": "complete",
+  "ffmpeg": "ffmpeg version 9.0.2-essentials_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
+  "lock": {
+    "upstream_url": "https://github.com/Soul-AILab/SoulX-FlashHead.git",
+    "upstream_revision": "9bc03de06bb0de82cd6bc477804512ae06144bf2",
+    "python": "3.12.10",
+    "models": [
+      {
+        "repository": "Soul-AILab/SoulX-FlashHead-1_3B",
+        "revision": "5fbd2e44ba08ab2deb28bd55cff2c15523e51ba5",
+        "directory": "FlashHead",
+        "files": [
+          "Model_Lite/config.json",
+          "Model_Lite/diffusion_pytorch_model.safetensors",
+          "VAE_LTX/config.json",
+          "VAE_LTX/diffusion_pytorch_model.safetensors",
+          "README.md"
+        ]
+      },
+      {
+        "repository": "facebook/wav2vec2-base-960h",
+        "revision": "22aad52d435eb6dbaf354bdad9b0da84ce7d6156",
+        "directory": "wav2vec2",
+        "files": [
+          "config.json",
+          "model.safetensors",
+          "preprocessor_config.json",
+          "README.md"
+        ]
+      }
+    ]
+  },
+  "upstream_revision": "9bc03de06bb0de82cd6bc477804512ae06144bf2",
+  "packages": {
+    "torch": "2.11.0+cu128",
+    "torchvision": "0.26.0+cu128",
+    "diffusers": "0.42.1",
+    "transformers": "5.22.2"
+  },
+  "cuda_runtime": "12.8",
+  "gpu": "NVIDIA GeForce RTX 3090",
+  "gpu_memory_bytes": 25769279488,
+  "load_seconds": 3.4219625999994605,
+  "input_duration_seconds": 6.0,
+  "settings": {
+    "frame_num": 33,
+    "motion_frames_latent_num": 2,
+    "tgt_fps": 25,
+    "sample_rate": 16000,
+    "sample_shift": 5,
+    "color_correction_strength": 1.0,
+    "cached_audio_duration": 8,
+    "num_heads": 12,
+    "height": 512,
+    "width": 512,
+    "motion_frames_num": 9,
+    "sample_steps": 4
+  },
+  "inference_seconds": 4.494662099999914,
+  "generated_frames": 168,
+  "peak_allocated_bytes": 5344988672,
+  "peak_reserved_bytes": 5943328768,
+  "media": {
+    "streams": [
+      {
+        "index": 0,
+        "codec_name": "h264",
+        "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+        "profile": "High",
+        "codec_type": "video",
+        "codec_tag_string": "avc1",
+        "codec_tag": "0x31637661",
+        "mime_codec_string": "avc1.64001e",
+        "width": 512,
+        "height": 512,
+        "coded_width": 512,
+        "coded_height": 512,
+        "has_b_frames": 0,
+        "pix_fmt": "yuv420p",
+        "level": 30,
+        "chroma_location": "left",
+        "field_order": "progressive",
+        "is_avc": "true",
+        "nal_length_size": "4",
+        "id": "0x1",
+        "r_frame_rate": "25/1",
+        "avg_frame_rate": "25/1",
+        "time_base": "1/12800",
+        "start_pts": 0,
+        "start_time": "0.000000",
+        "duration_ts": 76800,
+        "duration": "6.000000",
+        "bit_rate": "802286",
+        "bits_per_raw_sample": "8",
+        "nb_frames": "150",
+        "extradata_size": 44,
+        "disposition": {
+          "default": 1,
+          "dub": 0,
+          "original": 0,
+          "comment": 0,
+          "lyrics": 0,
+          "karaoke": 0,
+          "forced": 0,
+          "hearing_impaired": 0,
+          "visual_impaired": 0,
+          "clean_effects": 0,
+          "attached_pic": 0,
+          "timed_thumbnails": 0,
+          "non_diegetic": 0,
+          "captions": 0,
+          "descriptions": 0,
+          "metadata": 0,
+          "dependent": 0,
+          "still_image": 0,
+          "multilayer": 0
+        },
+        "tags": {
+          "language": "und",
+          "handler_name": "VideoHandler",
+          "encoder": "Lavc63.1.102 libx264"
+        }
+      },
+      {
+        "index": 1,
+        "codec_name": "aac",
+        "codec_long_name": "AAC (Advanced Audio Coding)",
+        "profile": "LC",
+        "codec_type": "audio",
+        "codec_tag_string": "mp4a",
+        "codec_tag": "0x6134706d",
+        "mime_codec_string": "mp4a.40.2",
+        "sample_fmt": "fltp",
+        "sample_rate": "16000",
+        "channels": 1,
+        "channel_layout": "mono",
+        "bits_per_sample": 0,
+        "initial_padding": 1024,
+        "id": "0x2",
+        "r_frame_rate": "0/0",
+        "avg_frame_rate": "0/0",
+        "time_base": "1/16000",
+        "start_pts": 0,
+        "start_time": "0.000000",
+        "duration_ts": 96000,
+        "duration": "6.000000",
+        "bit_rate": "62162",
+        "nb_frames": "95",
+        "extradata_size": 5,
+        "disposition": {
+          "default": 1,
+          "dub": 0,
+          "original": 0,
+          "comment": 0,
+          "lyrics": 0,
+          "karaoke": 0,
+          "forced": 0,
+          "hearing_impaired": 0,
+          "visual_impaired": 0,
+          "clean_effects": 0,
+          "attached_pic": 0,
+          "timed_thumbnails": 0,
+          "non_diegetic": 0,
+          "captions": 0,
+          "descriptions": 0,
+          "metadata": 0,
+          "dependent": 0,
+          "still_image": 0,
+          "multilayer": 0
+        },
+        "tags": {
+          "language": "und",
+          "handler_name": "SoundHandler"
+        }
+      }
+    ],
+    "format": {
+      "filename": "C:\\docs\\git\\tHead\\.runtime\\demo\\candidate.mp4",
+      "nb_streams": 2,
+      "nb_programs": 0,
+      "nb_stream_groups": 0,
+      "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+      "format_long_name": "QuickTime / MOV",
+      "start_time": "0.000000",
+      "duration": "6.000000",
+      "size": "652863",
+      "bit_rate": "870484",
+      "probe_score": 100,
+      "tags": {
+        "major_brand": "isom",
+        "minor_version": "512",
+        "compatible_brands": "isomiso2avc1mp41",
+        "encoder": "Lavf63.1.102"
+      }
+    }
+  },
+  "output": "C:\\docs\\git\\tHead\\.runtime\\demo\\clip.mp4",
+  "elapsed_seconds": 12.901773700001286,
+  "playback": {
+    "player": "FFplay 9.0.2",
+    "result": "normal autoexit; launcher exit 0",
+    "audible_speech_and_lip_sync": "User confirmed: Speech and animation are in sync",
+    "computer_use": "Player window discovered; inspection app approval timed out",
+    "confirmation_date": "2026-11-07"
+  },
+  "launcher_elapsed_seconds": 31.823660500000187
+}
