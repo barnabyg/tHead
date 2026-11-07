@@ -119,9 +119,9 @@
     ]
   },
   "resource_observations": {
-    "samples": 316,
+    "samples": 340,
     "first_utc": "2026-11-07T16:23:51.102566+00:00",
-    "last_utc": "2026-11-07T16:29:24.596006+00:00",
+    "last_utc": "2026-11-07T16:29:50.066774+00:00",
     "sampling": "one second plus diagnostic overhead; includes idle time and development load",
     "system_cpu_percent_range": [
       0.7,
@@ -152,7 +152,7 @@
           2983993344,
           3019210752
         ],
-        "observed_cpu_seconds": 47.421875
+        "observed_cpu_seconds": 47.4375
       },
       {
         "pid": 20904,
@@ -187,6 +187,15 @@
         "rss_bytes_range": [
           83607552,
           83607552
+        ],
+        "observed_cpu_seconds": 0.0
+      },
+      {
+        "pid": 20420,
+        "name": "pwsh.exe",
+        "rss_bytes_range": [
+          85086208,
+          85086208
         ],
         "observed_cpu_seconds": 0.0
       }
@@ -984,6 +993,129 @@
       }
     },
     {
+      "id": "a4eea0c97f6c4b7bbcc82fe8e001538b",
+      "state": "complete",
+      "input": {
+        "event": "generation-start",
+        "seconds": 0.00046440000005532056,
+        "progressive": true,
+        "clip": "six"
+      },
+      "duration_seconds": 18.27,
+      "transport": {
+        "event": "transport-profile",
+        "seconds": 0.0004670999987865798,
+        "fragment_frames": 8,
+        "fragment_seconds": 0.32,
+        "max_pending_fragments": 9
+      },
+      "first_frames_seconds": 1.0129559999986668,
+      "first_playable_seconds": 1.033451299997978,
+      "first_playing_seconds": 1.7204262999985076,
+      "first_presented_frame_seconds": 1.7976845999983198,
+      "render_complete_seconds": 13.155534399997123,
+      "playback_before_render_complete": true,
+      "first_arrival_to_playing_seconds": 1.6876936000007845,
+      "model_generation_seconds": 13.041163000005326,
+      "model_speed_relative_to_playback": 1.4009486730587246,
+      "max_pending_fragments": 9,
+      "max_reported_browser_buffer_seconds": 2.9225339999999997,
+      "post_start_stalls_seconds": [],
+      "unresolved_stall": false,
+      "ended_media_time": 18.344062,
+      "memory": {
+        "allocated_bytes": 4314651648,
+        "peak_allocated_bytes": 5357768192,
+        "reserved_bytes": 5943328768,
+        "rss_bytes": 3022884864
+      },
+      "input_integrity": {
+        "event": "input-complete",
+        "seconds": 11.232928899997205,
+        "samples": 292320,
+        "sha256": "69a64388c602ac6cd1a242df4677147cce99525e2c5cc6803b25d95783c09312"
+      },
+      "client_settings": {
+        "event": "client-settings",
+        "seconds": 0.008458799999061739,
+        "clientMilliseconds": 15336,
+        "utc": "2026-11-07T16:31:22.555Z",
+        "currentTime": 0,
+        "buffered": 0,
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+        "mode": "complete",
+        "clip": "text",
+        "initialBufferSeconds": 1.28
+      },
+      "max_queued_input_chunks": 2,
+      "media_published_after_stop": false,
+      "stop": {},
+      "client_pause": {},
+      "digital_silence": {},
+      "abandoned": {},
+      "error": "",
+      "text": "This local demonstration keeps every word in its original order while preparing the next part of the passage This local demonstration keeps every word in its original order while preparing the next part of the passage This local demonstration keeps every word in its original order while preparing the next part of the passage",
+      "tts_segments": [
+        {
+          "event": "tts-segment",
+          "seconds": 0.03268919999754871,
+          "index": 0,
+          "text": "This local demonstration keeps every word in its original order while preparing the next part of the passage This local demonstration keeps every word in its original order while",
+          "samples": 159680,
+          "preparation_seconds": 0.0322636999990209
+        },
+        {
+          "event": "tts-segment",
+          "seconds": 6.15314539999963,
+          "index": 1,
+          "text": "preparing the next part of the passage This local demonstration keeps every word in its original order while preparing the next part of the passage",
+          "samples": 132640,
+          "preparation_seconds": 0.02588140000079875
+        }
+      ],
+      "first_tts_audio_seconds": 0.03268919999754871,
+      "tts_preparation_seconds": 0.05814509999981965,
+      "tts_speed_relative_to_playback": 314.2139234442226,
+      "tts_complete": {
+        "event": "tts-complete",
+        "seconds": 11.232981599998311,
+        "samples": 292320,
+        "sha256": "69a64388c602ac6cd1a242df4677147cce99525e2c5cc6803b25d95783c09312"
+      },
+      "digital_audio_onset_seconds": 1.8873875999997836,
+      "audible_with_moving_video_seconds": 1.8873875999997836,
+      "playback_before_last_phrase_synthesis": true,
+      "pcm_handoff_matches_synthesis": true,
+      "tts_released": {
+        "event": "tts-released",
+        "seconds": 17.717917099998886
+      },
+      "resources_released": {
+        "event": "resources-released",
+        "seconds": 17.719521899998654
+      },
+      "decoded_media": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_type": "video",
+            "start_time": "0.000000",
+            "duration": "18.344062",
+            "nb_read_frames": "457"
+          },
+          {
+            "codec_type": "audio",
+            "sample_rate": "16000",
+            "channels": 1,
+            "start_time": "0.000000",
+            "duration": "18.334000",
+            "nb_read_frames": "287"
+          }
+        ]
+      }
+    },
+    {
       "id": "a82955f409c74d67b80576e284546f8e",
       "state": "failed",
       "input": {},
@@ -1587,6 +1719,115 @@
             "nb_read_frames": "20"
           }
         ]
+      }
+    },
+    {
+      "id": "fc37b82fb2ed4931b21113f14324503c",
+      "state": "stopped",
+      "input": {
+        "event": "generation-start",
+        "seconds": 0.00043899999946006574,
+        "progressive": true,
+        "clip": "six"
+      },
+      "duration_seconds": null,
+      "transport": {
+        "event": "transport-profile",
+        "seconds": 0.00044160000106785446,
+        "fragment_frames": 8,
+        "fragment_seconds": 0.32,
+        "max_pending_fragments": 9
+      },
+      "first_frames_seconds": 1.2512851999999839,
+      "first_playable_seconds": 1.272455500002252,
+      "first_playing_seconds": null,
+      "first_presented_frame_seconds": null,
+      "render_complete_seconds": null,
+      "playback_before_render_complete": false,
+      "first_arrival_to_playing_seconds": null,
+      "model_generation_seconds": 0.7127844999995432,
+      "model_speed_relative_to_playback": null,
+      "max_pending_fragments": 2,
+      "max_reported_browser_buffer_seconds": 0.704,
+      "post_start_stalls_seconds": [],
+      "unresolved_stall": false,
+      "ended_media_time": null,
+      "memory": {},
+      "input_integrity": {},
+      "client_settings": {
+        "event": "client-settings",
+        "seconds": 0.004486099998757709,
+        "clientMilliseconds": 651.5,
+        "utc": "2026-11-07T16:31:07.871Z",
+        "currentTime": 0,
+        "buffered": 0,
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+        "mode": "complete",
+        "clip": "text",
+        "initialBufferSeconds": 1.28
+      },
+      "max_queued_input_chunks": 2,
+      "media_published_after_stop": false,
+      "stop": {
+        "event": "stop-handled",
+        "seconds": 1.671720500002266
+      },
+      "client_pause": {
+        "event": "client-paused",
+        "seconds": 1.672779000000446,
+        "milliseconds": 0.8000000007450581
+      },
+      "digital_silence": {
+        "event": "digital-silence",
+        "seconds": 1.6921202000012272,
+        "status": "already-silent",
+        "firstSilentMilliseconds": 11.599999997764826,
+        "lastNonSilentMilliseconds": 0,
+        "preStopRms": 0,
+        "threshold": 1e-05,
+        "sampleRate": 48000,
+        "analyserSamples": 256,
+        "measurement": "browser-audio-graph"
+      },
+      "abandoned": {
+        "event": "generation-abandoned",
+        "seconds": 2.117695500000991
+      },
+      "error": "",
+      "text": "Hello. This is a local text to speech demonstration. The avatar should speak this passage clearly, then finish without repeating any words.",
+      "tts_segments": [
+        {
+          "event": "tts-segment",
+          "seconds": 0.049285799999779556,
+          "index": 0,
+          "text": "Hello.",
+          "samples": 20000,
+          "preparation_seconds": 0.048877200002607424
+        },
+        {
+          "event": "tts-segment",
+          "seconds": 0.5474800000010873,
+          "index": 1,
+          "text": "This is a local text to speech demonstration.",
+          "samples": 52960,
+          "preparation_seconds": 0.009570300000632415
+        }
+      ],
+      "first_tts_audio_seconds": 0.049285799999779556,
+      "tts_preparation_seconds": 0.05844750000323984,
+      "tts_speed_relative_to_playback": 78.01873475764116,
+      "tts_complete": {},
+      "digital_audio_onset_seconds": null,
+      "audible_with_moving_video_seconds": null,
+      "playback_before_last_phrase_synthesis": false,
+      "pcm_handoff_matches_synthesis": null,
+      "tts_released": {
+        "event": "tts-released",
+        "seconds": 2.1197672999987844
+      },
+      "resources_released": {
+        "event": "resources-released",
+        "seconds": 2.120771199999581
       }
     }
   ]

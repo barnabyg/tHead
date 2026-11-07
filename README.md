@@ -47,6 +47,9 @@ CPU synthesis with the installed Windows Zira English voice:
 pwsh -NoProfile -File ./scripts/speech-demo.ps1
 ```
 
+The [Phase 3 assessment](docs/runtime/phase-3-assessment.md) records integrated
+RTX 3090/browser measurements, Stop/recovery evidence and the feasibility decision.
+
 For development, install uv 0.11.7 and Node.js 24.14.1, then prepare the pinned
 browser-check tooling once:
 
