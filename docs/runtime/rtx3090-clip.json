@@ -201,8 +201,9 @@
   "playback": {
     "player": "FFplay 9.0.2",
     "result": "normal autoexit; launcher exit 0",
-    "audible_speech_and_lip_sync": "pending human confirmation",
-    "computer_use": "Player window discovered; inspection app approval timed out"
+    "audible_speech_and_lip_sync": "User confirmed: Speech and animation are in sync",
+    "computer_use": "Player window discovered; inspection app approval timed out",
+    "confirmation_date": "2026-11-07"
   },
   "launcher_elapsed_seconds": 31.823660500000187
 }

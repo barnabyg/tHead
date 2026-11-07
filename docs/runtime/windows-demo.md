@@ -115,5 +115,7 @@ states afterwards. The complete GPU run then generated and decoded six seconds.
 An initial launcher rerun exposed a locked FFplay executable; verified extraction
 now leaves identical files untouched. An open previous clip also correctly
 failed promotion rather than reporting success; close players before rerunning.
-Human confirmation of audible playback and approximate lip sync is recorded
-separately and remains pending until explicitly observed.
+The user confirmed on 7 November 2026: "Speech and animation are in sync."
+This completes the audible playback and approximate lip-sync check for this host.
+Computer-use screenshot inspection was unavailable because app approval timed out;
+the listening/animation assessment is the user's direct playback observation.
