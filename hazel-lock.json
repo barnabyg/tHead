@@ -1,0 +1,24 @@
+{
+  "voice": "Microsoft Hazel Desktop",
+  "voice_token": "TTS_MS_EN-GB_HAZEL_11.0",
+  "culture": "en-GB",
+  "voice_version": "11.0",
+  "rate": 0,
+  "volume": 100,
+  "sample_rate": 16000,
+  "windows_build_measured": "26300.9711",
+  "installed_files": [
+    {
+      "path": "Speech_OneCore/Engines/TTS/en-GB/M2057Hazel.APM",
+      "sha256": "ebe1d9e1b978df5e493a31dc40ef00c4dd70fa90424306267d878269476a8b61"
+    },
+    {
+      "path": "Speech_OneCore/Engines/TTS/en-GB/M2057Hazel.INI",
+      "sha256": "a59b71961de550d0b34068022a41d31387270d080eb26f6d11a52779d29a1dbd"
+    },
+    {
+      "path": "Speech_OneCore/Engines/TTS/en-GB/MSTTSLocEnGB.dat",
+      "sha256": "4419a49f03b45c3db3d6aeb1b49907b803a02c66f27bbea3a27dff6df8b94a7e"
+    }
+  ]
+}

@@ -67,6 +67,13 @@ RTX 3090 latency distribution, bounded browser-session and native recovery evide
 the hardware decision and clean-checkout startup. Digital timings are distinguished
 from physical-speaker and perceptual validation.
 
+[Selectable avatar/voice pairs](docs/runtime/windows-pairs.md) add JFK/Zira
+(the default) and Grace Hopper/Hazel. Use `-Pair hopper-hazel` at launch or choose
+**Avatar and voice** between turns in the browser. Switching preserves context;
+preparation failures identify the requested pair and allow recovery. The
+[Phase 6 handoff](docs/runtime/phase-6-assessment.md) records native timing,
+switching/recovery evidence, user listening/viewing confirmation and limitations.
+
 For development, install uv 0.11.7 and Node.js 24.14.1, then prepare the pinned
 browser-check tooling once:
 

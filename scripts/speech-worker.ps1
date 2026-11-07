@@ -1,12 +1,13 @@
 #Requires -Version 5.1
-# Fixed local Windows voice. Text arrives as data, never PowerShell code or SSML.
+param([string]$VoiceName = 'Microsoft Zira Desktop')
+# Declared local Windows voice. Text arrives as data, never PowerShell code or SSML.
 $ErrorActionPreference = 'Stop'
 [Console]::InputEncoding = [Text.UTF8Encoding]::new($false)
 [Console]::OutputEncoding = [Text.UTF8Encoding]::new($false)
 Add-Type -AssemblyName System.Speech
 $voice = [System.Speech.Synthesis.SpeechSynthesizer]::new()
 try {
-    $voice.SelectVoice('Microsoft Zira Desktop')
+    $voice.SelectVoice($VoiceName)
     $voice.Rate = 0
     $voice.Volume = 100
     $format = [System.Speech.AudioFormat.SpeechAudioFormatInfo]::new(

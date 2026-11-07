@@ -6,16 +6,28 @@ import argparse
 import os
 import re
 import threading
+import time
 import uuid
 from collections.abc import Iterator
-from http.server import ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
 
 from budget import PRICES, Budget, BudgetError
+from pairs import DEFAULT_PAIR, configured_pair, configured_pairs
 from prepare import RUNTIME
 from provider import INPUT_BOUND, INSTRUCTIONS, MODEL, OUTPUT_TOKENS, Provider
-from streaming import Demonstration, Session, handler
+from speech import Voice
+from streaming import Demonstration, LoopbackServer, Session, handler
+
+PAIR_FAULTS = {
+    "pair-portrait-missing": "Portrait missing; rerun the preparation/launch command",
+    "pair-portrait-unreadable": "Portrait unreadable; restore read permissions and retry",
+    "pair-portrait-invalid": "Portrait invalid; restore the declared portrait and retry",
+    "pair-voice-missing": "Desktop voice unavailable; install the declared legacy English voice",
+    "pair-voice-invalid": "Voice assets invalid; restore the declared Windows voice version",
+    "pair-prepare": "Avatar failed after voice preparation; retry or select another pair",
+    "pair-delay-fail": "Delayed avatar preparation failed; retry or select another pair",
+}
 
 
 class Turn(Session):
@@ -34,6 +46,7 @@ class Turn(Session):
         self.reservation = ""
         self.request_id = ""
         self.progressive = True
+        self.pair = ""
         self.text = ["conversation"]
 
     def save(self) -> None:
@@ -49,6 +62,7 @@ class Turn(Session):
             "usage": dict(self.usage),
             "inputBound": self.input_bound,
             "request": self.request_id,
+            "pair": self.pair,
         }
 
 
@@ -60,6 +74,12 @@ class Conversation(Demonstration):
             return self.reset(str(data.get("session", "")))
         if path == "/cancel":
             return self.cancel(str(data.get("session", "")), str(data.get("request", "")))
+        if path == "/select":
+            return self.select(
+                str(data.get("session", "")),
+                str(data.get("pair", "")),
+                str(data.get("fault", "")),
+            )
         return self.ask(
             str(data.get("session", "")),
             data.get("question"),
@@ -77,7 +97,13 @@ class Conversation(Demonstration):
         fixture: bool = False,
         budget_path: Path | None = None,
         initialize_budget: bool = False,
+        pair: str = DEFAULT_PAIR,
     ) -> None:
+        self.selected_pair = configured_pair(pair)
+        self.active_pair = ""
+        self.pair_sequence = 0
+        self.pair_preparation_seconds = 0.0
+        self.pair_fault = ""
         self.identity = uuid.uuid4().hex
         self.transcript: list[Turn] = []
         self.cancelled_requests: set[str] = set()
@@ -92,6 +118,88 @@ class Conversation(Demonstration):
         except BudgetError as error:
             self.budget_error = str(error)
         super().__init__(inputs, directory, test_backend, 8, True, diagnostics or fixture)
+
+    def prepare_assets(self, pipeline: Any, inference: Any) -> None:
+        pair = self.selected_pair
+        if self.pair_fault in ("pair-delay", "pair-delay-fail"):
+            time.sleep(2)  # Simulated preparation completing after Stop/reset.
+        candidate = Voice(pair.voice_lock)
+        try:
+            self.pair_probe(
+                "pair-portrait-missing", "pair-portrait-unreadable", "pair-portrait-invalid"
+            )
+            portrait = (
+                self.inputs / str(pair.portrait["filename"])
+                if self.test_backend
+                else pair.validate_portrait(self.inputs)
+            )
+            self.pair_probe("pair-voice-missing")
+            if not self.test_backend:
+                candidate.prepare(self.shutdown)
+            self.pair_probe("pair-voice-invalid")
+            if not self.test_backend:
+                inference.get_base_data(pipeline, str(portrait), 42, False)
+            self.pair_probe("pair-prepare", "pair-delay-fail")
+            self.voice.close()
+            with self.condition:
+                self.voice = candidate
+                self.portrait_path = portrait
+                self.active_pair = pair.id
+                self.loading["tts"] = candidate.metadata
+        finally:
+            if self.voice is not candidate:
+                candidate.close()
+
+    def pair_probe(self, *faults: str) -> None:
+        if self.pair_fault in faults:
+            raise RuntimeError(PAIR_FAULTS[self.pair_fault])
+
+    def load_assets(self, pipeline: Any, inference: Any) -> None:
+        started = time.perf_counter()
+        try:
+            super().load_assets(pipeline, inference)
+        except Exception as error:
+            with self.condition:
+                self.ready = False
+                self.state = "idle"
+                self.error = (
+                    f"{self.selected_pair.name} preparation failed: "
+                    f"{type(error).__name__}: {error}. "
+                    "See docs/runtime/windows-pairs.md; select an available pair to recover."
+                )
+                self.condition.notify_all()
+        finally:
+            self.pair_preparation_seconds = time.perf_counter() - started
+
+    def select(self, identity: str, pair_id: str, fault: str = "") -> dict[str, Any]:
+        pair = configured_pair(pair_id)
+        if fault and (not self.diagnostics or fault not in (*PAIR_FAULTS, "pair-delay")):
+            raise ValueError("Unknown pair diagnostic; launch with --diagnostics")
+        with self.condition:
+            if identity != self.identity:
+                raise ValueError("Stale session")
+            if not self.pair_selectable():
+                raise ValueError("Select between turns; Stop and wait for resource release")
+            if self.ready and pair.id == self.active_pair:
+                return self.status()
+            self.selected_pair = pair
+            self.error = ""
+            self.pair_fault = fault
+            self.pair_sequence += 1
+            self.ready = False
+            self.state = "selecting"
+            self.current = None
+            self.condition.notify_all()
+            return self.status()
+
+    def pair_selectable(self) -> bool:
+        current = self.current
+        playback = (
+            current
+            and current.state == "complete"
+            and not any(e["event"] == "ended" for e in current.events)
+        )
+        return self.state == "idle" and not playback
 
     def readiness(self) -> dict[str, Any]:
         return {
@@ -112,6 +220,12 @@ class Conversation(Demonstration):
             result = {
                 **super().status(),
                 "conversationEnabled": True,
+                "pairs": [{"id": p.id, "name": p.name} for p in configured_pairs().values()],
+                "activePair": self.active_pair,
+                "selectedPair": self.selected_pair.id,
+                "pairSequence": self.pair_sequence,
+                "pairSelectable": self.pair_selectable(),
+                "pairPreparationSeconds": self.pair_preparation_seconds,
                 "session": self.identity,
                 "model": self.provider.model,
                 "fixtureProvider": self.provider.fixture,
@@ -128,6 +242,7 @@ class Conversation(Demonstration):
                         "state": t.state,
                         "truncated": t.truncated,
                         "usage": t.usage,
+                        "pair": t.pair,
                     }
                     for t in self.transcript
                 ],
@@ -235,6 +350,7 @@ class Conversation(Demonstration):
             session = Turn(self.directory, self.fragment_frames, self.identity, question.strip())
             session.reservation = reservation
             session.request_id = request_id
+            session.pair = self.active_pair
             session.messages, session.input_bound, session.omitted = messages, input_bound, omitted
             session.fault = fault
             self.current = session
@@ -314,7 +430,12 @@ def main() -> None:
     parser.add_argument("--model", default=os.environ.get("THEAD_MODEL", MODEL))
     parser.add_argument("--budget", type=Path)
     parser.add_argument("--initialize-budget", action="store_true")
+    parser.add_argument("--pair", default=os.environ.get("THEAD_PAIR", DEFAULT_PAIR))
     args = parser.parse_args()
+    try:
+        configured_pair(args.pair)
+    except ValueError as error:
+        parser.error(str(error))
     app = Conversation(
         args.inputs,
         args.output,
@@ -334,8 +455,9 @@ def main() -> None:
             )
         ),
         args.initialize_budget,
+        args.pair,
     )
-    server = ThreadingHTTPServer(("127.0.0.1", args.port), handler(app))
+    server = LoopbackServer(("127.0.0.1", args.port), handler(app))
     lifetime = threading.Timer(7200, server.shutdown)
     lifetime.daemon = True
     lifetime.start()

@@ -22,6 +22,10 @@ class ConversationTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temporary = tempfile.TemporaryDirectory()
         self.addCleanup(self.temporary.cleanup)
+        self.addCleanup(self.stop_process)
+        self.start_app()
+
+    def start_app(self, pair: str | None = None) -> None:
         # Fixed task-owned executable and loopback server, isolated output and ephemeral port.
         self.process = subprocess.Popen(  # nosec B603
             [
@@ -32,21 +36,69 @@ class ConversationTests(unittest.TestCase):
                 "--output",
                 self.temporary.name,
                 "--test-backend",
+                *(["--pair", pair] if pair else []),
             ],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
         )
-        self.addCleanup(self.stop_process)
         assert self.process.stdout is not None  # nosec B101
         line = self.process.stdout.readline()
         self.assertTrue(line.startswith("LISTEN "), line)
         self.url = line.strip().split(" ")[1]
         self.wait(lambda s: s["state"] == "idle")
 
+    def test_configured_pair_launch_and_invalid_configuration(self) -> None:
+        status = self.request("/status")
+        self.assertEqual(status["activePair"], "jfk-zira")
+        self.ask()
+        done = self.wait(lambda s: s["state"] == "idle")
+        self.assertEqual(done["run"]["pair"], "jfk-zira")
+        self.stop_process()
+        self.start_app("hopper-hazel")
+        status = self.request("/status")
+        self.assertEqual(status["activePair"], "hopper-hazel")
+        self.assertIn("Hazel", status["pairs"][1]["name"])
+        self.ask()
+        self.wait(lambda s: s["state"] == "idle")
+        self.ask("How do we detect one?")
+        done = self.wait(lambda s: s["state"] == "idle")
+        self.assertEqual(done["run"]["pair"], "hopper-hazel")
+        self.assertIn("Earlier question", done["run"]["answer"])
+        # Fixed executable and invalid configuration; no assets/provider dispatch.
+        invalid = subprocess.run(  # nosec B603
+            [sys.executable, str(ROOT / "scripts/conversation.py"), "--pair", "unknown"],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        self.assertNotEqual(invalid.returncode, 0)
+        self.assertIn("Unknown pair", invalid.stderr)
+
     def stop_process(self) -> None:
         self.process.terminate()
         self.process.communicate(timeout=30)
+
+    def test_duplicate_listener_fails_without_serving_the_wrong_application(self) -> None:
+        identity = self.request("/status")["session"]
+        # Fixed local fixture, same port as this test's isolated server.
+        duplicate = subprocess.run(  # nosec B603
+            [
+                sys.executable,
+                str(ROOT / "scripts/conversation.py"),
+                "--test-backend",
+                "--port",
+                self.url.rsplit(":", 1)[1],
+                "--output",
+                self.temporary.name,
+            ],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        self.assertNotEqual(duplicate.returncode, 0)
+        self.assertNotIn("LISTEN", duplicate.stdout)
+        self.assertEqual(self.request("/status")["session"], identity)
 
     def request(self, path: str, data: dict[str, Any] | None = None) -> dict[str, Any]:
         body = json.dumps(data).encode() if data is not None else None

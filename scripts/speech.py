@@ -36,7 +36,8 @@ def segments(text: str) -> list[str]:
 class Voice:
     """Reusable SAPI owner. Cancellation kills synthesis; the next run reloads the voice."""
 
-    def __init__(self) -> None:
+    def __init__(self, lock_path: Path | None = None) -> None:
+        self.lock_path = lock_path or Path(__file__).parents[1] / "speech-lock.json"
         self.process: subprocess.Popen[str] | None = None
         self.reader: threading.Thread | None = None
         self.lines: queue.Queue[str] = queue.Queue(2)
@@ -59,7 +60,8 @@ class Voice:
             except queue.Empty:
                 if self.process is None or self.process.poll() is not None:
                     raise RuntimeError(
-                        "Local TTS worker exited; install the declared Zira voice"
+                        "Local TTS worker exited; install the declared Desktop voice; "
+                        "see windows-pairs.md"
                     ) from None
                 if time.monotonic() > deadline:
                     raise TimeoutError("Local TTS exceeded two minutes") from None
@@ -68,9 +70,7 @@ class Voice:
     def prepare(self, cancelled: threading.Event) -> None:
         if self.process is not None:
             return
-        lock = json.loads(
-            Path(__file__).parents[1].joinpath("speech-lock.json").read_text(encoding="utf-8")
-        )
+        lock = json.loads(self.lock_path.read_text(encoding="utf-8"))
         windows = Path(os.environ.get("WINDIR", "C:/Windows"))
         for asset in lock["installed_files"]:
             path = windows / asset["path"]
@@ -79,7 +79,7 @@ class Voice:
                 or hashlib.sha256(path.read_bytes()).hexdigest() != asset["sha256"]
             ):
                 raise RuntimeError(
-                    f"Declared Zira voice asset missing or changed: {path}; see windows-speech.md"
+                    f"{lock['voice']} asset missing or changed: {path}; see windows-pairs.md"
                 )
         self.lines = queue.Queue(2)
         # B603/B607: fixed Windows executable/script; untrusted text uses JSON stdin only.
@@ -90,6 +90,8 @@ class Voice:
                 "-NonInteractive",
                 "-File",
                 str(Path(__file__).with_name("speech-worker.ps1")),
+                "-VoiceName",
+                lock["voice"],
             ],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
@@ -107,6 +109,10 @@ class Voice:
                 raise RuntimeError("Local voice did not become ready")
             if not self.metadata.get("voice_id", "").endswith(lock["voice_token"]):
                 raise RuntimeError("Unexpected Windows voice token")
+            if self.metadata.get("voice") != lock["voice"] or not self.metadata.get(
+                "culture", ""
+            ).startswith("en-"):
+                raise RuntimeError("Expected the declared local English Desktop voice")
         except Exception:
             self.close()
             raise

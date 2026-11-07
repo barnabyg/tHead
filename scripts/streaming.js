@@ -12,7 +12,35 @@ const conversation = document.querySelector('#conversation');
 let sessionIdentity = null;
 let pendingRequest = null;
 let pendingController = null;
+let selecting = false;
+let stopping = 0;
+let resetting = 0;
+const pairSelector = document.querySelector('#pair');
+pairSelector?.addEventListener('change', async () => {
+  if (selecting) return;
+  selecting = true;
+  epoch++;
+  release();
+  notice = '';
+  start.disabled = true;
+  pairSelector.disabled = true;
+  document.querySelector('#pair-status').textContent = 'Switching pair…';
+  try {
+    await post('/select', {
+      session: sessionIdentity,
+      pair: pairSelector.value,
+      fault: document.querySelector('#pair-fault').value,
+    });
+  } catch (error) {
+    notice = String(error);
+  } finally {
+    selecting = false;
+  }
+});
 document.querySelector('#reset')?.addEventListener('click', async () => {
+  resetting++;
+  start.disabled = true;
+  if (pairSelector) pairSelector.disabled = true;
   epoch++;
   pendingController?.abort();
   const before = performance.now();
@@ -28,6 +56,9 @@ document.querySelector('#reset')?.addEventListener('click', async () => {
     notice = 'New conversation';
   } catch (error) {
     statusText.textContent = String(error);
+  } finally {
+    resetting--;
+    epoch++;
   }
 });
 function prepareAudioOutput() {
@@ -180,7 +211,10 @@ function observeVideo(run) {
     video.requestVideoFrameCallback(next);
   });
 }
-document.querySelector('#stop').onclick = () => {
+document.querySelector('#stop').onclick = async () => {
+  stopping++;
+  start.disabled = true;
+  if (pairSelector) pairSelector.disabled = true;
   epoch++;
   pendingController?.abort();
   const before = performance.now();
@@ -191,16 +225,24 @@ document.querySelector('#stop').onclick = () => {
   observeSilence(run, before, beforeRms);
   statusText.textContent = 'Stopped; waiting for inference resources if needed';
   notice = statusText.textContent;
+  const cancellations = [];
   if (run && !run.ended)
-    post('/stop', { run: run.id, clientPauseMilliseconds: performance.now() - before }).catch(
-      (error) => {
-        statusText.textContent = String(error);
-      },
+    cancellations.push(
+      post('/stop', { run: run.id, clientPauseMilliseconds: performance.now() - before }).catch(
+        (error) => {
+          statusText.textContent = String(error);
+        },
+      ),
     );
   if (conversation && pendingRequest)
-    post('/cancel', { session: sessionIdentity, request: pendingRequest }).catch((error) => {
-      statusText.textContent = String(error);
-    });
+    cancellations.push(
+      post('/cancel', { session: sessionIdentity, request: pendingRequest }).catch((error) => {
+        statusText.textContent = String(error);
+      }),
+    );
+  await Promise.all(cancellations);
+  epoch++;
+  stopping--;
 };
 function waitEvent(target, event, signal) {
   return new Promise((resolve, reject) => {
@@ -270,6 +312,7 @@ start.onclick = async () => {
   const previous = release();
   if (previous && !previous.ended) await post('/stop', { run: previous.id }).catch(() => {});
   start.disabled = true;
+  if (pairSelector) pairSelector.disabled = true;
   play.hidden = true;
   try {
     await prepareAudioOutput().context.resume();
@@ -436,6 +479,27 @@ setInterval(async () => {
     const status = await (await fetch('/status', { signal: AbortSignal.timeout(10000) })).json();
     if (ticket !== epoch) return;
     if (conversation) {
+      document.querySelector('#pair-diagnostics').hidden = !status.diagnostics;
+      const pair = status.pairs.find((item) => item.id === status.activePair);
+      if (!pairSelector.options.length) {
+        for (const item of status.pairs) pairSelector.add(new Option(item.name, item.id));
+      }
+      if (!selecting) pairSelector.value = status.selectedPair;
+      pairSelector.disabled =
+        selecting ||
+        stopping ||
+        resetting ||
+        !status.pairSelectable ||
+        submitting ||
+        status.state !== 'idle' ||
+        !!(active && !active.ended);
+      document.querySelector('#pair-status').textContent =
+        status.state === 'selecting' || status.state === 'loading'
+          ? `Preparing ${status.pairs.find((item) => item.id === status.selectedPair)?.name}…`
+          : status.error || `Active: ${pair?.name || 'none'}${status.ready ? ' — Ready' : ''}`;
+      conversation.textContent = pair
+        ? `Active pair: ${pair.name}. Synthetic speech.`
+        : 'Preparing pair';
       if (sessionIdentity && status.session !== sessionIdentity) {
         epoch++;
         release();
@@ -467,6 +531,9 @@ setInterval(async () => {
     start.disabled =
       !(status.ready && status.state === 'idle') ||
       submitting ||
+      selecting ||
+      stopping ||
+      resetting ||
       !!(active && !active.ended) ||
       !!status.configurationError;
     if (!active)

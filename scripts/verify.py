@@ -25,6 +25,7 @@ def main() -> None:
         "scripts/streaming.js",
         "scripts/benchmark.cjs",
         "scripts/resilience.cjs",
+        "scripts/pair-assessment.cjs",
         "scripts/streaming.html",
         "scripts/conversation.html",
         "playwright.config.cjs",
@@ -40,6 +41,7 @@ def main() -> None:
     run(["node", "--check", "scripts/streaming.js"], 120)
     run(["node", "--check", "scripts/benchmark.cjs"], 120)
     run(["node", "--check", "scripts/resilience.cjs"], 120)
+    run(["node", "--check", "scripts/pair-assessment.cjs"], 120)
     run(["node", "--check", "tests/browser/conversation.spec.cjs"], 120)
     run(["node", "--check", "playwright.config.cjs"], 120)
     run([python, "-m", "bandit", "-q", "-c", "pyproject.toml", "-r", "scripts", "tests"], 120)
@@ -154,6 +156,8 @@ def main() -> None:
         "pyproject.toml",
         "runtime-lock.json",
         "speech-lock.json",
+        "hazel-lock.json",
+        "avatar-pairs.json",
         "package.json",
         "package-lock.json",
         "biome.json",
@@ -171,6 +175,12 @@ def main() -> None:
             "docs/runtime/rtx3090-phase5-baseline.json",
             "docs/runtime/rtx3090-phase5-recovery.json",
             "speech-lock.json",
+            "hazel-lock.json",
+            "avatar-pairs.json",
+            "docs/runtime/rtx3090-phase6-fixture.json",
+            "docs/runtime/rtx3090-phase6-real.json",
+            "docs/runtime/rtx3090-phase6-stop.json",
+            "docs/runtime/phase6-clean-startup.json",
         )
     }
     public_metadata = re.compile(
@@ -192,7 +202,14 @@ def main() -> None:
                         public_metadata.fullmatch(evidence_lines[finding["line_number"] - 1])
                         or (
                             evidence_path.name
-                            in ("rtx3090-phase5-baseline.json", "rtx3090-phase5-recovery.json")
+                            in (
+                                "rtx3090-phase5-baseline.json",
+                                "rtx3090-phase5-recovery.json",
+                                "rtx3090-phase6-fixture.json",
+                                "rtx3090-phase6-real.json",
+                                "rtx3090-phase6-stop.json",
+                                "phase6-clean-startup.json",
+                            )
                             and source_pin.fullmatch(evidence_lines[finding["line_number"] - 1])
                         )
                     )

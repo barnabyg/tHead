@@ -29,7 +29,24 @@ pre {
 }
 </style>
 <h1>tHead conversation</h1>
-<p id="conversation">Local synthetic Zira voice and fixed JFK avatar. Ask a question.</p>
+<p id="conversation">Loading the configured portrait and local English voice.</p>
+<label for="pair">Avatar and voice</label>
+<select id="pair" disabled></select>
+<p id="pair-status" aria-live="polite">Preparing pair</p>
+<div id="pair-diagnostics" hidden>
+  <label for="pair-fault">Pair diagnostic</label>
+  <select id="pair-fault">
+    <option value="">None</option>
+    <option value="pair-delay">Delay preparation</option>
+    <option value="pair-portrait-missing">Missing portrait</option>
+    <option value="pair-portrait-unreadable">Unreadable portrait</option>
+    <option value="pair-portrait-invalid">Invalid portrait</option>
+    <option value="pair-voice-missing">Unavailable Desktop voice</option>
+    <option value="pair-voice-invalid">Invalid voice assets</option>
+    <option value="pair-prepare">Fail after partial preparation</option>
+    <option value="pair-delay-fail">Delay then fail preparation</option>
+  </select>
+</div>
 <pre id="transcript" aria-live="polite"></pre>
 <p id="usage"></p>
 <label for="text">Question</label>
