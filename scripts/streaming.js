@@ -5,6 +5,8 @@ const statusText = document.querySelector('#status');
 const report = document.querySelector('#report');
 let active = null;
 let epoch = 0;
+let submitting = false;
+let notice = '';
 let audioOutput = null;
 function prepareAudioOutput() {
   if (!audioOutput) {
@@ -33,6 +35,7 @@ function observeSilence(run, actionTime, beforeRms) {
     consecutive = 0;
   const sample = () => {
     const elapsed = performance.now() - actionTime;
+    if (active && active !== run) return;
     const rms = outputRms();
     if (rms !== null && rms < threshold) {
       if (firstSilent === null) firstSilent = elapsed;
@@ -82,7 +85,7 @@ async function post(path, data) {
 }
 function telemetry(event, extra = {}) {
   const run = active;
-  if (!run) return;
+  if (!run || run.ended) return;
   const buffered = video.buffered.length
     ? video.buffered.end(video.buffered.length - 1) - video.currentTime
     : 0;
@@ -116,6 +119,19 @@ for (const event of ['playing', 'waiting', 'stalled', 'ended', 'error']) {
 setInterval(() => {
   if (!video.ended) telemetry('occupancy');
 }, 500);
+setInterval(() => {
+  const run = active;
+  if (!run || run.audible || video.paused || video.ended) return;
+  const rms = outputRms();
+  if (rms !== null && rms >= 0.00001) {
+    run.audible = true;
+    telemetry('digital-audio-onset', {
+      rms,
+      measurement: 'browser-audio-graph',
+      sampleIntervalMilliseconds: 25,
+    });
+  }
+}, 25);
 function release() {
   const run = active;
   active = null;
@@ -136,6 +152,7 @@ document.querySelector('#stop').onclick = () => {
   release();
   observeSilence(run, before, beforeRms);
   statusText.textContent = 'Stopped; waiting for inference resources if needed';
+  notice = statusText.textContent;
   if (run)
     post('/stop', { run: run.id, clientPauseMilliseconds: performance.now() - before }).catch(
       (error) => {
@@ -196,6 +213,9 @@ async function feed(run, clip, delayed) {
   }
 }
 start.onclick = async () => {
+  if (submitting) return;
+  submitting = true;
+  notice = '';
   const ticket = ++epoch;
   const previous = release();
   if (previous && !previous.ended) await post('/stop', { run: previous.id }).catch(() => {});
@@ -203,14 +223,22 @@ start.onclick = async () => {
   play.hidden = true;
   try {
     await prepareAudioOutput().context.resume();
+    if (ticket !== epoch) return;
     const clip = document.querySelector('#clip').value;
     const mode = document.querySelector('#mode').value;
-    const run = await post('/start', { clip, progressive: mode !== 'complete' });
+    const run =
+      clip === 'text'
+        ? await post('/speak', {
+            text: document.querySelector('#text').value,
+            fault: document.querySelector('#fault').value,
+          })
+        : await post('/start', { clip, progressive: mode !== 'complete' });
     if (ticket !== epoch) {
       await post('/stop', { run: run.id });
       return;
     }
     active = run;
+    statusText.textContent = clip === 'text' ? 'Preparing local speech and avatar' : 'Generating';
     run.controller = new AbortController();
     const media = new MediaSource();
     run.url = URL.createObjectURL(media);
@@ -220,14 +248,15 @@ start.onclick = async () => {
     if (!MediaSource.isTypeSupported(codec))
       throw Error('This browser lacks H.264/AAC MediaSource support');
     const buffer = media.addSourceBuffer(codec);
-    const minimumBuffer = clip === 'short' ? 0.35 : mode === 'complete' ? 0.64 : 1.28;
+    const minimumBuffer =
+      clip === 'text' ? 1.28 : clip === 'short' ? 0.35 : mode === 'complete' ? 0.64 : 1.28;
     telemetry('client-settings', {
       userAgent: navigator.userAgent,
       mode,
       clip,
       initialBufferSeconds: minimumBuffer,
     });
-    if (mode !== 'complete')
+    if (clip !== 'text' && mode !== 'complete')
       feed(run, clip, mode === 'delayed').catch((error) => {
         if (active !== run) return;
         statusText.textContent = String(error);
@@ -257,14 +286,33 @@ start.onclick = async () => {
       if (response.status === 204) {
         media.endOfStream();
         telemetry('end-of-stream');
+        if (!requested && video.buffered.length) {
+          requested = true;
+          telemetry('play-request', { finalPartial: true });
+          video.requestVideoFrameCallback(() => {
+            if (active === run) telemetry('first-frame-presented');
+          });
+          video.play().catch(() => {
+            if (active === run) play.hidden = false;
+          });
+        }
         break;
       }
-      if (!response.ok) throw Error('Generation failed or run expired; see report');
+      if (!response.ok) {
+        const status = await (await fetch('/status')).json();
+        if (active !== run) return;
+        throw Error(
+          status.run?.id === run.id && status.run.error
+            ? status.run.error
+            : 'Generation failed or run expired; see report',
+        );
+      }
       const data = await response.arrayBuffer();
       if (active !== run) return;
       await append(buffer, data, run.controller.signal);
       if (active !== run) return;
       telemetry('appended', { index });
+      if (!requested && video.buffered.length) statusText.textContent = 'Buffering';
       index++;
       if (!requested && video.buffered.length && video.buffered.end(0) >= minimumBuffer) {
         requested = true;
@@ -288,10 +336,13 @@ start.onclick = async () => {
   } catch (error) {
     if (ticket !== epoch) return;
     statusText.textContent = String(error);
+    notice = String(error);
     telemetry('client-failure', { message: String(error) });
     video.pause();
     if (active) await post('/stop', { run: active.id }).catch(() => {});
     release();
+  } finally {
+    submitting = false;
   }
 };
 play.onclick = () => {
@@ -307,8 +358,13 @@ play.onclick = () => {
 setInterval(async () => {
   try {
     const status = await (await fetch('/status')).json();
-    start.disabled = !(status.ready && status.state === 'idle');
-    if (!active) statusText.textContent = status.error || `Model: ${status.state}`;
+    document.querySelector('#clip option[value="text"]').disabled = !status.speechEnabled;
+    document.querySelector('#diagnostics').hidden = !status.diagnostics;
+    if (!status.speechEnabled && document.querySelector('#clip').value === 'text')
+      document.querySelector('#clip').value = 'six';
+    start.disabled =
+      !(status.ready && status.state === 'idle') || submitting || !!(active && !active.ended);
+    if (!active) statusText.textContent = status.error || notice || `Model: ${status.state}`;
     report.textContent = JSON.stringify(status, null, 2);
   } catch (error) {
     statusText.textContent = String(error);
