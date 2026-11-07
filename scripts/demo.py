@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import ssl
 import sys
 import time
 import traceback
@@ -23,8 +24,12 @@ def acquire(url: str, path: Path, expected_hash: str) -> None:
         deadline = time.monotonic() + 600
         partial = path.with_suffix(path.suffix + ".partial")
         request = urllib.request.Request(url, headers={"User-Agent": "tHead-demo/0.1"})
+        # Preparation installs this hash-locked CA bundle before media acquisition.
+        # Avoid expired host trust-store roots without disabling TLS verification.
+        ca_bundle = RUNTIME / "download-venv/Lib/site-packages/certifi/cacert.pem"
+        context = ssl.create_default_context(cafile=str(ca_bundle))
         # URLs are fixed in demo-lock.json, not supplied by a remote caller.
-        with urllib.request.urlopen(request, timeout=180) as response:  # nosec B310
+        with urllib.request.urlopen(request, context=context, timeout=180) as response:  # nosec B310
             with partial.open("wb") as output:
                 while block := response.read(1024 * 1024):
                     if time.monotonic() > deadline:
