@@ -9,6 +9,11 @@ From `C:/docs/git/tHead`, in PowerShell 7:
 pwsh -NoProfile -File ./scripts/conversation.ps1
 ```
 
+Alternatively, double-click `run.bat` in the repository root or run `./run.bat`
+from PowerShell 7. It starts the same application, locates the project folder
+automatically and accepts the same options. For first use, run
+`./run.bat -InitializeBudget`; subsequent launches use `./run.bat`.
+
 Prerequisites: Windows 11, RTX 3090 with the pinned native CUDA driver/runtime,
 Python 3.12, uv 0.11.7, Git, PowerShell 7, Microsoft Zira Desktop English voice
 and the installed assets in `speech-lock.json`. Use an H.264/AAC MediaSource

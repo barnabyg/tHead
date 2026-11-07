@@ -1,5 +1,12 @@
 # tHead
 
+To start the conversational app, double-click `run.bat` in this folder, or run
+`.\run.bat` from PowerShell 7. See the
+[conversation guide](docs/runtime/windows-conversation.md) for prerequisites and
+backend API key setup. On first use only, run `.\run.bat -InitializeBudget`.
+The launcher accepts the same options as `scripts/conversation.ps1`, for example
+`.\run.bat -Pair hopper-hazel`, and keeps errors visible if startup fails.
+
 Native Windows talking-head feasibility work. Generate and play a six-second
 English clip using the [talking-head demonstration](docs/runtime/windows-demo.md)
 for [issue #3](https://github.com/barnabyg/tHead/issues/3):
