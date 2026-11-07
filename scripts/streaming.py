@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import hashlib
 import importlib
 import json
@@ -13,6 +14,7 @@ import time
 import uuid
 import wave
 from collections import deque
+from collections.abc import Iterator
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
@@ -38,6 +40,13 @@ class Session:
         self.played = 0.0
         self.error = ""
         self.diagnostic_failure = False
+        self.progressive = False
+        self.clip = "six"
+        self.input: deque[bytes] = deque()
+        self.input_index = 0
+        self.input_samples = 0
+        self.input_final = False
+        self.input_digest = hashlib.sha256()
         self.events: list[dict[str, Any]] = []
         self.event("accepted")
 
@@ -59,9 +68,10 @@ class Session:
             }
 
     def save(self) -> None:
-        (self.directory / "result.json").write_text(
-            json.dumps(self.snapshot(), indent=2) + "\n", encoding="utf-8"
-        )
+        with self.condition:
+            temporary = self.directory / "result.tmp"
+            temporary.write_text(json.dumps(self.snapshot(), indent=2) + "\n", encoding="utf-8")
+            temporary.replace(self.directory / "result.json")
 
     def output(self, data: bytes) -> None:
         with self.condition:
@@ -83,6 +93,61 @@ class Session:
             )
             self.parts += 1
             self.condition.notify_all()
+
+    def receive(self, index: int, chunk: bytes, final: bool) -> None:
+        with self.condition:
+            if not self.progressive or self.cancelled.is_set() or self.input_final:
+                raise ValueError("Run no longer accepts audio")
+            if index != self.input_index:
+                raise ValueError("Expected the next ordered input index")
+            if len(self.input) >= 2:
+                raise BlockingIOError("Input queue full")
+            if (
+                len(chunk) % 2
+                or len(chunk) > SAMPLES * 2
+                or (not final and len(chunk) != SAMPLES * 2)
+                or self.input_samples + len(chunk) // 2 > 30 * 16000
+                or (not chunk and not self.input_samples)
+            ):
+                raise ValueError("Expected ordered PCM16 chunks, at most 30 seconds")
+            self.input.append(chunk)
+            self.input_index += 1
+            self.input_samples += len(chunk) // 2
+            self.input_digest.update(chunk)
+            self.input_final = final
+            self.event(
+                "audio-arrived",
+                index=index,
+                samples=len(chunk) // 2,
+                received_samples=self.input_samples,
+                final=final,
+                queued=len(self.input),
+            )
+            self.condition.notify_all()
+            if final:
+                self.event(
+                    "input-complete",
+                    samples=self.input_samples,
+                    sha256=self.input_digest.hexdigest(),
+                )
+
+    def chunks(self) -> Iterator[bytes]:
+        while not self.cancelled.is_set():
+            with self.condition:
+                if not self.input and not self.input_final:
+                    self.event("input-underrun")
+                    deadline = time.monotonic() + 120
+                    while not self.input and not self.input_final and not self.cancelled.is_set():
+                        if time.monotonic() > deadline:
+                            raise TimeoutError("No audio arrived for two minutes")
+                        self.condition.wait(0.2)
+                    self.event("input-resumed")
+                if self.cancelled.is_set() or (not self.input and self.input_final):
+                    return
+                chunk = self.input.popleft()
+                self.condition.notify_all()
+            if chunk:
+                yield chunk
 
 
 class Demonstration:
@@ -114,12 +179,18 @@ class Demonstration:
                 "run": self.current.snapshot() if self.current else None,
             }
 
-    def start(self, diagnostic_failure: bool = False) -> Session:
+    def start(
+        self, diagnostic_failure: bool = False, progressive: bool = False, clip: str = "six"
+    ) -> Session:
         with self.condition:
             if not self.ready or self.state != "idle":
                 raise ValueError("Wait until the model is ready and idle")
+            if clip not in ("six", "long", "short"):
+                raise ValueError("Unknown declared audio clip")
             self.current = Session(self.directory)
             self.current.diagnostic_failure = diagnostic_failure and self.test_backend
+            self.current.progressive = progressive
+            self.current.clip = clip
             self.state = "generating"
             self.condition.notify_all()
             return self.current
@@ -134,6 +205,7 @@ class Demonstration:
                     session.event("stop-handled")
                     session.cancelled.set()
                     session.state = "stopped"
+                    session.input.clear()
                     session.condition.notify_all()
                     session.save()
             return session
@@ -153,8 +225,10 @@ class Demonstration:
                         session = self.current
                     assert session is not None  # nosec B101
                     session.event("diagnostic-delay")
-                    time.sleep(0.3)  # Simulated non-preemptible external inference.
-                    session.output(b"CPU diagnostic result; not playable media")
+                    chunks = session.chunks() if session.progressive else iter([b"diagnostic"])
+                    for _ in chunks:
+                        time.sleep(0.3)  # Simulated non-preemptible external inference.
+                        session.output(b"CPU diagnostic result; not playable media")
                     if session.cancelled.is_set():
                         session.event("generation-abandoned")
                     elif session.diagnostic_failure:
@@ -173,10 +247,9 @@ class Demonstration:
                     2,
                 ):
                     raise ValueError("Expected mono 16 kHz PCM16 audio")
-                pcm = audio.readframes(audio.getnframes())
-            if not 0 < len(pcm) <= 30 * 32000:
+                samples = audio.getnframes()
+            if not 0 < samples <= 30 * 16000:
                 raise ValueError("Expected speech lasting at most 30 seconds")
-            self.loading["input_sha256"] = hashlib.sha256(pcm).hexdigest()
             pipeline, inference, torch = load_pipeline(
                 RUNTIME / "models", RUNTIME / "FlashHead", self.loading
             )
@@ -184,6 +257,9 @@ class Demonstration:
             with self.condition:
                 self.ready = True
                 self.state = "idle"
+                (self.directory / "readiness.json").write_text(
+                    json.dumps(self.status(), indent=2) + "\n", encoding="utf-8"
+                )
                 self.condition.notify_all()
             while not self.shutdown.is_set():
                 with self.condition:
@@ -194,7 +270,7 @@ class Demonstration:
                         return
                     session = self.current
                 assert session is not None  # nosec B101
-                self.generate(session, pcm, pipeline, inference, torch, np)
+                self.generate(session, pipeline, inference, torch, np)
                 with self.condition:
                     self.state = "idle"
                     self.condition.notify_all()
@@ -207,12 +283,14 @@ class Demonstration:
             )
 
     def generate(
-        self, session: Session, pcm: bytes, pipeline: Any, inference: Any, torch: Any, np: Any
+        self, session: Session, pipeline: Any, inference: Any, torch: Any, np: Any
     ) -> None:
         mux = None
         try:
+            if session.cancelled.is_set():
+                return
             session.state = "generating"
-            session.event("generation-start", duration=len(pcm) / 32000)
+            session.event("generation-start", progressive=session.progressive, clip=session.clip)
             torch.cuda.reset_peak_memory_stats()
             inference.get_base_data(pipeline, str(self.inputs / "portrait.jpg"), 42, False)
             params = inference.get_infer_params()
@@ -230,10 +308,26 @@ class Demonstration:
             ffmpeg = RUNTIME / "media" / lock["media"]["directory"] / "bin/ffmpeg.exe"
             mux = Mux(ffmpeg, session.output, session.directory / "ffmpeg.log")
             history: deque[float] = deque([0.0] * 128000, maxlen=128000)
-            for index, offset in enumerate(range(0, len(pcm), SAMPLES * 2)):
+            if session.progressive:
+                chunks = session.chunks()
+            else:
+                pcm = self.audio(session.clip)
+                session.event(
+                    "complete-input",
+                    duration=len(pcm) / 32000,
+                    sha256=hashlib.sha256(pcm).hexdigest(),
+                )
+                chunks = (pcm[i : i + SAMPLES * 2] for i in range(0, len(pcm), SAMPLES * 2))
+            sample_count = 0
+            for index, chunk in enumerate(chunks):
                 if session.cancelled.is_set():
                     return
-                chunk = pcm[offset : offset + SAMPLES * 2]
+                session.event(
+                    "chunk-generation-start",
+                    index=index,
+                    received_samples=session.input_samples if session.progressive else None,
+                )
+                sample_count += len(chunk) // 2
                 speech = np.frombuffer(chunk, dtype="<i2").astype(np.float32) / 32768.0
                 history.extend(np.pad(speech, (0, SAMPLES - len(speech))).tolist())
                 begun = time.perf_counter()
@@ -250,9 +344,12 @@ class Demonstration:
                     generation_seconds=time.perf_counter() - begun,
                 )
                 mux.write(frames[:count].tobytes(), chunk)
+            if session.cancelled.is_set():
+                return
             torch.cuda.synchronize()
             session.event(
                 "render-complete",
+                samples=sample_count,
                 allocated_bytes=torch.cuda.memory_allocated(),
                 peak_allocated_bytes=torch.cuda.max_memory_allocated(),
                 reserved_bytes=torch.cuda.memory_reserved(),
@@ -272,6 +369,18 @@ class Demonstration:
             if session.cancelled.is_set():
                 session.event("generation-abandoned")
             session.save()
+
+    def audio(self, clip: str) -> bytes:
+        if clip not in ("six", "long", "short"):
+            raise ValueError("Unknown declared audio clip")
+        path = self.inputs / ("english-long.wav" if clip == "long" else "english.wav")
+        with wave.open(str(path), "rb") as audio:
+            if (audio.getframerate(), audio.getnchannels(), audio.getsampwidth()) != (16000, 1, 2):
+                raise ValueError("Expected mono 16 kHz PCM16 audio")
+            count = 5600 if clip == "short" else audio.getnframes()
+            if not 0 < count <= 30 * 16000:
+                raise ValueError("Expected at most 30 seconds")
+            return audio.readframes(count)
 
 
 def handler(demo: Demonstration) -> type[BaseHTTPRequestHandler]:
@@ -297,6 +406,13 @@ def handler(demo: Demonstration) -> type[BaseHTTPRequestHandler]:
                 self.reply(200, (ROOT / "scripts/streaming.html").read_bytes(), "text/html")
             elif parsed.path == "/status":
                 self.reply(200, json.dumps(demo.status()).encode())
+            elif parsed.path == "/audio":
+                try:
+                    self.reply(
+                        200, demo.audio(query.get("clip", ["six"])[0]), "application/octet-stream"
+                    )
+                except (ValueError, OSError) as error:
+                    self.reply(400, json.dumps({"error": str(error)}).encode())
             elif parsed.path == "/segment":
                 session = demo.current
                 if not session or query.get("run") != [session.id] or session.cancelled.is_set():
@@ -327,7 +443,21 @@ def handler(demo: Demonstration) -> type[BaseHTTPRequestHandler]:
                     raise ValueError("Request too large")
                 data = json.loads(self.rfile.read(size) or b"{}")
                 if self.path == "/start":
-                    result = demo.start(bool(data.get("diagnosticFailure"))).snapshot()
+                    result = demo.start(
+                        bool(data.get("diagnosticFailure")),
+                        bool(data.get("progressive")),
+                        str(data.get("clip", "six")),
+                    ).snapshot()
+                elif self.path == "/input":
+                    session = demo.current
+                    if not session or data.get("run") != session.id:
+                        raise ValueError("Stale run")
+                    session.receive(
+                        int(data["index"]),
+                        base64.b64decode(data["pcm"], validate=True),
+                        bool(data.get("final")),
+                    )
+                    result = {"ok": True}
                 elif self.path == "/stop":
                     stopped = demo.stop(str(data.get("run", "")))
                     stopped.event("client-paused", milliseconds=data.get("clientPauseMilliseconds"))
@@ -349,7 +479,9 @@ def handler(demo: Demonstration) -> type[BaseHTTPRequestHandler]:
                     self.reply(404, b"{}")
                     return
                 self.reply(200, json.dumps(result).encode())
-            except (ValueError, TypeError) as error:
+            except BlockingIOError as error:
+                self.reply(429, json.dumps({"error": str(error)}).encode())
+            except (ValueError, TypeError, KeyError) as error:
                 self.reply(409, json.dumps({"error": str(error)}).encode())
 
     return Handler

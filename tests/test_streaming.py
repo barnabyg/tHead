@@ -1,5 +1,6 @@
 """Exercise streaming sessions through the local HTTP demonstration boundary."""
 
+import base64
 import json
 import subprocess  # nosec B404
 import sys
@@ -51,6 +52,25 @@ class StreamingTests(unittest.TestCase):
                     self.fail("GPU owner did not become available")
 
                 idle()
+                progressive = request("/start", {"progressive": True})
+                time.sleep(0.4)
+                awaiting = request("/status")["run"]
+                assert isinstance(awaiting, dict)  # nosec B101
+                self.assertEqual(awaiting["parts"], 0)
+                request(
+                    "/input",
+                    {
+                        "run": progressive["id"],
+                        "index": 0,
+                        "pcm": base64.b64encode(b"\x01\x00" * 800).decode(),
+                        "final": True,
+                    },
+                )
+                idle()
+                with self.assertRaises(urllib.error.HTTPError):
+                    request(
+                        "/input", {"run": progressive["id"], "index": 1, "pcm": "", "final": True}
+                    )
                 abandoned = request("/start", {})
                 request("/stop", {"run": abandoned["id"]})
                 request("/stop", {"run": abandoned["id"]})

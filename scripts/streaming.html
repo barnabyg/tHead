@@ -10,6 +10,8 @@ pre {white-space: pre-wrap; max-height: 22rem; overflow: auto}
 <h1>tHead streaming experiment</h1>
 <p>Synthetic animation of JFK from prerecorded public-domain English speech.</p>
 <p id="status">Loading the native Windows model…</p>
+<label>Speech <select id="clip"><option value="six">6 seconds</option><option value="long">20 seconds</option><option value="short">0.35 seconds</option></select></label>
+<label>Input <select id="mode"><option value="complete">Complete recording</option><option value="progressive">Arriving every 0.96 s</option><option value="delayed">Arriving with a 3 s pause</option></select></label>
 <button id="start" disabled>Start</button>
 <button id="stop">Stop</button>
 <button id="play" hidden>Play audio/video</button>
@@ -28,7 +30,7 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 async function post(path, data) {
   const response = await fetch(path, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)});
   const result = await response.json();
-  if (!response.ok) throw Error(result.error || response.status);
+  if (!response.ok) {const error = Error(result.error || response.status); error.status = response.status; throw error;}
   return result;
 }
 function telemetry(event, extra = {}) {
@@ -92,6 +94,22 @@ async function append(buffer, data, signal) {
   buffer.appendBuffer(data);
   await updated;
 }
+async function feed(run, clip, delayed) {
+  const response = await fetch(`/audio?clip=${clip}`, {signal:run.controller.signal});
+  if (!response.ok) throw Error('Declared input unavailable; rerun preparation');
+  const pcm = new Uint8Array(await response.arrayBuffer());
+  for (let offset = 0, index = 0; offset < pcm.length; offset += 30720, index++) {
+    await sleep(Math.min(960, (pcm.length-offset)/32));
+    if (delayed && index === 2) await sleep(3000);
+    if (active !== run) return;
+    const chunk = pcm.slice(offset, offset + 30720);
+    const data = {run:run.id, index, pcm:btoa(String.fromCharCode(...chunk)), final:offset+chunk.length===pcm.length};
+    while (active === run) {
+      try {await post('/input', data); break;}
+      catch (error) {if (error.status !== 429) throw error; await sleep(50);}
+    }
+  }
+}
 start.onclick = async () => {
   const ticket = ++epoch;
   const previous = release();
@@ -99,7 +117,9 @@ start.onclick = async () => {
   start.disabled = true;
   play.hidden = true;
   try {
-    const run = await post('/start', {});
+    const clip = document.querySelector('#clip').value;
+    const mode = document.querySelector('#mode').value;
+    const run = await post('/start', {clip, progressive:mode !== 'complete'});
     if (ticket !== epoch) {await post('/stop', {run: run.id}); return;}
     active = run;
     run.controller = new AbortController();
@@ -110,6 +130,14 @@ start.onclick = async () => {
     const codec = 'video/mp4; codecs="avc1.42C01E, mp4a.40.2"';
     if (!MediaSource.isTypeSupported(codec)) throw Error('This browser lacks H.264/AAC MediaSource support');
     const buffer = media.addSourceBuffer(codec);
+    if (mode !== 'complete') feed(run, clip, mode === 'delayed').catch(error => {
+      if (active !== run) return;
+      statusText.textContent = String(error);
+      telemetry('input-failure', {message:String(error)});
+      epoch++;
+      release();
+      post('/stop', {run:run.id}).catch(() => {});
+    });
     let index = 0, requested = false;
     while (active === run) {
       if (video.buffered.length && video.buffered.end(video.buffered.length - 1) - video.currentTime > 2.88) {

@@ -40,6 +40,44 @@ produces no playable media; it cannot establish GPU or playback feasibility.
 Client pause-call duration is recorded separately from server abandonment;
 neither browser state nor telemetry measures the physical speaker's decay.
 
+## Progressively arriving speech
+
+Select Arriving every 0.96 s or Arriving with a 3 s pause, then Start. The browser
+acts as the prerecorded source: it sends ordered mono 16 kHz PCM16 messages to
+`/input`, at the selected arrival rate. The inference owner uses only received
+messages in this mode; it does not read the complete WAV. The source browser
+does have the complete recording, as a controlled arrival simulator. Two queued
+input chunks are allowed; HTTP 429 applies backpressure, and indices prevent
+duplication or reordering. Requests for abandoned runs are rejected.
+
+Generation starts after 15,360 samples (0.96 s) arrive, or after an explicitly
+final shorter message. Empty arrival queues wait for speech without inserting
+silence; no arrival for two minutes fails the run. End-of-input alone pads the
+final model window; only the actual PCM and corresponding video frames reach
+FFmpeg. The 0.35-second option exercises a single partial window; six seconds
+exercises a final 0.24-second window. The 20-second input is seconds 31–51 of the
+same pinned speech recording; the fixed portrait and model settings are unchanged.
+
+This is a practical **chunked adaptation**. An eight-second rolling window is
+re-encoded by wav2vec on each call; there is no preserved audio-encoder cache.
+The first window is zero-filled history, not eight seconds of received speech.
+Conditioning uses 33 frames and ±2 embedding frames, clamping the trailing indices
+to received context. Model motion latents (last nine frames), advancing RNG,
+portrait state and weights persist between chunks. The public portrait-preparation
+call resets motion and seed between runs. Overlapping window re-encoding may
+change boundary embeddings; motion persistence does not prove perceived continuity.
+
+The first playable fragment currently needs two generation calls / 1.92 seconds
+of arrived speech. In the measured delayed six-second run, generation started
+at 0.977 s with exactly 15,360 received samples. Playback began at 2.597 s while
+the third message was still unreceived. The deliberate three-second pause caused
+one observed stall (3.630–6.865 s); playback resumed and ended at 6.064 s media
+time. All 96,000 original samples were rendered, with no inserted underrun silence.
+Arrival timestamps and cumulative sample counts are recorded per message;
+`input-complete` records a PCM SHA-256 for comparing with the declared source.
+Use the same Stop/restart scenario in both arrival modes, including during the
+deliberate pause. A stall caused by absent input is expected and is reported.
+
 The server is loopback-only and intended for one local viewer. It expires after
 two hours; preparation has a separate five-hour limit. Do not expose it publicly.
 Use `-NoBrowser` to launch without opening another browser. Logs and per-run
