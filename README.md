@@ -25,7 +25,10 @@ pwsh -NoProfile -File ./scripts/smoke.ps1
 
 Read the prerequisites and measured result in the runtime guide first. Readiness
 means the real Lite, LTX VAE and audio encoder weights loaded on the RTX 3090.
-The demo adds video generation and playback; streaming remains subsequent work.
+The demo adds video generation and playback. See the
+[Windows reproducibility baseline](docs/runtime/windows-baseline.md) for clean-checkout
+preparation, repeated RTX 3090 measurements and the Phase 1 conclusion. Streaming
+remains subsequent work.
 
 For development, install uv 0.11.7 and run the canonical verification command:
 
