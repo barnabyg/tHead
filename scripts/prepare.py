@@ -8,6 +8,7 @@ import os
 # Bounded shell-free tooling; review B404 if commands become external.
 import subprocess  # nosec B404
 import sys
+import threading
 import time
 from pathlib import Path
 
@@ -15,13 +16,25 @@ ROOT = Path(__file__).resolve().parents[1]
 RUNTIME = ROOT / ".runtime"
 
 
-def run(command: list[str], timeout: int, cwd: Path = ROOT) -> None:
+def run(
+    command: list[str], timeout: int, cwd: Path = ROOT, cancelled: threading.Event | None = None
+) -> None:
     print(f"Running: {' '.join(command)}", flush=True)
     # Commands come only from this module or the checked-in verification runner.
     with subprocess.Popen(command, cwd=cwd) as process:  # nosec B603
+        code: int | None
         try:
-            code = process.wait(timeout=timeout)
-        except subprocess.TimeoutExpired:
+            if cancelled is None:
+                code = process.wait(timeout=timeout)
+            else:
+                deadline = time.monotonic() + timeout
+                while (code := process.poll()) is None:
+                    if cancelled.is_set():
+                        raise InterruptedError("Cancelled after another verification suite failed")
+                    if time.monotonic() > deadline:
+                        raise subprocess.TimeoutExpired(command, timeout)
+                    cancelled.wait(0.1)
+        except (subprocess.TimeoutExpired, InterruptedError, KeyboardInterrupt):
             if sys.platform == "win32":
                 # Fixed Windows tool and numeric PID; review if command/args become external.
                 subprocess.run(  # nosec B603 B607

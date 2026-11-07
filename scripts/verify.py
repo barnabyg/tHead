@@ -4,9 +4,12 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess  # nosec B404
 import sys
 import tempfile
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 from prepare import ROOT, run
@@ -17,14 +20,55 @@ from prepare import ROOT, run
 def main() -> None:
     python = sys.executable
     run([python, "-m", "ruff", "format", "--check", "scripts", "tests"], 120)
+    biome = str(ROOT / "node_modules/.bin/biome.cmd")
+    run([biome, "format", "scripts/streaming.js", "scripts/streaming.html"], 120)
     run([python, "-m", "ruff", "check", "scripts", "tests"], 120)
+    run(
+        [biome, "lint", "--error-on-warnings", "scripts/streaming.js", "scripts/streaming.html"],
+        120,
+    )
     run([python, "-m", "mypy"], 180)
+    run(["node", "--check", "scripts/streaming.js"], 120)
     run([python, "-m", "bandit", "-q", "-c", "pyproject.toml", "-r", "scripts", "tests"], 120)
-    tests = [python, "-W", "error", "-m", "unittest", "discover", "-s", "tests"]
-    if os.environ.get("CI"):
-        tests.append("--failfast")
-    run(tests, 180)
+    modules = sorted((ROOT / "tests").glob("test_*.py"))
+    # Independent command suites have separate temporary directories and ports.
+    # unittest has no parallel worker mode; run its modules concurrently instead.
+    failures = []
+    cancelled = threading.Event() if os.environ.get("CI") else None
+    with ThreadPoolExecutor(max_workers=min(len(modules), os.cpu_count() or 1)) as pool:
+        pending = []
+        for module in modules:
+            tests = [
+                python,
+                "-W",
+                "error",
+                "-m",
+                "unittest",
+                "discover",
+                "-s",
+                "tests",
+                "-p",
+                module.name,
+            ]
+            if os.environ.get("CI"):
+                tests.append("--failfast")
+            pending.append(pool.submit(run, tests, 180, cancelled=cancelled))
+        for future in as_completed(pending):
+            try:
+                future.result()
+            except Exception as error:
+                failures.append(error)
+                if os.environ.get("CI"):
+                    assert cancelled is not None  # nosec B101
+                    cancelled.set()
+                    for other in pending:
+                        other.cancel()
+                    raise
+    if failures:
+        raise RuntimeError(f"{len(failures)} test suites failed") from failures[0]
     run(["uv", "lock", "--check"], 180)
+    run(["npm.cmd", "ls", "--depth=0"], 180)
+    run(["npm.cmd", "audit", "--audit-level=low"], 600)
     run([python, "-m", "pip_audit", "--progress-spinner", "off"], 600)
     # PyPI advisories identify the base PyTorch release, not its official CUDA local suffix.
     requirements = (ROOT / "requirements-runtime.lock").read_text(encoding="utf-8")
@@ -87,9 +131,33 @@ def main() -> None:
         ".github",
         "pyproject.toml",
         "runtime-lock.json",
+        "package.json",
+        "package-lock.json",
+        "biome.json",
     ]
     secrets = subprocess.check_output(command, cwd=ROOT, text=True, timeout=180)  # nosec B603
-    if json.loads(secrets)["results"]:
+    findings = json.loads(secrets)["results"]
+    # Public run UUIDs / fixture PCM digests in this one generated evidence file.
+    # Do not suppress other fields or detector types; review if its schema changes.
+    evidence_path = ROOT / "docs/runtime/rtx3090-streaming.json"
+    evidence_lines = evidence_path.read_text(encoding="utf-8").splitlines()
+    public_metadata = re.compile(
+        r'\s*"(?:id)": "[0-9a-f]{32}",?\s*'
+        r'|\s*"(?:sha256|declared_pcm_sha256)": "[0-9a-f]{64}",?\s*'
+    )
+    for filename in list(findings):
+        if (ROOT / filename).resolve() == evidence_path.resolve():
+            findings[filename] = [
+                finding
+                for finding in findings[filename]
+                if not (
+                    finding["type"] == "Hex High Entropy String"
+                    and public_metadata.fullmatch(evidence_lines[finding["line_number"] - 1])
+                )
+            ]
+            if not findings[filename]:
+                del findings[filename]
+    if findings:
         raise RuntimeError(f"Potential secrets found: {secrets}")
     # This repository delivers scripts, not a distributable Python package.
     for directory in ("scripts", "tests"):

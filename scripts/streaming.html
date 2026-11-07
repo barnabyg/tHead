@@ -1,0 +1,56 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>tHead streaming experiment</title>
+<style>
+body {
+  font: 16px system-ui;
+  max-width: 1000px;
+  margin: 2rem auto;
+  background: #151923;
+  color: #eee;
+}
+button,
+select {
+  font: inherit;
+  padding: 0.6rem;
+  margin-right: 0.6rem;
+}
+video {
+  display: block;
+  width: 512px;
+  max-width: 100%;
+  background: black;
+  margin: 1rem 0;
+}
+pre {
+  white-space: pre-wrap;
+  max-height: 22rem;
+  overflow: auto;
+}
+</style>
+<h1>tHead streaming experiment</h1>
+<p>Synthetic animation of JFK from prerecorded public-domain English speech.</p>
+<p id="status">Loading the native Windows model…</p>
+<label
+  >Speech
+  <select id="clip">
+    <option value="six">6 seconds</option>
+    <option value="long">20 seconds</option>
+    <option value="short">0.35 seconds</option>
+  </select></label
+>
+<label
+  >Input
+  <select id="mode">
+    <option value="complete">Complete recording</option>
+    <option value="progressive">Arriving every 0.96 s</option>
+    <option value="delayed">Arriving with a 3 s pause</option>
+  </select></label
+>
+<button type="button" id="start" disabled>Start</button>
+<button type="button" id="stop">Stop</button>
+<button type="button" id="play" hidden>Play audio/video</button>
+<!-- biome-ignore lint/a11y/useMediaCaption: Lip-sync fixture has no verified transcript; remove when captions cover all declared clips. -->
+<video id="video" playsinline></video>
+<pre id="report"></pre>
+<script src="/player.js"></script>
