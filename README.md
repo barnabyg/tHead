@@ -62,6 +62,11 @@ First use adds `-InitializeBudget`; normal restarts preserve the existing ledger
 See the guide for prerequisites, no-cost fixtures and manual scenarios, and the
 [Phase 4 assessment](docs/runtime/phase-4-assessment.md) for measured results and limits.
 
+The [Phase 5 handoff](docs/runtime/phase-5-assessment.md) adds the ten-turn real-provider
+RTX 3090 latency distribution, bounded browser-session and native recovery evidence,
+the hardware decision and clean-checkout startup. Digital timings are distinguished
+from physical-speaker and perceptual validation.
+
 For development, install uv 0.11.7 and Node.js 24.14.1, then prepare the pinned
 browser-check tooling once:
 
