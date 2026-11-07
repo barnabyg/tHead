@@ -11,6 +11,7 @@ pre {white-space: pre-wrap; max-height: 22rem; overflow: auto}
 <p>Synthetic animation of JFK from prerecorded public-domain English speech.</p>
 <p id="status">Loading the native Windows model…</p>
 <button id="start" disabled>Start</button>
+<button id="stop">Stop</button>
 <button id="play" hidden>Play audio/video</button>
 <video id="video" playsinline></video>
 <pre id="report"></pre>
@@ -22,6 +23,7 @@ const play = document.querySelector('#play');
 const statusText = document.querySelector('#status');
 const report = document.querySelector('#report');
 let active = null;
+let epoch = 0;
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 async function post(path, data) {
   const response = await fetch(path, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)});
@@ -38,28 +40,73 @@ function telemetry(event, extra = {}) {
 for (const event of ['playing', 'waiting', 'stalled', 'ended', 'error']) {
   video.addEventListener(event, () => {
     telemetry(event, {mediaError: video.error?.message});
+    if (event === 'playing') statusText.textContent = 'Playing';
+    if (event === 'waiting' && active) statusText.textContent = 'Buffering';
     if (event === 'ended') statusText.textContent = 'Playback ended';
     if (event === 'error') statusText.textContent = 'Playback failed: ' + video.error?.message;
+    if (event === 'error' && active) {
+      const run = release();
+      epoch++;
+      post('/stop', {run: run.id}).catch(() => {});
+    }
   });
 }
-setInterval(() => telemetry('occupancy'), 500);
-async function append(buffer, data) {
-  await new Promise((resolve, reject) => {
-    buffer.addEventListener('updateend', resolve, {once: true});
-    buffer.addEventListener('error', reject, {once: true});
-    buffer.appendBuffer(data);
+setInterval(() => {if (!video.ended) telemetry('occupancy');}, 500);
+function release() {
+  const run = active;
+  active = null;
+  run?.controller?.abort();
+  video.pause();
+  video.removeAttribute('src');
+  video.load();
+  if (run?.url) URL.revokeObjectURL(run.url);
+  play.hidden = true;
+  return run;
+}
+document.querySelector('#stop').onclick = () => {
+  epoch++;
+  const before = performance.now();
+  const run = active;
+  telemetry('stop-action');
+  release();
+  statusText.textContent = 'Stopped; waiting for inference resources if needed';
+  if (run) post('/stop', {run: run.id, clientPauseMilliseconds: performance.now() - before}).catch(error => {statusText.textContent = String(error);});
+};
+function waitEvent(target, event, signal) {
+  return new Promise((resolve, reject) => {
+    const cleanup = () => {
+      target.removeEventListener(event, success);
+      target.removeEventListener('error', failure);
+      signal.removeEventListener('abort', failure);
+    };
+    const success = () => {cleanup(); resolve();};
+    const failure = () => {cleanup(); reject(Error('Media operation aborted or failed'));};
+    target.addEventListener(event, success, {once:true});
+    target.addEventListener('error', failure, {once:true});
+    signal.addEventListener('abort', failure, {once:true});
+    if (signal.aborted) failure();
   });
+}
+async function append(buffer, data, signal) {
+  const updated = waitEvent(buffer, 'updateend', signal);
+  buffer.appendBuffer(data);
+  await updated;
 }
 start.onclick = async () => {
+  const ticket = ++epoch;
+  const previous = release();
+  if (previous) await post('/stop', {run: previous.id}).catch(() => {});
   start.disabled = true;
   play.hidden = true;
   try {
     const run = await post('/start', {});
+    if (ticket !== epoch) {await post('/stop', {run: run.id}); return;}
     active = run;
+    run.controller = new AbortController();
     const media = new MediaSource();
     run.url = URL.createObjectURL(media);
     video.src = run.url;
-    await new Promise(resolve => media.addEventListener('sourceopen', resolve, {once: true}));
+    await waitEvent(media, 'sourceopen', run.controller.signal);
     const codec = 'video/mp4; codecs="avc1.42C01E, mp4a.40.2"';
     if (!MediaSource.isTypeSupported(codec)) throw Error('This browser lacks H.264/AAC MediaSource support');
     const buffer = media.addSourceBuffer(codec);
@@ -68,30 +115,36 @@ start.onclick = async () => {
       if (video.buffered.length && video.buffered.end(video.buffered.length - 1) - video.currentTime > 2.88) {
         await sleep(100); continue;
       }
-      const response = await fetch(`/segment?run=${run.id}&index=${index}`);
+      const response = await fetch(`/segment?run=${run.id}&index=${index}`, {signal:run.controller.signal});
       if (active !== run) return;
       if (response.status === 202) { await sleep(50); continue; }
       if (response.status === 204) { media.endOfStream(); telemetry('end-of-stream'); break; }
       if (!response.ok) throw Error('Generation failed or run expired; see report');
       const data = await response.arrayBuffer();
       if (active !== run) return;
-      await append(buffer, data);
+      await append(buffer, data, run.controller.signal);
+      if (active !== run) return;
       telemetry('appended', {index});
       index++;
       if (!requested && video.buffered.length) {
         requested = true;
         telemetry('play-request');
         video.requestVideoFrameCallback(() => {if (active === run) telemetry('first-frame-presented');});
-        video.play().catch(() => {play.hidden = false; statusText.textContent = 'Click Play to allow browser audio';});
+        video.play().catch(() => {if (active === run) {play.hidden = false; statusText.textContent = 'Click Play to allow browser audio';}});
       }
       if (video.currentTime > 5 && !buffer.updating) {
-        await new Promise(resolve => {buffer.addEventListener('updateend', resolve, {once: true}); buffer.remove(0, video.currentTime - 2);});
+        const removed = waitEvent(buffer, 'updateend', run.controller.signal);
+        buffer.remove(0, video.currentTime - 2);
+        await removed;
       }
     }
   } catch (error) {
+    if (ticket !== epoch) return;
     statusText.textContent = String(error);
     telemetry('client-failure', {message: String(error)});
     video.pause();
+    if (active) await post('/stop', {run: active.id}).catch(() => {});
+    release();
   }
 };
 play.onclick = () => {video.play().then(() => {play.hidden = true;}).catch(error => {statusText.textContent = String(error);});};

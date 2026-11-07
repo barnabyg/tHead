@@ -21,6 +21,25 @@ lip synchronisation. Expect playback before generation finishes, an orderly end,
 and a second Start using the same loaded model. Reports appear below the player.
 The existing offline `scripts/demo.ps1` workflow is preserved.
 
+Stop pauses and detaches the browser media immediately, aborts pending fetches
+and appends, and revokes its object URL. The server invalidates the run ID before
+accepting more media or telemetry. Repeated Stop is harmless. Start becomes
+available after the current non-preemptible inference call returns and its
+FFmpeg process, sockets and bounded queues are released; weights stay loaded.
+Failure is shown in the report and leaves the owner available for another run.
+Test Stop before first playback, while buffering, and while speech is playing,
+then Start and verify that no old speech returns. Also click Stop twice.
+
+Real browser checks on 7 November stopped before first playback and during
+active playback. The first run was stopped at 0.300 s and released generation at
+0.486 s. The active run played at 1.794 s, received Stop at 1.918 s and produced no
+further media. CPU HTTP tests inject a non-preemptible delayed result and failure,
+verify HTTP 410 for stopped media and rejection of stale telemetry, and complete
+a replacement run. `--test-backend` is explicitly a CPU protocol diagnostic that
+produces no playable media; it cannot establish GPU or playback feasibility.
+Client pause-call duration is recorded separately from server abandonment;
+neither browser state nor telemetry measures the physical speaker's decay.
+
 The server is loopback-only and intended for one local viewer. It expires after
 two hours; preparation has a separate five-hour limit. Do not expose it publicly.
 Use `-NoBrowser` to launch without opening another browser. Logs and per-run
