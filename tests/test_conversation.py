@@ -79,6 +79,27 @@ class ConversationTests(unittest.TestCase):
         self.process.terminate()
         self.process.communicate(timeout=30)
 
+    def test_duplicate_listener_fails_without_serving_the_wrong_application(self) -> None:
+        identity = self.request("/status")["session"]
+        # Fixed local fixture, same port as this test's isolated server.
+        duplicate = subprocess.run(  # nosec B603
+            [
+                sys.executable,
+                str(ROOT / "scripts/conversation.py"),
+                "--test-backend",
+                "--port",
+                self.url.rsplit(":", 1)[1],
+                "--output",
+                self.temporary.name,
+            ],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        self.assertNotEqual(duplicate.returncode, 0)
+        self.assertNotIn("LISTEN", duplicate.stdout)
+        self.assertEqual(self.request("/status")["session"], identity)
+
     def request(self, path: str, data: dict[str, Any] | None = None) -> dict[str, Any]:
         body = json.dumps(data).encode() if data is not None else None
         # URL comes only from our loopback process.

@@ -22,6 +22,7 @@ def main() -> None:
     parser.add_argument("--fixture-provider", action="store_true")
     parser.add_argument("--initialize-budget", action="store_true")
     parser.add_argument("--budget")
+    parser.add_argument("--port", type=int, default=8765)
     parser.add_argument("--pair", default=os.environ.get("THEAD_PAIR", DEFAULT_PAIR))
     args = parser.parse_args()
     if args.conversation:
@@ -60,7 +61,7 @@ def main() -> None:
         180,
     )
     if not args.no_browser:
-        threading.Timer(2, lambda: webbrowser.open("http://127.0.0.1:8765")).start()
+        threading.Timer(2, lambda: webbrowser.open(f"http://127.0.0.1:{args.port}")).start()
     # The server shuts down after two hours. Allow five more minutes for imports,
     # request teardown and its 120-second worker join before killing the tree.
     run(
@@ -70,6 +71,8 @@ def main() -> None:
                 ROOT / ("scripts/conversation.py" if args.conversation else "scripts/streaming.py")
             ),
             *([] if args.conversation else ["--fragment-frames", str(args.fragment_frames)]),
+            "--port",
+            str(args.port),
             *(["--pair", args.pair] if args.conversation else []),
             *(["--fixture-provider"] if args.fixture_provider and args.conversation else []),
             *(["--initialize-budget"] if args.initialize_budget else []),

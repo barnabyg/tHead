@@ -9,7 +9,6 @@ import threading
 import time
 import uuid
 from collections.abc import Iterator
-from http.server import ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
 
@@ -18,7 +17,7 @@ from pairs import DEFAULT_PAIR, configured_pair, configured_pairs
 from prepare import RUNTIME
 from provider import INPUT_BOUND, INSTRUCTIONS, MODEL, OUTPUT_TOKENS, Provider
 from speech import Voice
-from streaming import Demonstration, Session, handler
+from streaming import Demonstration, LoopbackServer, Session, handler
 
 PAIR_FAULTS = {
     "pair-portrait-missing": "Portrait missing; rerun the preparation/launch command",
@@ -458,7 +457,7 @@ def main() -> None:
         args.initialize_budget,
         args.pair,
     )
-    server = ThreadingHTTPServer(("127.0.0.1", args.port), handler(app))
+    server = LoopbackServer(("127.0.0.1", args.port), handler(app))
     lifetime = threading.Timer(7200, server.shutdown)
     lifetime.daemon = True
     lifetime.start()

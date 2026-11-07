@@ -9,6 +9,7 @@ import importlib
 import json
 import math
 import platform
+import socket
 import threading
 import time
 import uuid
@@ -26,6 +27,16 @@ from speech import Voice, segments
 from stream_media import Mux
 
 SAMPLES = 15360
+
+
+class LoopbackServer(ThreadingHTTPServer):
+    # Windows SO_REUSEADDR permits two live listeners, routing to the wrong app.
+    allow_reuse_address = False
+
+    def server_bind(self) -> None:
+        if hasattr(socket, "SO_EXCLUSIVEADDRUSE"):
+            self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
+        super().server_bind()
 
 
 class Session:
@@ -761,7 +772,7 @@ def main() -> None:
         args.speech,
         args.diagnostics,
     )
-    server = ThreadingHTTPServer(("127.0.0.1", args.port), handler(demo))
+    server = LoopbackServer(("127.0.0.1", args.port), handler(demo))
     lifetime = threading.Timer(7200, server.shutdown)
     lifetime.daemon = True
     lifetime.start()

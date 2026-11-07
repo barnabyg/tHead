@@ -17,6 +17,10 @@ adds `-InitializeBudget`; subsequent launches reuse the real ledger.
 with real local speech/GPU/media. First fixture use needs `-InitializeBudget`.
 CPU `-TestBackend` media is not playable.
 
+`-Port 8876` selects an isolated loopback port (default 8765); its URL is
+http://127.0.0.1:8876. A port already owned by another server is rejected rather
+than allowing duplicate Windows listeners to serve the wrong application.
+
 The launcher downloads both declared portraits and verifies SHA256.
 `avatar-pairs.json`, `speech-lock.json` and `hazel-lock.json` pin acquisition and
 expected bytes. Portrait decoding, voice files, exact Desktop name/token and
@@ -107,3 +111,31 @@ unavailable Desktop voice, invalid voice assets and delayed failure. During dela
 failure, use New conversation: expect empty context, retained failed choice and
 the same recoverable error. These controlled diagnostics simulate failures and
 are available only with diagnostics/fixture launch flags; they never call the LLM.
+
+## Bounded native evidence capture (#33)
+
+Install browser verification tooling (`npm.cmd ci --ignore-scripts` and
+`npx.cmd playwright install chromium`) once. With the app ready from the launch
+command above plus `-FixtureProvider`, run from the same directory:
+
+```powershell
+node ./scripts/pair-assessment.cjs ./my-pair-fixture-evidence.json
+```
+
+It requires a new output path and saves raw evidence after each complete turn or
+switch. It warms both pairs, runs ten alternating-pair prompts (including black
+hole/follow-up), then Stop/replacement, busy reset, partial-preparation failure and
+recovery, and reset during loading. First/repeat switches and server preparation
+are separate from Submit-to-digital-audio-with-advancing-video. The five measured
+turns per pair exclude two warm-ups and separate recovery probes. Failed attempts
+remain in the report. Playback must complete without autoplay intervention to be
+valid. It has finite three-minute operation and thirty-minute overall limits.
+
+For real-provider timing, restart without `-FixtureProvider` using the durable
+real ledger and explicitly add `--real` to the evidence command. This opts into
+at most 18 paid requests and USD 0.05 additional conservative reservations at the
+declared gpt-6-luna rates; there are no automatic retries. The monthly guard still
+applies. For an isolated app port set `$env:THEAD_URL = 'http://127.0.0.1:8876'`
+in the evidence command's terminal. Never point real evidence at the fixture
+ledger or reset existing accounting. Reports deliberately save prompts/answers;
+they are opt-in artifacts, unlike the session-only application itself.
