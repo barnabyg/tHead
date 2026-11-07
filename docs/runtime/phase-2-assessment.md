@@ -4,7 +4,7 @@ Measured 7 November 2026 on native Windows 11 build 26300, RTX 3090 24 GB,
 driver 621.14, Ryzen 5 7600. Source/model/software pins match the
 [Phase 1 baseline](windows-baseline.md): Python 3.12.10, Torch 2.11.0+cu128,
 CUDA runtime 12.8, Diffusers 0.42.1, Transformers 5.22.2 and FFmpeg 9.0.2.
-The browser was the desktop app's local Chromium browser. GPU runs were serial.
+The browser was the desktop app's local Chromium 156 browser. GPU runs were serial.
 The fixed portrait and speech provenance remain in `demo-lock.json` and
 [the offline guide](windows-demo.md). No TTS, LLM or integrated conversation runs
 were performed.
@@ -83,9 +83,12 @@ reserved memory remained 5,943,328,768 bytes. Peaks were about 5.35 GB. This sho
 no observed GPU allocator growth across these repeats, not a long-duration leak
 proof or a whole-system memory measurement. Later instrumentation also records
 process RSS, but the initial comparisons did not measure CPU memory growth.
-Model load took 3.399–3.588 s in separate server processes. This excludes Python
+Initial model loads took 3.399–3.588 s in separate server processes. This excludes Python
 import/startup and uses warmed filesystem caches; readiness timing is reported
 separately in newer reports. Runs within each process retained the loaded weights.
+The final clean-process short run reserved 5,941,231,616 bytes, reaching
+5,943,328,768 bytes after the subsequent six-second run. Process RSS observations
+were about 2.98 GB; the evidence does not establish long-duration CPU stability.
 
 ## Stop, stale output and recovery
 
@@ -99,6 +102,16 @@ generation and 0.037 s while waiting for input. The earlier active-playback Stop
 released generation after 0.456 s. Non-preemptible inference is disclosed in the
 [launch guide](windows-streaming.md).
 
+The separate browser audio-output observation closes the action-to-silence
+measurement gap at the specified player boundary. Run `a2892085` had non-silent
+pre-Stop RMS 0.02747, remained non-silent at 11.5 ms, and first observed silence
+at 21.8 ms after the action, confirmed by two consecutive windows below RMS
+0.00001. The analyser uses 256 samples at 48 kHz (5.33 ms windows), sampled at
+approximately 10 ms intervals. This is **digital audio-graph silence observed
+within 21.8 ms**, not physical speaker/DAC latency. Its pause call took 1.3 ms;
+generation resources were released separately after 0.353 s. A subsequent
+six-second progressive run (`d1b7f1fa`) completed on the same loaded model.
+
 No recorded media fragment was published after Stop. CPU HTTP probes separately
 inject delayed external results and generation failure, reject stopped media and
 stale telemetry, and complete replacement runs. Real repeated runs also completed
@@ -111,9 +124,28 @@ Use the one preparation/launch command, prerequisites and changed-behaviour
 scenario in [windows-streaming.md](windows-streaming.md). A real launcher run
 prepared the pinned runtime and inputs from the existing declared `.runtime`
 caches, then loaded the server. Uncached acquisition was established in Phase 1;
-the current workflow still needs the final clean-checkout recheck recorded here.
+clean local clones of commits `61267e0`, `6f52c6a` and the final executable commit
+`df3ea7f` also prepared and launched successfully. The final clone had a clean
+tracked/untracked status and no frontend development dependencies installed.
+Its only declared reuse was a `.runtime` directory junction to the original
+runtime/model/media/download caches; this is cache-aware verification, not an
+uncached reinstall. The last launcher preparation took 14.368 s; final server model
+load took 4.439 s and full readiness took 9.686 s, recorded separately in the JSON. Final short playback
+(`22a3d440`) and Stop/recovery (`6c182299` → `82ad4eff`) completed from that clone;
+the replacement six-second run played at 2.594 s, rendered at 7.070 s and ended
+without a post-start stall. No launcher restart separated that Stop/recovery pair.
 All preparation/model/media caches and the installed VC++ runtime/driver are
 prerequisites, not files supplied by a normal source checkout.
+
+The two-axis code review found encoder deadline/cancellation/cleanup and CI
+fail-fast defects; these were fixed and re-reviewed. Final Standards findings:
+zero unresolved. Final Spec findings: one pending perceptual sync/boundary check,
+as disclosed in the decision above. The digital-output Stop measurement and
+clean-checkout checks address the other initial evidence gaps. Canonical
+verification is `uv run --locked python scripts/verify.py` after the README's
+development setup. The narrow caption-lint exception and scoped Bandit
+subprocess/invariant exceptions are documented beside their uses; no runtime
+dependency advisory exceptions were added or changed.
 
 The selected strategy preserves motion latents across 0.96-second audio chunks
 and re-encodes an eight-second window; it is not a stateful incremental wav2vec
