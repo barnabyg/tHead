@@ -72,5 +72,7 @@ provider dispatch or speech. Use a separate freshly initialised fixture for a no
 answer: inspect per-turn input/output usage and estimated cost, then Stop or reset and
 confirm the monthly totals remain. The complete preparation/launch command and browser
 scenario are documented with the conversation application. The automated budget tests
-also cover exact-limit acceptance, rejection, retry allowance, missing usage, restart,
-UTC rollover, price/model changes, corrupt/missing accounting and concurrent processes.
+also cover exact-limit acceptance, rejection, retry allowance, missing usage, reopening,
+UTC rollover, unknown model rejection, corrupt/missing accounting and concurrent
+connections from multiple Budget instances in threads. Cross-process contention and
+changes to the published price table have not been independently exercised.
