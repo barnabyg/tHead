@@ -386,7 +386,12 @@ class Demonstration:
                 session.event("failure", error=session.error)
         finally:
             if mux:
-                mux.close()
+                try:
+                    mux.close()
+                except Exception as error:
+                    session.state = "failed"
+                    session.error = f"Encoder cleanup failed: {type(error).__name__}: {error}"
+                    session.event("failure", error=session.error)
             if session.cancelled.is_set():
                 session.event("generation-abandoned")
             session.save()
