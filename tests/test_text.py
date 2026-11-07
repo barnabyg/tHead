@@ -73,6 +73,18 @@ class TextTests(unittest.TestCase):
             [event["text"] for event in prepared], ["Hello world.", "A final sentence."]
         )
 
+    def test_progressive_media_precedes_final_synthesis_and_preserves_samples(self) -> None:
+        self.request("/speak", {"text": "One. Two. Three. Four. Five. Six. Seven. Eight."})
+        result = self.idle()["run"]
+        events = result["events"]
+        media = next(e for e in events if e["event"] == "media-ready")
+        complete = next(e for e in events if e["event"] == "tts-complete")
+        self.assertLess(media["seconds"], complete["seconds"])
+        arrived = [e for e in events if e["event"] == "audio-arrived"]
+        self.assertEqual(sum(e["samples"] for e in arrived), 128000)
+        self.assertTrue(arrived[-1]["final"])
+        self.assertLessEqual(max(e["queued"] for e in arrived), 2)
+
 
 if __name__ == "__main__":
     unittest.main()

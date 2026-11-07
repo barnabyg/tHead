@@ -214,6 +214,7 @@ start.onclick = async () => {
       return;
     }
     active = run;
+    statusText.textContent = clip === 'text' ? 'Preparing local speech and avatar' : 'Generating';
     run.controller = new AbortController();
     const media = new MediaSource();
     run.url = URL.createObjectURL(media);
@@ -223,7 +224,8 @@ start.onclick = async () => {
     if (!MediaSource.isTypeSupported(codec))
       throw Error('This browser lacks H.264/AAC MediaSource support');
     const buffer = media.addSourceBuffer(codec);
-    const minimumBuffer = clip === 'short' ? 0.35 : mode === 'complete' ? 0.64 : 1.28;
+    const minimumBuffer =
+      clip === 'text' ? 1.28 : clip === 'short' ? 0.35 : mode === 'complete' ? 0.64 : 1.28;
     telemetry('client-settings', {
       userAgent: navigator.userAgent,
       mode,
@@ -260,6 +262,13 @@ start.onclick = async () => {
       if (response.status === 204) {
         media.endOfStream();
         telemetry('end-of-stream');
+        if (!requested && video.buffered.length) {
+          requested = true;
+          telemetry('play-request', { finalPartial: true });
+          video.play().catch(() => {
+            if (active === run) play.hidden = false;
+          });
+        }
         break;
       }
       if (!response.ok) throw Error('Generation failed or run expired; see report');

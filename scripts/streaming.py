@@ -46,7 +46,6 @@ class Session:
         self.progressive = False
         self.clip = "six"
         self.text: list[str] = []
-        self.speech_pcm = b""
         self.input: deque[bytes] = deque()
         self.input_index = 0
         self.input_samples = 0
@@ -117,7 +116,7 @@ class Session:
                 len(chunk) % 2
                 or len(chunk) > SAMPLES * 2
                 or (not final and len(chunk) != SAMPLES * 2)
-                or self.input_samples + len(chunk) // 2 > 30 * 16000
+                or self.input_samples + len(chunk) // 2 > (120 if self.text else 30) * 16000
                 or (not chunk and not self.input_samples)
             ):
                 raise ValueError("Expected ordered PCM16 chunks, at most 30 seconds")
@@ -238,12 +237,14 @@ class Demonstration:
         with self.condition:
             session = self.start()
             session.text = phrases
+            session.progressive = True
             session.event("text-submitted", text=text, segments=len(phrases))
             return session
 
     def prepare_speech(self, session: Session) -> None:
         session.state = "synthesising"
-        output = bytearray()
+        pending = bytearray()
+        total = 0
         for index, text in enumerate(session.text):
             if session.cancelled.is_set():
                 return
@@ -255,7 +256,8 @@ class Demonstration:
                 pcm = self.voice.speak(text, session.cancelled)
             if session.cancelled.is_set():
                 return
-            if len(output) + len(pcm) > 120 * 32000:
+            total += len(pcm)
+            if total > 120 * 32000:
                 raise ValueError("Speech exceeds the two-minute limit")
             session.event(
                 "tts-segment",
@@ -264,9 +266,55 @@ class Demonstration:
                 samples=len(pcm) // 2,
                 preparation_seconds=time.perf_counter() - begun,
             )
-            output.extend(pcm)
-        session.speech_pcm = bytes(output)
-        session.event("tts-complete", samples=len(output) // 2)
+            pending.extend(pcm)
+            # Keep the final partial window until actual end of text. Never pad a
+            # phrase boundary or restart avatar/mux state between phrases.
+            while len(pending) >= SAMPLES * 2:
+                self.handoff(session, bytes(pending[: SAMPLES * 2]), False)
+                del pending[: SAMPLES * 2]
+        if session.cancelled.is_set():
+            return
+        self.handoff(session, bytes(pending), True)
+        session.event("tts-complete", samples=total // 2)
+
+    @staticmethod
+    def handoff(session: Session, chunk: bytes, final: bool) -> None:
+        with session.condition:
+            deadline = time.monotonic() + 300
+            while len(session.input) >= 2 and not session.cancelled.is_set():
+                if time.monotonic() > deadline:
+                    raise TimeoutError("Speech handoff blocked for five minutes")
+                session.condition.wait(0.1)
+            if not session.cancelled.is_set():
+                session.receive(session.input_index, chunk, final)
+
+    def begin_speech(self, session: Session) -> threading.Thread | None:
+        if not session.text:
+            return None
+
+        def produce() -> None:
+            try:
+                self.prepare_speech(session)
+            except Exception as error:
+                with session.condition:
+                    if not session.cancelled.is_set():
+                        session.error = f"{type(error).__name__}: {error}"
+                        session.state = "failed"
+                        session.event("failure", error=session.error)
+                        session.abandon()
+
+        producer = threading.Thread(target=produce, daemon=True)
+        producer.start()
+        return producer
+
+    @staticmethod
+    def finish_speech(session: Session, producer: threading.Thread | None) -> None:
+        if producer:
+            producer.join(timeout=30)
+            if producer.is_alive():
+                raise TimeoutError("Speech producer did not release within thirty seconds")
+            session.event("tts-released")
+        session.save()
 
     def work(self) -> None:
         try:
@@ -283,8 +331,7 @@ class Demonstration:
                             return
                         session = self.current
                     assert session is not None  # nosec B101
-                    if session.text:
-                        self.prepare_speech(session)
+                    producer = self.begin_speech(session)
                     session.event("diagnostic-delay")
                     chunks = session.chunks() if session.progressive else iter([b"diagnostic"])
                     for _ in chunks:
@@ -296,9 +343,9 @@ class Demonstration:
                         session.state = "failed"
                         session.error = "Injected external inference failure"
                         session.event("failure", error=session.error)
-                    else:
+                    elif session.state != "failed":
                         session.state = "complete"
-                    session.save()
+                    self.finish_speech(session, producer)
                     self.state = "idle"
                 return
             with wave.open(str(self.inputs / "english.wav"), "rb") as audio:
@@ -335,15 +382,9 @@ class Demonstration:
                         return
                     session = self.current
                 assert session is not None  # nosec B101
-                if session.text:
-                    try:
-                        self.prepare_speech(session)
-                    except Exception as error:
-                        session.error = f"{type(error).__name__}: {error}"
-                        session.state = "failed"
-                        session.event("failure", error=session.error)
-                        session.abandon()
+                producer = self.begin_speech(session)
                 self.generate(session, pipeline, inference, torch, np)
+                self.finish_speech(session, producer)
                 with self.condition:
                     self.state = "idle"
                     self.condition.notify_all()
@@ -397,7 +438,7 @@ class Demonstration:
             if session.progressive:
                 chunks = session.chunks()
             else:
-                pcm = session.speech_pcm if session.text else self.audio(session.clip)
+                pcm = self.audio(session.clip)
                 session.event(
                     "complete-input",
                     duration=len(pcm) / 32000,
@@ -547,7 +588,7 @@ def handler(demo: Demonstration) -> type[BaseHTTPRequestHandler]:
                     ).snapshot()
                 elif self.path == "/input":
                     session = demo.current
-                    if not session or data.get("run") != session.id:
+                    if not session or data.get("run") != session.id or session.text:
                         raise ValueError("Stale run")
                     session.receive(
                         int(data["index"]),

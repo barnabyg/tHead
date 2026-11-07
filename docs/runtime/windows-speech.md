@@ -32,6 +32,30 @@ same application. Click Play audio/video if browser autoplay is blocked.
 No LLM or hosted TTS is involved. The prerecorded streaming and offline launchers
 remain available independently.
 
+## Progressive speech
+
+Text is normalised only for whitespace. Sentence-ending `.`, `!` or `?` followed
+by whitespace is a preferred boundary; sentences over 180 characters split at
+the last whitespace within that limit. A single longer word is rejected.
+Abbreviations can therefore create a prosodic break. Final text needs no
+punctuation. Separate sentence synthesis may change intonation; this is the
+latency/continuity trade-off of the lightweight engine.
+
+The producer synthesises one bounded phrase, then hands off ordered 15,360-sample
+windows (0.96 s). It joins leftover samples to the next phrase without inserting
+silence or padding phrase boundaries. Only end-of-text sends a final partial
+window, including an explicit empty drain marker after an exact full window.
+One voice, rolling avatar history, motion state and continuous encoder remain in
+use across phrase boundaries. No substitute speech is supplied while waiting.
+
+There are at most two queued PCM windows, one in-flight phrase (at most 30 s),
+120 s total speech and 1200 text characters. Producer handoff applies backpressure
+with a five-minute hard limit. Phase 2's eight-frame fragments, 2.88 s media
+horizon and **1.28 s progressive startup buffer** are retained. A complete short
+utterance below that buffer starts after the encoder drains. Browser media older
+than two seconds is evicted during playback. Real text/voice timing must still be
+measured; CPU protocol probes do not establish sound or continuity.
+
 ## Engine and reproducibility
 
 Synthesis uses Windows PowerShell 5.1's framework `System.Speech` 4.0.0.0 and the
