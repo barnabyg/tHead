@@ -13,8 +13,10 @@ from pathlib import Path
 from typing import Any
 
 from budget import PRICES, Budget, BudgetError
+from pairs import DEFAULT_PAIR, configured_pair, configured_pairs
 from prepare import RUNTIME
 from provider import INPUT_BOUND, INSTRUCTIONS, MODEL, OUTPUT_TOKENS, Provider
+from speech import Voice
 from streaming import Demonstration, Session, handler
 
 
@@ -34,6 +36,7 @@ class Turn(Session):
         self.reservation = ""
         self.request_id = ""
         self.progressive = True
+        self.pair = ""
         self.text = ["conversation"]
 
     def save(self) -> None:
@@ -49,6 +52,7 @@ class Turn(Session):
             "usage": dict(self.usage),
             "inputBound": self.input_bound,
             "request": self.request_id,
+            "pair": self.pair,
         }
 
 
@@ -77,7 +81,10 @@ class Conversation(Demonstration):
         fixture: bool = False,
         budget_path: Path | None = None,
         initialize_budget: bool = False,
+        pair: str = DEFAULT_PAIR,
     ) -> None:
+        self.selected_pair = configured_pair(pair)
+        self.active_pair = ""
         self.identity = uuid.uuid4().hex
         self.transcript: list[Turn] = []
         self.cancelled_requests: set[str] = set()
@@ -92,6 +99,17 @@ class Conversation(Demonstration):
         except BudgetError as error:
             self.budget_error = str(error)
         super().__init__(inputs, directory, test_backend, 8, True, diagnostics or fixture)
+
+    def prepare_assets(self, pipeline: Any, inference: Any) -> None:
+        pair = self.selected_pair
+        if not self.test_backend:
+            self.portrait_path = pair.validate_portrait(self.inputs)
+            self.voice.close()
+            self.voice = Voice(pair.voice_lock)
+            self.voice.prepare(self.shutdown)
+            self.loading["tts"] = self.voice.metadata
+            inference.get_base_data(pipeline, str(self.portrait_path), 42, False)
+        self.active_pair = pair.id
 
     def readiness(self) -> dict[str, Any]:
         return {
@@ -112,6 +130,9 @@ class Conversation(Demonstration):
             result = {
                 **super().status(),
                 "conversationEnabled": True,
+                "pairs": [{"id": p.id, "name": p.name} for p in configured_pairs().values()],
+                "activePair": self.active_pair,
+                "selectedPair": self.selected_pair.id,
                 "session": self.identity,
                 "model": self.provider.model,
                 "fixtureProvider": self.provider.fixture,
@@ -128,6 +149,7 @@ class Conversation(Demonstration):
                         "state": t.state,
                         "truncated": t.truncated,
                         "usage": t.usage,
+                        "pair": t.pair,
                     }
                     for t in self.transcript
                 ],
@@ -235,6 +257,7 @@ class Conversation(Demonstration):
             session = Turn(self.directory, self.fragment_frames, self.identity, question.strip())
             session.reservation = reservation
             session.request_id = request_id
+            session.pair = self.active_pair
             session.messages, session.input_bound, session.omitted = messages, input_bound, omitted
             session.fault = fault
             self.current = session
@@ -314,7 +337,12 @@ def main() -> None:
     parser.add_argument("--model", default=os.environ.get("THEAD_MODEL", MODEL))
     parser.add_argument("--budget", type=Path)
     parser.add_argument("--initialize-budget", action="store_true")
+    parser.add_argument("--pair", default=os.environ.get("THEAD_PAIR", DEFAULT_PAIR))
     args = parser.parse_args()
+    try:
+        configured_pair(args.pair)
+    except ValueError as error:
+        parser.error(str(error))
     app = Conversation(
         args.inputs,
         args.output,
@@ -334,6 +362,7 @@ def main() -> None:
             )
         ),
         args.initialize_budget,
+        args.pair,
     )
     server = ThreadingHTTPServer(("127.0.0.1", args.port), handler(app))
     lifetime = threading.Timer(7200, server.shutdown)

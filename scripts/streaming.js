@@ -436,6 +436,10 @@ setInterval(async () => {
     const status = await (await fetch('/status', { signal: AbortSignal.timeout(10000) })).json();
     if (ticket !== epoch) return;
     if (conversation) {
+      const pair = status.pairs.find((item) => item.id === status.activePair);
+      conversation.textContent = pair
+        ? `Active pair: ${pair.name}. Synthetic speech.`
+        : 'Preparing pair';
       if (sessionIdentity && status.session !== sessionIdentity) {
         epoch++;
         release();

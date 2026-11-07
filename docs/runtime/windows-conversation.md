@@ -1,5 +1,8 @@
 # Windows conversational application
 
+For configured portrait/voice pairs and `-Pair` / `THEAD_PAIR`, see
+[the pair guide](windows-pairs.md). The default remains JFK/Zira.
+
 From `C:/docs/git/tHead`, in PowerShell 7:
 
 ```powershell

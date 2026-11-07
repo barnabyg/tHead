@@ -188,6 +188,7 @@ class Demonstration:
         diagnostics: bool = False,
     ) -> None:
         self.inputs = inputs
+        self.portrait_path = inputs / "portrait.jpg"
         self.startup = time.perf_counter()
         self.directory = directory
         self.directory.mkdir(parents=True, exist_ok=True)
@@ -369,9 +370,15 @@ class Demonstration:
             session.event("tts-released")
         session.save()
 
+    def prepare_assets(self, pipeline: Any, inference: Any) -> None:
+        if self.speech_enabled and not self.test_backend:
+            self.voice.prepare(self.shutdown)
+            self.loading["tts"] = self.voice.metadata
+
     def work(self) -> None:
         try:
             if self.test_backend:
+                self.prepare_assets(None, None)
                 self.ready = True
                 self.state = "idle"
                 self.loading["ready_seconds"] = time.perf_counter() - self.startup
@@ -423,9 +430,7 @@ class Demonstration:
                 RUNTIME / "models", RUNTIME / "FlashHead", self.loading
             )
             np = importlib.import_module("numpy")
-            if self.speech_enabled:
-                self.voice.prepare(self.shutdown)
-                self.loading["tts"] = self.voice.metadata
+            self.prepare_assets(pipeline, inference)
             with self.condition:
                 self.ready = True
                 self.state = "idle"
@@ -485,7 +490,7 @@ class Demonstration:
                 max_pending_fragments=session.max_pending,
             )
             torch.cuda.reset_peak_memory_stats()
-            inference.get_base_data(pipeline, str(self.inputs / "portrait.jpg"), 42, False)
+            inference.get_base_data(pipeline, str(self.portrait_path), 42, False)
             params = inference.get_infer_params()
             if (
                 params["frame_num"],
