@@ -130,8 +130,9 @@ start.onclick = async () => {
     const codec = 'video/mp4; codecs="avc1.42C01E, mp4a.40.2"';
     if (!MediaSource.isTypeSupported(codec)) throw Error('This browser lacks H.264/AAC MediaSource support');
     const buffer = media.addSourceBuffer(codec);
+    const minimumBuffer = clip === 'short' ? 0.35 : (mode === 'complete' ? 0.64 : 1.28);
     telemetry('client-settings', {userAgent:navigator.userAgent, mode, clip,
-      initialBufferSeconds:clip === 'short' ? 0.35 : (mode === 'complete' ? 0.64 : 1.28)});
+      initialBufferSeconds:minimumBuffer});
     if (mode !== 'complete') feed(run, clip, mode === 'delayed').catch(error => {
       if (active !== run) return;
       statusText.textContent = String(error);
@@ -156,7 +157,6 @@ start.onclick = async () => {
       if (active !== run) return;
       telemetry('appended', {index});
       index++;
-      const minimumBuffer = clip === 'short' ? 0.35 : (mode === 'complete' ? 0.64 : 1.28);
       if (!requested && video.buffered.length && video.buffered.end(0) >= minimumBuffer) {
         requested = true;
         telemetry('play-request');
