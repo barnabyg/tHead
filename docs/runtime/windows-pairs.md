@@ -83,3 +83,27 @@ contextual follow-up, Stop an answer, switch back and ask a replacement. For a
 loading check with `-Diagnostics`, choose **Pair diagnostic → Delay preparation**,
 switch, then click New conversation and Stop during loading. Expect the chosen
 pair to become ready in the new empty conversation, without old playback.
+
+## Failure and recovery (#32)
+
+Failed preparation leaves **Active pair** showing the last successful pair and
+the selector showing the failed requested pair. Ask stays disabled. The error
+names the requested pair and remediation. Choose an available pair to recover;
+the transcript and budget remain intact. A candidate voice is disposed if portrait,
+voice validation or avatar preparation fails; portrait/voice activate together.
+There is one preparation job and at most two voice owners during handoff, with
+no per-selection model cache. Stop does not cancel the chosen pair's preparation;
+it detaches response playback. New conversation retains preparation/choice while
+clearing context. Because pending switches are rejected, a delayed completion
+cannot supersede a later accepted selection.
+
+Controlled failure scenario, without editing application internals: launch the
+command above with `-FixtureProvider` (initialise its separate ledger on first use).
+Complete an answer, choose **Pair diagnostic → Fail after partial preparation**,
+then select the other pair. Expect a named error, unchanged last active pair and
+disabled Ask. Choose **None**, select the available original pair, and ask the
+follow-up; context must survive. Repeat with missing/unreadable/invalid portrait,
+unavailable Desktop voice, invalid voice assets and delayed failure. During delayed
+failure, use New conversation: expect empty context, retained failed choice and
+the same recoverable error. These controlled diagnostics simulate failures and
+are available only with diagnostics/fixture launch flags; they never call the LLM.

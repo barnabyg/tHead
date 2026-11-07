@@ -180,6 +180,91 @@ test('reset and Stop during loading retain choice, reject overlapping selection 
   expect(after.run.pair).toBe('hopper-hazel');
 });
 
+for (const fault of [
+  'pair-portrait-missing',
+  'pair-portrait-unreadable',
+  'pair-portrait-invalid',
+  'pair-voice-missing',
+  'pair-voice-invalid',
+  'pair-prepare',
+  'pair-delay-fail',
+]) {
+  test(`pair failure ${fault} preserves active pair and accounting, then recovers context`, async ({
+    page,
+    request,
+  }, info) => {
+    const ask = page.getByRole('button', { name: 'Ask', exact: true });
+    const pair = page.getByLabel('Avatar and voice', { exact: true });
+    await ask.click();
+    await expect(page.locator('#status')).toHaveText('Playback ended');
+    const before = await (await request.get(`${info.url}/status`)).json();
+    await page.getByLabel('Pair diagnostic', { exact: true }).selectOption(fault);
+    await expect(pair).toBeEnabled();
+    await pair.selectOption('hopper-hazel');
+    await expect(page.locator('#pair-status')).toContainText('Grace Hopper / Hazel');
+    await expect(page.locator('#pair-status')).toContainText('failed');
+    await expect(ask).toBeDisabled();
+    const failed = await (await request.get(`${info.url}/status`)).json();
+    expect(failed.activePair).toBe('jfk-zira');
+    expect(failed.selectedPair).toBe('hopper-hazel');
+    expect(failed.ready).toBe(false);
+    expect(failed.budget.estimated_usd).toBe(before.budget.estimated_usd);
+    expect(failed.transcript).toEqual(before.transcript);
+    await page.getByLabel('Pair diagnostic', { exact: true }).selectOption('');
+    await pair.selectOption('jfk-zira');
+    await expect(ask).toBeEnabled();
+    await page.getByLabel('Question', { exact: true }).fill('How do we detect one?');
+    await ask.click();
+    await expect(page.locator('#status')).toHaveText('Playback ended');
+    const recovered = await (await request.get(`${info.url}/status`)).json();
+    expect(recovered.run.answer).toContain('Earlier question: What is a black hole?');
+    expect(recovered.run.pair).toBe('jfk-zira');
+  });
+}
+
+test('late old media and delayed failed selection cannot revive playback after reset', async ({
+  page,
+  request,
+}, info) => {
+  const ask = page.getByRole('button', { name: 'Ask', exact: true });
+  const pair = page.getByLabel('Avatar and voice', { exact: true });
+  let releaseMedia;
+  let receivedMedia;
+  const mediaGate = new Promise((resolve) => {
+    releaseMedia = resolve;
+  });
+  const received = new Promise((resolve) => {
+    receivedMedia = resolve;
+  });
+  await page.route('**/segment?*', async (route) => {
+    receivedMedia();
+    await mediaGate;
+    await route
+      .fulfill({ path: 'tests/fixtures/browser.mp4', contentType: 'video/mp4' })
+      .catch(() => {});
+  });
+  await ask.click();
+  await received;
+  await page.getByRole('button', { name: 'Stop', exact: true }).click();
+  await expect(pair).toBeEnabled();
+  await page.getByLabel('Pair diagnostic', { exact: true }).selectOption('pair-delay-fail');
+  await pair.selectOption('hopper-hazel');
+  await expect(page.locator('#pair-status')).toContainText('Preparing Grace Hopper');
+  await page.getByRole('button', { name: 'New conversation' }).click();
+  releaseMedia();
+  await expect(page.locator('#pair-status')).toContainText('failed');
+  await expect(page.locator('#transcript')).toBeEmpty();
+  await expect(page.locator('#video')).not.toHaveAttribute('src');
+  const failed = await (await request.get(`${info.url}/status`)).json();
+  expect(failed.selectedPair).toBe('hopper-hazel');
+  expect(failed.activePair).toBe('jfk-zira');
+  expect(failed.run).toBeNull();
+  await page.getByLabel('Pair diagnostic', { exact: true }).selectOption('');
+  await pair.selectOption('jfk-zira');
+  await expect(ask).toBeEnabled();
+  expect((await (await request.get(`${info.url}/status`)).json()).activePair).toBe('jfk-zira');
+});
+
 test('complete answer, contextual follow-up, idle Stop and fresh conversation', async ({
   page,
   request,

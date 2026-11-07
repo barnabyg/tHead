@@ -20,6 +20,16 @@ from provider import INPUT_BOUND, INSTRUCTIONS, MODEL, OUTPUT_TOKENS, Provider
 from speech import Voice
 from streaming import Demonstration, Session, handler
 
+PAIR_FAULTS = {
+    "pair-portrait-missing": "Portrait missing; rerun the preparation/launch command",
+    "pair-portrait-unreadable": "Portrait unreadable; restore read permissions and retry",
+    "pair-portrait-invalid": "Portrait invalid; restore the declared portrait and retry",
+    "pair-voice-missing": "Desktop voice unavailable; install the declared legacy English voice",
+    "pair-voice-invalid": "Voice assets invalid; restore the declared Windows voice version",
+    "pair-prepare": "Avatar failed after voice preparation; retry or select another pair",
+    "pair-delay-fail": "Delayed avatar preparation failed; retry or select another pair",
+}
+
 
 class Turn(Session):
     def __init__(
@@ -111,23 +121,60 @@ class Conversation(Demonstration):
         super().__init__(inputs, directory, test_backend, 8, True, diagnostics or fixture)
 
     def prepare_assets(self, pipeline: Any, inference: Any) -> None:
-        started = time.perf_counter()
         pair = self.selected_pair
-        if self.pair_fault == "pair-delay":
+        if self.pair_fault in ("pair-delay", "pair-delay-fail"):
             time.sleep(2)  # Simulated preparation completing after Stop/reset.
-        if not self.test_backend:
-            self.portrait_path = pair.validate_portrait(self.inputs)
+        candidate = Voice(pair.voice_lock)
+        try:
+            self.pair_probe(
+                "pair-portrait-missing", "pair-portrait-unreadable", "pair-portrait-invalid"
+            )
+            portrait = (
+                self.inputs / str(pair.portrait["filename"])
+                if self.test_backend
+                else pair.validate_portrait(self.inputs)
+            )
+            self.pair_probe("pair-voice-missing")
+            if not self.test_backend:
+                candidate.prepare(self.shutdown)
+            self.pair_probe("pair-voice-invalid")
+            if not self.test_backend:
+                inference.get_base_data(pipeline, str(portrait), 42, False)
+            self.pair_probe("pair-prepare", "pair-delay-fail")
             self.voice.close()
-            self.voice = Voice(pair.voice_lock)
-            self.voice.prepare(self.shutdown)
-            self.loading["tts"] = self.voice.metadata
-            inference.get_base_data(pipeline, str(self.portrait_path), 42, False)
-        self.active_pair = pair.id
-        self.pair_preparation_seconds = time.perf_counter() - started
+            with self.condition:
+                self.voice = candidate
+                self.portrait_path = portrait
+                self.active_pair = pair.id
+                self.loading["tts"] = candidate.metadata
+        finally:
+            if self.voice is not candidate:
+                candidate.close()
+
+    def pair_probe(self, *faults: str) -> None:
+        if self.pair_fault in faults:
+            raise RuntimeError(PAIR_FAULTS[self.pair_fault])
+
+    def load_assets(self, pipeline: Any, inference: Any) -> None:
+        started = time.perf_counter()
+        try:
+            super().load_assets(pipeline, inference)
+        except Exception as error:
+            with self.condition:
+                self.ready = False
+                self.state = "idle"
+                self.error = (
+                    f"{self.selected_pair.name} preparation failed: "
+                    f"{type(error).__name__}: {error}. "
+                    "See docs/runtime/windows-pairs.md; select an available pair to recover."
+                )
+                self.condition.notify_all()
+        finally:
+            self.pair_preparation_seconds = time.perf_counter() - started
 
     def select(self, identity: str, pair_id: str, fault: str = "") -> dict[str, Any]:
         pair = configured_pair(pair_id)
-        if fault and (not self.diagnostics or fault != "pair-delay"):
+        if fault and (not self.diagnostics or fault not in (*PAIR_FAULTS, "pair-delay")):
             raise ValueError("Unknown pair diagnostic; launch with --diagnostics")
         with self.condition:
             if identity != self.identity:
@@ -143,6 +190,7 @@ class Conversation(Demonstration):
             if self.ready and pair.id == self.active_pair:
                 return self.status()
             self.selected_pair = pair
+            self.error = ""
             self.pair_fault = fault
             self.pair_sequence += 1
             self.ready = False
