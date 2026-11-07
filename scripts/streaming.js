@@ -167,6 +167,19 @@ function release() {
   play.hidden = true;
   return run;
 }
+function observeVideo(run) {
+  video.requestVideoFrameCallback((_now, first) => {
+    if (active !== run) return;
+    telemetry('first-frame-presented', { mediaTime: first.mediaTime });
+    const next = (_time, frame) => {
+      if (active !== run) return;
+      if (frame.mediaTime > first.mediaTime)
+        telemetry('moving-video', { mediaTime: frame.mediaTime });
+      else video.requestVideoFrameCallback(next);
+    };
+    video.requestVideoFrameCallback(next);
+  });
+}
 document.querySelector('#stop').onclick = () => {
   epoch++;
   pendingController?.abort();
@@ -244,6 +257,8 @@ async function feed(run, clip, delayed) {
   }
 }
 start.onclick = async () => {
+  const submittedAt = performance.now();
+  const submittedUtc = new Date().toISOString();
   if (submitting) return;
   submitting = true;
   notice = '';
@@ -283,6 +298,11 @@ start.onclick = async () => {
       return;
     }
     active = run;
+    telemetry('submit-action', {
+      clientMilliseconds: submittedAt,
+      utc: submittedUtc,
+      request: requestId,
+    });
     statusText.textContent = clip === 'text' ? 'Preparing local speech and avatar' : 'Generating';
     run.controller = new AbortController();
     const media = new MediaSource();
@@ -336,11 +356,12 @@ start.onclick = async () => {
         if (!requested && video.buffered.length) {
           requested = true;
           telemetry('play-request', { finalPartial: true });
-          video.requestVideoFrameCallback(() => {
-            if (active === run) telemetry('first-frame-presented');
-          });
+          observeVideo(run);
           video.play().catch(() => {
-            if (active === run) play.hidden = false;
+            if (active === run) {
+              telemetry('autoplay-blocked');
+              play.hidden = false;
+            }
           });
         }
         break;
@@ -364,11 +385,10 @@ start.onclick = async () => {
       if (!requested && video.buffered.length && video.buffered.end(0) >= minimumBuffer) {
         requested = true;
         telemetry('play-request');
-        video.requestVideoFrameCallback(() => {
-          if (active === run) telemetry('first-frame-presented');
-        });
+        observeVideo(run);
         video.play().catch(() => {
           if (active === run) {
+            telemetry('autoplay-blocked');
             play.hidden = false;
             statusText.textContent = 'Click Play to allow browser audio';
           }
@@ -397,6 +417,7 @@ start.onclick = async () => {
   }
 };
 play.onclick = () => {
+  telemetry('manual-play');
   video
     .play()
     .then(() => {

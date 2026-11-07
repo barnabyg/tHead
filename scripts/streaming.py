@@ -446,7 +446,13 @@ class Demonstration:
                 producer = self.begin_speech(session)
                 self.generate(session, pipeline, inference, torch, np)
                 self.finish_speech(session, producer)
-                session.event("resources-released")
+                session.event(
+                    "resources-released",
+                    allocated_bytes=torch.cuda.memory_allocated(),
+                    reserved_bytes=torch.cuda.memory_reserved(),
+                    rss_bytes=importlib.import_module("psutil").Process().memory_info().rss,
+                    queued_audio=len(session.input),
+                )
                 session.save()
                 with self.condition:
                     self.state = "idle"
@@ -527,6 +533,7 @@ class Demonstration:
                 history.extend(np.pad(speech, (0, SAMPLES - len(speech))).tolist())
                 begun = time.perf_counter()
                 embedding = inference.get_audio_embedding(pipeline, np.asarray(history), 167, 200)
+                session.event("inference-start", index=index)
                 frames = inference.run_pipeline(pipeline, embedding)[9:]
                 frames = frames.to(torch.uint8).cpu().numpy()
                 if session.cancelled.is_set():

@@ -23,6 +23,8 @@ def main() -> None:
     biome = str(ROOT / "node_modules/.bin/biome.cmd")
     browser_files = [
         "scripts/streaming.js",
+        "scripts/benchmark.cjs",
+        "scripts/resilience.cjs",
         "scripts/streaming.html",
         "scripts/conversation.html",
         "playwright.config.cjs",
@@ -36,6 +38,8 @@ def main() -> None:
     )
     run([python, "-m", "mypy"], 180)
     run(["node", "--check", "scripts/streaming.js"], 120)
+    run(["node", "--check", "scripts/benchmark.cjs"], 120)
+    run(["node", "--check", "scripts/resilience.cjs"], 120)
     run(["node", "--check", "tests/browser/conversation.spec.cjs"], 120)
     run(["node", "--check", "playwright.config.cjs"], 120)
     run([python, "-m", "bandit", "-q", "-c", "pyproject.toml", "-r", "scripts", "tests"], 120)
@@ -164,6 +168,8 @@ def main() -> None:
             "docs/runtime/rtx3090-streaming.json",
             "docs/runtime/rtx3090-speech.json",
             "docs/runtime/rtx3090-conversation.json",
+            "docs/runtime/rtx3090-phase5-baseline.json",
+            "docs/runtime/rtx3090-phase5-recovery.json",
             "speech-lock.json",
         )
     }
@@ -171,6 +177,8 @@ def main() -> None:
         r'\s*"(?:id|session|request)": "[0-9a-f-]{32,36}",?\s*'
         r'|\s*"(?:sha256|declared_pcm_sha256)": "[0-9a-f]{64}",?\s*'
     )
+    # Only the new explicit evidence captures' Git source pin; review on schema changes.
+    source_pin = re.compile(r'\s*"source": "[0-9a-f]{40}",?\s*')
     for filename in list(findings):
         evidence_path = (ROOT / filename).resolve()
         if evidence_path in evidence_paths:
@@ -180,13 +188,20 @@ def main() -> None:
                 for finding in findings[filename]
                 if not (
                     finding["type"] == "Hex High Entropy String"
-                    and public_metadata.fullmatch(evidence_lines[finding["line_number"] - 1])
+                    and (
+                        public_metadata.fullmatch(evidence_lines[finding["line_number"] - 1])
+                        or (
+                            evidence_path.name
+                            in ("rtx3090-phase5-baseline.json", "rtx3090-phase5-recovery.json")
+                            and source_pin.fullmatch(evidence_lines[finding["line_number"] - 1])
+                        )
+                    )
                 )
             ]
             if not findings[filename]:
                 del findings[filename]
     if findings:
-        raise RuntimeError(f"Potential secrets found: {secrets}")
+        raise RuntimeError(f"Potential secrets found: {json.dumps(findings)}")
     # This repository delivers scripts, not a distributable Python package.
     for directory in ("scripts", "tests"):
         for path in (ROOT / directory).glob("*.py"):
