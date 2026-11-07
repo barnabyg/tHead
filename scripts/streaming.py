@@ -588,6 +588,19 @@ class Demonstration:
 
 def handler(demo: Demonstration) -> type[BaseHTTPRequestHandler]:
     class Handler(BaseHTTPRequestHandler):
+        def parse_request(self) -> bool:
+            if not super().parse_request():
+                return False
+            assert isinstance(self.server, ThreadingHTTPServer)  # nosec B101
+            allowed = {
+                f"127.0.0.1:{self.server.server_port}",
+                f"localhost:{self.server.server_port}",
+            }
+            if self.headers.get("Host") not in allowed:
+                self.send_error(403, "Use the loopback application address")
+                return False
+            return True
+
         def log_message(self, format: str, *args: Any) -> None:
             pass
 

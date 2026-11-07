@@ -198,6 +198,13 @@ class ConversationTests(unittest.TestCase):
         self.assertFalse(status["budget"]["usable"])
         self.assertTrue(status["configurationError"])
 
+    def test_nonloopback_host_cannot_read_session_or_dispatch(self) -> None:
+        for path in ("/status", "/"):
+            request = urllib.request.Request(self.url + path, headers={"Host": "attacker.test"})
+            with self.assertRaises(urllib.error.HTTPError) as failure:
+                urllib.request.urlopen(request, timeout=10)  # nosec B310
+            self.assertEqual(failure.exception.code, 403)
+
 
 if __name__ == "__main__":
     unittest.main()
