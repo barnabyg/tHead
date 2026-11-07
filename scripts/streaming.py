@@ -249,7 +249,8 @@ class Demonstration:
         if not self.speech_enabled:
             raise ValueError("Launch speech-demo.ps1 to enable local TTS")
         if fault and (
-            not self.diagnostics or fault not in ("tts", "media", "tts-delay", "buffer-delay")
+            not self.diagnostics
+            or fault not in ("tts", "media", "tts-delay", "buffer-delay", "dispatch-delay")
         ):
             raise ValueError("Fault injection requires the explicit diagnostics launcher flag")
         phrases = segments(text)
@@ -262,7 +263,10 @@ class Demonstration:
             return session
 
     def prepare_speech(self, session: Session) -> None:
-        session.state = "synthesising"
+        with session.condition:
+            if session.cancelled.is_set():
+                return
+            session.state = "synthesising"
         pending = bytearray()
         total = 0
         digest = hashlib.sha256()
@@ -329,6 +333,9 @@ class Demonstration:
             return None
 
         def produce() -> None:
+            if session.fault == "dispatch-delay":
+                session.event("dispatch-delay")
+                session.cancelled.wait(1)
             try:
                 self.prepare_speech(session)
             except Exception as error:

@@ -61,6 +61,23 @@ class TextTests(unittest.TestCase):
             time.sleep(0.02)
         self.fail("Application did not become idle")
 
+    def wait_event(self, kind: str) -> None:
+        deadline = time.monotonic() + 10
+        while time.monotonic() < deadline:
+            current = self.request("/status")["run"]
+            if any(e["event"] == kind for e in current["events"]):
+                return
+            time.sleep(0.02)
+        self.fail(f"Expected application event: {kind}")
+
+    def test_stop_before_producer_startup_remains_terminal(self) -> None:
+        run = self.request("/speak", {"text": "Queued speech.", "fault": "dispatch-delay"})
+        self.wait_event("dispatch-delay")
+        self.request("/stop", {"run": run["id"]})
+        result = self.idle()["run"]
+        self.assertEqual(result["state"], "stopped")
+        self.assertEqual(result["parts"], 0)
+
     def test_entered_text_completes_and_invalid_input_is_rejected(self) -> None:
         for text in ("", " \n ", "a" * 1201):
             with self.assertRaises(urllib.error.HTTPError):
@@ -92,14 +109,7 @@ class TextTests(unittest.TestCase):
 
     def test_stop_during_synthesis_rejects_late_results_and_recovers_from_failures(self) -> None:
         run = self.request("/speak", {"text": "Delayed speech.", "fault": "tts-delay"})
-        deadline = time.monotonic() + 10
-        while time.monotonic() < deadline:
-            current = self.request("/status")["run"]
-            if any(e["event"] == "tts-start" for e in current["events"]):
-                break
-            time.sleep(0.02)
-        else:
-            self.fail("Synthesis did not begin")
+        self.wait_event("tts-start")
         self.request("/stop", {"run": run["id"]})
         self.request("/stop", {"run": run["id"]})
         stopped = self.idle()["run"]
