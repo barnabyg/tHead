@@ -54,3 +54,17 @@ Conversation text and diagnostics containing generated words remain in backend
 memory; they are not saved to `result.json` or readiness files. Temporary media
 remains under ignored `.runtime/conversation` until cleanup. This is a single-user
 loopback experiment. Existing speech and streaming demos remain independent.
+
+Ask “How do we detect one?” after the black-hole answer. Both turns remain in the
+transcript and earlier completed exchanges accompany the follow-up request.
+New conversation assigns a fresh session identity and clears transcript/context
+while retaining the loaded model and voice. A server restart loses session context;
+a stale browser submission is rejected and the status refresh exposes the new session.
+
+Context retains the newest coherent exchanges that fit 8192 conservatively bounded
+input tokens, including current question, instructions and framing margins. The
+bound uses UTF-8 byte length plus 64 tokens per message and 256 global overhead,
+rather than assuming four characters per token. Oldest exchanges are dropped whole;
+the transcript remains visible and states how many exchanges were omitted. A
+100-turn in-memory session limit requires New conversation rather than growing
+memory indefinitely. Provider-stored histories and conversation files are unused.

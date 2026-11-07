@@ -103,6 +103,8 @@ class Provider:
         if fault == "llm":
             raise ValueError("Injected provider failure")
         text = "A black hole traps light. We detect one by its effects on nearby matter."
+        if len(messages) > 1:
+            text += " Earlier question: " + messages[0]["content"][:80]
         if fault == "long":
             text = "word " * 90 + "Final partial"
         elif fault == "unbroken":

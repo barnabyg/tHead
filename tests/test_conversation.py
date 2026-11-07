@@ -97,6 +97,33 @@ class ConversationTests(unittest.TestCase):
             self.assertEqual("".join("".join(phrases).split()), "".join(answer.split()))
             self.assertEqual(done["transcript"][-1]["truncated"], fault == "truncate")
 
+    def test_followup_context_order_reset_and_stale_session(self) -> None:
+        self.ask()
+        self.wait(lambda s: s["state"] == "idle")
+        self.ask("How do we detect one?")
+        done = self.wait(lambda s: s["state"] == "idle")
+        self.assertIn("Earlier question: What is a black hole?", done["transcript"][-1]["answer"])
+        self.assertEqual(
+            [t["question"] for t in done["transcript"]],
+            ["What is a black hole?", "How do we detect one?"],
+        )
+        identity = done["session"]
+        fresh = self.request("/reset", {"session": identity})
+        self.assertNotEqual(fresh["session"], identity)
+        self.assertEqual(fresh["transcript"], [])
+        with self.assertRaises(urllib.error.HTTPError):
+            self.request("/ask", {"session": identity, "question": "Stale session"})
+        self.ask("How do we detect one?")
+        done = self.wait(lambda s: s["state"] == "idle")
+        self.assertNotIn("Earlier question", done["transcript"][-1]["answer"])
+
+    def test_context_is_bounded_and_truncation_visible(self) -> None:
+        for _ in range(8):
+            self.ask("What is a black hole? " + "x" * 1100)
+            done = self.wait(lambda s: s["state"] == "idle")
+        self.assertGreater(done["contextOmitted"], 0)
+        self.assertLessEqual(done["run"]["inputBound"], 8192)
+
 
 if __name__ == "__main__":
     unittest.main()

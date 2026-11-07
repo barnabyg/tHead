@@ -10,6 +10,18 @@ let notice = '';
 let audioOutput = null;
 const conversation = document.querySelector('#conversation');
 let sessionIdentity = null;
+document.querySelector('#reset')?.addEventListener('click', async () => {
+  try {
+    const fresh = await post('/reset', { session: sessionIdentity });
+    epoch++;
+    release();
+    sessionIdentity = fresh.session;
+    document.querySelector('#transcript').textContent = '';
+    notice = 'New conversation';
+  } catch (error) {
+    statusText.textContent = String(error);
+  }
+});
 function prepareAudioOutput() {
   if (!audioOutput) {
     const context = new AudioContext();
@@ -379,6 +391,11 @@ setInterval(async () => {
       document.querySelector('#usage').textContent = status.budget
         ? JSON.stringify(status.budget)
         : '';
+      if (status.contextOmitted) {
+        const note = document.createElement('p');
+        note.textContent = `${status.contextOmitted} earlier exchanges omitted from model context to fit the input allowance.`;
+        transcript.append(note);
+      }
     }
     document.querySelector('#clip option[value="text"]').disabled = !status.speechEnabled;
     document.querySelector('#diagnostics').hidden = !status.diagnostics;

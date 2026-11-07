@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from prepare import RUNTIME
-from provider import MODEL, Provider
+from provider import INPUT_BOUND, INSTRUCTIONS, MODEL, Provider
 from streaming import Demonstration, Session, handler
 
 
@@ -28,6 +28,8 @@ class Turn(Session):
         self.messages = [{"role": "user", "content": question}]
         self.truncated = False
         self.usage: dict[str, Any] = {}
+        self.input_bound = 0
+        self.omitted = 0
         self.progressive = True
         self.text = ["conversation"]
 
@@ -42,6 +44,7 @@ class Turn(Session):
             "answer": self.answer,
             "truncated": self.truncated,
             "usage": dict(self.usage),
+            "inputBound": self.input_bound,
         }
 
 
@@ -49,6 +52,8 @@ class Conversation(Demonstration):
     page = "conversation.html"
 
     def command(self, path: str, data: dict[str, Any]) -> dict[str, Any]:
+        if path == "/reset":
+            return self.reset(str(data.get("session", "")))
         return self.ask(
             str(data.get("session", "")), data.get("question"), str(data.get("fault", ""))
         ).snapshot()
@@ -82,6 +87,7 @@ class Conversation(Demonstration):
                 "conversationEnabled": True,
                 "session": self.identity,
                 "model": self.provider.model,
+                "contextOmitted": self.current.omitted if isinstance(self.current, Turn) else 0,
                 "configurationError": ""
                 if self.provider.fixture or os.environ.get("OPENAI_API_KEY")
                 else "Set OPENAI_API_KEY in the backend and restart",
@@ -97,6 +103,42 @@ class Conversation(Demonstration):
                     for t in self.transcript
                 ],
             }
+
+    def reset(self, identity: str) -> dict[str, Any]:
+        with self.condition:
+            if identity != self.identity:
+                raise ValueError("Session was lost or reset; reload the conversation")
+            if self.state != "idle":
+                raise ValueError("Wait until idle to start a new conversation")
+            self.identity = uuid.uuid4().hex
+            self.transcript.clear()
+            self.current = None
+            return self.status()
+
+    def context(self, question: str) -> tuple[list[dict[str, str]], int, int]:
+        # UTF-8 bytes upper-bound text BPE tokens, with explicit framing margin.
+        def bound(messages: list[dict[str, str]]) -> int:
+            return (
+                len(INSTRUCTIONS.encode())
+                + 256
+                + sum(len(m["content"].encode()) + 64 for m in messages)
+            )
+
+        messages = [{"role": "user", "content": question}]
+        if bound(messages) > INPUT_BOUND:
+            raise ValueError("Question exceeds the configured input allowance")
+        retained = 0
+        for turn in reversed(self.transcript):
+            exchange = [{"role": "user", "content": turn.question}]
+            if turn.state == "complete":
+                exchange.append({"role": "assistant", "content": turn.answer})
+            else:
+                continue
+            if bound(exchange + messages) > INPUT_BOUND:
+                break
+            messages = exchange + messages
+            retained += 1
+        return messages, bound(messages), len(self.transcript) - retained
 
     def ask(self, identity: str, question: Any, fault: str = "") -> Turn:
         if not isinstance(question, str) or not question.strip() or len(question) > 1200:
@@ -128,7 +170,11 @@ class Conversation(Demonstration):
                 raise ValueError("Wait for readiness and resource release")
             if not self.provider.fixture and not os.environ.get("OPENAI_API_KEY"):
                 raise ValueError("Set OPENAI_API_KEY in the backend and restart")
+            if len(self.transcript) >= 100:
+                raise ValueError("Session reached 100 turns; start a New conversation")
+            messages, input_bound, omitted = self.context(question.strip())
             session = Turn(self.directory, self.fragment_frames, self.identity, question.strip())
+            session.messages, session.input_bound, session.omitted = messages, input_bound, omitted
             session.fault = fault
             self.current = session
             self.transcript.append(session)
