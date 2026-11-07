@@ -7,6 +7,7 @@ import os
 import subprocess  # nosec B404
 import sys
 import tempfile
+import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
@@ -25,6 +26,7 @@ def main() -> None:
     # Independent command suites have separate temporary directories and ports.
     # unittest has no parallel worker mode; run its modules concurrently instead.
     failures = []
+    cancelled = threading.Event() if os.environ.get("CI") else None
     with ThreadPoolExecutor(max_workers=min(len(modules), os.cpu_count() or 1)) as pool:
         pending = []
         for module in modules:
@@ -42,13 +44,15 @@ def main() -> None:
             ]
             if os.environ.get("CI"):
                 tests.append("--failfast")
-            pending.append(pool.submit(run, tests, 180))
+            pending.append(pool.submit(run, tests, 180, cancelled=cancelled))
         for future in as_completed(pending):
             try:
                 future.result()
             except Exception as error:
                 failures.append(error)
                 if os.environ.get("CI"):
+                    assert cancelled is not None  # nosec B101
+                    cancelled.set()
                     for other in pending:
                         other.cancel()
                     raise
