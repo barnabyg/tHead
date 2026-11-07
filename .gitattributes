@@ -1,0 +1,3 @@
+* text=auto eol=lf
+# Unified-diff empty context lines require a space; remove this exception with the patch.
+patches/windows-eager-single-gpu.patch whitespace=-blank-at-eol

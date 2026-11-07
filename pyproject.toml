@@ -1,0 +1,34 @@
+[project]
+name = "thead-smoke"
+version = "0.1.0"
+description = "Native Windows FlashHead Lite feasibility smoke test"
+requires-python = ">=3.10"
+dependencies = []
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+include = ["scripts/*.py", "tests/*.py", "pyproject.toml"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.mypy]
+files = ["scripts", "tests"]
+python_version = "3.10"
+strict = true
+
+[tool.bandit]
+targets = ["scripts", "tests"]
+
+[dependency-groups]
+dev = [
+    "bandit==1.9.4",
+    "detect-secrets==1.5.0",
+    "mypy==2.4.1",
+    "pip-audit==2.10.1",
+    "ruff==0.17.4",
+]
