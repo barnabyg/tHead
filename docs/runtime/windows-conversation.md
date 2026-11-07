@@ -14,7 +14,7 @@ Python 3.12, uv 0.11.7, Git, PowerShell 7, Microsoft Zira Desktop English voice
 and the installed assets in `speech-lock.json`. Use an H.264/AAC MediaSource
 browser (Chrome/Edge). See [the speech guide](windows-speech.md) for asset,
 voice and tool prerequisites. The command prepares the declared FlashHead Lite,
-fixed portrait, FFmpeg and input caches, loads GPU/voice once and opens
+configured portraits, FFmpeg and input caches, loads the GPU model once and opens
 [the loopback application](http://127.0.0.1:8765). Downloads require network
 access and sufficient disk space; warm caches avoid repeated downloads.
 
@@ -91,7 +91,7 @@ loopback experiment. Existing speech and streaming demos remain independent.
 Ask “How do we detect one?” after the black-hole answer. Both turns remain in the
 transcript and earlier completed exchanges accompany the follow-up request.
 New conversation assigns a fresh session identity and clears transcript/context
-while retaining the loaded model and voice. A server restart loses session context;
+while retaining the loaded model and selected pair. A server restart loses session context;
 a stale browser submission is rejected and the status refresh exposes the new session.
 
 Context retains the newest coherent exchanges that fit 8192 conservatively bounded

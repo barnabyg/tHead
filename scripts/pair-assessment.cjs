@@ -167,6 +167,41 @@ async function main() {
       save();
       return result;
     };
+    if (process.argv.includes('--stop-only')) {
+      if (real) throw Error('--stop-only requires the no-cost provider fixture');
+      report.mode = 'audible-stop-and-replacement';
+      for (const id of ids) {
+        if ((await status()).activePair !== id) await select(id);
+        await page.getByLabel('Diagnostic fault').selectOption('long');
+        const run = await submit('Exercise Stop during audible moving playback.');
+        await page.waitForFunction(
+          () => document.querySelector('#video').currentTime > 1 && outputRms() > 0.0001,
+        );
+        report.probes.push({ label: `before-audible-stop-${id}`, status: await status() });
+        await page.getByRole('button', { name: 'Stop', exact: true }).click();
+        await expect(ask).toBeEnabled({ timeout: 180_000 });
+        await expect
+          .poll(
+            async () =>
+              (await status()).run?.events.some(
+                (e) => e.event === 'digital-silence' && e.status === 'observed',
+              ),
+            { timeout: 30_000 },
+          )
+          .toBe(true);
+        const stopped = await status();
+        expect(stopped.run.id).toBe(run);
+        expect(stopped.run.state).toBe('stopped');
+        report.probes.push({ label: `after-audible-stop-${id}`, status: stopped });
+        await expect(page.locator('#video')).not.toHaveAttribute('src');
+        await page.getByLabel('Diagnostic fault').selectOption('');
+        await complete('Replacement after audible Stop');
+      }
+      report.final = await status();
+      report.elapsedSeconds = (Date.now() - Date.parse(report.captured)) / 1000;
+      report.complete = true;
+      return;
+    }
     // Warm both pairs explicitly before measuring repeated switches/turns.
     if (report.initial.activePair !== ids[0]) await select(ids[0]);
     await complete('What is gravity?', true);

@@ -179,6 +179,8 @@ def main() -> None:
             "avatar-pairs.json",
             "docs/runtime/rtx3090-phase6-fixture.json",
             "docs/runtime/rtx3090-phase6-real.json",
+            "docs/runtime/rtx3090-phase6-stop.json",
+            "docs/runtime/phase6-clean-startup.json",
         )
     }
     public_metadata = re.compile(
@@ -205,6 +207,8 @@ def main() -> None:
                                 "rtx3090-phase5-recovery.json",
                                 "rtx3090-phase6-fixture.json",
                                 "rtx3090-phase6-real.json",
+                                "rtx3090-phase6-stop.json",
+                                "phase6-clean-startup.json",
                             )
                             and source_pin.fullmatch(evidence_lines[finding["line_number"] - 1])
                         )
