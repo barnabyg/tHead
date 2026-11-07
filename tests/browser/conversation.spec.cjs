@@ -68,6 +68,12 @@ test('complete answer, contextual follow-up, idle Stop and fresh conversation', 
   await page.getByRole('button', { name: 'Ask', exact: true }).click();
   await expect(page.locator('#transcript')).toContainText('A black hole traps light.');
   await expect(page.locator('#status')).toHaveText('Playback ended');
+  const measured = (await (await request.get(`${info.url}/status`)).json()).run.events;
+  const submitted = measured.find((event) => event.event === 'submit-action');
+  const moving = measured.find((event) => event.event === 'moving-video');
+  const audible = measured.find((event) => event.event === 'digital-audio-onset');
+  expect(submitted.clientMilliseconds).toBeLessThan(moving.clientMilliseconds);
+  expect(submitted.clientMilliseconds).toBeLessThan(audible.clientMilliseconds);
   await expect(page.getByRole('button', { name: 'Ask', exact: true })).toBeEnabled();
   await page.getByRole('button', { name: 'Stop', exact: true }).click();
   await expect
