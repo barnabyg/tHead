@@ -9,13 +9,15 @@ The fixed portrait and speech provenance remain in `demo-lock.json` and
 [the offline guide](windows-demo.md). No TTS, LLM or integrated conversation runs
 were performed.
 
-**Decision: the chunked technical path is credible, but hold the Phase 3 gate
-pending human confirmation of audible synchronisation and boundary quality.**
+**Decision: Phase 2 passes for the tested native Windows RTX 3090 profile.
+The selected chunked path provides a credible foundation for Phase 3.**
 Real browser playback, progressive input and bounded cancellation work on the
 target hardware. Container timestamps and decoded frame counts cannot establish
-perceived lip sync. The Phase 1 listening confirmation does not validate this
-new streaming path. A listening/visual assessment has been requested; no Phase 2
-human result is assumed.
+perceived lip sync. On 7 November 2026, the user confirmed the 20-second
+progressive-input listening/visual check through boundaries and the ending:
+"Speech and animation stay in sync." This is a Phase 2 confirmation, separate
+from the earlier offline check. It does not establish quality for every possible
+arrival pattern, input or session length, or meet the integrated latency target.
 
 ## Measured runs
 
@@ -139,8 +141,10 @@ prerequisites, not files supplied by a normal source checkout.
 
 The two-axis code review found encoder deadline/cancellation/cleanup and CI
 fail-fast defects; these were fixed and re-reviewed. Final Standards findings:
-zero unresolved. Final Spec findings: one pending perceptual sync/boundary check,
-as disclosed in the decision above. The digital-output Stop measurement and
+zero unresolved. The review comparison point was `8827e34`, subsequently confirmed
+by the user. The user playback confirmation closes the remaining perceptual
+sync/boundary finding; final Spec findings: zero unresolved for the tested profile.
+The digital-output Stop measurement and
 clean-checkout checks address the other initial evidence gaps. Canonical
 verification is `uv run --locked python scripts/verify.py` after the README's
 development setup. The narrow caption-lint exception and scoped Bandit
@@ -160,7 +164,8 @@ continuity margin. This leaves limited but credible room within the eventual
 handoff and browser scheduling. Those stages are unmeasured; their delays may
 overlap or accumulate, and the integrated target has **not** been met or tested.
 
-Before Phase 3: confirm audible/visual boundary quality, retain the selected
-startup margin, and budget the missing stages with actual measurements. If lip
+For Phase 3, retain the selected startup margin and budget the missing stages
+with actual measurements. Recheck audible/visual quality when input timing,
+windowing or transport changes. If lip
 sync or motion continuity fails, investigate the rolling encoder/window boundary
 and AAC timing on this same runtime before building an integrated pipeline.
