@@ -43,6 +43,9 @@ def acquire(url: str, path: Path, expected_hash: str) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--no-play", action="store_true", help="Generate without opening a player")
+    parser.add_argument(
+        "--prepare-only", action="store_true", help="Prepare inputs without inference"
+    )
     args = parser.parse_args()
     RUNTIME.mkdir(exist_ok=True)
     report = RUNTIME / "demo-result.json"
@@ -94,6 +97,10 @@ def main() -> int:
             ],
             180,
         )
+        if args.prepare_only:
+            result["status"] = "prepared"
+            result["stage"] = "complete"
+            return 0
         result["stage"] = "generation"
         run(
             [str(RUNTIME / "venv/Scripts/python.exe"), str(ROOT / "scripts/generate_clip.py")], 3600

@@ -1,0 +1,106 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>tHead streaming experiment</title>
+<style>
+body {font: 16px system-ui; max-width: 1000px; margin: 2rem auto; background: #151923; color: #eee}
+button, select {font: inherit; padding: .6rem; margin-right: .6rem}
+video {display: block; width: 512px; max-width: 100%; background: black; margin: 1rem 0}
+pre {white-space: pre-wrap; max-height: 22rem; overflow: auto}
+</style>
+<h1>tHead streaming experiment</h1>
+<p>Synthetic animation of JFK from prerecorded public-domain English speech.</p>
+<p id="status">Loading the native Windows model…</p>
+<button id="start" disabled>Start</button>
+<button id="play" hidden>Play audio/video</button>
+<video id="video" playsinline></video>
+<pre id="report"></pre>
+<script>
+"use strict";
+const video = document.querySelector('#video');
+const start = document.querySelector('#start');
+const play = document.querySelector('#play');
+const statusText = document.querySelector('#status');
+const report = document.querySelector('#report');
+let active = null;
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+async function post(path, data) {
+  const response = await fetch(path, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)});
+  const result = await response.json();
+  if (!response.ok) throw Error(result.error || response.status);
+  return result;
+}
+function telemetry(event, extra = {}) {
+  const run = active;
+  if (!run) return;
+  const buffered = video.buffered.length ? video.buffered.end(video.buffered.length - 1) - video.currentTime : 0;
+  post('/telemetry', {run: run.id, event, clientMilliseconds: performance.now(), utc: new Date().toISOString(), currentTime: video.currentTime, buffered, ...extra}).catch(() => {});
+}
+for (const event of ['playing', 'waiting', 'stalled', 'ended', 'error']) {
+  video.addEventListener(event, () => {
+    telemetry(event, {mediaError: video.error?.message});
+    if (event === 'ended') statusText.textContent = 'Playback ended';
+    if (event === 'error') statusText.textContent = 'Playback failed: ' + video.error?.message;
+  });
+}
+setInterval(() => telemetry('occupancy'), 500);
+async function append(buffer, data) {
+  await new Promise((resolve, reject) => {
+    buffer.addEventListener('updateend', resolve, {once: true});
+    buffer.addEventListener('error', reject, {once: true});
+    buffer.appendBuffer(data);
+  });
+}
+start.onclick = async () => {
+  start.disabled = true;
+  play.hidden = true;
+  try {
+    const run = await post('/start', {});
+    active = run;
+    const media = new MediaSource();
+    run.url = URL.createObjectURL(media);
+    video.src = run.url;
+    await new Promise(resolve => media.addEventListener('sourceopen', resolve, {once: true}));
+    const codec = 'video/mp4; codecs="avc1.42C01E, mp4a.40.2"';
+    if (!MediaSource.isTypeSupported(codec)) throw Error('This browser lacks H.264/AAC MediaSource support');
+    const buffer = media.addSourceBuffer(codec);
+    let index = 0, requested = false;
+    while (active === run) {
+      if (video.buffered.length && video.buffered.end(video.buffered.length - 1) - video.currentTime > 2.88) {
+        await sleep(100); continue;
+      }
+      const response = await fetch(`/segment?run=${run.id}&index=${index}`);
+      if (active !== run) return;
+      if (response.status === 202) { await sleep(50); continue; }
+      if (response.status === 204) { media.endOfStream(); telemetry('end-of-stream'); break; }
+      if (!response.ok) throw Error('Generation failed or run expired; see report');
+      const data = await response.arrayBuffer();
+      if (active !== run) return;
+      await append(buffer, data);
+      telemetry('appended', {index});
+      index++;
+      if (!requested && video.buffered.length) {
+        requested = true;
+        telemetry('play-request');
+        video.requestVideoFrameCallback(() => {if (active === run) telemetry('first-frame-presented');});
+        video.play().catch(() => {play.hidden = false; statusText.textContent = 'Click Play to allow browser audio';});
+      }
+      if (video.currentTime > 5 && !buffer.updating) {
+        await new Promise(resolve => {buffer.addEventListener('updateend', resolve, {once: true}); buffer.remove(0, video.currentTime - 2);});
+      }
+    }
+  } catch (error) {
+    statusText.textContent = String(error);
+    telemetry('client-failure', {message: String(error)});
+    video.pause();
+  }
+};
+play.onclick = () => {video.play().then(() => {play.hidden = true;}).catch(error => {statusText.textContent = String(error);});};
+setInterval(async () => {
+  try {
+    const status = await (await fetch('/status')).json();
+    start.disabled = !(status.ready && status.state === 'idle');
+    if (!active) statusText.textContent = status.error || `Model: ${status.state}`;
+    report.textContent = JSON.stringify(status, null, 2);
+  } catch (error) {statusText.textContent = String(error);}
+}, 500);
+</script>
