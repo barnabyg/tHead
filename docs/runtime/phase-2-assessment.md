@@ -146,6 +146,10 @@ verification is `uv run --locked python scripts/verify.py` after the README's
 development setup. The narrow caption-lint exception and scoped Bandit
 subprocess/invariant exceptions are documented beside their uses; no runtime
 dependency advisory exceptions were added or changed.
+The secret scan also exempts only `Hex High Entropy String` findings on the
+generated evidence file's `id` (public run UUID), `sha256` and `declared_pcm_sha256`
+(public fixture PCM digests) fields. Other fields/files/detectors remain checked;
+re-review this exception if the evidence schema changes.
 
 The selected strategy preserves motion latents across 0.96-second audio chunks
 and re-encodes an eight-second window; it is not a stateful incremental wav2vec

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess  # nosec B404
 import sys
 import tempfile
@@ -135,7 +136,28 @@ def main() -> None:
         "biome.json",
     ]
     secrets = subprocess.check_output(command, cwd=ROOT, text=True, timeout=180)  # nosec B603
-    if json.loads(secrets)["results"]:
+    findings = json.loads(secrets)["results"]
+    # Public run UUIDs / fixture PCM digests in this one generated evidence file.
+    # Do not suppress other fields or detector types; review if its schema changes.
+    evidence_path = ROOT / "docs/runtime/rtx3090-streaming.json"
+    evidence_lines = evidence_path.read_text(encoding="utf-8").splitlines()
+    public_metadata = re.compile(
+        r'\s*"(?:id)": "[0-9a-f]{32}",?\s*'
+        r'|\s*"(?:sha256|declared_pcm_sha256)": "[0-9a-f]{64}",?\s*'
+    )
+    for filename in list(findings):
+        if (ROOT / filename).resolve() == evidence_path.resolve():
+            findings[filename] = [
+                finding
+                for finding in findings[filename]
+                if not (
+                    finding["type"] == "Hex High Entropy String"
+                    and public_metadata.fullmatch(evidence_lines[finding["line_number"] - 1])
+                )
+            ]
+            if not findings[filename]:
+                del findings[filename]
+    if findings:
         raise RuntimeError(f"Potential secrets found: {secrets}")
     # This repository delivers scripts, not a distributable Python package.
     for directory in ("scripts", "tests"):
