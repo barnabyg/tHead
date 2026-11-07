@@ -22,6 +22,7 @@ from urllib.parse import parse_qs, urlparse
 
 from prepare import ROOT, RUNTIME
 from smoke import load_pipeline
+from speech import Voice, segments
 from stream_media import Mux
 
 SAMPLES = 15360
@@ -44,6 +45,8 @@ class Session:
         self.diagnostic_failure = False
         self.progressive = False
         self.clip = "six"
+        self.text: list[str] = []
+        self.speech_pcm = b""
         self.input: deque[bytes] = deque()
         self.input_index = 0
         self.input_samples = 0
@@ -160,7 +163,12 @@ class Session:
 
 class Demonstration:
     def __init__(
-        self, inputs: Path, directory: Path, test_backend: bool = False, fragment_frames: int = 8
+        self,
+        inputs: Path,
+        directory: Path,
+        test_backend: bool = False,
+        fragment_frames: int = 8,
+        speech_enabled: bool = False,
     ) -> None:
         self.inputs = inputs
         self.startup = time.perf_counter()
@@ -173,6 +181,8 @@ class Demonstration:
         self.current: Session | None = None
         self.test_backend = test_backend
         self.fragment_frames = fragment_frames
+        self.voice = Voice()
+        self.speech_enabled = speech_enabled
         self.shutdown = threading.Event()
         self.loading: dict[str, Any] = {
             "platform": platform.platform(),
@@ -188,6 +198,7 @@ class Demonstration:
                 "ready": self.ready,
                 "error": self.error,
                 "loading": self.loading,
+                "speechEnabled": self.speech_enabled,
                 "run": self.current.snapshot() if self.current else None,
             }
 
@@ -220,6 +231,43 @@ class Demonstration:
                     session.save()
             return session
 
+    def speak(self, text: str) -> Session:
+        if not self.speech_enabled:
+            raise ValueError("Launch speech-demo.ps1 to enable local TTS")
+        phrases = segments(text)
+        with self.condition:
+            session = self.start()
+            session.text = phrases
+            session.event("text-submitted", text=text, segments=len(phrases))
+            return session
+
+    def prepare_speech(self, session: Session) -> None:
+        session.state = "synthesising"
+        output = bytearray()
+        for index, text in enumerate(session.text):
+            if session.cancelled.is_set():
+                return
+            begun = time.perf_counter()
+            if self.test_backend:
+                session.cancelled.wait(0.15)
+                pcm = b"\x01\x00" * 16000
+            else:
+                pcm = self.voice.speak(text, session.cancelled)
+            if session.cancelled.is_set():
+                return
+            if len(output) + len(pcm) > 120 * 32000:
+                raise ValueError("Speech exceeds the two-minute limit")
+            session.event(
+                "tts-segment",
+                index=index,
+                text=text,
+                samples=len(pcm) // 2,
+                preparation_seconds=time.perf_counter() - begun,
+            )
+            output.extend(pcm)
+        session.speech_pcm = bytes(output)
+        session.event("tts-complete", samples=len(output) // 2)
+
     def work(self) -> None:
         try:
             if self.test_backend:
@@ -235,6 +283,8 @@ class Demonstration:
                             return
                         session = self.current
                     assert session is not None  # nosec B101
+                    if session.text:
+                        self.prepare_speech(session)
                     session.event("diagnostic-delay")
                     chunks = session.chunks() if session.progressive else iter([b"diagnostic"])
                     for _ in chunks:
@@ -265,6 +315,9 @@ class Demonstration:
                 RUNTIME / "models", RUNTIME / "FlashHead", self.loading
             )
             np = importlib.import_module("numpy")
+            if self.speech_enabled:
+                self.voice.prepare(self.shutdown)
+                self.loading["tts"] = self.voice.metadata
             with self.condition:
                 self.ready = True
                 self.state = "idle"
@@ -282,6 +335,14 @@ class Demonstration:
                         return
                     session = self.current
                 assert session is not None  # nosec B101
+                if session.text:
+                    try:
+                        self.prepare_speech(session)
+                    except Exception as error:
+                        session.error = f"{type(error).__name__}: {error}"
+                        session.state = "failed"
+                        session.event("failure", error=session.error)
+                        session.abandon()
                 self.generate(session, pipeline, inference, torch, np)
                 with self.condition:
                     self.state = "idle"
@@ -290,6 +351,7 @@ class Demonstration:
             self.error = f"{type(error).__name__}: {error}"
             self.state = "failed"
         finally:
+            self.voice.close()
             (self.directory / "readiness.json").write_text(
                 json.dumps(self.status(), indent=2) + "\n", encoding="utf-8"
             )
@@ -335,7 +397,7 @@ class Demonstration:
             if session.progressive:
                 chunks = session.chunks()
             else:
-                pcm = self.audio(session.clip)
+                pcm = session.speech_pcm if session.text else self.audio(session.clip)
                 session.event(
                     "complete-input",
                     duration=len(pcm) / 32000,
@@ -475,7 +537,9 @@ def handler(demo: Demonstration) -> type[BaseHTTPRequestHandler]:
                 if not 0 <= size <= 65536:
                     raise ValueError("Request too large")
                 data = json.loads(self.rfile.read(size) or b"{}")
-                if self.path == "/start":
+                if self.path == "/speak":
+                    result = demo.speak(data.get("text", "")).snapshot()
+                elif self.path == "/start":
                     result = demo.start(
                         bool(data.get("diagnosticFailure")),
                         bool(data.get("progressive")),
@@ -504,7 +568,7 @@ def handler(demo: Demonstration) -> type[BaseHTTPRequestHandler]:
                         raise ValueError("Stale run")
                     with session.condition:
                         session.played = max(
-                            session.played, min(30, float(data.get("currentTime", 0)))
+                            session.played, min(120, float(data.get("currentTime", 0)))
                         )
                         session.event("player", **{k: v for k, v in data.items() if k != "run"})
                         session.condition.notify_all()
@@ -529,9 +593,14 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=RUNTIME / "streaming")
     parser.add_argument("--test-backend", action="store_true", help="CPU protocol probe; no media")
     parser.add_argument("--fragment-frames", type=int, choices=(8, 24), default=8)
+    parser.add_argument("--speech", action="store_true")
     args = parser.parse_args()
     demo = Demonstration(
-        args.inputs.resolve(), args.output.resolve(), args.test_backend, args.fragment_frames
+        args.inputs.resolve(),
+        args.output.resolve(),
+        args.test_backend,
+        args.fragment_frames,
+        args.speech,
     )
     server = ThreadingHTTPServer(("127.0.0.1", args.port), handler(demo))
     print(f"LISTEN http://127.0.0.1:{server.server_port}", flush=True)

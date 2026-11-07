@@ -13,6 +13,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--no-browser", action="store_true")
     parser.add_argument("--fragment-frames", type=int, choices=(8, 24), default=8)
+    parser.add_argument("--speech", action="store_true")
     args = parser.parse_args()
     run([sys.executable, str(ROOT / "scripts/demo.py"), "--prepare-only"], 18000)
     lock = json.loads((ROOT / "demo-lock.json").read_text(encoding="utf-8"))
@@ -49,6 +50,7 @@ def main() -> None:
             str(ROOT / "scripts/streaming.py"),
             "--fragment-frames",
             str(args.fragment_frames),
+            *(["--speech", "--output", str(RUNTIME / "speech")] if args.speech else []),
         ],
         7200,
     )

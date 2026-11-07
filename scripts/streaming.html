@@ -30,10 +30,18 @@ pre {
 </style>
 <h1>tHead streaming experiment</h1>
 <p>Synthetic animation of JFK from prerecorded public-domain English speech.</p>
+<label for="text">English passage (local synthetic voice)</label>
+<textarea
+  id="text"
+  maxlength="1200"
+  rows="4"
+  cols="70"
+>Hello. This is a local text to speech demonstration. The avatar should speak this passage clearly, then finish without repeating any words.</textarea>
 <p id="status">Loading the native Windows model…</p>
 <label
   >Speech
   <select id="clip">
+    <option value="text">Entered English text</option>
     <option value="six">6 seconds</option>
     <option value="long">20 seconds</option>
     <option value="short">0.35 seconds</option>

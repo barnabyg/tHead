@@ -205,7 +205,10 @@ start.onclick = async () => {
     await prepareAudioOutput().context.resume();
     const clip = document.querySelector('#clip').value;
     const mode = document.querySelector('#mode').value;
-    const run = await post('/start', { clip, progressive: mode !== 'complete' });
+    const run =
+      clip === 'text'
+        ? await post('/speak', { text: document.querySelector('#text').value })
+        : await post('/start', { clip, progressive: mode !== 'complete' });
     if (ticket !== epoch) {
       await post('/stop', { run: run.id });
       return;
@@ -227,7 +230,7 @@ start.onclick = async () => {
       clip,
       initialBufferSeconds: minimumBuffer,
     });
-    if (mode !== 'complete')
+    if (clip !== 'text' && mode !== 'complete')
       feed(run, clip, mode === 'delayed').catch((error) => {
         if (active !== run) return;
         statusText.textContent = String(error);
@@ -307,6 +310,9 @@ play.onclick = () => {
 setInterval(async () => {
   try {
     const status = await (await fetch('/status')).json();
+    document.querySelector('#clip option[value="text"]').disabled = !status.speechEnabled;
+    if (!status.speechEnabled && document.querySelector('#clip').value === 'text')
+      document.querySelector('#clip').value = 'six';
     start.disabled = !(status.ready && status.state === 'idle');
     if (!active) statusText.textContent = status.error || `Model: ${status.state}`;
     report.textContent = JSON.stringify(status, null, 2);
