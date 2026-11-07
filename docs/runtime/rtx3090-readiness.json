@@ -1,0 +1,50 @@
+{
+  "status": "ready",
+  "stage": "complete",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+  "lock": {
+    "upstream_url": "https://github.com/Soul-AILab/SoulX-FlashHead.git",
+    "upstream_revision": "9bc03de06bb0de82cd6bc477804512ae06144bf2",
+    "python": "3.12.10",
+    "models": [
+      {
+        "repository": "Soul-AILab/SoulX-FlashHead-1_3B",
+        "revision": "5fbd2e44ba08ab2deb28bd55cff2c15523e51ba5",
+        "directory": "FlashHead",
+        "files": [
+          "Model_Lite/config.json",
+          "Model_Lite/diffusion_pytorch_model.safetensors",
+          "VAE_LTX/config.json",
+          "VAE_LTX/diffusion_pytorch_model.safetensors",
+          "README.md"
+        ]
+      },
+      {
+        "repository": "facebook/wav2vec2-base-960h",
+        "revision": "22aad52d435eb6dbaf354bdad9b0da84ce7d6156",
+        "directory": "wav2vec2",
+        "files": [
+          "config.json",
+          "model.safetensors",
+          "preprocessor_config.json",
+          "README.md"
+        ]
+      }
+    ]
+  },
+  "upstream_revision": "9bc03de06bb0de82cd6bc477804512ae06144bf2",
+  "packages": {
+    "torch": "2.11.0+cu128",
+    "torchvision": "0.26.0+cu128",
+    "diffusers": "0.42.1",
+    "transformers": "5.22.2"
+  },
+  "cuda_runtime": "12.8",
+  "gpu": "NVIDIA GeForce RTX 3090",
+  "gpu_memory_bytes": 25769279488,
+  "load_seconds": 3.4203842999995686,
+  "peak_allocated_bytes": 4295000576,
+  "peak_reserved_bytes": 4578082816,
+  "elapsed_seconds": 7.792389000000185
+}

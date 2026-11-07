@@ -1,0 +1,91 @@
+diff --git a/flash_head/audio_analysis/wav2vec2.py b/flash_head/audio_analysis/wav2vec2.py
+index 1504ff3..a4f22f7 100644
+--- a/flash_head/audio_analysis/wav2vec2.py
++++ b/flash_head/audio_analysis/wav2vec2.py
+@@ -7,6 +7,11 @@ from .torch_utils import linear_interpolation
+ # https://github.com/huggingface/transformers/blob/HEAD/src/transformers/models/wav2vec2/modeling_wav2vec2.py
+ # initialize our encoder with the pre-trained wav2vec 2.0 weights.
+ class Wav2Vec2Model(Wav2Vec2Model):
++    # Encoder-only inference does not use the CTC head or training-time mask embedding.
++    # Review these exact-key exceptions before enabling training or explicit masking.
++    _keys_to_ignore_on_load_unexpected = [r"^lm_head\.(weight|bias)$"]
++    _keys_to_ignore_on_load_missing = [r"^masked_spec_embed$"]
++
+     def __init__(self, config: Wav2Vec2Config):
+         super().__init__(config)
+ 
+diff --git a/flash_head/src/modules/flash_head_model.py b/flash_head/src/modules/flash_head_model.py
+index 989cd7c..3f80cd1 100755
+--- a/flash_head/src/modules/flash_head_model.py
++++ b/flash_head/src/modules/flash_head_model.py
+@@ -8,12 +8,13 @@ from diffusers import ModelMixin
+ from diffusers.configuration_utils import ConfigMixin, register_to_config
+ import torch.cuda.amp as amp
+ import torch.distributed as dist
+-from xfuser.core.distributed import (
+-    get_sequence_parallel_rank,
+-    get_sequence_parallel_world_size,
+-    get_sp_group,
+-)
+-from xfuser.core.long_ctx_attention import xFuserLongContextAttention
++if dist.is_initialized():
++    from xfuser.core.distributed import (
++        get_sequence_parallel_rank,
++        get_sequence_parallel_world_size,
++        get_sp_group,
++    )
++    from xfuser.core.long_ctx_attention import xFuserLongContextAttention
+ try:
+     import flash_attn_interface
+     FLASH_ATTN_3_AVAILABLE = True
+@@ -545,4 +546,4 @@ class AudioProjModel(ModelMixin, ConfigMixin):
+             context_tokens = self.norm(context_tokens)
+         context_tokens = rearrange(context_tokens, "(bz f) m c -> bz f m c", f=video_length)
+ 
+-        return context_tokens
+\ No newline at end of file
++        return context_tokens
+diff --git a/flash_head/src/pipeline/flash_head_pipeline.py b/flash_head/src/pipeline/flash_head_pipeline.py
+index 6d0b757..c655862 100644
+--- a/flash_head/src/pipeline/flash_head_pipeline.py
++++ b/flash_head/src/pipeline/flash_head_pipeline.py
+@@ -13,17 +13,17 @@ from transformers import Wav2Vec2FeatureExtractor
+ from flash_head.src.modules.flash_head_model import WanModelAudioProject
+ from flash_head.audio_analysis.wav2vec2 import Wav2Vec2Model
+ from flash_head.utils.utils import match_and_blend_colors_torch, resize_and_centercrop
+-from flash_head.utils.facecrop import process_image
+ 
+ # compile models to speedup inference
+-COMPILE_MODEL = True
+-COMPILE_VAE = True
++COMPILE_MODEL = False
++COMPILE_VAE = False
+ # use parallel vae to speedup decode/encode, only support WanVAE
+ USE_PARALLEL_VAE = True
+ 
+ def get_cond_image_dict(cond_image_path_or_dir, use_face_crop):
+     def get_image(cond_image_path, use_face_crop):
+         if use_face_crop:
++            from flash_head.utils.facecrop import process_image
+             try:
+                 image = process_image(cond_image_path)
+                 return image
+diff --git a/flash_head/utils/utils.py b/flash_head/utils/utils.py
+index 1e8a00e..8f9ae6b 100644
+--- a/flash_head/utils/utils.py
++++ b/flash_head/utils/utils.py
+@@ -5,7 +5,6 @@ import math
+ from PIL import Image
+ import torchvision.transforms as transforms
+ import torch.nn as nn
+-import pyloudnorm as pyln
+ 
+ def rgb_to_lab_torch(rgb: torch.Tensor) -> torch.Tensor:
+     """
+@@ -219,4 +218,4 @@ def resize_and_centercrop(cond_image, target_size):
+         cropped_tensor = transforms.functional.center_crop(resized_tensor, target_size)
+         cropped_tensor = cropped_tensor[:, :, None, :, :] 
+ 
+-    return cropped_tensor
+\ No newline at end of file
++    return cropped_tensor
