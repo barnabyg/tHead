@@ -57,25 +57,8 @@
     ]
   },
   "demo_lock": {
-    "media": {
-      "url": "https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-9.0.2-essentials_build.zip",
-      "sha256": "60f467265b1e312373dbcd92200c2618a74850f98d3d078e94296bb3fa2047ba",
-      "directory": "ffmpeg-9.0.2-essentials_build"
-    },
-    "inputs": [
-      {
-        "filename": "portrait.jpg",
-        "url": "https://upload.wikimedia.org/wikipedia/commons/c/c3/John_F._Kennedy%2C_White_House_color_photo_portrait.jpg",
-        "sha256": "5990691f38bc2d0ebf29e1d49c0fe27357bac4b1b5959121ce7d26248b065d6f"
-      },
-      {
-        "filename": "speech.ogg",
-        "url": "https://upload.wikimedia.org/wikipedia/commons/d/d5/JFK_inaugural_address.ogg",
-        "sha256": "a257580da6eda796ed1c703e545865005753f7cb20cc042e0db3c44de82274fc"
-      }
-    ],
-    "audio_start_seconds": 31,
-    "audio_duration_seconds": 6
+    "path": "demo-lock.json",
+    "note": "Exact asset URLs and SHA-256 values are in this tracked lock; no duplicate hash baseline."
   },
   "installed_packages": {
     "runtime": {
@@ -150,8 +133,8 @@
       "started_utc": "2026-11-07T13:27:36.3475444+00:00",
       "runtime_existed_before": false,
       "exit_code": 1,
-      "checkout": "c1f9c5bf38c9cd52e27ebf2cf6c6f4833c5870bd",
-      "elapsed_seconds": 1337.0969226
+      "elapsed_seconds": 1337.0969226,
+      "revision": "c1f9c5bf38c9cd52e27ebf2cf6c6f4833c5870bd"
     },
     "setup": {
       "status": "ready",
