@@ -139,3 +139,18 @@ applies. For an isolated app port set `$env:THEAD_URL = 'http://127.0.0.1:8876'`
 in the evidence command's terminal. Never point real evidence at the fixture
 ledger or reset existing accounting. Reports deliberately save prompts/answers;
 they are opt-in artifacts, unlike the session-only application itself.
+
+For an additional no-cost check of audible Stop in both pairs, use the same
+fixture app and evidence command with `--stop-only`. It waits for moving playback
+and a non-silent browser audio graph, Stops, requires observed digital silence,
+and completes a replacement response for each pair. This uses four fixture
+requests and cannot run in real-provider mode.
+
+With the app launched using `-FixtureProvider -Diagnostics`, run:
+
+```powershell
+node ./scripts/pair-assessment.cjs ./my-audible-stop-evidence.json --stop-only
+```
+
+Expect observed digital silence and a complete replacement response after Stop
+with each pair; the output must report `complete: true` without errors.
