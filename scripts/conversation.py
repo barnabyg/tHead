@@ -12,8 +12,9 @@ from http.server import ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
 
+from budget import PRICES, Budget, BudgetError
 from prepare import RUNTIME
-from provider import INPUT_BOUND, INSTRUCTIONS, MODEL, Provider
+from provider import INPUT_BOUND, INSTRUCTIONS, MODEL, OUTPUT_TOKENS, Provider
 from streaming import Demonstration, Session, handler
 
 
@@ -30,6 +31,7 @@ class Turn(Session):
         self.usage: dict[str, Any] = {}
         self.input_bound = 0
         self.omitted = 0
+        self.reservation = ""
         self.progressive = True
         self.text = ["conversation"]
 
@@ -66,10 +68,21 @@ class Conversation(Demonstration):
         diagnostics: bool = False,
         model: str = MODEL,
         fixture: bool = False,
+        budget_path: Path | None = None,
+        initialize_budget: bool = False,
     ) -> None:
         self.identity = uuid.uuid4().hex
         self.transcript: list[Turn] = []
         self.provider = Provider(model, test_backend or fixture)
+        self.budget: Budget | None = None
+        self.budget_error = ""
+        try:
+            self.budget = Budget(
+                budget_path or directory / "budget.sqlite3",
+                initialize=initialize_budget or test_backend,
+            )
+        except BudgetError as error:
+            self.budget_error = str(error)
         super().__init__(inputs, directory, test_backend, 8, True, diagnostics or fixture)
 
     def readiness(self) -> dict[str, Any]:
@@ -82,11 +95,18 @@ class Conversation(Demonstration):
 
     def status(self) -> dict[str, Any]:
         with self.condition:
+            budget: dict[str, Any] = {"usable": False, "error": self.budget_error}
+            if self.budget:
+                try:
+                    budget = self.budget.snapshot()
+                except BudgetError as error:
+                    budget["error"] = str(error)
             result = {
                 **super().status(),
                 "conversationEnabled": True,
                 "session": self.identity,
                 "model": self.provider.model,
+                "budget": budget,
                 "contextOmitted": self.current.omitted if isinstance(self.current, Turn) else 0,
                 "configurationError": ""
                 if self.provider.fixture or os.environ.get("OPENAI_API_KEY")
@@ -105,6 +125,10 @@ class Conversation(Demonstration):
             }
             if isinstance(self.current, Turn) and self.current.conversation != self.identity:
                 result["run"] = None
+            if not budget["usable"]:
+                result["configurationError"] = budget["error"]
+            elif self.provider.model not in PRICES:
+                result["configurationError"] = "Unknown model pricing; select gpt-6-luna"
             return result
 
     def reset(self, identity: str) -> dict[str, Any]:
@@ -175,7 +199,13 @@ class Conversation(Demonstration):
             if len(self.transcript) >= 100:
                 raise ValueError("Session reached 100 turns; start a New conversation")
             messages, input_bound, omitted = self.context(question.strip())
+            if not self.budget:
+                raise ValueError(self.budget_error)
+            # The only application provider-request boundary. Every explicit retry
+            # enters here and receives its own durable reservation before dispatch.
+            reservation = self.budget.reserve(self.provider.model, input_bound, OUTPUT_TOKENS)
             session = Turn(self.directory, self.fragment_frames, self.identity, question.strip())
+            session.reservation = reservation
             session.messages, session.input_bound, session.omitted = messages, input_bound, omitted
             session.fault = fault
             self.current = session
@@ -183,6 +213,21 @@ class Conversation(Demonstration):
             self.state = "generating"
             self.condition.notify_all()
             return session
+
+    def finish_speech(self, session: Session, producer: threading.Thread | None) -> None:
+        super().finish_speech(session, producer)
+        if isinstance(session, Turn) and self.budget:
+            try:
+                session.usage = self.budget.settle(
+                    session.reservation,
+                    session.usage.get("input_tokens"),
+                    session.usage.get("output_tokens"),
+                )
+            except BudgetError:
+                # The committed reservation remains charged; later dispatch fails closed.
+                self.budget_error = (
+                    "Budget reconciliation failed; restore accounting before retrying"
+                )
 
     def phrases(self, session: Session) -> Iterator[str]:
         if not isinstance(session, Turn):
@@ -238,6 +283,8 @@ def main() -> None:
     parser.add_argument("--fixture-provider", action="store_true")
     parser.add_argument("--diagnostics", action="store_true")
     parser.add_argument("--model", default=os.environ.get("THEAD_MODEL", MODEL))
+    parser.add_argument("--budget", type=Path)
+    parser.add_argument("--initialize-budget", action="store_true")
     args = parser.parse_args()
     app = Conversation(
         args.inputs,
@@ -246,6 +293,13 @@ def main() -> None:
         args.diagnostics,
         args.model,
         args.fixture_provider,
+        args.budget
+        or (
+            args.output / "budget.sqlite3"
+            if args.test_backend
+            else RUNTIME / "conversation-budget.sqlite3"
+        ),
+        args.initialize_budget,
     )
     server = ThreadingHTTPServer(("127.0.0.1", args.port), handler(app))
     lifetime = threading.Timer(7200, server.shutdown)

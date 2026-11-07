@@ -404,6 +404,8 @@ setInterval(async () => {
       for (const turn of status.transcript) {
         const entry = document.createElement('p');
         entry.textContent = `You: ${turn.question}\nAvatar: ${turn.answer}\n${turn.state === 'stopped' ? 'Interrupted' : turn.state}${turn.truncated ? ' (output limit reached)' : ''} — Generated text may not all have been spoken.`;
+        if (turn.usage?.estimated_usd !== undefined)
+          entry.textContent += `\nTokens: ${turn.usage.input_tokens ?? 'unknown'} input / ${turn.usage.output_tokens ?? 'unknown'} output; estimated USD ${turn.usage.estimated_usd.toFixed(6)}${turn.usage.estimated ? ' (conservative allowance; final usage unavailable)' : ''}.`;
         transcript.append(entry);
       }
       document.querySelector('#usage').textContent = status.budget

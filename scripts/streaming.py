@@ -361,8 +361,7 @@ class Demonstration:
         producer.start()
         return producer
 
-    @staticmethod
-    def finish_speech(session: Session, producer: threading.Thread | None) -> None:
+    def finish_speech(self, session: Session, producer: threading.Thread | None) -> None:
         if producer:
             producer.join(timeout=30)
             if producer.is_alive():

@@ -26,6 +26,21 @@ The app uses the fixed standard OpenAI HTTPS endpoint, stateless Responses
 two to four concise English sentences. There are no automatic retries; another
 submission is a new request. Provider errors are redacted to actionable states.
 
+On **first use only**, add `-InitializeBudget` to the launch command to explicitly
+create `.runtime/conversation-budget.sqlite3`. Normal launches open this existing
+ledger. Missing/corrupt accounting disables paid requests; restore it rather than
+initialising away prior spend. `-Budget <absolute-path>` selects an existing ledger
+or explicitly creates it with `-InitializeBudget`. Keep that path across restarts
+and model changes. The UI shows per-turn token usage/cost when available and UTC
+monthly totals in USD. Missing final usage retains the conservative reserved cost,
+including cancellation/failure. Reset never clears accounting. Only priced models
+can dispatch. See [budget policy and controlled near-limit fixture](conversation-budget.md).
+
+To show rejection without spending money, create the disposable full-limit ledger
+in that guide and launch `conversation.ps1 -TestBackend -Budget <printed-path>`.
+Ask a question: expect a budget error, unchanged totals and no provider dispatch.
+For playable fixture media use `-FixtureProvider -Budget <printed-path>` instead.
+
 Wait for idle, ask “What is a black hole?”, and read the incremental answer.
 Expect local speech and moving video before a sufficiently long/delayed answer
 has finished generating. The transcript labels generated text separately from

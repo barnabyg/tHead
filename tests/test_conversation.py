@@ -12,6 +12,9 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+
+from budget import Budget  # noqa: E402
 
 
 class ConversationTests(unittest.TestCase):
@@ -162,6 +165,38 @@ class ConversationTests(unittest.TestCase):
             self.ask("Recovery question")
             done = self.wait(lambda s: s["state"] == "idle")
             self.assertEqual(done["run"]["state"], "complete")
+
+    def test_budget_reconciles_and_survives_stop_reset_and_retry(self) -> None:
+        self.ask(fault="llm-connect")
+        working = self.request("/status")
+        self.assertGreater(working["budget"]["reserved_usd"], 0)
+        self.request("/stop", {"run": working["run"]["id"]})
+        stopped = self.wait(lambda s: s["state"] == "idle")
+        spent = stopped["budget"]["estimated_usd"]
+        self.assertGreater(spent, 0)
+        self.request("/reset", {"session": stopped["session"]})
+        self.assertEqual(self.request("/status")["budget"]["estimated_usd"], spent)
+        self.ask()
+        done = self.wait(lambda s: s["state"] == "idle")
+        self.assertGreater(done["budget"]["estimated_usd"], spent)
+        self.assertEqual(done["transcript"][-1]["usage"]["input_tokens"], 100)
+        self.assertEqual(done["transcript"][-1]["usage"]["estimated_usd"], 0.000025)
+
+    def test_budget_rejection_and_unusable_accounting_make_no_provider_request(self) -> None:
+        ledger = Budget(Path(self.temporary.name) / "budget.sqlite3")
+        ledger.reserve("gpt-6-luna", 0, 80_000_000)
+        with self.assertRaises(urllib.error.HTTPError):
+            self.ask()
+        status = self.request("/status")
+        self.assertIsNone(status["run"])
+        self.assertEqual(status["transcript"], [])
+        self.assertEqual(status["budget"]["remaining_usd"], 0)
+        (Path(self.temporary.name) / "budget.sqlite3").write_text("unusable")
+        with self.assertRaises(urllib.error.HTTPError):
+            self.ask()
+        status = self.request("/status")
+        self.assertFalse(status["budget"]["usable"])
+        self.assertTrue(status["configurationError"])
 
 
 if __name__ == "__main__":

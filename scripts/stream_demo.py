@@ -17,6 +17,8 @@ def main() -> None:
     parser.add_argument("--diagnostics", action="store_true")
     parser.add_argument("--conversation", action="store_true")
     parser.add_argument("--fixture-provider", action="store_true")
+    parser.add_argument("--initialize-budget", action="store_true")
+    parser.add_argument("--budget")
     args = parser.parse_args()
     run([sys.executable, str(ROOT / "scripts/demo.py"), "--prepare-only"], 18000)
     lock = json.loads((ROOT / "demo-lock.json").read_text(encoding="utf-8"))
@@ -56,6 +58,8 @@ def main() -> None:
             ),
             *([] if args.conversation else ["--fragment-frames", str(args.fragment_frames)]),
             *(["--fixture-provider"] if args.fixture_provider and args.conversation else []),
+            *(["--initialize-budget"] if args.initialize_budget else []),
+            *(["--budget", args.budget] if args.budget else []),
             *(["--speech", "--output", str(RUNTIME / "speech")] if args.speech else []),
             *(["--diagnostics"] if args.diagnostics else []),
         ],
