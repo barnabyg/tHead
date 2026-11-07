@@ -12111,5 +12111,23 @@
       "question": "How do we detect one?",
       "post_start_waits": []
     }
+  },
+  "clean_startup": {
+    "tracked_tree_clean": true,
+    "warm_cache": true,
+    "prepared_seconds": 12.7693478,
+    "ready_seconds": 8.638123100001394,
+    "state": "idle",
+    "voice": {
+      "engine": "System.Speech, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35",
+      "voice_id": "TTS_MS_EN-US_ZIRA_11.0",
+      "windows": "10.0.26300.0",
+      "ready": true,
+      "voice": "Microsoft Zira Desktop",
+      "culture": "en-US"
+    },
+    "prerequisites": "Installed Windows/driver/voice/Python/uv; directory junctions to declared runtime environments, source/model/media/download caches; copied public input assets; isolated output and ledger.",
+    "scope": "Preparation and startup to native ready; no clean-checkout paid call or browser replay.",
+    "revision": "3d1b32c677172351dfa724768e399049ad553ddb"
   }
 }

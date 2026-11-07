@@ -105,3 +105,16 @@ GPU work is serialised because concurrent inference would invalidate timings;
 CPU/browser correctness suites run independently in parallel. Phase 5's ten-turn
 distribution, bottleneck tuning, long-session soak and hardware decisions are
 outside this assessment.
+
+## Clean-checkout startup
+
+A detached, clean tracked checkout of `3d1b32c` ran the documented command with
+`-NoBrowser -Diagnostics -FixtureProvider -InitializeBudget`. Preparation completed
+in **12.769 seconds** and the native GPU/Zira application became ready in **8.638
+seconds** after construction, with no configuration error. Its ledger, generated
+outputs and copied public input files were isolated in the clean checkout.
+Directory junctions supplied the declared warm Python environments, pinned
+upstream/model/media/download caches; Windows, the GPU driver, voice, Python and
+uv were already installed. This verifies tracked launch sources with declared
+prerequisites/caches, not a fresh machine or cold download. Browser playback and
+paid requests were checked in the main checkout rather than replayed here.
