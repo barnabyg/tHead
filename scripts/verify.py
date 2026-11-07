@@ -24,6 +24,7 @@ def main() -> None:
     browser_files = [
         "scripts/streaming.js",
         "scripts/benchmark.cjs",
+        "scripts/resilience.cjs",
         "scripts/streaming.html",
         "scripts/conversation.html",
         "playwright.config.cjs",
@@ -38,6 +39,7 @@ def main() -> None:
     run([python, "-m", "mypy"], 180)
     run(["node", "--check", "scripts/streaming.js"], 120)
     run(["node", "--check", "scripts/benchmark.cjs"], 120)
+    run(["node", "--check", "scripts/resilience.cjs"], 120)
     run(["node", "--check", "tests/browser/conversation.spec.cjs"], 120)
     run(["node", "--check", "playwright.config.cjs"], 120)
     run([python, "-m", "bandit", "-q", "-c", "pyproject.toml", "-r", "scripts", "tests"], 120)
@@ -166,6 +168,8 @@ def main() -> None:
             "docs/runtime/rtx3090-streaming.json",
             "docs/runtime/rtx3090-speech.json",
             "docs/runtime/rtx3090-conversation.json",
+            "docs/runtime/rtx3090-phase5-baseline.json",
+            "docs/runtime/rtx3090-phase5-recovery.json",
             "speech-lock.json",
         )
     }

@@ -17,7 +17,7 @@ test.beforeEach(async ({ page }, info) => {
   );
   info.app = child;
   info.output = output;
-  const timeout = setTimeout(() => child.kill(), 180_000);
+  const timeout = setTimeout(() => child.kill(), 960_000);
   info.appTimeout = timeout;
   info.url = await new Promise((resolve, reject) => {
     let text = '';
@@ -45,6 +45,41 @@ test.beforeEach(async ({ page }, info) => {
   });
   await page.goto(info.url);
   await expect(page.getByRole('button', { name: 'Ask', exact: true })).toBeEnabled();
+});
+
+test('bounded 100-turn session trims context, rejects turn 101 and resets', async ({
+  page,
+  request,
+}, info) => {
+  test.setTimeout(900_000);
+  const ask = page.getByRole('button', { name: 'Ask', exact: true });
+  for (let index = 0; index < 100; index++) {
+    await expect(ask).toBeEnabled();
+    const question = `Turn ${index}: ${'context '.repeat(120)}`;
+    await page.getByLabel('Question', { exact: true }).fill(question);
+    await ask.click();
+    await expect(page.locator('#transcript')).toContainText(`You: Turn ${index}:`);
+    await expect(page.locator('#status')).toHaveText('Playback ended');
+  }
+  await expect(ask).toBeEnabled();
+  await expect(page.locator('#transcript')).toContainText('exchanges omitted');
+  const before = await (await request.get(`${info.url}/status`)).json();
+  expect(before.transcript).toHaveLength(100);
+  await page.getByLabel('Question', { exact: true }).fill('This turn must be rejected');
+  await ask.click();
+  await expect(page.locator('#status')).toContainText('100 turns');
+  const rejected = await (await request.get(`${info.url}/status`)).json();
+  expect(rejected.transcript).toHaveLength(100);
+  expect(rejected.budget.estimated_usd).toBe(before.budget.estimated_usd);
+  await page.getByRole('button', { name: 'New conversation' }).click();
+  await expect(page.locator('#transcript')).toBeEmpty();
+  await expect(ask).toBeEnabled();
+  await ask.click();
+  await expect(page.locator('#status')).toHaveText('Playback ended');
+  const fresh = await (await request.get(`${info.url}/status`)).json();
+  expect(fresh.transcript).toHaveLength(1);
+  const dispatched = fresh.run.events.find((event) => event.event === 'provider-request');
+  expect(dispatched.messages).toHaveLength(1);
 });
 
 test.afterEach(async ({ page }, info) => {
@@ -128,6 +163,47 @@ test('Stop cancels an accepted request whose start reply is delayed', async ({
   await expect(page.locator('#transcript')).toContainText('Interrupted');
 });
 
+test('repeated Stop across delayed stages retains questions and excludes interrupted answers', async ({
+  page,
+  request,
+}, info) => {
+  const ask = page.getByRole('button', { name: 'Ask', exact: true });
+  for (const [fault, stage] of [
+    ['llm-connect', 'llm-connect'],
+    ['llm-delay', 'llm-first-text'],
+    ['tts-delay', 'tts-start'],
+  ]) {
+    await expect(ask).toBeEnabled();
+    await page.getByLabel('Diagnostic fault').selectOption(fault);
+    await ask.click();
+    await expect
+      .poll(async () => {
+        const status = await (await request.get(`${info.url}/status`)).json();
+        return status.run.events.some((event) => event.event === stage);
+      })
+      .toBe(true);
+    await page.getByRole('button', { name: 'Stop', exact: true }).click();
+    await page.getByRole('button', { name: 'Stop', exact: true }).click();
+    await expect(ask).toBeEnabled();
+    const stopped = await (await request.get(`${info.url}/status`)).json();
+    expect(stopped.run.state).toBe('stopped');
+    expect(stopped.run.events.some((event) => event.event === 'resources-released')).toBe(true);
+    const question = stopped.transcript.at(-1).question;
+    const spent = stopped.budget.estimated_usd;
+    await page.getByLabel('Diagnostic fault').selectOption('');
+    await page.getByLabel('Question', { exact: true }).fill(`Replacement after ${fault}`);
+    await ask.click();
+    await expect(page.locator('#status')).toHaveText('Playback ended');
+    await expect(ask).toBeEnabled();
+    const next = await (await request.get(`${info.url}/status`)).json();
+    const messages = next.run.events.find((event) => event.event === 'provider-request').messages;
+    expect(messages.at(-2)).toEqual({ role: 'user', content: question });
+    expect(next.budget.estimated_usd).toBeGreaterThanOrEqual(spent);
+    await page.getByRole('button', { name: 'New conversation' }).click();
+    await expect(page.locator('#transcript')).toBeEmpty();
+  }
+});
+
 test('busy reset rejects late text and safe rendering keeps provider markup literal', async ({
   page,
 }) => {
@@ -156,6 +232,17 @@ test('provider, TTS and media failures recover, then budget rejection prevents d
       .poll(async () => (await (await request.get(`${info.url}/status`)).json()).run.state)
       .toBe('failed');
     await expect(page.getByRole('button', { name: 'Ask', exact: true })).toBeEnabled();
+    await page.route('**/segment?*', async (route) => {
+      const index = new URL(route.request().url()).searchParams.get('index');
+      if (index === '0')
+        await route.fulfill({ path: 'tests/fixtures/browser.mp4', contentType: 'video/mp4' });
+      else await route.fulfill({ status: 204, body: '' });
+    });
+    await page.getByLabel('Diagnostic fault').selectOption('');
+    await page.getByRole('button', { name: 'Ask', exact: true }).click();
+    await expect(page.locator('#status')).toHaveText('Playback ended');
+    await expect(page.getByRole('button', { name: 'Ask', exact: true })).toBeEnabled();
+    await page.unroute('**/segment?*');
   }
   const python = process.env.THEAD_TEST_PYTHON || 'python';
   // Seed only this test-owned ledger through the public accounting interface.
