@@ -265,6 +265,37 @@ test('late old media and delayed failed selection cannot revive playback after r
   expect((await (await request.get(`${info.url}/status`)).json()).activePair).toBe('jfk-zira');
 });
 
+test('reset acknowledgement gates the next selection and response', async ({ page }) => {
+  let releaseReset;
+  let resetAccepted;
+  const gate = new Promise((resolve) => {
+    releaseReset = resolve;
+  });
+  const accepted = new Promise((resolve) => {
+    resetAccepted = resolve;
+  });
+  await page.route('**/reset', async (route) => {
+    const response = await route.fetch();
+    resetAccepted();
+    await gate;
+    await route.fulfill({ response });
+  });
+  await page.getByRole('button', { name: 'New conversation' }).click();
+  await accepted;
+  const pair = page.getByLabel('Avatar and voice', { exact: true });
+  const ask = page.getByRole('button', { name: 'Ask', exact: true });
+  try {
+    expect(await pair.isDisabled()).toBe(true);
+    expect(await ask.isDisabled()).toBe(true);
+  } finally {
+    releaseReset();
+  }
+  await expect(pair).toBeEnabled();
+  await pair.selectOption('hopper-hazel');
+  await expect(page.locator('#pair-status')).toContainText('Active: Grace Hopper');
+  await expect(ask).toBeEnabled();
+});
+
 test('complete answer, contextual follow-up, idle Stop and fresh conversation', async ({
   page,
   request,

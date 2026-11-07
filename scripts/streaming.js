@@ -13,7 +13,8 @@ let sessionIdentity = null;
 let pendingRequest = null;
 let pendingController = null;
 let selecting = false;
-let stopping = false;
+let stopping = 0;
+let resetting = 0;
 const pairSelector = document.querySelector('#pair');
 pairSelector?.addEventListener('change', async () => {
   if (selecting) return;
@@ -37,6 +38,9 @@ pairSelector?.addEventListener('change', async () => {
   }
 });
 document.querySelector('#reset')?.addEventListener('click', async () => {
+  resetting++;
+  start.disabled = true;
+  if (pairSelector) pairSelector.disabled = true;
   epoch++;
   pendingController?.abort();
   const before = performance.now();
@@ -52,6 +56,9 @@ document.querySelector('#reset')?.addEventListener('click', async () => {
     notice = 'New conversation';
   } catch (error) {
     statusText.textContent = String(error);
+  } finally {
+    resetting--;
+    epoch++;
   }
 });
 function prepareAudioOutput() {
@@ -205,7 +212,9 @@ function observeVideo(run) {
   });
 }
 document.querySelector('#stop').onclick = async () => {
-  stopping = true;
+  stopping++;
+  start.disabled = true;
+  if (pairSelector) pairSelector.disabled = true;
   epoch++;
   pendingController?.abort();
   const before = performance.now();
@@ -233,7 +242,7 @@ document.querySelector('#stop').onclick = async () => {
     );
   await Promise.all(cancellations);
   epoch++;
-  stopping = false;
+  stopping--;
 };
 function waitEvent(target, event, signal) {
   return new Promise((resolve, reject) => {
@@ -479,6 +488,7 @@ setInterval(async () => {
       pairSelector.disabled =
         selecting ||
         stopping ||
+        resetting ||
         submitting ||
         status.state !== 'idle' ||
         !!(active && !active.ended);
@@ -522,6 +532,7 @@ setInterval(async () => {
       submitting ||
       selecting ||
       stopping ||
+      resetting ||
       !!(active && !active.ended) ||
       !!status.configurationError;
     if (!active)
