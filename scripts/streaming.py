@@ -46,6 +46,7 @@ class Session:
         self.progressive = False
         self.clip = "six"
         self.text: list[str] = []
+        self.fault = ""
         self.input: deque[bytes] = deque()
         self.input_index = 0
         self.input_samples = 0
@@ -56,6 +57,14 @@ class Session:
 
     def event(self, kind: str, **data: Any) -> None:
         with self.condition:
+            if self.cancelled.is_set() and kind not in (
+                "client-paused",
+                "digital-silence",
+                "generation-abandoned",
+                "tts-released",
+                "resources-released",
+            ):
+                return
             if len(self.events) < 2000:
                 self.events.append(
                     {"event": kind, "seconds": time.perf_counter() - self.started, **data}
@@ -168,6 +177,7 @@ class Demonstration:
         test_backend: bool = False,
         fragment_frames: int = 8,
         speech_enabled: bool = False,
+        diagnostics: bool = False,
     ) -> None:
         self.inputs = inputs
         self.startup = time.perf_counter()
@@ -182,6 +192,7 @@ class Demonstration:
         self.fragment_frames = fragment_frames
         self.voice = Voice()
         self.speech_enabled = speech_enabled
+        self.diagnostics = diagnostics or test_backend
         self.shutdown = threading.Event()
         self.loading: dict[str, Any] = {
             "platform": platform.platform(),
@@ -198,6 +209,7 @@ class Demonstration:
                 "error": self.error,
                 "loading": self.loading,
                 "speechEnabled": self.speech_enabled,
+                "diagnostics": self.diagnostics,
                 "run": self.current.snapshot() if self.current else None,
             }
 
@@ -230,13 +242,16 @@ class Demonstration:
                     session.save()
             return session
 
-    def speak(self, text: str) -> Session:
+    def speak(self, text: str, fault: str = "") -> Session:
         if not self.speech_enabled:
             raise ValueError("Launch speech-demo.ps1 to enable local TTS")
+        if fault and (not self.diagnostics or fault not in ("tts", "media", "tts-delay")):
+            raise ValueError("Fault injection requires the explicit diagnostics launcher flag")
         phrases = segments(text)
         with self.condition:
             session = self.start()
             session.text = phrases
+            session.fault = fault
             session.progressive = True
             session.event("text-submitted", text=text, segments=len(phrases))
             return session
@@ -249,6 +264,12 @@ class Demonstration:
             if session.cancelled.is_set():
                 return
             begun = time.perf_counter()
+            session.event("tts-start", index=index)
+            if session.fault == "tts-delay":
+                # Diagnostic external operation returns late even after Stop.
+                time.sleep(1)
+            if session.fault == "tts":
+                raise RuntimeError("Injected local TTS failure")
             if self.test_backend:
                 session.cancelled.wait(0.15)
                 pcm = b"\x01\x00" * 16000
@@ -336,6 +357,12 @@ class Demonstration:
                     chunks = session.chunks() if session.progressive else iter([b"diagnostic"])
                     for _ in chunks:
                         time.sleep(0.3)  # Simulated non-preemptible external inference.
+                        if session.fault == "media":
+                            session.state = "failed"
+                            session.error = "Injected media failure"
+                            session.event("failure", error=session.error)
+                            session.abandon()
+                            break
                         session.output(b"CPU diagnostic result; not playable media")
                     if session.cancelled.is_set():
                         session.event("generation-abandoned")
@@ -346,6 +373,8 @@ class Demonstration:
                     elif session.state != "failed":
                         session.state = "complete"
                     self.finish_speech(session, producer)
+                    session.event("resources-released")
+                    session.save()
                     self.state = "idle"
                 return
             with wave.open(str(self.inputs / "english.wav"), "rb") as audio:
@@ -385,6 +414,8 @@ class Demonstration:
                 producer = self.begin_speech(session)
                 self.generate(session, pipeline, inference, torch, np)
                 self.finish_speech(session, producer)
+                session.event("resources-released")
+                session.save()
                 with self.condition:
                     self.state = "idle"
                     self.condition.notify_all()
@@ -404,7 +435,10 @@ class Demonstration:
         try:
             if session.cancelled.is_set():
                 return
-            session.state = "generating"
+            with session.condition:
+                if session.cancelled.is_set():
+                    return
+                session.state = "generating"
             session.event("generation-start", progressive=session.progressive, clip=session.clip)
             session.event(
                 "transport-profile",
@@ -425,6 +459,8 @@ class Demonstration:
             ) != (33, 9, 25, 16000, 512, 512):
                 raise RuntimeError("Pinned streaming profile changed")
             session.event("portrait-ready", settings=params)
+            if session.fault == "media":
+                raise RuntimeError("Injected media failure")
             lock = json.loads((ROOT / "demo-lock.json").read_text(encoding="utf-8"))
             ffmpeg = RUNTIME / "media" / lock["media"]["directory"] / "bin/ffmpeg.exe"
             mux = Mux(
@@ -483,9 +519,10 @@ class Demonstration:
                 rss_bytes=importlib.import_module("psutil").Process().memory_info().rss,
             )
             mux.finish()
-            if not session.cancelled.is_set():
-                session.state = "complete"
-                session.event("transport-complete")
+            with session.condition:
+                if not session.cancelled.is_set():
+                    session.state = "complete"
+                    session.event("transport-complete")
         except Exception as error:
             if not session.cancelled.is_set():
                 session.state = "failed"
@@ -578,8 +615,10 @@ def handler(demo: Demonstration) -> type[BaseHTTPRequestHandler]:
                 if not 0 <= size <= 65536:
                     raise ValueError("Request too large")
                 data = json.loads(self.rfile.read(size) or b"{}")
+                if not isinstance(data, dict):
+                    raise ValueError("Expected a JSON object")
                 if self.path == "/speak":
-                    result = demo.speak(data.get("text", "")).snapshot()
+                    result = demo.speak(data.get("text", ""), str(data.get("fault", ""))).snapshot()
                 elif self.path == "/start":
                     result = demo.start(
                         bool(data.get("diagnosticFailure")),
@@ -608,9 +647,12 @@ def handler(demo: Demonstration) -> type[BaseHTTPRequestHandler]:
                     if not session or data.get("run") != session.id or session.cancelled.is_set():
                         raise ValueError("Stale run")
                     with session.condition:
-                        session.played = max(
-                            session.played, min(120, float(data.get("currentTime", 0)))
-                        )
+                        if session.cancelled.is_set():
+                            raise ValueError("Stale run")
+                        position = float(data.get("currentTime", 0))
+                        if not math.isfinite(position) or position < 0:
+                            raise ValueError("Expected a finite nonnegative playback position")
+                        session.played = max(session.played, min(120, position))
                         session.event("player", **{k: v for k, v in data.items() if k != "run"})
                         session.condition.notify_all()
                         session.save()
@@ -635,6 +677,7 @@ def main() -> None:
     parser.add_argument("--test-backend", action="store_true", help="CPU protocol probe; no media")
     parser.add_argument("--fragment-frames", type=int, choices=(8, 24), default=8)
     parser.add_argument("--speech", action="store_true")
+    parser.add_argument("--diagnostics", action="store_true")
     args = parser.parse_args()
     demo = Demonstration(
         args.inputs.resolve(),
@@ -642,14 +685,19 @@ def main() -> None:
         args.test_backend,
         args.fragment_frames,
         args.speech,
+        args.diagnostics,
     )
     server = ThreadingHTTPServer(("127.0.0.1", args.port), handler(demo))
+    lifetime = threading.Timer(7200, server.shutdown)
+    lifetime.daemon = True
+    lifetime.start()
     print(f"LISTEN http://127.0.0.1:{server.server_port}", flush=True)
     try:
         server.serve_forever(poll_interval=0.2)
     except KeyboardInterrupt:
         pass
     finally:
+        lifetime.cancel()
         server.server_close()
         demo.shutdown.set()
         if demo.current:

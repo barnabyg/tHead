@@ -5,6 +5,8 @@ const statusText = document.querySelector('#status');
 const report = document.querySelector('#report');
 let active = null;
 let epoch = 0;
+let submitting = false;
+let notice = '';
 let audioOutput = null;
 function prepareAudioOutput() {
   if (!audioOutput) {
@@ -33,6 +35,7 @@ function observeSilence(run, actionTime, beforeRms) {
     consecutive = 0;
   const sample = () => {
     const elapsed = performance.now() - actionTime;
+    if (active && active !== run) return;
     const rms = outputRms();
     if (rms !== null && rms < threshold) {
       if (firstSilent === null) firstSilent = elapsed;
@@ -82,7 +85,7 @@ async function post(path, data) {
 }
 function telemetry(event, extra = {}) {
   const run = active;
-  if (!run) return;
+  if (!run || run.ended) return;
   const buffered = video.buffered.length
     ? video.buffered.end(video.buffered.length - 1) - video.currentTime
     : 0;
@@ -136,6 +139,7 @@ document.querySelector('#stop').onclick = () => {
   release();
   observeSilence(run, before, beforeRms);
   statusText.textContent = 'Stopped; waiting for inference resources if needed';
+  notice = statusText.textContent;
   if (run)
     post('/stop', { run: run.id, clientPauseMilliseconds: performance.now() - before }).catch(
       (error) => {
@@ -196,6 +200,9 @@ async function feed(run, clip, delayed) {
   }
 }
 start.onclick = async () => {
+  if (submitting) return;
+  submitting = true;
+  notice = '';
   const ticket = ++epoch;
   const previous = release();
   if (previous && !previous.ended) await post('/stop', { run: previous.id }).catch(() => {});
@@ -203,11 +210,15 @@ start.onclick = async () => {
   play.hidden = true;
   try {
     await prepareAudioOutput().context.resume();
+    if (ticket !== epoch) return;
     const clip = document.querySelector('#clip').value;
     const mode = document.querySelector('#mode').value;
     const run =
       clip === 'text'
-        ? await post('/speak', { text: document.querySelector('#text').value })
+        ? await post('/speak', {
+            text: document.querySelector('#text').value,
+            fault: document.querySelector('#fault').value,
+          })
         : await post('/start', { clip, progressive: mode !== 'complete' });
     if (ticket !== epoch) {
       await post('/stop', { run: run.id });
@@ -300,10 +311,13 @@ start.onclick = async () => {
   } catch (error) {
     if (ticket !== epoch) return;
     statusText.textContent = String(error);
+    notice = String(error);
     telemetry('client-failure', { message: String(error) });
     video.pause();
     if (active) await post('/stop', { run: active.id }).catch(() => {});
     release();
+  } finally {
+    submitting = false;
   }
 };
 play.onclick = () => {
@@ -320,10 +334,12 @@ setInterval(async () => {
   try {
     const status = await (await fetch('/status')).json();
     document.querySelector('#clip option[value="text"]').disabled = !status.speechEnabled;
+    document.querySelector('#diagnostics').hidden = !status.diagnostics;
     if (!status.speechEnabled && document.querySelector('#clip').value === 'text')
       document.querySelector('#clip').value = 'six';
-    start.disabled = !(status.ready && status.state === 'idle');
-    if (!active) statusText.textContent = status.error || `Model: ${status.state}`;
+    start.disabled =
+      !(status.ready && status.state === 'idle') || submitting || !!(active && !active.ended);
+    if (!active) statusText.textContent = status.error || notice || `Model: ${status.state}`;
     report.textContent = JSON.stringify(status, null, 2);
   } catch (error) {
     statusText.textContent = String(error);

@@ -17,6 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 class TextTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temporary.cleanup)
         # Fixed task-owned CLI and ephemeral loopback port, not external commands.
         self.process = subprocess.Popen(  # nosec B603
             [
@@ -33,14 +34,16 @@ class TextTests(unittest.TestCase):
             stderr=subprocess.STDOUT,
             text=True,
         )
+        self.addCleanup(self.stop_process)
         assert self.process.stdout is not None  # nosec B101
-        self.url = self.process.stdout.readline().strip().split(" ")[1]
+        line = self.process.stdout.readline()
+        self.assertTrue(line.startswith("LISTEN "), line)
+        self.url = line.strip().split(" ")[1]
         self.idle()
 
-    def tearDown(self) -> None:
+    def stop_process(self) -> None:
         self.process.terminate()
         self.process.communicate(timeout=30)
-        self.temporary.cleanup()
 
     def request(self, path: str, data: dict[str, Any] | None = None) -> dict[str, Any]:
         body = json.dumps(data).encode() if data is not None else None
@@ -84,6 +87,38 @@ class TextTests(unittest.TestCase):
         self.assertEqual(sum(e["samples"] for e in arrived), 128000)
         self.assertTrue(arrived[-1]["final"])
         self.assertLessEqual(max(e["queued"] for e in arrived), 2)
+
+    def test_stop_during_synthesis_rejects_late_results_and_recovers_from_failures(self) -> None:
+        run = self.request("/speak", {"text": "Delayed speech.", "fault": "tts-delay"})
+        deadline = time.monotonic() + 10
+        while time.monotonic() < deadline:
+            current = self.request("/status")["run"]
+            if any(e["event"] == "tts-start" for e in current["events"]):
+                break
+            time.sleep(0.02)
+        else:
+            self.fail("Synthesis did not begin")
+        self.request("/stop", {"run": run["id"]})
+        self.request("/stop", {"run": run["id"]})
+        stopped = self.idle()["run"]
+        self.assertEqual(stopped["state"], "stopped")
+        self.assertFalse(
+            any(e["event"] in ("tts-segment", "media-ready") for e in stopped["events"])
+        )
+        for fault in ("tts", "media"):
+            self.request("/speak", {"text": "Failure probe.", "fault": fault})
+            failed = self.idle()["run"]
+            self.assertEqual(failed["state"], "failed")
+            self.assertIn("Injected", failed["error"])
+        replacement = self.request("/speak", {"text": "Recovered speech."})
+        for path, body in (
+            ("/telemetry", {"run": run["id"], "currentTime": 90}),
+            ("/stop", {"run": run["id"]}),
+        ):
+            with self.assertRaises(urllib.error.HTTPError):
+                self.request(path, body)
+        self.assertEqual(self.idle()["run"]["id"], replacement["id"])
+        self.assertEqual(self.request("/status")["run"]["state"], "complete")
 
 
 if __name__ == "__main__":

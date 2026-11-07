@@ -56,6 +56,38 @@ utterance below that buffer starts after the encoder drains. Browser media older
 than two seconds is evicted during playback. Real text/voice timing must still be
 measured; CPU protocol probes do not establish sound or continuity.
 
+## Stop and recovery
+
+Stop pauses and detaches the browser's media synchronously, revokes its object
+URL and aborts media fetches before sending the server request. A browser epoch
+invalidates pending start responses; run IDs reject old media/input/telemetry.
+Repeated Stop is harmless. New input is enabled after the old GPU owner and
+speech producer release; already loaded model resources remain reusable.
+
+Native GPU inference cannot be preempted mid-call. Its result is discarded after
+Stop. Browser digital silence is sampled separately (10 ms timer, 256-sample
+audio analyser, two silent observations, five-second observation limit); this is
+an audio-graph observation, not physical speaker latency. A replacement run
+cancels an outstanding silence observation to avoid attributing new speech to
+the old run. Results record `stop-handled`, `generation-abandoned`,
+`tts-released` and `resources-released` separately.
+
+TTS waits poll cancellation every 50 ms. Cancelling active native synthesis kills
+its worker and waits at most 10 s plus a 5 s pipe-reader join; the next submission
+reloads the voice. The producer must join within 30 s before accepting another
+run. Encoder shutdown kills FFmpeg, waits at most 30 s and joins its three
+threads for at most 5 s each. Inference has no reliable thread-level kill: if it
+hangs, the outer two-hour process-tree supervisor is the final limit. Stop
+silence should not be confused with those resource-release limits. PCM, pending
+phrase, media queues and per-run events (2000) are bounded; repeated runs reuse
+one GPU pipeline and one TTS worker rather than accumulating loaded copies.
+
+For explicit failure injection, append `-Diagnostics` to the same launcher.
+Choose **Fail local TTS** or **Fail media**, Start, expect a clear failure, reset
+the fault to None and submit the example again successfully. **Delay synthesis**
+allows Stop before first audio. These controls are unavailable without the flag;
+the CPU protocol test backend also enables them but produces no playable media.
+
 ## Engine and reproducibility
 
 Synthesis uses Windows PowerShell 5.1's framework `System.Speech` 4.0.0.0 and the

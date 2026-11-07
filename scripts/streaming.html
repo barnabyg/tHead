@@ -56,6 +56,15 @@ pre {
   </select></label
 >
 <button type="button" id="start" disabled>Start</button>
+<label id="diagnostics" hidden
+  >Diagnostic fault
+  <select id="fault">
+    <option value="">None</option>
+    <option value="tts-delay">Delay synthesis (Stop probe)</option>
+    <option value="tts">Fail local TTS</option>
+    <option value="media">Fail media</option>
+  </select>
+</label>
 <button type="button" id="stop">Stop</button>
 <button type="button" id="play" hidden>Play audio/video</button>
 <!-- biome-ignore lint/a11y/useMediaCaption: Lip-sync fixture has no verified transcript; remove when captions cover all declared clips. -->
