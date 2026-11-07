@@ -44,7 +44,7 @@ for (const event of ['playing', 'waiting', 'stalled', 'ended', 'error']) {
     telemetry(event, {mediaError: video.error?.message});
     if (event === 'playing') statusText.textContent = 'Playing';
     if (event === 'waiting' && active) statusText.textContent = 'Buffering';
-    if (event === 'ended') statusText.textContent = 'Playback ended';
+    if (event === 'ended') {statusText.textContent = 'Playback ended'; if (active) active.ended = true;}
     if (event === 'error') statusText.textContent = 'Playback failed: ' + video.error?.message;
     if (event === 'error' && active) {
       const run = release();
@@ -113,7 +113,7 @@ async function feed(run, clip, delayed) {
 start.onclick = async () => {
   const ticket = ++epoch;
   const previous = release();
-  if (previous) await post('/stop', {run: previous.id}).catch(() => {});
+  if (previous && !previous.ended) await post('/stop', {run: previous.id}).catch(() => {});
   start.disabled = true;
   play.hidden = true;
   try {
@@ -130,6 +130,8 @@ start.onclick = async () => {
     const codec = 'video/mp4; codecs="avc1.42C01E, mp4a.40.2"';
     if (!MediaSource.isTypeSupported(codec)) throw Error('This browser lacks H.264/AAC MediaSource support');
     const buffer = media.addSourceBuffer(codec);
+    telemetry('client-settings', {userAgent:navigator.userAgent, mode, clip,
+      initialBufferSeconds:clip === 'short' ? 0.35 : (mode === 'complete' ? 0.64 : 1.28)});
     if (mode !== 'complete') feed(run, clip, mode === 'delayed').catch(error => {
       if (active !== run) return;
       statusText.textContent = String(error);
@@ -154,7 +156,8 @@ start.onclick = async () => {
       if (active !== run) return;
       telemetry('appended', {index});
       index++;
-      if (!requested && video.buffered.length) {
+      const minimumBuffer = clip === 'short' ? 0.35 : (mode === 'complete' ? 0.64 : 1.28);
+      if (!requested && video.buffered.length && video.buffered.end(0) >= minimumBuffer) {
         requested = true;
         telemetry('play-request');
         video.requestVideoFrameCallback(() => {if (active === run) telemetry('first-frame-presented');});

@@ -27,8 +27,18 @@ Read the prerequisites and measured result in the runtime guide first. Readiness
 means the real Lite, LTX VAE and audio encoder weights loaded on the RTX 3090.
 The demo adds video generation and playback. See the
 [Windows reproducibility baseline](docs/runtime/windows-baseline.md) for clean-checkout
-preparation, repeated RTX 3090 measurements and the Phase 1 conclusion. Streaming
-remains subsequent work.
+preparation, repeated RTX 3090 measurements and the Phase 1 conclusion.
+
+Streaming output, Stop/recovery and controlled progressive audio input are available
+in the [browser streaming experiment](docs/runtime/windows-streaming.md):
+
+```powershell
+pwsh -NoProfile -File ./scripts/stream-demo.ps1
+```
+
+The [Phase 2 assessment](docs/runtime/phase-2-assessment.md) records real RTX 3090
+measurements and the feasibility decision. This is prerecorded speech, with no
+TTS, LLM or integrated conversation pipeline.
 
 For development, install uv 0.11.7 and run the canonical verification command:
 
@@ -39,7 +49,9 @@ uv run --locked python scripts/verify.py
 It checks formatting, lint, strict types, static security analysis, command-boundary
 tests, dependency locks and vulnerabilities, secrets, Python syntax and PowerShell
 syntax. CI runs these checks on Windows. GPU validation uses the separate smoke
-command and must be run on the target hardware. There is one small CPU test suite;
-GPU runs are serial because they share one GPU and memory/timing measurements.
+command and must be run on the target hardware. Independent CPU test modules run
+concurrently with isolated temporary paths and loopback ports; unittest has no
+internal parallel worker mode. GPU runs are serial because they share one GPU
+and memory/timing measurements.
 There is no distributable application package at this phase, so wheel building
 and deployment verification are inapplicable.

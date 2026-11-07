@@ -28,7 +28,7 @@ SAMPLES = 15360
 
 
 class Session:
-    def __init__(self, directory: Path) -> None:
+    def __init__(self, directory: Path, fragment_frames: int = 8) -> None:
         self.id = uuid.uuid4().hex
         self.directory = directory / self.id
         self.directory.mkdir(parents=True)
@@ -37,6 +37,8 @@ class Session:
         self.state = "queued"
         self.cancelled = threading.Event()
         self.parts = 0
+        self.fragment_seconds = fragment_frames / 25
+        self.max_pending = 72 // fragment_frames
         self.played = 0.0
         self.error = ""
         self.diagnostic_failure = False
@@ -76,7 +78,7 @@ class Session:
     def output(self, data: bytes) -> None:
         with self.condition:
             deadline = time.monotonic() + 300
-            while self.parts - 1 - int(self.played / 0.96) >= 3:
+            while self.parts - 1 - int(self.played / self.fragment_seconds) >= self.max_pending:
                 if self.cancelled.is_set():
                     return
                 if time.monotonic() > deadline:
@@ -89,7 +91,7 @@ class Session:
                 "media-ready",
                 index=self.parts,
                 bytes=len(data),
-                pending=max(0, self.parts - int(self.played / 0.96)),
+                pending=max(0, self.parts - int(self.played / self.fragment_seconds)),
             )
             self.parts += 1
             self.condition.notify_all()
@@ -151,8 +153,11 @@ class Session:
 
 
 class Demonstration:
-    def __init__(self, inputs: Path, directory: Path, test_backend: bool = False) -> None:
+    def __init__(
+        self, inputs: Path, directory: Path, test_backend: bool = False, fragment_frames: int = 8
+    ) -> None:
         self.inputs = inputs
+        self.startup = time.perf_counter()
         self.directory = directory
         self.directory.mkdir(parents=True, exist_ok=True)
         self.condition = threading.Condition()
@@ -161,6 +166,7 @@ class Demonstration:
         self.error = ""
         self.current: Session | None = None
         self.test_backend = test_backend
+        self.fragment_frames = fragment_frames
         self.shutdown = threading.Event()
         self.loading: dict[str, Any] = {
             "platform": platform.platform(),
@@ -187,7 +193,7 @@ class Demonstration:
                 raise ValueError("Wait until the model is ready and idle")
             if clip not in ("six", "long", "short"):
                 raise ValueError("Unknown declared audio clip")
-            self.current = Session(self.directory)
+            self.current = Session(self.directory, self.fragment_frames)
             self.current.diagnostic_failure = diagnostic_failure and self.test_backend
             self.current.progressive = progressive
             self.current.clip = clip
@@ -215,6 +221,7 @@ class Demonstration:
             if self.test_backend:
                 self.ready = True
                 self.state = "idle"
+                self.loading["ready_seconds"] = time.perf_counter() - self.startup
                 while not self.shutdown.is_set():
                     with self.condition:
                         self.condition.wait_for(
@@ -257,6 +264,7 @@ class Demonstration:
             with self.condition:
                 self.ready = True
                 self.state = "idle"
+                self.loading["ready_seconds"] = time.perf_counter() - self.startup
                 (self.directory / "readiness.json").write_text(
                     json.dumps(self.status(), indent=2) + "\n", encoding="utf-8"
                 )
@@ -291,6 +299,12 @@ class Demonstration:
                 return
             session.state = "generating"
             session.event("generation-start", progressive=session.progressive, clip=session.clip)
+            session.event(
+                "transport-profile",
+                fragment_frames=self.fragment_frames,
+                fragment_seconds=session.fragment_seconds,
+                max_pending_fragments=session.max_pending,
+            )
             torch.cuda.reset_peak_memory_stats()
             inference.get_base_data(pipeline, str(self.inputs / "portrait.jpg"), 42, False)
             params = inference.get_infer_params()
@@ -306,7 +320,9 @@ class Demonstration:
             session.event("portrait-ready", settings=params)
             lock = json.loads((ROOT / "demo-lock.json").read_text(encoding="utf-8"))
             ffmpeg = RUNTIME / "media" / lock["media"]["directory"] / "bin/ffmpeg.exe"
-            mux = Mux(ffmpeg, session.output, session.directory / "ffmpeg.log")
+            mux = Mux(
+                ffmpeg, session.output, session.directory / "ffmpeg.log", self.fragment_frames
+            )
             history: deque[float] = deque([0.0] * 128000, maxlen=128000)
             if session.progressive:
                 chunks = session.chunks()
@@ -353,6 +369,7 @@ class Demonstration:
                 allocated_bytes=torch.cuda.memory_allocated(),
                 peak_allocated_bytes=torch.cuda.max_memory_allocated(),
                 reserved_bytes=torch.cuda.memory_reserved(),
+                rss_bytes=importlib.import_module("psutil").Process().memory_info().rss,
             )
             mux.finish()
             if not session.cancelled.is_set():
@@ -493,8 +510,11 @@ def main() -> None:
     parser.add_argument("--inputs", type=Path, default=RUNTIME / "demo-inputs")
     parser.add_argument("--output", type=Path, default=RUNTIME / "streaming")
     parser.add_argument("--test-backend", action="store_true", help="CPU protocol probe; no media")
+    parser.add_argument("--fragment-frames", type=int, choices=(8, 24), default=8)
     args = parser.parse_args()
-    demo = Demonstration(args.inputs.resolve(), args.output.resolve(), args.test_backend)
+    demo = Demonstration(
+        args.inputs.resolve(), args.output.resolve(), args.test_backend, args.fragment_frames
+    )
     server = ThreadingHTTPServer(("127.0.0.1", args.port), handler(demo))
     print(f"LISTEN http://127.0.0.1:{server.server_port}", flush=True)
     try:

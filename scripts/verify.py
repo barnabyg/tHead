@@ -7,6 +7,7 @@ import os
 import subprocess  # nosec B404
 import sys
 import tempfile
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 from prepare import ROOT, run
@@ -20,10 +21,39 @@ def main() -> None:
     run([python, "-m", "ruff", "check", "scripts", "tests"], 120)
     run([python, "-m", "mypy"], 180)
     run([python, "-m", "bandit", "-q", "-c", "pyproject.toml", "-r", "scripts", "tests"], 120)
-    tests = [python, "-W", "error", "-m", "unittest", "discover", "-s", "tests"]
-    if os.environ.get("CI"):
-        tests.append("--failfast")
-    run(tests, 180)
+    modules = sorted((ROOT / "tests").glob("test_*.py"))
+    # Independent command suites have separate temporary directories and ports.
+    # unittest has no parallel worker mode; run its modules concurrently instead.
+    failures = []
+    with ThreadPoolExecutor(max_workers=min(len(modules), os.cpu_count() or 1)) as pool:
+        pending = []
+        for module in modules:
+            tests = [
+                python,
+                "-W",
+                "error",
+                "-m",
+                "unittest",
+                "discover",
+                "-s",
+                "tests",
+                "-p",
+                module.name,
+            ]
+            if os.environ.get("CI"):
+                tests.append("--failfast")
+            pending.append(pool.submit(run, tests, 180))
+        for future in as_completed(pending):
+            try:
+                future.result()
+            except Exception as error:
+                failures.append(error)
+                if os.environ.get("CI"):
+                    for other in pending:
+                        other.cancel()
+                    raise
+    if failures:
+        raise RuntimeError(f"{len(failures)} test suites failed") from failures[0]
     run(["uv", "lock", "--check"], 180)
     run([python, "-m", "pip_audit", "--progress-spinner", "off"], 600)
     # PyPI advisories identify the base PyTorch release, not its official CUDA local suffix.

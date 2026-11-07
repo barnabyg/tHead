@@ -67,8 +67,10 @@ portrait state and weights persist between chunks. The public portrait-preparati
 call resets motion and seed between runs. Overlapping window re-encoding may
 change boundary embeddings; motion persistence does not prove perceived continuity.
 
-The first playable fragment currently needs two generation calls / 1.92 seconds
-of arrived speech. In the measured delayed six-second run, generation started
+The initial 24-frame profile needed two generation calls / 1.92 seconds of arrived
+speech for its first playable fragment. The selected eight-frame profile needs
+one call / 0.96 seconds, while the progressive player waits for its initial
+1.28-second playback buffer. In the initial delayed six-second run, generation started
 at 0.977 s with exactly 15,360 received samples. Playback began at 2.597 s while
 the third message was still unreceived. The deliberate three-second pause caused
 one observed stall (3.630–6.865 s); playback resumed and ended at 6.064 s media
@@ -89,21 +91,25 @@ from the offline guide. No global Python packages or alternate model are used.
 
 One FFmpeg process per run receives generated RGB frames and their corresponding
 PCM speech through two bounded loopback feeds. It emits one continuous fragmented
-MP4: H.264 at 512 × 512 / 25 fps, no B frames, 24-frame keyframe interval, AAC
+MP4: H.264 at 512 × 512 / 25 fps, no B frames, eight-frame keyframe interval, AAC
 128 kbit/s. The browser appends ordered initialization/media fragments to a
 single MediaSource timeline. This avoids restarting the AAC encoder at boundaries.
 AAC priming adds approximately 64 ms to this profile's timeline; visual/audio
 judgement is still required. The final video frame count rounds up to 40 ms;
 audio retains the original sample count, with AAC padding in the container.
 
-Two raw chunks per feed and three unconsumed output fragments bound transport
-memory; browser delivery pauses above 2.88 seconds buffered. Consumed browser
+Two raw chunks per feed and nine unconsumed output fragments (2.88 seconds) bound
+transport memory; browser delivery pauses above 2.88 seconds buffered. One append
+can overshoot that browser threshold by one fragment. Consumed browser
 media is removed after five seconds. Encoded fragments remain on disk as evidence
 (input is capped at 30 seconds per run). A missing consumer fails after five
 minutes. FFmpeg drain has a five-minute limit. These are hang limits, not targets.
 
-The first complete fragment normally requires the next keyframe, so one extra
-0.96-second generation call contributes to startup latency. `frames-ready` marks
+The initial 24-frame profile needed the next model chunk to close a fragment.
+The selected eight-frame profile produces playable output from the first model
+chunk. The player initially buffers at least 0.64 seconds for complete input and
+1.28 seconds for timed arrivals, trading some startup time for continuity;
+the short-input option uses 0.35 seconds. `frames-ready` marks
 CPU-visible completed GPU output, `media-ready` marks mux availability, and browser
 `appended`, `playing`, `first-frame-presented`, `waiting`, `occupancy` and `ended`
 events establish the player boundary. Server event times are monotonic seconds
@@ -117,3 +123,21 @@ first generated chunk 1.322 s; first playable fragment 1.947 s; browser playing
 1.988 s; render complete 5.029 s for six seconds of speech. The browser reached
 `ended` at media time 6.064 s with no post-start waiting event. This establishes
 playback before rendering finishes; it does not alone establish perceived lip sync.
+
+## Repeatable assessment
+
+After playing the desired scenarios, generate the machine-readable assessment:
+
+```powershell
+uv run --locked python scripts/assess_streaming.py
+```
+
+This reads `.runtime/streaming`, checks completed clips' codecs, start times,
+durations and decoded video frame counts, decodes both streams with errors fatal,
+compares recorded PCM hashes where available, and writes
+`.runtime/streaming-assessment.json`. It reports startup, generation speed,
+input/output queues, browser buffering, stalls and cancellation separately.
+It does not substitute for the listening scenario above. See the
+[Phase 2 assessment](phase-2-assessment.md) for measured results and remaining gaps.
+Use `-FragmentFrames 24` on the launch command to reproduce the initial transport
+granularity; the current player's initial-buffer policy remains in effect.

@@ -15,7 +15,9 @@ from typing import IO
 class Mux:
     """One encoder per run; two loopback PCM/RGB feeds, one continuous MP4 timeline."""
 
-    def __init__(self, ffmpeg: Path, output: Callable[[bytes], None], log: Path) -> None:
+    def __init__(
+        self, ffmpeg: Path, output: Callable[[bytes], None], log: Path, fragment_frames: int = 8
+    ) -> None:
         self.output = output
         self.error: Exception | None = None
         self.stopped = threading.Event()
@@ -82,9 +84,9 @@ class Mux:
                 "-pix_fmt",
                 "yuv420p",
                 "-g",
-                "24",
+                str(fragment_frames),
                 "-keyint_min",
-                "24",
+                str(fragment_frames),
                 "-sc_threshold",
                 "0",
                 "-bf",
