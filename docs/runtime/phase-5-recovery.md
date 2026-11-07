@@ -88,7 +88,12 @@ window after installing the documented browser tools. It requires fixture mode,
 refuses existing output and has a 30-minute wall limit. Use a fresh fixture ledger
 for comparable accounting; never substitute it for real durable accounting.
 
-Remaining gaps: physical speaker measurements, listening/viewing this new run,
+The user separately confirmed clear speech, moving lips, approximate synchronisation
+and complete endings for the delivered real-provider black-hole/follow-up scenario
+on 7 November 2026. This does not provide per-probe perceptual validation of the
+native fixture run.
+
+Remaining gaps: physical speaker measurements, per-probe perceptual validation,
 100-turn native-media resource trends, cross-process hardware contention and
 indefinite operation. Future optimisation of buffering, scheduling, models or
 provider consumption must rerun the affected scenarios. The delivered production

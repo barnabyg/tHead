@@ -56,8 +56,12 @@ Video requires a second presented frame with increasing mediaTime. Timer schedul
 can add delay; numerical decimal precision is not measurement accuracy. This
 establishes digital signal plus advancing frames, not physical-speaker latency,
 semantic speech onset, perceived lip-sync or visible facial motion quality.
-No microphone/listening/viewing sign-off was collected for this new ten-turn run.
-Phase 4's earlier perceptual sign-off does not certify these answers.
+No microphone measurement or per-turn listening/viewing sign-off was collected
+for the ten-turn run. Separately, on 7 November 2026 the user checked the delivered
+real-provider app with the black-hole question and contextual follow-up and confirmed
+clear speech, moving lips, approximate synchronisation and complete endings.
+That qualitative check does not instrument physical-speaker latency or certify
+every benchmark answer.
 
 LLM first-text ranged 0.549–2.028 s after backend acceptance. First media ranged
 1.235–2.888 s. First speech preparation (`tts-segment`) and avatar window times

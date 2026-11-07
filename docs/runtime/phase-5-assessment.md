@@ -4,18 +4,21 @@ The RTX 3090 demonstrated a **2.473 s median, 3.755 s p95, 2.077–3.755 s range
 for ten warmed real-provider Submit-to-digital-audio-and-advancing-video turns,
 with zero recorded failures, stalls or 10+ second turns. Estimated total paid
 experiment cost including the excluded warm-up was **USD 0.00079175**. No paid
-optimisation experiments were needed. This meets the digital latency bound;
-the complete typical 3–5 second audible/synchronised experience is **not yet
-established by these digital observations alone**. Physical-speaker timing and
-new listening/viewing sign-off remain separate evidence requirements.
+optimisation experiments were needed. This meets the digital latency bound.
+On 7 November 2026, the user completed the black-hole/follow-up listening/viewing
+check on the delivered real-provider app and confirmed all four checks passed:
+clear speech, moving lips, approximate synchronisation and complete endings.
+Together these support the prototype experience on the tested RTX 3090 configuration.
+The sign-off is qualitative and separate from the ten-turn digital benchmark;
+physical-speaker Submit latency was not instrumented.
 
 See [per-turn/stage/raw latency evidence](phase-5-latency.md),
 [the evidence-backed no-tuning decision](phase-5-investigation.md),
 [bounded-session/Stop/reset/failure/resource results](phase-5-recovery.md), and
 [the hardware decision](phase-5-hardware.md). No RTX 4090 is recommended from
-these results, and none was comparatively tested. This report does not establish
-the entire product goal or unblock selectable-avatar work on an unvalidated
-perceptual experience.
+these results, and none was comparatively tested. This report establishes neither
+indefinite stability nor the entire product goal, and does not itself authorise
+selectable-avatar work.
 
 ## Clean tracked launch
 
@@ -74,7 +77,9 @@ accumulate on disk until explicitly removed; resource-idle does not mean disk
 cleanup. Model/provider/network variability and sample size limit generalisation.
 No persistent conversation storage or automatic hardware migration was introduced.
 
-The next decision is perceptual validation of the delivered app. If that exposes a
-shortfall, isolate provider/network, synthesis, inference or buffering before tuning
-or recommending hardware. Future production timing changes require comparable
+Perceptual validation of the short delivered-app scenario passed. The remaining
+validation work is native 100-turn resource behaviour and physical-speaker timing
+if that level of measurement is required. If further use exposes a shortfall,
+isolate provider/network, synthesis, inference or buffering before tuning or
+recommending hardware. Future production timing changes require comparable
 real ten-turn evidence and the affected cancellation/endings rechecks.
