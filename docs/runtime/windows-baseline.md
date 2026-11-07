@@ -1,10 +1,10 @@
 # Phase 1: native Windows reproducibility baseline
 
 Issue: [#4](https://github.com/barnabyg/tHead/issues/4). Measured 7 November 2026.
-**Phase 1: BLOCKED pending human confirmation of the new playback.** Native CUDA
-generation and clean-checkout startup with declared caches passed after the TLS
-fix below. New FFplay processes exited normally; this cannot establish that
-speech was audible or lip synchronisation looked acceptable to a listener.
+**Phase 1: PASS on the tested RTX 3090 profile.** Native CUDA generation and
+clean-checkout startup with declared caches passed after the TLS fix below.
+The user confirmed the new playback was audible, animated and approximately
+in sync. Cache and measurement limitations remain explicit below.
 
 ## Reproduce and inspect
 
@@ -189,19 +189,21 @@ TLS bypass or hash exception was introduced. The final committed clean-checkout
 launcher then acquired all three assets from empty media/input directories and
 completed generation, decode and FFplay playback. The technical blocker is resolved.
 
-### Playback and remaining gate
+### Playback confirmation and conclusion
 
 Both the seeded and final launchers opened real FFplay and exited 0.
 The earlier issue #3 evidence records the user's direct confirmation on this host:
 "Speech and animation are in sync." That applies to the earlier clip/profile;
-it is not a fresh listening check for these baseline outputs. A new confirmation
-of audible speech, visible animation and approximate synchronisation was requested
-but has not been received. No new audible/visual quality pass is claimed.
+it is not a fresh listening check for these baseline outputs. In response to the
+new baseline playback check, the user confirmed on 7 November 2026:
+"Audible, animated, approximately in sync." This completes the manual check for
+this demonstration; it is not a separate qualitative assessment of every timed run.
 
-**Conclusion: runtime/acquisition PASS with declared caches; overall Phase 1
-BLOCKED pending the new human playback check.** Run the command above and confirm
-the short scenario, or report the observed playback defect before starting
-streaming work. No remaining native CUDA or media-acquisition error was observed.
+**Conclusion: Phase 1 PASS with declared caches and confirmed playback.** The
+tested native Windows profile generates and plays the talking-head demonstration
+on the RTX 3090. No remaining native CUDA, media-acquisition or observed playback
+blocker was reported. Phase 2 streaming feasibility can now be investigated;
+the later conversational latency target remains unproven.
 
 ## Verification and retained artifacts
 
@@ -211,8 +213,8 @@ for the TLS fix. The canonical verification command is
 CI has no RTX 3090. No new suppression or advisory exception was added.
 
 The two experiment clones, their caches, logs, generated MP4s and raw JSON reports
-are retained under ignored `.runtime/issue-4-*` paths so the pending playback can
-be checked and failures inspected. They are local evidence, not a delivery
+are retained under ignored `.runtime/issue-4-*` paths for replay and diagnostic
+inspection. They are local evidence, not a delivery
 dependency. The final clone has junctions into the first clone's caches; preserve
 those targets until the experiment is no longer needed. Unrelated `.scratch`
 and `docs/specs` files were left untouched. No remote branch was pushed.

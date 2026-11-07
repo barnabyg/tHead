@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measurement_date": "2026-11-07",
-  "phase_1_status": "blocked-pending-human-playback-confirmation",
+  "phase_1_status": "pass-tested-rtx3090-profile-with-declared-caches",
   "revisions": {
     "initial": {
       "revision": "c1f9c5bf38c9cd52e27ebf2cf6c6f4833c5870bd"
@@ -563,8 +563,11 @@
     "Fully empty-cache end-to-end run of final revision was not repeated."
   ],
   "playback_assessment": {
-    "current": "player processes exited normally; human confirmation pending",
+    "current": "User confirmed: Audible, animated, approximately in sync",
     "prior_issue_3": "User confirmed on 2026-11-07: Speech and animation are in sync.",
-    "prior_observation_applies_to": "earlier clip/profile, not a new listening check of these runs"
+    "prior_observation_applies_to": "earlier clip/profile, not a new listening check of these runs",
+    "confirmation_date": "2026-11-07",
+    "observer": "user, direct playback observation",
+    "scope": "Baseline demonstration playback; not a separate qualitative assessment of every timed run"
   }
 }
