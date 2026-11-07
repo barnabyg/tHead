@@ -10,6 +10,7 @@ let notice = '';
 let audioOutput = null;
 const conversation = document.querySelector('#conversation');
 let sessionIdentity = null;
+let pendingRequest = null;
 document.querySelector('#reset')?.addEventListener('click', async () => {
   epoch++;
   const before = performance.now();
@@ -179,6 +180,10 @@ document.querySelector('#stop').onclick = () => {
         statusText.textContent = String(error);
       },
     );
+  if (conversation && pendingRequest)
+    post('/cancel', { session: sessionIdentity, request: pendingRequest }).catch((error) => {
+      statusText.textContent = String(error);
+    });
 };
 function waitEvent(target, event, signal) {
   return new Promise((resolve, reject) => {
@@ -239,6 +244,8 @@ start.onclick = async () => {
   submitting = true;
   notice = '';
   const ticket = ++epoch;
+  const requestId = crypto.randomUUID();
+  if (conversation) pendingRequest = requestId;
   const previous = release();
   if (previous && !previous.ended) await post('/stop', { run: previous.id }).catch(() => {});
   start.disabled = true;
@@ -252,6 +259,7 @@ start.onclick = async () => {
       ? await post('/ask', {
           question: document.querySelector('#text').value,
           session: sessionIdentity,
+          request: requestId,
           fault: document.querySelector('#fault').value,
         })
       : clip === 'text'
@@ -369,8 +377,11 @@ start.onclick = async () => {
     telemetry('client-failure', { message: String(error) });
     video.pause();
     if (active) await post('/stop', { run: active.id }).catch(() => {});
+    if (conversation)
+      await post('/cancel', { session: sessionIdentity, request: requestId }).catch(() => {});
     release();
   } finally {
+    if (pendingRequest === requestId) pendingRequest = null;
     submitting = false;
   }
 };

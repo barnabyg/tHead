@@ -8,6 +8,7 @@ import time
 import unittest
 import urllib.error
 import urllib.request
+import uuid
 from pathlib import Path
 from typing import Any
 
@@ -66,7 +67,12 @@ class ConversationTests(unittest.TestCase):
     def ask(self, question: str = "What is a black hole?", fault: str = "") -> dict[str, Any]:
         return self.request(
             "/ask",
-            {"question": question, "fault": fault, "session": self.request("/status")["session"]},
+            {
+                "question": question,
+                "fault": fault,
+                "session": self.request("/status")["session"],
+                "request": uuid.uuid4().hex,
+            },
         )
 
     def test_streamed_answer_and_progressive_speech(self) -> None:
@@ -204,6 +210,24 @@ class ConversationTests(unittest.TestCase):
             with self.assertRaises(urllib.error.HTTPError) as failure:
                 urllib.request.urlopen(request, timeout=10)  # nosec B310
             self.assertEqual(failure.exception.code, 403)
+
+    def test_cancellation_without_a_start_reply(self) -> None:
+        identity = self.request("/status")["session"]
+        request_id = uuid.uuid4().hex
+        self.request("/cancel", {"session": identity, "request": request_id})
+        with self.assertRaises(urllib.error.HTTPError):
+            self.request(
+                "/ask",
+                {
+                    "session": identity,
+                    "request": request_id,
+                    "question": "Cancelled before dispatch",
+                },
+            )
+        run = self.ask(fault="llm-connect")
+        self.request("/cancel", {"session": identity, "request": run["request"]})
+        stopped = self.wait(lambda s: s["state"] == "idle")
+        self.assertEqual(stopped["run"]["state"], "stopped")
 
 
 if __name__ == "__main__":

@@ -32,6 +32,7 @@ class Turn(Session):
         self.input_bound = 0
         self.omitted = 0
         self.reservation = ""
+        self.request_id = ""
         self.progressive = True
         self.text = ["conversation"]
 
@@ -47,6 +48,7 @@ class Turn(Session):
             "truncated": self.truncated,
             "usage": dict(self.usage),
             "inputBound": self.input_bound,
+            "request": self.request_id,
         }
 
 
@@ -56,8 +58,13 @@ class Conversation(Demonstration):
     def command(self, path: str, data: dict[str, Any]) -> dict[str, Any]:
         if path == "/reset":
             return self.reset(str(data.get("session", "")))
+        if path == "/cancel":
+            return self.cancel(str(data.get("session", "")), str(data.get("request", "")))
         return self.ask(
-            str(data.get("session", "")), data.get("question"), str(data.get("fault", ""))
+            str(data.get("session", "")),
+            data.get("question"),
+            str(data.get("fault", "")),
+            str(data.get("request", "")),
         ).snapshot()
 
     def __init__(
@@ -73,6 +80,7 @@ class Conversation(Demonstration):
     ) -> None:
         self.identity = uuid.uuid4().hex
         self.transcript: list[Turn] = []
+        self.cancelled_requests: set[str] = set()
         self.provider = Provider(model, test_backend or fixture)
         self.budget: Budget | None = None
         self.budget_error = ""
@@ -139,9 +147,24 @@ class Conversation(Demonstration):
                 self.stop(self.current.id)
             self.identity = uuid.uuid4().hex
             self.transcript.clear()
+            self.cancelled_requests.clear()
             if self.state == "idle":
                 self.current = None
             return self.status()
+
+    def cancel(self, identity: str, request_id: str) -> dict[str, Any]:
+        with self.condition:
+            if identity != self.identity:
+                raise ValueError("Stale session")
+            if not re.fullmatch(r"[a-f0-9-]{32,36}", request_id):
+                raise ValueError("Expected response request identity")
+            if len(self.cancelled_requests) >= 512:
+                raise ValueError("Start a New conversation before further requests")
+            self.cancelled_requests.add(request_id)
+            current = self.current
+            if isinstance(current, Turn) and current.request_id == request_id:
+                self.stop(current.id)
+            return {"ok": True}
 
     def context(self, question: str) -> tuple[list[dict[str, str]], int, int]:
         # UTF-8 bytes upper-bound text BPE tokens, with explicit framing margin.
@@ -166,7 +189,7 @@ class Conversation(Demonstration):
             retained += 1
         return messages, bound(messages), len(self.transcript) - retained
 
-    def ask(self, identity: str, question: Any, fault: str = "") -> Turn:
+    def ask(self, identity: str, question: Any, fault: str = "", request_id: str = "") -> Turn:
         if not isinstance(question, str) or not question.strip() or len(question) > 1200:
             raise ValueError("Enter a question of 1–1200 characters")
         if fault and (
@@ -192,6 +215,10 @@ class Conversation(Demonstration):
         with self.condition:
             if identity != self.identity:
                 raise ValueError("Session was lost or reset; reload the conversation")
+            if not re.fullmatch(r"[a-f0-9-]{32,36}", request_id):
+                raise ValueError("Expected response request identity")
+            if request_id in self.cancelled_requests:
+                raise ValueError("Response was cancelled before dispatch")
             if not self.ready or self.state != "idle":
                 raise ValueError("Wait for readiness and resource release")
             if not self.provider.fixture and not os.environ.get("OPENAI_API_KEY"):
@@ -206,6 +233,7 @@ class Conversation(Demonstration):
             reservation = self.budget.reserve(self.provider.model, input_bound, OUTPUT_TOKENS)
             session = Turn(self.directory, self.fragment_frames, self.identity, question.strip())
             session.reservation = reservation
+            session.request_id = request_id
             session.messages, session.input_bound, session.omitted = messages, input_bound, omitted
             session.fault = fault
             self.current = session

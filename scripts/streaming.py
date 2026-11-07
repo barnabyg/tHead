@@ -662,7 +662,7 @@ def handler(demo: Demonstration) -> type[BaseHTTPRequestHandler]:
                 data = json.loads(self.rfile.read(size) or b"{}")
                 if not isinstance(data, dict):
                     raise ValueError("Expected a JSON object")
-                if self.path in ("/ask", "/reset"):
+                if self.path in ("/ask", "/reset", "/cancel"):
                     result = demo.command(self.path, data)
                 elif demo.page == "conversation.html" and self.path in (
                     "/speak",
