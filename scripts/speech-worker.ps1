@@ -13,6 +13,7 @@ try {
         16000, [System.Speech.AudioFormat.AudioBitsPerSample]::Sixteen,
         [System.Speech.AudioFormat.AudioChannel]::Mono)
     @{ ready = $true; voice = $voice.Voice.Name; culture = $voice.Voice.Culture.Name;
+       voice_id = $voice.Voice.Id;
        engine = [System.Speech.Synthesis.SpeechSynthesizer].Assembly.FullName;
        windows = [Environment]::OSVersion.Version.ToString() } | ConvertTo-Json -Compress
     while ($null -ne ($line = [Console]::ReadLine())) {

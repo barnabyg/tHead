@@ -119,6 +119,19 @@ for (const event of ['playing', 'waiting', 'stalled', 'ended', 'error']) {
 setInterval(() => {
   if (!video.ended) telemetry('occupancy');
 }, 500);
+setInterval(() => {
+  const run = active;
+  if (!run || run.audible || video.paused || video.ended) return;
+  const rms = outputRms();
+  if (rms !== null && rms >= 0.00001) {
+    run.audible = true;
+    telemetry('digital-audio-onset', {
+      rms,
+      measurement: 'browser-audio-graph',
+      sampleIntervalMilliseconds: 25,
+    });
+  }
+}, 25);
 function release() {
   const run = active;
   active = null;
@@ -276,18 +289,30 @@ start.onclick = async () => {
         if (!requested && video.buffered.length) {
           requested = true;
           telemetry('play-request', { finalPartial: true });
+          video.requestVideoFrameCallback(() => {
+            if (active === run) telemetry('first-frame-presented');
+          });
           video.play().catch(() => {
             if (active === run) play.hidden = false;
           });
         }
         break;
       }
-      if (!response.ok) throw Error('Generation failed or run expired; see report');
+      if (!response.ok) {
+        const status = await (await fetch('/status')).json();
+        if (active !== run) return;
+        throw Error(
+          status.run?.id === run.id && status.run.error
+            ? status.run.error
+            : 'Generation failed or run expired; see report',
+        );
+      }
       const data = await response.arrayBuffer();
       if (active !== run) return;
       await append(buffer, data, run.controller.signal);
       if (active !== run) return;
       telemetry('appended', { index });
+      if (!requested && video.buffered.length) statusText.textContent = 'Buffering';
       index++;
       if (!requested && video.buffered.length && video.buffered.end(0) >= minimumBuffer) {
         requested = true;

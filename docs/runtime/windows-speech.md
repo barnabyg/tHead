@@ -47,6 +47,9 @@ silence or padding phrase boundaries. Only end-of-text sends a final partial
 window, including an explicit empty drain marker after an exact full window.
 One voice, rolling avatar history, motion state and continuous encoder remain in
 use across phrase boundaries. No substitute speech is supplied while waiting.
+The next phrase is synthesised only after queued windows from the preceding
+phrase have been consumed. This limits synthesis lookahead; a short passage can
+still finish synthesis before playback and is labelled accordingly in evidence.
 
 There are at most two queued PCM windows, one in-flight phrase (at most 30 s),
 120 s total speech and 1200 text characters. Producer handoff applies backpressure
@@ -87,6 +90,8 @@ Choose **Fail local TTS** or **Fail media**, Start, expect a clear failure, rese
 the fault to None and submit the example again successfully. **Delay synthesis**
 allows Stop before first audio. These controls are unavailable without the flag;
 the CPU protocol test backend also enables them but produces no playable media.
+**Delay buffering** holds transport below the startup margin for three seconds,
+allowing Stop during buffering without altering the selected profile.
 
 ## Engine and reproducibility
 
@@ -101,7 +106,10 @@ cold combined readiness are exposed in `/status`; per-run timings are in
 Windows supplies the engine/voice under its own licence; no Windows voice files
 are redistributed here. Install them through Windows rather than copying
 personal assets. OS servicing may change the voice: record OS/file versions and
-revalidate after updates. The engine is an installed prerequisite, not a package
+revalidate after updates. `speech-lock.json` pins the three installed Zira voice
+file hashes and token; startup fails if they differ. Revalidation and a lock
+update are needed after a changed voice installation.
+The engine is an installed prerequisite, not a package
 download implicitly performed by the launcher.
 
 Piper was considered: a local CPU alternative, but its GPLv3 engine and separately
@@ -109,3 +117,27 @@ licensed voice models add acquisition, dependency and resampling requirements.
 Zira's measured CPU synthesis is comfortably faster than speech duration in the
 initial isolated probe; concurrent GPU timing and perceptual quality still need
 integrated measurement. Do not infer conversation feasibility from isolated TTS.
+
+## Repeating the measurements
+
+Start the demonstration with `-Diagnostics`, submit the declared passages through
+the browser, and run this bounded resource monitor concurrently in another
+PowerShell 7 terminal from the clone root:
+
+```powershell
+./.runtime/venv/Scripts/python.exe scripts/assess_speech.py --monitor-seconds 360 --output .runtime/speech-resources.json
+```
+
+After playback and recovery probes finish, summarise server/browser timings,
+PCM handoff hashes and decode every completed published media stream:
+
+```powershell
+./.runtime/venv/Scripts/python.exe scripts/assess_speech.py
+```
+
+The report is `.runtime/speech-assessment.json`. Audio onset uses a 25 ms browser
+timer, an RMS threshold of 0.00001, and an independent frame-presentation callback;
+server receipt adds loopback overhead. It is digital output, not speaker latency.
+The resource monitor samples the whole GPU/system plus matching app/TTS processes;
+other desktop/development activity is included, so it is observational contention
+evidence rather than an isolated causal benchmark. Run GPU demonstrations serially.

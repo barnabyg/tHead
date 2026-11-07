@@ -131,6 +131,7 @@ def main() -> None:
         ".github",
         "pyproject.toml",
         "runtime-lock.json",
+        "speech-lock.json",
         "package.json",
         "package-lock.json",
         "biome.json",
@@ -139,14 +140,22 @@ def main() -> None:
     findings = json.loads(secrets)["results"]
     # Public run UUIDs / fixture PCM digests in this one generated evidence file.
     # Do not suppress other fields or detector types; review if its schema changes.
-    evidence_path = ROOT / "docs/runtime/rtx3090-streaming.json"
-    evidence_lines = evidence_path.read_text(encoding="utf-8").splitlines()
+    evidence_paths = {
+        (ROOT / name).resolve()
+        for name in (
+            "docs/runtime/rtx3090-streaming.json",
+            "docs/runtime/rtx3090-speech.json",
+            "speech-lock.json",
+        )
+    }
     public_metadata = re.compile(
         r'\s*"(?:id)": "[0-9a-f]{32}",?\s*'
         r'|\s*"(?:sha256|declared_pcm_sha256)": "[0-9a-f]{64}",?\s*'
     )
     for filename in list(findings):
-        if (ROOT / filename).resolve() == evidence_path.resolve():
+        evidence_path = (ROOT / filename).resolve()
+        if evidence_path in evidence_paths:
+            evidence_lines = evidence_path.read_text(encoding="utf-8").splitlines()
             findings[filename] = [
                 finding
                 for finding in findings[filename]

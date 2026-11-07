@@ -85,6 +85,8 @@ class TextTests(unittest.TestCase):
         self.assertLess(media["seconds"], complete["seconds"])
         arrived = [e for e in events if e["event"] == "audio-arrived"]
         self.assertEqual(sum(e["samples"] for e in arrived), 128000)
+        received = next(e for e in events if e["event"] == "input-complete")
+        self.assertEqual(received["sha256"], complete["sha256"])
         self.assertTrue(arrived[-1]["final"])
         self.assertLessEqual(max(e["queued"] for e in arrived), 2)
 

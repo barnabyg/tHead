@@ -1,0 +1,24 @@
+{
+  "voice": "Microsoft Zira Desktop",
+  "voice_token": "TTS_MS_EN-US_ZIRA_11.0",
+  "voice_version": "11.0",
+  "rate": 0,
+  "volume": 100,
+  "sample_rate": 16000,
+  "windows_build_measured": "26300.9711",
+  "sapi_file_version_measured": "5.3.31910.00",
+  "installed_files": [
+    {
+      "path": "Speech/Engines/TTS/en-US/M1033ZIR.APM",
+      "sha256": "13469bbe905fb45dbb786947d9b632e7ede48464a0c3be0e68ac5bbac2312f03"
+    },
+    {
+      "path": "Speech/Engines/TTS/en-US/M1033ZIR.INI",
+      "sha256": "97d701c0fa406215590605c65fb1f5ac358dcf62737ea46e4346f74487d2de56"
+    },
+    {
+      "path": "Speech/Engines/TTS/en-US/MSTTSLocEnUS.dat",
+      "sha256": "21daa790461300128dd98343930ea0cb213aa4d35ad3511e2f448edc93e8c9d4"
+    }
+  ]
+}

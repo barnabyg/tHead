@@ -93,6 +93,9 @@ class Session:
             self.condition.notify_all()
 
     def output(self, data: bytes) -> None:
+        if self.fault == "buffer-delay" and self.parts == 3:
+            self.event("buffer-delay")
+            self.cancelled.wait(3)
         with self.condition:
             deadline = time.monotonic() + 300
             while self.parts - 1 - int(self.played / self.fragment_seconds) >= self.max_pending:
@@ -245,7 +248,9 @@ class Demonstration:
     def speak(self, text: str, fault: str = "") -> Session:
         if not self.speech_enabled:
             raise ValueError("Launch speech-demo.ps1 to enable local TTS")
-        if fault and (not self.diagnostics or fault not in ("tts", "media", "tts-delay")):
+        if fault and (
+            not self.diagnostics or fault not in ("tts", "media", "tts-delay", "buffer-delay")
+        ):
             raise ValueError("Fault injection requires the explicit diagnostics launcher flag")
         phrases = segments(text)
         with self.condition:
@@ -260,7 +265,16 @@ class Demonstration:
         session.state = "synthesising"
         pending = bytearray()
         total = 0
+        digest = hashlib.sha256()
         for index, text in enumerate(session.text):
+            # Do not prepare another phrase while a previous phrase still has
+            # queued windows. This bounds lookahead and keeps synthesis demand-driven.
+            with session.condition:
+                deadline = time.monotonic() + 300
+                while session.input and not session.cancelled.is_set():
+                    if time.monotonic() > deadline:
+                        raise TimeoutError("Speech lookahead blocked for five minutes")
+                    session.condition.wait(0.1)
             if session.cancelled.is_set():
                 return
             begun = time.perf_counter()
@@ -278,6 +292,7 @@ class Demonstration:
             if session.cancelled.is_set():
                 return
             total += len(pcm)
+            digest.update(pcm)
             if total > 120 * 32000:
                 raise ValueError("Speech exceeds the two-minute limit")
             session.event(
@@ -296,7 +311,7 @@ class Demonstration:
         if session.cancelled.is_set():
             return
         self.handoff(session, bytes(pending), True)
-        session.event("tts-complete", samples=total // 2)
+        session.event("tts-complete", samples=total // 2, sha256=digest.hexdigest())
 
     @staticmethod
     def handoff(session: Session, chunk: bytes, final: bool) -> None:

@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import base64
+import hashlib
 import json
+import os
 import queue
 import re
 import subprocess  # nosec B404
@@ -66,6 +68,19 @@ class Voice:
     def prepare(self, cancelled: threading.Event) -> None:
         if self.process is not None:
             return
+        lock = json.loads(
+            Path(__file__).parents[1].joinpath("speech-lock.json").read_text(encoding="utf-8")
+        )
+        windows = Path(os.environ.get("WINDIR", "C:/Windows"))
+        for asset in lock["installed_files"]:
+            path = windows / asset["path"]
+            if (
+                not path.is_file()
+                or hashlib.sha256(path.read_bytes()).hexdigest() != asset["sha256"]
+            ):
+                raise RuntimeError(
+                    f"Declared Zira voice asset missing or changed: {path}; see windows-speech.md"
+                )
         self.lines = queue.Queue(2)
         # B603/B607: fixed Windows executable/script; untrusted text uses JSON stdin only.
         self.process = subprocess.Popen(  # nosec B603 B607
@@ -90,6 +105,8 @@ class Voice:
             self.metadata = self.reply(cancelled)
             if not self.metadata.get("ready"):
                 raise RuntimeError("Local voice did not become ready")
+            if not self.metadata.get("voice_id", "").endswith(lock["voice_token"]):
+                raise RuntimeError("Unexpected Windows voice token")
         except Exception:
             self.close()
             raise
