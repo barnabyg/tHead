@@ -7,8 +7,8 @@ Chromium 156 presented real generated H.264/AAC avatar media. Automated Chromium
 they are correctness checks, not GPU or perceptual evidence.
 
 **Result: the conversational workflow is implemented and demonstrated at the
-digital browser boundary. Perceptual sign-off and Phase 5 performance validation
-remain open.** No claim of a typical 3–5 second experience is made from these
+digital browser boundary, with user perceptual sign-off. Phase 5 performance
+validation remains open.** No claim of a typical 3–5 second experience is made from these
 few runs. The independent ten-turn median/p95 assessment and optimisation remain
 Phase 5 work.
 
@@ -96,10 +96,11 @@ and mutation Origin to loopback addresses.
 
 ## Remaining limits
 
-Human confirmation of audible clarity, approximate lip sync, phrase ordering and
-the complete ending has not been supplied in this task. Digital onset/frame/end
-events and visible playback do not replace that perceptual check. Model access
-and network latency can vary. Fresh cache downloads, cross-process budget
+On 7 November 2026, the user confirmed that the real answer had clear speech,
+moving, roughly synchronised lips and a complete ending: “Yes, speech and video
+looked and sounded correct.” This is perceptual confirmation of the observed
+demonstration, not a timed physical-speaker measurement or a guarantee for every
+turn. Model access and network latency can vary. Fresh cache downloads, cross-process budget
 contention and price-table changes have not been independently exercised here.
 GPU work is serialised because concurrent inference would invalidate timings;
 CPU/browser correctness suites run independently in parallel. Phase 5's ten-turn

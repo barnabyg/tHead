@@ -2,7 +2,7 @@
   "date": "2026-11-07",
   "environment": "Native Windows 11 RTX 3090 Microsoft Zira Desktop Chromium 156",
   "real_provider_estimated_total_usd": 0.0001745,
-  "perceptual_confirmation": "Not yet supplied; digital audio/video telemetry is not a physical-speaker listening assessment.",
+  "perceptual_confirmation": "User confirmed on 2026-11-07 that the real answer had clear speech, moving roughly synchronised lips and a complete ending: Yes, speech and video looked and sounded correct. This is perceptual sign-off for the observed demonstration, not a physical-speaker latency measurement.",
   "runs": {
     "fixture-overlap": {
       "note": "",
