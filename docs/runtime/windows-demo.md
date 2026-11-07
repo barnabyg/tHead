@@ -67,6 +67,11 @@ it does not alter `PATH` or install software system-wide. The build source and
 license information are available on the [publisher's builds page](https://www.gyan.dev/ffmpeg/builds/).
 Retain those notices if redistributing binaries; this repository distributes none.
 
+Media acquisition validates HTTPS with the certifi CA bundle installed by the
+hash-locked downloader environment. This avoids expired roots in bootstrap
+Python's host trust store while retaining certificate and hostname validation;
+SHA-256 checks still apply to every acquired asset. No host trust settings change.
+
 The profile keeps upstream's **512 × 512**, **25 fps**, **four denoising steps**,
 seed 42, bfloat16 CUDA, native PyTorch attention, eager model/VAE, and colour
 correction strength 1.0. Arbitrary smaller model resolutions are not assumed.
@@ -92,6 +97,10 @@ needed during inference with the pinned newer libraries:
   at the projection that explicitly operates in float32, preserving its intent.
 
 ## Diagnostics and measured evidence
+
+For clean-checkout verification, cold preparation versus repeated warmed timings,
+GPU measurement boundaries and the Phase 1 conclusion, see the
+[Windows reproducibility baseline](windows-baseline.md).
 
 Failures exit nonzero and record the stage/error. `.runtime/demo.log` and
 `.runtime/demo-result.json` cover preparation and playback;

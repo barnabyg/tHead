@@ -1,0 +1,587 @@
+{
+  "schema_version": 1,
+  "measurement_date": "2026-11-07",
+  "phase_1_status": "blocked-pending-human-playback-confirmation",
+  "revisions": {
+    "initial": {
+      "revision": "c1f9c5bf38c9cd52e27ebf2cf6c6f4833c5870bd"
+    },
+    "final": {
+      "revision": "7d9f32b937910020bdd2c95cc589c3a0797ccb5f"
+    }
+  },
+  "host": {
+    "os": "Windows 11 Home x64 build 26300",
+    "cpu": "AMD Ryzen 5 7600, 6 cores",
+    "visible_ram_bytes": 102665969664,
+    "gpu": "NVIDIA GeForce RTX 3090",
+    "gpu_memory_bytes": 25769279488,
+    "driver": "621.14",
+    "driver_cuda_capability": "13.5",
+    "torch_cuda_runtime": "12.8",
+    "power_limit_watts": 280,
+    "powershell": "7.6.9",
+    "git": "2.56.0.windows.4",
+    "uv": "0.11.7",
+    "bootstrap_python": "3.12.10",
+    "visual_cpp_x64_runtime": "14.51.36247.00"
+  },
+  "runtime_lock": {
+    "upstream_url": "https://github.com/Soul-AILab/SoulX-FlashHead.git",
+    "upstream_revision": "9bc03de06bb0de82cd6bc477804512ae06144bf2",
+    "python": "3.12.10",
+    "models": [
+      {
+        "repository": "Soul-AILab/SoulX-FlashHead-1_3B",
+        "revision": "5fbd2e44ba08ab2deb28bd55cff2c15523e51ba5",
+        "directory": "FlashHead",
+        "files": [
+          "Model_Lite/config.json",
+          "Model_Lite/diffusion_pytorch_model.safetensors",
+          "VAE_LTX/config.json",
+          "VAE_LTX/diffusion_pytorch_model.safetensors",
+          "README.md"
+        ]
+      },
+      {
+        "repository": "facebook/wav2vec2-base-960h",
+        "revision": "22aad52d435eb6dbaf354bdad9b0da84ce7d6156",
+        "directory": "wav2vec2",
+        "files": [
+          "config.json",
+          "model.safetensors",
+          "preprocessor_config.json",
+          "README.md"
+        ]
+      }
+    ]
+  },
+  "demo_lock": {
+    "media": {
+      "url": "https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-9.0.2-essentials_build.zip",
+      "sha256": "60f467265b1e312373dbcd92200c2618a74850f98d3d078e94296bb3fa2047ba",
+      "directory": "ffmpeg-9.0.2-essentials_build"
+    },
+    "inputs": [
+      {
+        "filename": "portrait.jpg",
+        "url": "https://upload.wikimedia.org/wikipedia/commons/c/c3/John_F._Kennedy%2C_White_House_color_photo_portrait.jpg",
+        "sha256": "5990691f38bc2d0ebf29e1d49c0fe27357bac4b1b5959121ce7d26248b065d6f"
+      },
+      {
+        "filename": "speech.ogg",
+        "url": "https://upload.wikimedia.org/wikipedia/commons/d/d5/JFK_inaugural_address.ogg",
+        "sha256": "a257580da6eda796ed1c703e545865005753f7cb20cc042e0db3c44de82274fc"
+      }
+    ],
+    "audio_start_seconds": 31,
+    "audio_duration_seconds": 6
+  },
+  "installed_packages": {
+    "runtime": {
+      "Jinja2": "3.1.6",
+      "MarkupSafe": "3.0.4",
+      "PyYAML": "6.0.3",
+      "Pygments": "2.21.0",
+      "accelerate": "1.15.0",
+      "annotated-doc": "0.0.5",
+      "anyio": "4.16.0",
+      "certifi": "2026.10.23",
+      "charset-normalizer": "3.5.2",
+      "click": "8.5.1",
+      "colorama": "0.4.6",
+      "diffusers": "0.42.1",
+      "einops": "0.8.1",
+      "filelock": "4.2.9",
+      "fsspec": "2026.9.0",
+      "h11": "0.16.0",
+      "hf-xet": "1.8.0",
+      "httpcore2": "2.16.0",
+      "httpx2": "2.16.0",
+      "huggingface_hub": "2.4.0",
+      "idna": "3.20",
+      "importlib_metadata": "9.0.1",
+      "loguru": "0.7.3",
+      "markdown-it-py": "4.2.0",
+      "mdurl": "0.1.2",
+      "mpmath": "1.3.0",
+      "networkx": "3.4.2",
+      "numpy": "1.26.4",
+      "packaging": "26.3",
+      "pillow": "13.0.0",
+      "psutil": "7.2.2",
+      "regex": "2026.9.29",
+      "requests": "2.34.2",
+      "rich": "15.0.0",
+      "safetensors": "0.8.0",
+      "setuptools": "81.0.0",
+      "shellingham": "1.5.4",
+      "sympy": "1.14.0",
+      "tokenizers": "0.23.3",
+      "torch": "2.11.0+cu128",
+      "torchvision": "0.26.0+cu128",
+      "tqdm": "4.70.1",
+      "transformers": "5.22.2",
+      "truststore": "0.10.5",
+      "typer": "0.28.0",
+      "typing_extensions": "4.16.0",
+      "urllib3": "2.8.0",
+      "win32_setctime": "1.2.1",
+      "zipp": "4.1.2"
+    },
+    "downloader": {
+      "PyYAML": "6.0.3",
+      "certifi": "2026.10.23",
+      "charset-normalizer": "3.5.2",
+      "colorama": "0.4.6",
+      "filelock": "4.2.9",
+      "fsspec": "2026.9.0",
+      "huggingface_hub": "0.36.2",
+      "idna": "3.20",
+      "packaging": "26.3",
+      "requests": "2.34.2",
+      "tqdm": "4.70.1",
+      "typing_extensions": "4.16.0",
+      "urllib3": "2.8.0"
+    }
+  },
+  "initial_empty_application_cache_attempt": {
+    "wrapper": {
+      "started_utc": "2026-11-07T13:27:36.3475444+00:00",
+      "runtime_existed_before": false,
+      "exit_code": 1,
+      "checkout": "c1f9c5bf38c9cd52e27ebf2cf6c6f4833c5870bd",
+      "elapsed_seconds": 1337.0969226
+    },
+    "setup": {
+      "status": "ready",
+      "elapsed_seconds": 1336.2132698000005
+    },
+    "readiness": {
+      "status": "ready",
+      "stage": "complete",
+      "platform": "Windows-11-10.0.26300-SP0",
+      "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+      "lock": {
+        "upstream_url": "https://github.com/Soul-AILab/SoulX-FlashHead.git",
+        "upstream_revision": "9bc03de06bb0de82cd6bc477804512ae06144bf2",
+        "python": "3.12.10",
+        "models": [
+          {
+            "repository": "Soul-AILab/SoulX-FlashHead-1_3B",
+            "revision": "5fbd2e44ba08ab2deb28bd55cff2c15523e51ba5",
+            "directory": "FlashHead",
+            "files": [
+              "Model_Lite/config.json",
+              "Model_Lite/diffusion_pytorch_model.safetensors",
+              "VAE_LTX/config.json",
+              "VAE_LTX/diffusion_pytorch_model.safetensors",
+              "README.md"
+            ]
+          },
+          {
+            "repository": "facebook/wav2vec2-base-960h",
+            "revision": "22aad52d435eb6dbaf354bdad9b0da84ce7d6156",
+            "directory": "wav2vec2",
+            "files": [
+              "config.json",
+              "model.safetensors",
+              "preprocessor_config.json",
+              "README.md"
+            ]
+          }
+        ]
+      },
+      "upstream_revision": "9bc03de06bb0de82cd6bc477804512ae06144bf2",
+      "packages": {
+        "torch": "2.11.0+cu128",
+        "torchvision": "0.26.0+cu128",
+        "diffusers": "0.42.1",
+        "transformers": "5.22.2"
+      },
+      "cuda_runtime": "12.8",
+      "gpu": "NVIDIA GeForce RTX 3090",
+      "gpu_memory_bytes": 25769279488,
+      "load_seconds": 4.232354300002044,
+      "peak_allocated_bytes": 4295000576,
+      "peak_reserved_bytes": 4578082816,
+      "elapsed_seconds": 14.201778099999501
+    },
+    "launcher": {
+      "status": "blocked",
+      "stage": "media-acquisition",
+      "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: certificate has expired (_ssl.c:1010)>",
+      "elapsed_seconds": 1336.5578765999999
+    }
+  },
+  "tls_diagnostics": {
+    "default_trust_head": [
+      {
+        "url": "https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-9.0.2-essentials_build.zip",
+        "error": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: certificate has expired (_ssl.c:1010)>",
+        "openssl": "OpenSSL 3.0.16 11 Feb 2025"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/c/c3/John_F._Kennedy%2C_White_House_color_photo_portrait.jpg",
+        "error": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: certificate has expired (_ssl.c:1010)>",
+        "openssl": "OpenSSL 3.0.16 11 Feb 2025"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/d/d5/JFK_inaugural_address.ogg",
+        "error": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: certificate has expired (_ssl.c:1010)>",
+        "openssl": "OpenSSL 3.0.16 11 Feb 2025"
+      }
+    ],
+    "certifi_head": [
+      {
+        "url": "https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-9.0.2-essentials_build.zip",
+        "trust": "pinned downloader certifi bundle",
+        "status": 200
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/c/c3/John_F._Kennedy%2C_White_House_color_photo_portrait.jpg",
+        "trust": "pinned downloader certifi bundle",
+        "error": "HTTP Error 403: Forbidden"
+      }
+    ],
+    "certifi_actual_user_agent_get": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/c/c3/John_F._Kennedy%2C_White_House_color_photo_portrait.jpg",
+        "method": "GET, headers only; response closed without reading",
+        "trust": "pinned downloader certifi bundle",
+        "status": 200
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/d/d5/JFK_inaugural_address.ogg",
+        "method": "GET, headers only; response closed without reading",
+        "trust": "pinned downloader certifi bundle",
+        "status": 200
+      }
+    ]
+  },
+  "seeded_media_supplement": {
+    "files": [
+      "ffmpeg.zip",
+      "portrait.jpg",
+      "speech.ogg"
+    ],
+    "hashes_checked_against": "demo-lock.json",
+    "generation": {
+      "status": "generated",
+      "stage": "complete",
+      "load_seconds": 3.4274031999993895,
+      "input_duration_seconds": 6.0,
+      "inference_seconds": 4.4792276000007405,
+      "generated_frames": 168,
+      "peak_allocated_bytes": 5344988672,
+      "peak_reserved_bytes": 5943328768,
+      "elapsed_seconds": 13.223464399998193,
+      "streams": [
+        {
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 512,
+          "height": 512,
+          "pix_fmt": "yuv420p",
+          "avg_frame_rate": "25/1",
+          "duration": "6.000000",
+          "start_time": "0.000000",
+          "nb_frames": "150"
+        },
+        {
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "avg_frame_rate": "0/0",
+          "duration": "6.000000",
+          "start_time": "0.000000",
+          "nb_frames": "95",
+          "sample_rate": "16000",
+          "channels": 1
+        }
+      ]
+    },
+    "launcher_elapsed_seconds": 32.7288086999979,
+    "playback": "player-exited",
+    "fresh_media_acquisition_verified": false
+  },
+  "final_clean_checkout": {
+    "initial_git_status": "empty",
+    "directory": "C:\\docs\\git\\tHead\\.runtime\\issue-4-final",
+    "declared_cache_junctions": {
+      "uv-cache": "C:\\docs\\git\\tHead\\.runtime\\issue-4-clean\\.runtime\\uv-cache",
+      "models": "C:\\docs\\git\\tHead\\.runtime\\issue-4-clean\\.runtime\\models"
+    },
+    "environments_source_media_inputs_prepopulated": false,
+    "setup": {
+      "status": "ready",
+      "elapsed_seconds": 25.865117800000007
+    },
+    "readiness": {
+      "status": "ready",
+      "stage": "complete",
+      "platform": "Windows-11-10.0.26300-SP0",
+      "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+      "lock": {
+        "upstream_url": "https://github.com/Soul-AILab/SoulX-FlashHead.git",
+        "upstream_revision": "9bc03de06bb0de82cd6bc477804512ae06144bf2",
+        "python": "3.12.10",
+        "models": [
+          {
+            "repository": "Soul-AILab/SoulX-FlashHead-1_3B",
+            "revision": "5fbd2e44ba08ab2deb28bd55cff2c15523e51ba5",
+            "directory": "FlashHead",
+            "files": [
+              "Model_Lite/config.json",
+              "Model_Lite/diffusion_pytorch_model.safetensors",
+              "VAE_LTX/config.json",
+              "VAE_LTX/diffusion_pytorch_model.safetensors",
+              "README.md"
+            ]
+          },
+          {
+            "repository": "facebook/wav2vec2-base-960h",
+            "revision": "22aad52d435eb6dbaf354bdad9b0da84ce7d6156",
+            "directory": "wav2vec2",
+            "files": [
+              "config.json",
+              "model.safetensors",
+              "preprocessor_config.json",
+              "README.md"
+            ]
+          }
+        ]
+      },
+      "upstream_revision": "9bc03de06bb0de82cd6bc477804512ae06144bf2",
+      "packages": {
+        "torch": "2.11.0+cu128",
+        "torchvision": "0.26.0+cu128",
+        "diffusers": "0.42.1",
+        "transformers": "5.22.2"
+      },
+      "cuda_runtime": "12.8",
+      "gpu": "NVIDIA GeForce RTX 3090",
+      "gpu_memory_bytes": 25769279488,
+      "load_seconds": 4.301523499998439,
+      "peak_allocated_bytes": 4295000576,
+      "peak_reserved_bytes": 4578082816,
+      "elapsed_seconds": 14.100386499998422
+    },
+    "launcher_elapsed_seconds": 63.20942110000033,
+    "generation": {
+      "status": "generated",
+      "stage": "complete",
+      "load_seconds": 3.3801218000007793,
+      "input_duration_seconds": 6.0,
+      "inference_seconds": 4.475857299999916,
+      "generated_frames": 168,
+      "peak_allocated_bytes": 5344988672,
+      "peak_reserved_bytes": 5943328768,
+      "elapsed_seconds": 13.112239299996872,
+      "streams": [
+        {
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 512,
+          "height": 512,
+          "pix_fmt": "yuv420p",
+          "avg_frame_rate": "25/1",
+          "duration": "6.000000",
+          "start_time": "0.000000",
+          "nb_frames": "150"
+        },
+        {
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "avg_frame_rate": "0/0",
+          "duration": "6.000000",
+          "start_time": "0.000000",
+          "nb_frames": "95",
+          "sample_rate": "16000",
+          "channels": 1
+        }
+      ]
+    },
+    "playback": "player-exited",
+    "exit_code": 0
+  },
+  "settings": {
+    "frame_num": 33,
+    "motion_frames_latent_num": 2,
+    "tgt_fps": 25,
+    "sample_rate": 16000,
+    "sample_shift": 5,
+    "color_correction_strength": 1.0,
+    "cached_audio_duration": 8,
+    "num_heads": 12,
+    "height": 512,
+    "width": 512,
+    "motion_frames_num": 9,
+    "sample_steps": 4
+  },
+  "warmed_runs": [
+    {
+      "status": "generated",
+      "stage": "complete",
+      "load_seconds": 3.417852700000367,
+      "input_duration_seconds": 6.0,
+      "inference_seconds": 4.486318200000824,
+      "generated_frames": 168,
+      "peak_allocated_bytes": 5344988672,
+      "peak_reserved_bytes": 5943328768,
+      "elapsed_seconds": 12.888593800002127,
+      "streams": [
+        {
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 512,
+          "height": 512,
+          "pix_fmt": "yuv420p",
+          "avg_frame_rate": "25/1",
+          "duration": "6.000000",
+          "start_time": "0.000000",
+          "nb_frames": "150"
+        },
+        {
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "avg_frame_rate": "0/0",
+          "duration": "6.000000",
+          "start_time": "0.000000",
+          "nb_frames": "95",
+          "sample_rate": "16000",
+          "channels": 1
+        }
+      ],
+      "run": 1,
+      "gpu_snapshot_before": {
+        "timestamp": "2026/11/07 13:55:24.998",
+        "name": "NVIDIA GeForce RTX 3090",
+        "memory.used [MiB]": "751 MiB",
+        "utilization.gpu [%]": "5 %",
+        "temperature.gpu": "35.78",
+        "power.limit [W]": "280.00 W"
+      },
+      "command": [
+        ".runtime/venv/Scripts/python.exe",
+        "scripts/generate_clip.py",
+        "--report",
+        "../issue-4-evidence/final-warm-1.json"
+      ]
+    },
+    {
+      "status": "generated",
+      "stage": "complete",
+      "load_seconds": 3.414224500000273,
+      "input_duration_seconds": 6.0,
+      "inference_seconds": 4.5001136000028055,
+      "generated_frames": 168,
+      "peak_allocated_bytes": 5344988672,
+      "peak_reserved_bytes": 5943328768,
+      "elapsed_seconds": 12.842457200000354,
+      "streams": [
+        {
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 512,
+          "height": 512,
+          "pix_fmt": "yuv420p",
+          "avg_frame_rate": "25/1",
+          "duration": "6.000000",
+          "start_time": "0.000000",
+          "nb_frames": "150"
+        },
+        {
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "avg_frame_rate": "0/0",
+          "duration": "6.000000",
+          "start_time": "0.000000",
+          "nb_frames": "95",
+          "sample_rate": "16000",
+          "channels": 1
+        }
+      ],
+      "run": 2,
+      "gpu_snapshot_before": {
+        "timestamp": "2026/11/07 13:55:38.747",
+        "name": "NVIDIA GeForce RTX 3090",
+        "memory.used [MiB]": "746 MiB",
+        "utilization.gpu [%]": "1 %",
+        "temperature.gpu": "42.19",
+        "power.limit [W]": "280.00 W"
+      },
+      "command": [
+        ".runtime/venv/Scripts/python.exe",
+        "scripts/generate_clip.py",
+        "--report",
+        "../issue-4-evidence/final-warm-2.json"
+      ]
+    },
+    {
+      "status": "generated",
+      "stage": "complete",
+      "load_seconds": 3.3919897000014316,
+      "input_duration_seconds": 6.0,
+      "inference_seconds": 4.529324200000701,
+      "generated_frames": 168,
+      "peak_allocated_bytes": 5344988672,
+      "peak_reserved_bytes": 5943328768,
+      "elapsed_seconds": 12.904317000000447,
+      "streams": [
+        {
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 512,
+          "height": 512,
+          "pix_fmt": "yuv420p",
+          "avg_frame_rate": "25/1",
+          "duration": "6.000000",
+          "start_time": "0.000000",
+          "nb_frames": "150"
+        },
+        {
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "avg_frame_rate": "0/0",
+          "duration": "6.000000",
+          "start_time": "0.000000",
+          "nb_frames": "95",
+          "sample_rate": "16000",
+          "channels": 1
+        }
+      ],
+      "run": 3,
+      "gpu_snapshot_before": {
+        "timestamp": "2026/11/07 13:55:52.458",
+        "name": "NVIDIA GeForce RTX 3090",
+        "memory.used [MiB]": "750 MiB",
+        "utilization.gpu [%]": "3 %",
+        "temperature.gpu": "44.03",
+        "power.limit [W]": "280.00 W"
+      },
+      "command": [
+        ".runtime/venv/Scripts/python.exe",
+        "scripts/generate_clip.py",
+        "--report",
+        "../issue-4-evidence/final-warm-3.json"
+      ]
+    }
+  ],
+  "inference_summary_seconds": {
+    "median": 4.5001136000028055,
+    "min": 4.486318200000824,
+    "max": 4.529324200000701
+  },
+  "measurement_limits": [
+    "Three serialized fresh processes with caches warm; models reloaded every run.",
+    "Inference includes audio encoding, chunk generation, frame copies and raw disk output; excludes model load, image preparation, mux and playback.",
+    "Allocator peaks include loading and inference, not whole-device WDDM usage.",
+    "No concurrent task-owned GPU work; Windows desktop remains active.",
+    "Fully empty-cache end-to-end run of final revision was not repeated."
+  ],
+  "playback_assessment": {
+    "current": "player processes exited normally; human confirmation pending",
+    "prior_issue_3": "User confirmed on 2026-11-07: Speech and animation are in sync.",
+    "prior_observation_applies_to": "earlier clip/profile, not a new listening check of these runs"
+  }
+}
