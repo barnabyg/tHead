@@ -173,7 +173,7 @@ document.querySelector('#stop').onclick = () => {
   observeSilence(run, before, beforeRms);
   statusText.textContent = 'Stopped; waiting for inference resources if needed';
   notice = statusText.textContent;
-  if (run)
+  if (run && !run.ended)
     post('/stop', { run: run.id, clientPauseMilliseconds: performance.now() - before }).catch(
       (error) => {
         statusText.textContent = String(error);
