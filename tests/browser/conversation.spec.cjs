@@ -37,10 +37,7 @@ test('edit saved avatar retains identity and unchanged portrait across restart',
   expect(await (await request.get(`${info.url}/portrait?avatar=${created.id}`)).body()).toEqual(
     image,
   );
-  clearTimeout(info.appTimeout);
-  const exited = new Promise((resolve) => info.app.once('exit', resolve));
-  info.app.kill();
-  await exited;
+  await stopFixture(info);
   await startFixture(info);
   await page.goto(info.url);
   status = await (await request.get(`${info.url}/status`)).json();
@@ -102,10 +99,7 @@ test('cancel editing and deletion; confirmed selected deletion falls back perman
   expect(status.transcript).toEqual(initial.transcript);
   expect(status.session).toBe(initial.session);
   expect(status.budget.estimated_usd).toBe(initial.budget.estimated_usd);
-  clearTimeout(info.appTimeout);
-  const exited = new Promise((resolve) => info.app.once('exit', resolve));
-  info.app.kill();
-  await exited;
+  await stopFixture(info);
   await startFixture(info);
   await page.goto(info.url);
   expect((await (await request.get(`${info.url}/status`)).json()).avatars).toHaveLength(2);
@@ -243,7 +237,7 @@ async function startFixture(info) {
     signalCode: child.signalCode,
     stderr,
   });
-  const timeout = setTimeout(() => child.kill(), 960_000);
+  const timeout = setTimeout(() => killFixture(child), 960_000);
   info.appTimeout = timeout;
   info.url = await new Promise((resolve, reject) => {
     let text = '';
@@ -261,6 +255,53 @@ async function startFixture(info) {
       }
     });
   });
+}
+
+function killFixture(child) {
+  if (child.exitCode !== null) return;
+  if (process.platform === 'win32') {
+    // Fixed task-owned PID; terminate the venv launcher and its interpreter together.
+    execFileSync('taskkill', ['/PID', String(child.pid), '/T', '/F'], { timeout: 30_000 });
+  } else child.kill('SIGKILL');
+}
+
+async function stopFixture(info, interrupted = false) {
+  clearTimeout(info.appTimeout);
+  const child = info.app;
+  if (!child || child.exitCode !== null) return;
+  const closed = new Promise((resolve) => child.once('close', resolve));
+  let timer;
+  try {
+    if (interrupted) killFixture(child);
+    else {
+      // Let the backend cancel/join its worker and release SQLite handles before cleanup.
+      await fetch(`${info.url}/shutdown`, { method: 'POST', signal: AbortSignal.timeout(10_000) });
+    }
+    await Promise.race([
+      closed,
+      new Promise((_, reject) => {
+        timer = setTimeout(() => reject(Error('Fixture shutdown exceeded 30 seconds')), 30_000);
+      }),
+    ]);
+  } catch (error) {
+    killFixture(child);
+    throw error;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function removeFixtureOutput(directory) {
+  const output = fs.realpathSync(directory);
+  const temporary = fs.realpathSync(os.tmpdir());
+  if (
+    path.dirname(output).toLowerCase() !== temporary.toLowerCase() ||
+    !path.basename(output).startsWith('thead-browser-')
+  ) {
+    throw Error('Unexpected fixture cleanup path');
+  }
+  // Windows may retain a handle briefly after process exit or antivirus scanning.
+  fs.rmSync(output, { recursive: true, force: true, maxRetries: 10, retryDelay: 250 });
 }
 
 test.beforeEach(async ({ page }, info) => {
@@ -653,10 +694,7 @@ test('saved portrait survives source removal, failed save and restart; corrupt s
     fs.rmdirSync(db);
     fs.renameSync(`${db}.preserved`, db);
   }
-  clearTimeout(info.appTimeout);
-  const exited = new Promise((resolve) => info.app.once('exit', resolve));
-  info.app.kill();
-  await exited;
+  await stopFixture(info);
   await startFixture(info);
   await page.goto(info.url);
   await expect(page.getByLabel('Avatar', { exact: true }).locator('option')).toHaveCount(3);
@@ -676,10 +714,7 @@ test('saved portrait survives source removal, failed save and restart; corrupt s
   await expect(page.locator('#transcript')).toContainText('Earlier question');
   await page.getByRole('button', { name: 'New conversation' }).click();
   await expect(page.locator('#transcript')).toBeEmpty();
-  clearTimeout(info.appTimeout);
-  const stopped = new Promise((resolve) => info.app.once('exit', resolve));
-  info.app.kill();
-  await stopped;
+  await stopFixture(info);
   fs.writeFileSync(db, 'corrupt database');
   await startFixture(info);
   await page.goto(info.url);
@@ -851,10 +886,7 @@ for (const editing of [false, true]) {
       await page.getByRole('button', { name: 'Save avatar', exact: true }).click();
       await dispatched;
       await expect(page.getByRole('button', { name: 'Save avatar', exact: true })).toBeDisabled();
-      clearTimeout(info.appTimeout);
-      const exited = new Promise((resolve) => info.app.once('exit', resolve));
-      info.app.kill();
-      await exited;
+      await stopFixture(info, true);
     } finally {
       const released = new Promise((resolve) => locker.once('exit', resolve));
       locker.stdin.end('\n');
@@ -1024,13 +1056,8 @@ test.afterEach(async ({ page }, info) => {
     }
     await page.close();
   } finally {
-    clearTimeout(info.appTimeout);
-    if (info.app && info.app.exitCode === null) {
-      const exited = new Promise((resolve) => info.app.once('exit', resolve));
-      info.app.kill();
-      await exited;
-    }
-    fs.rmSync(info.output, { recursive: true, force: true });
+    await stopFixture(info);
+    removeFixtureOutput(info.output);
   }
 });
 

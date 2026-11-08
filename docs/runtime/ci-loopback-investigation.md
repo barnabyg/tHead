@@ -43,3 +43,24 @@ Manual application testing does not apply to the pending-connection regression;
 the existing native avatar playback evidence is separate. The regression binds
 an ephemeral loopback port, owns/closes all client sockets and uses no paid API,
 GPU or persistent user data.
+
+## Separate Windows fixture teardown failure
+
+After the backlog change, the PR job on `8dcb440` reached a different failure:
+`fs.rmSync` raised `EPERM` removing a fixture directory after process termination.
+The error arose in teardown, not a behaviour assertion. The old harness killed
+the venv launcher and awaited its exit before immediately deleting output;
+that does not establish that descendant interpreter handles have closed.
+
+Normal shutdown now asks the diagnostic fixture to stop, lets it cancel/join its
+worker, and waits for the process's `close` event. Explicit interrupted-save
+scenarios and the hard lifetime cap terminate the owned process tree on Windows.
+Deletion checks the resolved path is a task-owned `thead-browser-` directory
+directly under the temporary root. It uses Node's bounded filesystem-lock retries
+(10 retries, 250 ms linear backoff, at most 13.75 s of backoff) for transient
+Windows handle/antivirus locks. See [Node fs.rmSync options](https://nodejs.org/api/fs.html#fsrmsyncpath-options).
+This changes cleanup retries only; test/request retries remain unchanged.
+
+Twelve repeated reset, interruption and restart/storage browser checks passed
+locally with four workers after this change. CI still provides the authoritative
+clean-run result; no test failure is suppressed by the cleanup policy.
