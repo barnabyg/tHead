@@ -7,8 +7,8 @@ isolated research audition, not an application voice or approval to ship cloning
 
 | Issue | Verdict | Evidence / remaining condition |
 | --- | --- | --- |
-| #52 native setup | Pass: reproducible CPU setup | Fresh local clone, independent caches/venvs, identical output digest, offline synthesis and explicit user confirmation of an intelligible complete utterance |
-| #53 voice quality | Not started | Requires #52 to close with a passing verdict; similarity scores cannot be inferred from intelligibility |
+| #52 native setup | Pass; issue closed 8 November 2026 | Fresh local clone, independent caches/venvs, identical output digest, offline synthesis and explicit user confirmation of an intelligible complete utterance |
+| #53 voice quality | Listening pack complete; human gate unresolved | 68 candidate WAVs, 10 baseline WAVs, 2 expected 5-second rejections; [protocol, command and raw evidence](chatterbox-quality.md) |
 | #54 integration/adoption | Deferred | Requires #53 to close with a passing verdict; no adapter, GPU benchmark or production UI added |
 
 Do not adopt on this evidence. Native setup alone establishes neither similarity
@@ -224,8 +224,8 @@ with no warning output. Temporary clone/caches and duplicate diagnostic weights
 were removed after preserving reproduction logs; the primary audition environment
 is retained for re-use.
 
-Clean-checkout preparation/generation and the explicit setup listening verdict pass. #53 still needs
-its full two-speaker repeated-condition listening pack and explicit 1–5 human
-similarity/naturalness scores. #54's browser/media latency, cancellation, recovery,
+Clean-checkout preparation/generation and the explicit setup listening verdict pass.
+The two-speaker repeated-condition #53 pack is delivered; explicit per-sample 1–5
+human similarity/naturalness and defect judgements are pending. #54's browser/media latency, cancellation, recovery,
 reference lifecycle, RAM/VRAM and continuous resampling checks remain untested.
 Do not extrapolate these isolated whole-utterance CPU measurements to FlashHead.

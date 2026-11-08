@@ -185,6 +185,8 @@ def main() -> None:
             "chatterbox-lock.json",
             "docs/runtime/chatterbox/setup-result.json",
             "docs/runtime/chatterbox/clean-result.json",
+            "docs/runtime/chatterbox/quality-manifest.json",
+            "docs/runtime/chatterbox/alignment-verification.json",
             "docs/runtime/chatterbox/wheel-inventory.json",
         )
     }
@@ -202,6 +204,8 @@ def main() -> None:
             "chatterbox-lock.json",
             "docs/runtime/chatterbox/setup-result.json",
             "docs/runtime/chatterbox/clean-result.json",
+            "docs/runtime/chatterbox/quality-manifest.json",
+            "docs/runtime/chatterbox/alignment-verification.json",
             "docs/runtime/chatterbox/wheel-inventory.json",
         )
     }

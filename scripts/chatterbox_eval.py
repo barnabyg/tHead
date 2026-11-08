@@ -6,6 +6,7 @@ import argparse
 import hashlib
 import importlib
 import json
+import logging
 import os
 import random
 import re
@@ -37,6 +38,30 @@ def reject_network(event: str, arguments: tuple[object, ...]) -> None:
         raise OSError(f"Offline audition blocked network operation: {event}")
 
 
+class ReferenceAlignmentDiagnostic(logging.Filter):
+    """Retain one upstream reference-conditioning adjustment as structured evidence."""
+
+    def __init__(self, observations: list[str]) -> None:
+        super().__init__()
+        self.observations = observations
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        # The pinned embed_ref immediately clamps reference token length to the mel
+        # length. Keep that exact diagnostic in result.json without a console warning.
+        # Revisit when the source pin changes or listening reveals a short-reference defect.
+        message = "Reference mel length is not equal to 2 * reference token length.\n"
+        if (
+            record.name == "root"
+            and record.levelno == logging.WARNING
+            and record.funcName == "embed_ref"
+            and record.pathname.replace("\\", "/").endswith("/chatterbox/models/s3gen/s3gen.py")
+            and record.getMessage() == message
+        ):
+            self.observations.append(message.strip())
+            return False
+        return True
+
+
 def synthesize(args: argparse.Namespace, lock: dict[str, Any]) -> None:
     started = time.perf_counter()
     report: dict[str, Any] = {
@@ -50,7 +75,9 @@ def synthesize(args: argparse.Namespace, lock: dict[str, Any]) -> None:
         "threads": 8,
         "network_policy": "offline environment flags and Python socket audit hook",
         "streaming": False,
+        "conditioning_diagnostics": [],
     }
+    alignment = ReferenceAlignmentDiagnostic(report["conditioning_diagnostics"])
     try:
         if sys.version_info[:3] != tuple(int(part) for part in lock["python"].split(".")):
             raise ValueError("Python differs from the evaluated pin; prepare a fresh state")
@@ -63,6 +90,7 @@ def synthesize(args: argparse.Namespace, lock: dict[str, Any]) -> None:
             DO_NOT_TRACK="1",
         )
         sys.addaudithook(reject_network)
+        logging.getLogger().addFilter(alignment)
         # Upstream's pinned S3Gen still uses this compatibility layer. The warning
         # does not affect inference; revisit/remove this exact filter when either
         # the model/source or diffusers pin changes. All other warnings remain errors
@@ -122,6 +150,7 @@ def synthesize(args: argparse.Namespace, lock: dict[str, Any]) -> None:
         report["error"] = str(error)
         raise
     finally:
+        logging.getLogger().removeFilter(alignment)
         report["total_seconds"] = time.perf_counter() - started
         (args.output / "result.json").write_text(
             json.dumps(report, indent=2) + "\n", encoding="utf-8"
