@@ -570,6 +570,8 @@
           <select id="pair" disabled></select>
           <p id="pair-status" aria-live="polite">Preparing avatar</p>
           <button type="button" id="create-avatar">Create avatar</button>
+          <button type="button" id="edit-avatar" hidden>Edit avatar</button>
+          <button type="button" id="delete-avatar" hidden>Delete avatar</button>
           <p id="avatar-result" role="status"></p>
           <p id="avatar-storage-error" role="status"></p>
           <label for="model">Model</label>
@@ -647,6 +649,13 @@
       </select></label
     >
 
+    <dialog id="avatar-deletion" aria-labelledby="delete-title">
+      <h2 id="delete-title">Delete avatar</h2>
+      <p id="delete-confirmation"></p>
+      <p id="delete-status" role="status"></p>
+      <button type="button" id="confirm-delete-avatar">Confirm deletion</button>
+      <button type="button" id="cancel-delete-avatar">Cancel</button>
+    </dialog>
     <dialog id="avatar-editor" aria-labelledby="avatar-title">
       <form id="avatar-form" novalidate>
         <h2 id="avatar-title">Create avatar</h2>

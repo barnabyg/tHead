@@ -1,8 +1,9 @@
-# Create a local avatar
+# Manage local avatars
 
 This is the #43 extension beyond Phase 6's fixed pairs and original exclusion of
-a custom avatar editor. It adds creation from an existing image. Editing,
-deleting, cropping, cloning voices and persistent conversations are out of scope.
+a custom avatar editor. It adds creation from an existing image and, with #49,
+editing/deletion of user-created avatars. Cropping, cloning voices and persistent
+conversations are out of scope.
 Historical Phase 6 evidence retains its original pair labels.
 
 From `C:/docs/git/tHead`, in PowerShell 7, use this single preparation-and-launch
@@ -37,6 +38,37 @@ say “Image is corrupt or oversized; choose a valid JPEG or PNG” and preserve
 name and voice. Replace the file and retry. Cancel or Escape closes the form
 without saving. Save is disabled while in progress; repeated submissions cannot
 create duplicate names.
+
+## Edit and delete
+
+Select a user-created avatar in Settings and choose **Edit avatar**. The saved
+name, voice and portrait preview are filled in. Replace the image and/or voice,
+optionally change the name, then save. An empty image picker retains the saved
+portrait. Saving updates the same identity without another catalogue entry.
+Cancel or Escape discards edits. Invalid images and failed saves retain the
+previous saved record and leave the form available for correction.
+
+Editing/deletion require the interval between turns, after playback ends or
+Stop releases resources. Saving the selected avatar prepares its portrait and
+voice together before accepting another question. A preparation failure reports
+an error rather than substituting a voice.
+
+**Delete avatar** opens a confirmation naming the selected avatar. Cancel keeps
+it. Confirming removes its saved record and portrait bytes, and explicitly
+switches to the permanent default **JFK**. Built-in JFK and Grace cannot be edited
+or deleted through either UI or API. Transcript, context and budget are retained.
+Source image files and bundled assets are never deleted. Portrait bytes are
+owned by their individual database record, so deleting one avatar cannot remove
+another avatar's image. The single derived model-input image remains a reusable
+output cache, replaced on the next imported-avatar preparation.
+
+Manual scenario using the preparation-and-launch command above: create/select
+an avatar, change image/voice, save and speak. Verify actual image/voice playback,
+restart, reselect and check persistence. Cancel an edit and deletion and check
+no changes. Delete the selected user avatar and check the named fallback to JFK,
+retained transcript and subsequent speech. Confirm JFK stays available and has
+no delete action. Native Windows listening/viewing is required to verify audible
+voice identity and perceived synchronisation.
 
 ## Limits and voices
 

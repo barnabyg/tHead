@@ -90,6 +90,8 @@ class Conversation(Demonstration):
             return self.configure(data)
         if path == "/avatars":
             return self.create_avatar(data)
+        if path in ("/avatars/update", "/avatars/delete"):
+            return self.change_avatar(data, path.endswith("delete"))
         if path == "/reset":
             return self.reset(str(data.get("session", "")))
         if path == "/cancel":
@@ -195,6 +197,33 @@ class Conversation(Demonstration):
         if avatar.portrait.get("stored"):
             return self.avatars.portrait(identity)
         return (self.inputs / str(avatar.portrait["filename"])).read_bytes()
+
+    def change_avatar(self, data: dict[str, Any], deleting: bool) -> dict[str, Any]:
+        identity = str(data.get("id", ""))
+        with self.condition:
+            if data.get("session") != self.identity:
+                raise ValueError("Stale session; reload before changing avatars")
+            if not self.pair_selectable():
+                raise ValueError("Change avatars between turns; Stop and wait for resource release")
+            previous = self.avatars.require_user_avatar(identity)
+            if deleting:
+                self.avatars.delete(identity, data.get("name"))
+                avatar = self.avatars.get(DEFAULT_PAIR)
+            else:
+                voice = data.get("voice", previous.voice)
+                available = voice_catalogue(self.test_backend, str(voice))
+                if not any(v["id"] == voice and v["available"] for v in available):
+                    raise ValueError(
+                        "Voice unavailable; restore the supported Windows voice and retry"
+                    )
+                avatar = self.avatars.update(
+                    identity, data.get("name", previous.name), voice, data.get("image")
+                )
+            if self.selected_pair.id == identity:
+                # Invalidate prepared media even when the stable avatar ID is unchanged.
+                self.active_pair = ""
+                self.select(self.identity, avatar.id)
+            return {"id": avatar.id, "name": previous.name if deleting else avatar.name}
 
     def prepare_assets(self, pipeline: Any, inference: Any) -> None:
         pair = self.selected_pair
@@ -303,7 +332,12 @@ class Conversation(Demonstration):
     def status(self) -> dict[str, Any]:
         with self.condition:
             avatars = [
-                {"id": p.id, "name": p.name, "voice": p.voice}
+                {
+                    "id": p.id,
+                    "name": p.name,
+                    "voice": p.voice,
+                    "editable": bool(p.portrait.get("stored")),
+                }
                 for p in self.avatars.avatars().values()
             ]
             budget: dict[str, Any] = {"usable": False, "error": self.budget_error}

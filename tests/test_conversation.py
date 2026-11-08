@@ -1,5 +1,6 @@
 """Conversation acceptance at the loopback HTTP boundary; no paid calls or GPU."""
 
+import base64
 import json
 import subprocess  # nosec B404
 import sys
@@ -145,6 +146,7 @@ class ConversationTests(unittest.TestCase):
         request = next(e for e in done["run"]["events"] if e["event"] == "provider-request")
         self.assertEqual(request["configuration"]["model"], "gpt-6.1-sol")
         self.assertEqual(request["configuration"]["reasoning"], {"effort": "medium"})
+
         for model in ("gpt-6.1-lunar", "unknown", 123):
             with self.assertRaises(urllib.error.HTTPError):
                 self.request("/settings", {"session": status["session"], "model": model})
@@ -153,6 +155,44 @@ class ConversationTests(unittest.TestCase):
             self.request("/settings", {"session": "stale", "model": "gpt-6-luna"})
         recovered = self.request("/settings", {"session": status["session"], "model": "gpt-6-luna"})
         self.assertEqual(recovered["model"], "gpt-6-luna")
+
+    def test_avatar_mutation_guards_and_selected_repreparation(self) -> None:
+        status = self.request("/status")
+        data = {"session": status["session"], "name": "Saved", "voice": "hazel"}
+        created = self.request(
+            "/avatars",
+            {
+                **data,
+                "image": base64.b64encode(
+                    (ROOT / "tests/fixtures/portrait.jpg").read_bytes()
+                ).decode("ascii"),
+            },
+        )
+        for endpoint in ("/avatars/update", "/avatars/delete"):
+            for identity in ("jfk-zira", "hopper-hazel"):
+                with self.assertRaises(urllib.error.HTTPError) as failure:
+                    self.request(endpoint, {**data, "id": identity})
+                self.assertIn("Built-in", failure.exception.read().decode())
+            with self.assertRaises(urllib.error.HTTPError) as failure:
+                self.request(endpoint, {**data, "id": created["id"], "session": "stale"})
+            self.assertIn("Stale session", failure.exception.read().decode())
+        self.request("/select", {"session": status["session"], "avatar": created["id"]})
+        self.wait(lambda s: s["ready"])
+        self.request("/avatars/update", {**data, "id": created["id"], "voice": "zira"})
+        prepared = self.wait(lambda s: s["ready"])
+        self.assertEqual(prepared["activeAvatar"], created["id"])
+        self.assertEqual(prepared["pairSequence"], 2)
+        run = self.ask(fault="llm-connect")
+        for endpoint in ("/avatars/update", "/avatars/delete"):
+            with self.assertRaises(urllib.error.HTTPError) as failure:
+                self.request(endpoint, {**data, "id": created["id"]})
+            self.assertIn("between turns", failure.exception.read().decode())
+        self.request("/cancel", {"session": status["session"], "request": run["request"]})
+        self.wait(lambda s: s["state"] == "idle")
+        self.request("/avatars/delete", {**data, "id": created["id"]})
+        fallback = self.wait(lambda s: s["ready"])
+        self.assertEqual(fallback["activeAvatar"], "jfk-zira")
+        self.assertEqual(len(fallback["avatars"]), 2)
 
     def test_thinking_settings_capture_and_supported_model_combinations(self) -> None:
         status = self.request("/status")

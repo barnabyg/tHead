@@ -705,7 +705,7 @@ def handler(demo: Demonstration) -> type[BaseHTTPRequestHandler]:
                 return
             try:
                 size = int(self.headers.get("Content-Length", "0"))
-                limit = 7 * 1024 * 1024 if self.path == "/avatars" else 65536
+                limit = 7 * 1024 * 1024 if self.path in ("/avatars", "/avatars/update") else 65536
                 if not 0 <= size <= limit:
                     raise ValueError("Request too large")
                 data = json.loads(self.rfile.read(size) or b"{}")
@@ -714,7 +714,16 @@ def handler(demo: Demonstration) -> type[BaseHTTPRequestHandler]:
                 if self.path == "/shutdown" and demo.diagnostics:
                     threading.Thread(target=self.server.shutdown, daemon=True).start()
                     result = {"ok": True}
-                elif self.path in ("/ask", "/reset", "/cancel", "/select", "/avatars", "/settings"):
+                elif self.path in (
+                    "/ask",
+                    "/reset",
+                    "/cancel",
+                    "/select",
+                    "/avatars",
+                    "/avatars/update",
+                    "/avatars/delete",
+                    "/settings",
+                ):
                     result = demo.command(self.path, data)
                 elif demo.page == "conversation.html" and self.path in (
                     "/speak",
