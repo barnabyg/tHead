@@ -22,7 +22,7 @@ while a live server's accept loop is briefly delayed.
    backlog to 128 made the same regression pass. This bounds queued connections;
    it does not change test retries, worker counts or execution timeouts.
 
-The CI diagnostic distinguishes a live listener from process failure; the
+The CI diagnostic establishes a live fixture process rather than process exit; the
 controlled regression isolates backlog capacity as a cause of the same symptom.
 It does not measure the precise number of queued connections in the original CI
 failures. CI must pass on the fix before handoff.
