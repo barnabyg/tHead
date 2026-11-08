@@ -232,6 +232,17 @@ async function startFixture(info) {
   );
   info.app = child;
   info.output = output;
+  // Drain stderr and retain a bounded tail so CI fixture failures expose their cause.
+  let stderr = '';
+  child.stderr.on('data', (chunk) => {
+    stderr = (stderr + chunk).slice(-8000);
+  });
+  info.appDiagnostics = () => ({
+    pid: child.pid,
+    exitCode: child.exitCode,
+    signalCode: child.signalCode,
+    stderr,
+  });
   const timeout = setTimeout(() => child.kill(), 960_000);
   info.appTimeout = timeout;
   info.url = await new Promise((resolve, reject) => {
@@ -1008,6 +1019,9 @@ test('bounded 100-turn session trims context, rejects turn 101 and resets', asyn
 
 test.afterEach(async ({ page }, info) => {
   try {
+    if (info.status !== info.expectedStatus) {
+      console.error('Fixture diagnostics:', JSON.stringify(info.appDiagnostics?.()));
+    }
     await page.close();
   } finally {
     clearTimeout(info.appTimeout);
