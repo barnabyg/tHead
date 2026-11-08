@@ -184,6 +184,7 @@ def main() -> None:
             "docs/runtime/phase6-clean-startup.json",
             "chatterbox-lock.json",
             "docs/runtime/chatterbox/setup-result.json",
+            "docs/runtime/chatterbox/clean-result.json",
             "docs/runtime/chatterbox/wheel-inventory.json",
         )
     }
@@ -200,6 +201,7 @@ def main() -> None:
         for name in (
             "chatterbox-lock.json",
             "docs/runtime/chatterbox/setup-result.json",
+            "docs/runtime/chatterbox/clean-result.json",
             "docs/runtime/chatterbox/wheel-inventory.json",
         )
     }

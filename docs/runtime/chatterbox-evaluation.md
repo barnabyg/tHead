@@ -7,7 +7,7 @@ isolated research audition, not an application voice or approval to ship cloning
 
 | Issue | Verdict | Evidence / remaining condition |
 | --- | --- | --- |
-| #52 native setup | Reproduced in the evaluation checkout; clean-checkout reproduction pending | Local CPU synthesis, offline evidence and user confirmation of an intelligible complete utterance |
+| #52 native setup | Pass: reproducible CPU setup | Fresh local clone, independent caches/venvs, identical output digest, offline synthesis and explicit user confirmation of an intelligible complete utterance |
 | #53 voice quality | Not started | Requires #52 to close with a passing verdict; similarity scores cannot be inferred from intelligibility |
 | #54 integration/adoption | Deferred | Requires #53 to close with a passing verdict; no adapter, GPU benchmark or production UI added |
 
@@ -166,6 +166,19 @@ of the fixed generated WAV; review it if that file type changes.
    16.993 s, conditioning 1.308 s and synthesis 6.432 s. **Conclusion:** a dedicated
    subprocess is necessary; this repeat is filesystem/cache warm, not a clean
    checkout or persistent warmed conversation turn.
+5. **Hypothesis:** tracked files alone can reproduce preparation and speech.
+   **Change:** clone local commit `64ae0fd` with `git clone --no-local --no-hardlinks`
+   into `.runtime/chatterbox-clean-checkout`; run the documented command with
+   empty bootstrap/candidate caches and no existing virtual environments. The
+   installed host interpreters and uv/Git/PowerShell remain declared prerequisites.
+   **Measurement:** 112 candidate packages installed, all pinned model assets
+   freshly downloaded/verified; [clean result](chatterbox/clean-result.json)
+   produces the exact previously auditioned WAV digest. Import 47.118 s,
+   model ready 50.444 s, conditioning 10.062 s, synthesis 6.487 s, first complete
+   PCM 66.993 s. This correctness reproduction ran alongside CPU checks, so its
+   cold timings are observations under contention, not an isolated benchmark.
+   **Conclusion:** native clean-checkout setup passes. The subsequent warning-filter
+   and exception-comment fixes do not change dependencies, model assets or synthesis.
 
 The first audition ran under network-restricted execution.
 [A same-interpreter HTTPS probe](chatterbox/offline-probe.json) failed DNS resolution.
@@ -192,15 +205,16 @@ LibriSpeech, derived from LibriVox; [OpenSLR resource 12](https://www.openslr.or
 
 ## Verification and remaining work
 
-Canonical command: `uv run --locked python scripts/verify.py` (final result to
-be recorded after review). Focused CLI tests, Ruff, strict mypy and static security
+Canonical command: `uv run --locked python scripts/verify.py` passed during
+implementation (including 38 browser tests); final post-review verification remains
+to be recorded. Focused CLI tests, Ruff, strict mypy and static security
 checks run during implementation. No main-runtime dependency or security
 exception is changed. Manual scenario: run the documented command, listen to the
 complete passage, retry without `--prepare`, then supply a missing/invalid WAV
 and expect an explicit error. A newly generated WAV is always unreviewed until
 a human listens; the command never grants a quality gate itself.
 
-Clean-checkout preparation/generation is the remaining setup gate. #53 still needs
+Clean-checkout preparation/generation and the explicit setup listening verdict pass. #53 still needs
 its full two-speaker repeated-condition listening pack and explicit 1–5 human
 similarity/naturalness scores. #54's browser/media latency, cancellation, recovery,
 reference lifecycle, RAM/VRAM and continuous resampling checks remain untested.
