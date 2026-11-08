@@ -1,0 +1,39 @@
+{
+  "reviewer": "User, in chat",
+  "recorded_at_utc": "2026-11-08T18:41:33Z",
+  "scope": "Initial screen: fixed seed 17, clean 10-second reference, baseline and longer answer for each speaker",
+  "overall": "Positive/acceptable initial screen, comparable to the user’s prior voice-cloning experience",
+  "raw_scores": "A 2/4, complete. B 3/4, complete. C 3/4, complete. D 3/4, complete.",
+  "user_clarification": "I do not believe that was a negative outcome. I have done lots of voice cloning before and it is never 100% accurate. The accuracy here was comparable to what I am used to.",
+  "gate_note": "Scores are unchanged. This is a positive human initial screen, not a complete review of the original matrix or an automatic pass of its provisional numeric cutoff.",
+  "samples": [
+    {
+      "label": "A",
+      "sample_id": "1089-10s-baseline-17",
+      "similarity": 2,
+      "naturalness": 4,
+      "reported_complete": true
+    },
+    {
+      "label": "B",
+      "sample_id": "1089-10s-long-answer-17",
+      "similarity": 3,
+      "naturalness": 4,
+      "reported_complete": true
+    },
+    {
+      "label": "C",
+      "sample_id": "121-10s-baseline-17",
+      "similarity": 3,
+      "naturalness": 4,
+      "reported_complete": true
+    },
+    {
+      "label": "D",
+      "sample_id": "121-10s-long-answer-17",
+      "similarity": 3,
+      "naturalness": 4,
+      "reported_complete": true
+    }
+  ]
+}

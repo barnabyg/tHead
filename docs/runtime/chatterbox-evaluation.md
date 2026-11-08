@@ -8,7 +8,7 @@ isolated research audition, not an application voice or approval to ship cloning
 | Issue | Verdict | Evidence / remaining condition |
 | --- | --- | --- |
 | #52 native setup | Pass; issue closed 8 November 2026 | Fresh local clone, independent caches/venvs, identical output digest, offline synthesis and explicit user confirmation of an intelligible complete utterance |
-| #53 voice quality | Listening pack complete; human gate unresolved | 68 candidate WAVs, 10 baseline WAVs, 2 expected 5-second rejections; [protocol, command and raw evidence](chatterbox-quality.md) |
+| #53 voice quality | User judged the four-clip initial screen acceptable; broader gate scope pending | Scores A 2/4, B 3/4, C 3/4, D 3/4 (similarity/naturalness), all complete; [verdict and full evidence](chatterbox-quality.md) |
 | #54 integration/adoption | Deferred | Requires #53 to close with a passing verdict; no adapter, GPU benchmark or production UI added |
 
 Do not adopt on this evidence. Native setup alone establishes neither similarity
@@ -225,8 +225,10 @@ were removed after preserving reproduction logs; the primary audition environmen
 is retained for re-use.
 
 Clean-checkout preparation/generation and the explicit setup listening verdict pass.
-The two-speaker repeated-condition #53 pack is delivered; explicit per-sample 1–5
-human similarity/naturalness and defect judgements are pending. #54's browser/media latency, cancellation, recovery,
+The two-speaker repeated-condition #53 pack is delivered. The user explicitly
+accepted the four-clip initial screen; the remaining 74 clips are unreviewed.
+The prototype-gate scope is pending confirmation, rather than a negative quality
+verdict. #54's browser/media latency, cancellation, recovery,
 reference lifecycle, RAM/VRAM and continuous resampling checks remain untested.
 Do not extrapolate these isolated whole-utterance CPU measurements to FlashHead.
 
@@ -234,16 +236,16 @@ Do not extrapolate these isolated whole-utterance CPU measurements to FlashHead.
 
 **No adoption at present. Integration evaluation is deferred, not passed or
 technically rejected.** Issue #54 explicitly requires #53 to close with a passing
-human quality verdict. The listening pack is available, but its similarity,
-naturalness, accent and per-sample defect scores are still pending. Successful
-generation and the single setup intelligibility confirmation do not satisfy that
-prerequisite. The retired upstream and 90 candidate dependency advisories also
+human quality verdict. The user judges the four-clip initial screen acceptable,
+with all utterances complete. The remaining matrix is unreviewed, and #53 has not
+yet closed with an agreed prototype-gate scope. This is not a negative quality
+outcome; the written stage dependency is still pending. The retired upstream and 90 candidate dependency advisories also
 remain material adoption risks; no production security/licensing clearance exists.
 
 | Adoption requirement | Evidence/status |
 | --- | --- |
 | Native reproducibility | Pass; #52 closed with explicit user listening confirmation |
-| Two-speaker quality and reference preparation | Matrix generated; human scores unresolved (#53 remains open) |
+| Two-speaker quality and reference preparation | Positive/acceptable four-clip user screen; broader gate scope pending (#53 remains open) |
 | Fresh FlashHead/browser baseline; cold and ten warmed turns per configuration | Not run: integration gate deferred |
 | CPU/GPU coexistence, stalls, peak RAM/VRAM and allocation release | Not measured; the quality matrix uses CPU in separate processes and is not a coexistence benchmark |
 | Browser first audible speech with a decoded moving frame; 3–5 s warm target | Not measured; isolated complete-WAV timing does not establish this |

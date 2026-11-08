@@ -105,7 +105,9 @@ or re-record noisy/music/multi-speaker references; the harness does not detect
 those conditions automatically. The contaminated examples test what happens if
 that preparation rule is ignored, rather than validating a detector.
 
-The quality gate is **unresolved until explicit human scores are recorded**.
+The original full-matrix quality gate remains distinct from the **positive initial
+human screen** recorded below. No negative outcome is inferred from the numeric
+scores against the user's explicit judgement.
 To pass provisionally, each clean speaker at a supported recommended reference
 length must score at least 3 for similarity and naturalness, with no meaning-changing
 missing/extra words across the core text set and repeats. Report every sample,
@@ -123,15 +125,35 @@ audition is separate. The full [raw manifest](chatterbox/quality-manifest.json)
 records each result, seed, output hash and configuration. The local pack contains
 33.1 MB of audio/evidence, ten reference WAVs and 78 score-sheet rows.
 
-All generation outputs remain `generated_unreviewed`. The score sheet records
-the earlier explicit user confirmation that one identical #52 baseline sample
-was intelligible and complete; its similarity/naturalness fields are blank.
-This prior confirmation is not a #53 quality score. Human per-sample similarity,
-naturalness, accent and defect judgements are still required. After the user
+Four fixed screen samples have explicit user scores; 74 generated clips remain
+unreviewed. The earlier #52 confirmation concerned only intelligibility of one
+identical setup sample. After the user
 reported that Excel was unavailable and the 78-row CSV was burdensome, the default
 review was narrowed to the four-clip screen above, with chat replies. The original
 matrix/evidence is retained; this changes review workload, not the formal quality
 gate or the generated audio.
+
+### Recorded initial human screen
+
+The user reported all four utterances complete and explicitly judged the cloning
+accuracy **acceptable/comparable to their previous voice-cloning experience**.
+They rejected a negative interpretation based on the provisional cutoff: voice
+cloning is not expected to be 100% identical. The numeric scores remain unchanged.
+
+| Clip | Speaker / passage | Similarity | Naturalness | User report |
+| --- | --- | --- | --- | --- |
+| A | Peter Bobbe / baseline | 2 | 4 | Complete |
+| B | Peter Bobbe / longer answer | 3 | 4 | Complete |
+| C | Nikolle Doolin / baseline | 3 | 4 | Complete |
+| D | Nikolle Doolin / longer answer | 3 | 4 | Complete |
+
+[Recorded user verdict](chatterbox/human-verdict.json) preserves the scores and
+clarification. This is a **positive initial screen**, not a negative result and
+not a claim that all remaining samples or accents were reviewed. The original
+issue's cutoff of 3 was provisional; it is not used to override the experienced
+user's explicit acceptability judgement. Whether this screen replaces the broader
+listening matrix as the gate for the bounded #54 prototype is a scope decision;
+it does not require changing a score from 2 to 3.
 
 Both contaminated references produced WAVs without automatic rejection. This
 establishes that reference hygiene must be a manual preparation step; it does
@@ -157,8 +179,8 @@ one diagnostic verification (82 operations total).
 Hypothesis → change → measurement → conclusion: the pinned Nano may retain two
 different voices consistently → fixed texts/seeds and paired reference lengths,
 with all attempts retained → 68 candidate WAVs generated, no synthesis errors,
-but no human similarity/naturalness scores yet → synthesis feasibility confirmed;
-the quality hypothesis remains unresolved. No quality-driven retries, variant
+then four human scores plus an explicit acceptable/comparable verdict → positive
+initial quality screen, with broader conditions unreviewed. No quality-driven retries, variant
 switches or tuning were performed. The 5.1-second extension closes a protocol
 coverage gap rather than replacing an unfavourable sample.
 

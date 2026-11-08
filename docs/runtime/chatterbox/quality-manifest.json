@@ -1,5 +1,5 @@
 {
-  "gate": "unresolved_human_scores_required",
+  "gate": "positive_initial_screen_formal_gate_scope_pending",
   "issue": 53,
   "references": [
     {
@@ -358,7 +358,7 @@
       "text_id": "baseline",
       "seed": 17,
       "exit_code": 0,
-      "status": "generated_unreviewed",
+      "status": "screen_reviewed",
       "error": "",
       "wall_seconds": 23.048195600000327,
       "audio": "samples/1089-10s-baseline-17/speech.wav",
@@ -386,6 +386,13 @@
         "output_sha256": "bafdabc0fbbe9c6679d76c4aaad5da17f8798ed7ec05ff36ef6f356f4efde2b7",
         "watermark": "upstream PerthImplicitWatermarker, unmodified",
         "total_seconds": 19.34292820000337
+      },
+      "human_screen_review": {
+        "label": "A",
+        "sample_id": "1089-10s-baseline-17",
+        "similarity": 2,
+        "naturalness": 4,
+        "reported_complete": true
       }
     },
     {
@@ -787,7 +794,7 @@
       "text_id": "long-answer",
       "seed": 17,
       "exit_code": 0,
-      "status": "generated_unreviewed",
+      "status": "screen_reviewed",
       "error": "",
       "wall_seconds": 28.241000899997744,
       "audio": "samples/1089-10s-long-answer-17/speech.wav",
@@ -815,6 +822,13 @@
         "output_sha256": "6fa77a7593ff2cd7b86383a1ed0b79ac2431305a0c6dfa8de50236ceed8907e2",
         "watermark": "upstream PerthImplicitWatermarker, unmodified",
         "total_seconds": 24.046403600001213
+      },
+      "human_screen_review": {
+        "label": "B",
+        "sample_id": "1089-10s-long-answer-17",
+        "similarity": 3,
+        "naturalness": 4,
+        "reported_complete": true
       }
     },
     {
@@ -1489,7 +1503,7 @@
       "text_id": "baseline",
       "seed": 17,
       "exit_code": 0,
-      "status": "generated_unreviewed",
+      "status": "screen_reviewed",
       "error": "",
       "wall_seconds": 26.02843379999831,
       "audio": "samples/121-10s-baseline-17/speech.wav",
@@ -1517,6 +1531,13 @@
         "output_sha256": "fe485238f928b4b76ed69434af4c3639a2a3f3d6e7af5a15455b0a3d12c677b5",
         "watermark": "upstream PerthImplicitWatermarker, unmodified",
         "total_seconds": 22.169600200002606
+      },
+      "human_screen_review": {
+        "label": "C",
+        "sample_id": "121-10s-baseline-17",
+        "similarity": 3,
+        "naturalness": 4,
+        "reported_complete": true
       }
     },
     {
@@ -1957,7 +1978,7 @@
       "text_id": "long-answer",
       "seed": 17,
       "exit_code": 0,
-      "status": "generated_unreviewed",
+      "status": "screen_reviewed",
       "error": "",
       "wall_seconds": 28.878835499999695,
       "audio": "samples/121-10s-long-answer-17/speech.wav",
@@ -1985,6 +2006,13 @@
         "output_sha256": "6bef02625e552a20488726c256e9ab6071efd6095fc8264380bf27d92a0b6455",
         "watermark": "upstream PerthImplicitWatermarker, unmodified",
         "total_seconds": 24.562965600001917
+      },
+      "human_screen_review": {
+        "label": "D",
+        "sample_id": "121-10s-long-answer-17",
+        "similarity": 3,
+        "naturalness": 4,
+        "reported_complete": true
       }
     },
     {
@@ -3597,5 +3625,44 @@
     "watermark": "unmodified upstream PerthImplicitWatermarker"
   },
   "not_attempted": [],
-  "post_matrix_verification": "One separate 1089-5.1s-baseline-17 verification recorded the same diagnostic in JSON instead of console output and produced the identical WAV digest; not selected as a replacement quality sample."
+  "post_matrix_verification": "One separate 1089-5.1s-baseline-17 verification recorded the same diagnostic in JSON instead of console output and produced the identical WAV digest; not selected as a replacement quality sample.",
+  "human_screen": {
+    "reviewer": "User, in chat",
+    "recorded_at_utc": "2026-11-08T18:41:33Z",
+    "scope": "Initial screen: fixed seed 17, clean 10-second reference, baseline and longer answer for each speaker",
+    "overall": "Positive/acceptable initial screen, comparable to the user’s prior voice-cloning experience",
+    "raw_scores": "A 2/4, complete. B 3/4, complete. C 3/4, complete. D 3/4, complete.",
+    "user_clarification": "I do not believe that was a negative outcome. I have done lots of voice cloning before and it is never 100% accurate. The accuracy here was comparable to what I am used to.",
+    "gate_note": "Scores are unchanged. This is a positive human initial screen, not a complete review of the original matrix or an automatic pass of its provisional numeric cutoff.",
+    "samples": [
+      {
+        "label": "A",
+        "sample_id": "1089-10s-baseline-17",
+        "similarity": 2,
+        "naturalness": 4,
+        "reported_complete": true
+      },
+      {
+        "label": "B",
+        "sample_id": "1089-10s-long-answer-17",
+        "similarity": 3,
+        "naturalness": 4,
+        "reported_complete": true
+      },
+      {
+        "label": "C",
+        "sample_id": "121-10s-baseline-17",
+        "similarity": 3,
+        "naturalness": 4,
+        "reported_complete": true
+      },
+      {
+        "label": "D",
+        "sample_id": "121-10s-long-answer-17",
+        "similarity": 3,
+        "naturalness": 4,
+        "reported_complete": true
+      }
+    ]
+  }
 }
