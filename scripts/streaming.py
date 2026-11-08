@@ -33,6 +33,9 @@ SAMPLES = 15360
 class LoopbackServer(ThreadingHTTPServer):
     # Windows SO_REUSEADDR permits two live listeners, routing to the wrong app.
     allow_reuse_address = False
+    # Polling, media and telemetry can burst while a busy Windows host delays accept().
+    # The stdlib backlog of five refuses live-server connections in that case.
+    request_queue_size = 128
 
     def server_bind(self) -> None:
         if hasattr(socket, "SO_EXCLUSIVEADDRUSE"):
