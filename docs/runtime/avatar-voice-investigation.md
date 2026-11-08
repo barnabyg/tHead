@@ -83,8 +83,13 @@ demonstrate a changed saved voice.
 The “Unavailable Desktop voice” diagnostic should give a preparation error with
 Ask disabled. Selecting a healthy avatar recovers without losing context. This
 simulates error handling rather than a real missing Windows installation.
-Native listening and synchronised avatar playback for this exact report remain
-unverified. No paid provider requests were made.
+The later [native edit/delete verification](windows-avatars.md#native-editdelete-verification-49)
+completed actual GPU/avatar playback using Zira, then an intentional change to
+Hazel, Hazel after restart/reselection, and Zira after explicit deletion fallback.
+All four responses recorded audio onset, moving video and playback end with the
+declared SAPI identity. This did not reproduce an unintentional change. Human
+listening and perceived synchronisation for this report remain unverified.
+No paid provider requests were made.
 
 ## Details needed if it recurs
 

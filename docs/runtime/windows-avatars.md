@@ -121,6 +121,28 @@ Stop/reset and recovery. These checks cannot establish physical speaker output,
 voice quality or perceived lip sync. Real Windows/GPU digital media observations
 are distinct from human listening/viewing confirmation.
 
+### Native edit/delete verification (#49)
+
+On 2026-11-08, native Windows 11 / RTX 3090 / Chromium, implementation commit
+`0ce6c3d`, an isolated fixture-provider run completed this sequence:
+
+| Response | Saved avatar state | Actual prepared SAPI voice |
+| --- | --- | --- |
+| Before edit | Imported portrait, stable user ID | Microsoft Zira Desktop |
+| After image/voice edit | Grace portrait bytes replace the original, same ID | Microsoft Hazel Desktop |
+| After server restart and reselection | Replacement portrait/voice persist | Microsoft Hazel Desktop |
+| After confirmed deletion | Named fallback to permanent JFK, derived portrait removed | Microsoft Zira Desktop |
+
+All four responses recorded digital audio onset, moving video and playback end.
+The portrait API returned the exact replacement image bytes. SAPI preparation
+validated the declared voice tokens; no speech/GPU transport was substituted.
+The run used separate output/user-data/budget directories and an ephemeral port,
+and made no paid provider requests. The existing application was left running;
+these are functional observations, not latency/resource benchmarks. Task-owned
+servers and the browser were shut down after verification. Human audible voice
+identity and perceived synchronisation remain unverified; use the manual
+scenario above for those checks.
+
 Observed on 2026-11-08 on native Windows 11 / RTX 3090 / Chromium: imported a
 JPEG as **My avatar** with Microsoft Hazel Desktop; four complete responses
 established digital audio onset, moving video and playback end. The run included
