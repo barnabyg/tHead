@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from chatterbox_eval import ReferenceAlignmentDiagnostic, reject_network  # noqa: E402
+from chatterbox_eval import ReferenceAlignmentDiagnostic, configure_warning_policy, reject_network  # noqa: E402
 from chatterbox_voice import reference_file, reference_record  # noqa: E402
 
 
@@ -49,21 +49,7 @@ def main() -> None:
         )
         sys.addaudithook(reject_network)
         logging.getLogger().addFilter(ReferenceAlignmentDiagnostic(diagnostics))
-        # Reuse the exact upstream compatibility-warning policy from the audited CLI.
-        import re
-        import warnings
-
-        warnings.filterwarnings(
-            "ignore",
-            message=re.escape(
-                "`LoRACompatibleLinear` is deprecated and will be removed in version 1.0.0. "
-                "Use of `LoRACompatibleLinear` is deprecated. Please switch to PEFT backend "
-                "by installing PEFT: `pip install peft`."
-            )
-            + "$",
-            category=FutureWarning,
-            module=r"diffusers\.models\.lora",
-        )
+        configure_warning_policy()
         lock = json.loads(
             (
                 Path(__file__).resolve().parents[1]

@@ -91,21 +91,7 @@ def synthesize(args: argparse.Namespace, lock: dict[str, Any]) -> None:
         )
         sys.addaudithook(reject_network)
         logging.getLogger().addFilter(alignment)
-        # Upstream's pinned S3Gen still uses this compatibility layer. The warning
-        # does not affect inference; revisit/remove this exact filter when either
-        # the model/source or diffusers pin changes. All other warnings remain errors
-        # when callers enable that policy.
-        warnings.filterwarnings(
-            "ignore",
-            message=re.escape(
-                "`LoRACompatibleLinear` is deprecated and will be removed in version 1.0.0. "
-                "Use of `LoRACompatibleLinear` is deprecated. Please switch to PEFT backend "
-                "by installing PEFT: `pip install peft`."
-            )
-            + "$",
-            category=FutureWarning,
-            module=r"diffusers\.models\.lora",
-        )
+        configure_warning_policy()
         torch = importlib.import_module("torch")
         np = importlib.import_module("numpy")
         soundfile = importlib.import_module("soundfile")
@@ -155,6 +141,24 @@ def synthesize(args: argparse.Namespace, lock: dict[str, Any]) -> None:
         (args.output / "result.json").write_text(
             json.dumps(report, indent=2) + "\n", encoding="utf-8"
         )
+
+
+def configure_warning_policy() -> None:
+    # Upstream's pinned S3Gen still uses this compatibility layer. The warning
+    # does not affect inference; revisit/remove this exact filter when either
+    # the model/source or diffusers pin changes. All other warnings remain errors
+    # when callers enable that policy.
+    warnings.filterwarnings(
+        "ignore",
+        message=re.escape(
+            "`LoRACompatibleLinear` is deprecated and will be removed in version 1.0.0. "
+            "Use of `LoRACompatibleLinear` is deprecated. Please switch to PEFT backend "
+            "by installing PEFT: `pip install peft`."
+        )
+        + "$",
+        category=FutureWarning,
+        module=r"diffusers\.models\.lora",
+    )
 
 
 def main() -> int:
