@@ -24,7 +24,7 @@ from urllib.parse import parse_qs, urlparse
 from pairs import configured_pair
 from prepare import ROOT, RUNTIME
 from smoke import load_pipeline
-from speech import Voice, segments
+from speech import SpeechVoice, Voice, segments
 from stream_media import Mux
 
 SAMPLES = 15360
@@ -214,7 +214,7 @@ class Demonstration:
         self.current: Session | None = None
         self.test_backend = test_backend
         self.fragment_frames = fragment_frames
-        self.voice = Voice()
+        self.voice: SpeechVoice = Voice()
         self.speech_enabled = speech_enabled
         self.diagnostics = diagnostics or test_backend
         self.shutdown = threading.Event()
@@ -291,6 +291,7 @@ class Demonstration:
         pending = bytearray()
         total = 0
         digest = hashlib.sha256()
+        self.voice.begin_turn(session.cancelled)
         for index, text in enumerate(self.phrases(session)):
             # Do not prepare another phrase while a previous phrase still has
             # queued windows. This bounds lookahead and keeps synthesis demand-driven.
@@ -309,11 +310,7 @@ class Demonstration:
                 time.sleep(1)
             if session.fault == "tts":
                 raise RuntimeError("Injected local TTS failure")
-            if self.test_backend:
-                session.cancelled.wait(0.15)
-                pcm = b"\x01\x00" * 16000
-            else:
-                pcm = self.voice.speak(text, session.cancelled)
+            pcm = self.speech_pcm(text, session.cancelled)
             if session.cancelled.is_set():
                 return
             total += len(pcm)
@@ -326,6 +323,7 @@ class Demonstration:
                 text=text,
                 samples=len(pcm) // 2,
                 preparation_seconds=time.perf_counter() - begun,
+                engine_metrics=self.voice.metadata.get("last_synthesis", {}),
             )
             pending.extend(pcm)
             # Keep the final partial window until actual end of text. Never pad a
@@ -335,8 +333,22 @@ class Demonstration:
                 del pending[: SAMPLES * 2]
         if session.cancelled.is_set():
             return
+        tail = self.voice.finish_turn(session.cancelled)
+        pending.extend(tail)
+        digest.update(tail)
+        total += len(tail)
+        if total > 120 * 32000:
+            raise ValueError("Speech exceeds the two-minute limit")
+        if tail:
+            session.event("tts-tail", samples=len(tail) // 2)
         self.handoff(session, bytes(pending), True)
         session.event("tts-complete", samples=total // 2, sha256=digest.hexdigest())
+
+    def speech_pcm(self, text: str, cancelled: threading.Event) -> bytes:
+        if self.test_backend:
+            cancelled.wait(0.15)
+            return b"\x01\x00" * 16000
+        return self.voice.speak(text, cancelled)
 
     def phrases(self, session: Session) -> Iterator[str]:
         yield from session.text
@@ -717,6 +729,8 @@ def handler(demo: Demonstration) -> type[BaseHTTPRequestHandler]:
                 if self.path == "/shutdown" and demo.diagnostics:
                     threading.Thread(target=self.server.shutdown, daemon=True).start()
                     result = {"ok": True}
+                elif self.path == "/experimental" and getattr(demo, "experimental_enabled", False):
+                    result = demo.command(self.path, data)
                 elif self.path in (
                     "/ask",
                     "/reset",

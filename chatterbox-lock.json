@@ -56,5 +56,19 @@
         "sha256": "f6bd25a65e4e63ca31360e9fb11c7e4f9a391a78385d640acd814092dd6eee4f"
       }
     ]
-  }
+  },
+  "references": [
+    {
+      "id": "librispeech-1089-10s",
+      "speaker": "Peter Bobbe",
+      "file": "docs/runtime/chatterbox/reference-1089-10s.wav",
+      "sha256": "bba0af570fd5a873ac6150ed8f7d7fd6eaf1b5943002af18bf9947b5b0c2d06c"
+    },
+    {
+      "id": "librispeech-121-10s",
+      "speaker": "Nikolle Doolin",
+      "file": "docs/runtime/chatterbox/reference-121-10s.wav",
+      "sha256": "a48388b2eee73d6d2db5e15b88a4761a40af7518714862b65f40ff73bd18d8e6"
+    }
+  ]
 }

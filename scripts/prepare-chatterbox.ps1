@@ -1,16 +1,18 @@
 # Invoked only by chatterbox_eval.py --prepare, under its process-tree timeout.
-param([Parameter(Mandatory)][string]$State)
+param([Parameter(Mandatory)][string]$State, [ValidateSet("cpu","cuda")][string]$Configuration = "cpu")
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
 $root = Split-Path $PSScriptRoot -Parent
-$lock = Get-Content (Join-Path $root 'chatterbox-lock.json') -Raw | ConvertFrom-Json
+$lockName = if ($Configuration -eq 'cuda') { 'chatterbox-gpu-lock.json' } else { 'chatterbox-lock.json' }
+$requirements = if ($Configuration -eq 'cuda') { 'requirements-gpu.lock' } else { 'requirements.lock' }
+$lock = Get-Content (Join-Path $root $lockName) -Raw | ConvertFrom-Json
 $State = [IO.Path]::GetFullPath($State)
 $drive = [IO.DriveInfo]::new([IO.Path]::GetPathRoot($State))
 $memory = Get-CimInstance Win32_OperatingSystem
 if ($drive.AvailableFreeSpace -lt 20GB -or $memory.FreePhysicalMemory * 1KB -lt 8GB) {
     throw 'Evaluation acquisition requires at least 20 GiB free disk and 8 GiB free RAM.'
 }
-Write-Output "Preflight: $($drive.AvailableFreeSpace) bytes free disk; $($memory.FreePhysicalMemory * 1KB) bytes free RAM; CPU configuration (no VRAM allocation)."
+Write-Output "Preflight: $($drive.AvailableFreeSpace) bytes free disk; $($memory.FreePhysicalMemory * 1KB) bytes free RAM; $Configuration configuration."
 New-Item -ItemType Directory -Force $State | Out-Null
 $env:UV_CACHE_DIR = Join-Path $State 'uv-cache'
 $env:UV_PYTHON_INSTALL_DIR = Join-Path $State 'python'
@@ -49,7 +51,11 @@ if (-not (Test-Path -LiteralPath $python)) {
 }
 $version = & $python -I -c 'import platform; print(platform.python_version())'
 if ($LASTEXITCODE -ne 0 -or $version -ne $lock.python) { throw 'Candidate Python differs from its pin; choose a fresh --state directory.' }
-Invoke-Checked uv @('pip', 'sync', '--python', $python, '--require-hashes', (Join-Path $root 'docs/runtime/chatterbox/requirements.lock'))
+$installedTorch = & $python -I -c 'import importlib.util; import torch; print(torch.__version__)' 2>$null
+if ($LASTEXITCODE -eq 0 -and $installedTorch -ne $lock.torch) {
+    throw 'Existing PyTorch configuration differs; choose a fresh -State directory. No environment was changed.'
+}
+Invoke-Checked uv @('pip', 'sync', '--python', $python, '--require-hashes', (Join-Path $root "docs/runtime/chatterbox/$requirements"))
 Invoke-Checked uv @('pip', 'install', '--python', $python, '--no-deps', '--no-build-isolation', (Join-Path $State 'source'), (Join-Path $State 'perth'))
 Invoke-Checked uv @('pip', 'check', '--python', $python)
 

@@ -26,10 +26,12 @@ def main() -> None:
         "scripts/benchmark.cjs",
         "scripts/resilience.cjs",
         "scripts/pair-assessment.cjs",
+        "scripts/chatterbox-benchmark.cjs",
         "scripts/streaming.html",
         "scripts/conversation.html",
         "playwright.config.cjs",
         "tests/browser/conversation.spec.cjs",
+        "tests/browser/chatterbox.spec.cjs",
     ]
     run([biome, "format", *browser_files], 120)
     run([python, "-m", "ruff", "check", "scripts", "tests"], 120)
@@ -42,7 +44,9 @@ def main() -> None:
     run(["node", "--check", "scripts/benchmark.cjs"], 120)
     run(["node", "--check", "scripts/resilience.cjs"], 120)
     run(["node", "--check", "scripts/pair-assessment.cjs"], 120)
+    run(["node", "--check", "scripts/chatterbox-benchmark.cjs"], 120)
     run(["node", "--check", "tests/browser/conversation.spec.cjs"], 120)
+    run(["node", "--check", "tests/browser/chatterbox.spec.cjs"], 120)
     run(["node", "--check", "playwright.config.cjs"], 120)
     run([python, "-m", "bandit", "-q", "-c", "pyproject.toml", "-r", "scripts", "tests"], 120)
     modules = sorted((ROOT / "tests").glob("test_*.py"))
@@ -158,6 +162,7 @@ def main() -> None:
         "speech-lock.json",
         "hazel-lock.json",
         "chatterbox-lock.json",
+        "chatterbox-gpu-lock.json",
         "avatar-pairs.json",
         "package.json",
         "package-lock.json",
@@ -183,6 +188,7 @@ def main() -> None:
             "docs/runtime/rtx3090-phase6-stop.json",
             "docs/runtime/phase6-clean-startup.json",
             "chatterbox-lock.json",
+            "chatterbox-gpu-lock.json",
             "docs/runtime/chatterbox/setup-result.json",
             "docs/runtime/chatterbox/clean-result.json",
             "docs/runtime/chatterbox/quality-manifest.json",
@@ -202,6 +208,7 @@ def main() -> None:
         (ROOT / name).resolve()
         for name in (
             "chatterbox-lock.json",
+            "chatterbox-gpu-lock.json",
             "docs/runtime/chatterbox/setup-result.json",
             "docs/runtime/chatterbox/clean-result.json",
             "docs/runtime/chatterbox/quality-manifest.json",
