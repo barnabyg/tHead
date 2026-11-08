@@ -154,6 +154,46 @@ class ConversationTests(unittest.TestCase):
         recovered = self.request("/settings", {"session": status["session"], "model": "gpt-6-luna"})
         self.assertEqual(recovered["model"], "gpt-6-luna")
 
+    def test_thinking_settings_capture_and_supported_model_combinations(self) -> None:
+        status = self.request("/status")
+        identity = status["session"]
+        self.assertEqual(status["settings"]["thinkingLevel"], "none")
+        run = self.ask(fault="llm-connect")
+        changed = self.request("/settings", {"session": identity, "model": "gpt-6.1-sol"})
+        self.assertEqual(changed["settings"]["thinkingLevel"], "medium")
+        self.assertIn("medium", changed["settings"]["message"])
+        self.assertEqual(changed["run"]["thinkingLevel"], "none")
+        self.wait(lambda s: s["state"] == "idle")
+        for model, levels in (
+            ("gpt-6.1-sol", ("low", "medium", "high", "xhigh", "max")),
+            ("gpt-6-luna", ("none", "low", "medium", "high", "xhigh", "max")),
+        ):
+            for level in levels:
+                self.request(
+                    "/settings", {"session": identity, "model": model, "thinkingLevel": level}
+                )
+                self.ask()
+                done = self.wait(lambda s: s["state"] == "idle")
+                request = next(e for e in done["run"]["events"] if e["event"] == "provider-request")
+                self.assertEqual(request["configuration"]["reasoning"], {"effort": level})
+                self.assertEqual(done["run"]["thinkingLevel"], level)
+                self.assertEqual(done["run"]["usage"]["reasoning_tokens"], 10)
+        self.request("/settings", {"session": identity, "model": "gpt-6.1-sol"})
+        self.assertEqual(self.request("/status")["settings"]["thinkingLevel"], "max")
+        for invalid in ("none", "minimal", 123, None):
+            with self.assertRaises(urllib.error.HTTPError):
+                self.request("/settings", {"session": identity, "thinkingLevel": invalid})
+        self.assertEqual(self.request("/status")["settings"]["thinkingLevel"], "max")
+        self.ask(fault="llm-settings")
+        failed = self.wait(lambda s: s["state"] == "idle")
+        self.assertEqual(failed["run"]["state"], "failed")
+        self.assertIn("Settings", failed["run"]["error"])
+        self.assertTrue(failed["run"]["usage"]["estimated"])
+        self.request("/settings", {"session": identity, "thinkingLevel": "low"})
+        self.ask()
+        self.assertEqual(self.wait(lambda s: s["state"] == "idle")["run"]["state"], "complete")
+        self.assertEqual(run["thinkingLevel"], "none")
+
     def test_streamed_answer_and_progressive_speech(self) -> None:
         for question in ("", " \n", "x" * 1201):
             with self.assertRaises(urllib.error.HTTPError):

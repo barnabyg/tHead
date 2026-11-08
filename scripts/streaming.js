@@ -44,22 +44,65 @@ document.querySelector('#settings-back')?.addEventListener('click', () => {
   settingsButton.focus();
 });
 const modelSelector = document.querySelector('#model');
+const thinkingSelector = document.querySelector('#thinking-level');
 let savingSettings = false;
-modelSelector?.addEventListener('change', async () => {
+let settingsRevision = 0;
+let modelCatalog = '';
+let thinkingCatalog = '';
+function renderSettings(settings) {
+  const catalog = JSON.stringify([settings.models, settings.model]);
+  if (catalog !== modelCatalog) {
+    modelSelector.replaceChildren(
+      ...settings.models.map((model) => {
+        const option = new Option(model.id + (model.available ? '' : ' — unavailable'), model.id);
+        option.disabled = !model.available;
+        return option;
+      }),
+    );
+    if (!settings.models.some((model) => model.id === settings.model)) {
+      modelSelector.add(new Option(`${settings.model} — unsupported`, settings.model));
+    }
+    modelCatalog = catalog;
+  }
+  modelSelector.value = settings.model;
+  modelSelector.disabled = false;
+  const levels = settings.models.find((model) => model.id === settings.model)?.levels || [];
+  const levelCatalog = JSON.stringify(levels);
+  if (levelCatalog !== thinkingCatalog) {
+    thinkingSelector.replaceChildren(
+      ...(levels.length ? levels : ['Unavailable']).map((level) => new Option(level, level)),
+    );
+    thinkingCatalog = levelCatalog;
+  }
+  if (levels.length) thinkingSelector.value = settings.thinkingLevel;
+  thinkingSelector.disabled = !levels.length;
+  document.querySelector('#model-availability').textContent = settings.models
+    .filter((model) => !model.available)
+    .map((model) => model.error)
+    .join('. ');
+}
+async function saveSettings(change) {
   if (savingSettings) return;
   savingSettings = true;
+  settingsRevision++;
   modelSelector.disabled = true;
+  thinkingSelector.disabled = true;
   const feedback = document.querySelector('#settings-status');
   feedback.textContent = 'Saving…';
   try {
-    await post('/settings', { session: sessionIdentity, model: modelSelector.value });
-    feedback.textContent = 'Saved. Applies to the next question.';
+    const saved = await post('/settings', { session: sessionIdentity, ...change });
+    renderSettings(saved.settings);
+    feedback.textContent = `Saved. ${saved.settings.message || 'Applies to the next question.'}`;
   } catch (error) {
     feedback.textContent = String(error);
   } finally {
     savingSettings = false;
   }
-});
+}
+modelSelector?.addEventListener('change', () => saveSettings({ model: modelSelector.value }));
+thinkingSelector?.addEventListener('change', () =>
+  saveSettings({ thinkingLevel: thinkingSelector.value }),
+);
 const pairSelector = document.querySelector('#pair');
 const avatarEditor = document.querySelector('#avatar-editor');
 const avatarForm = document.querySelector('#avatar-form');
@@ -607,32 +650,13 @@ setInterval(async () => {
   if (polling) return;
   polling = true;
   const ticket = epoch;
+  const configTicket = settingsRevision;
   try {
     const status = await (await fetch('/status', { signal: AbortSignal.timeout(10000) })).json();
     if (ticket !== epoch) return;
     if (conversation) {
-      if (status.settings && !savingSettings) {
-        modelSelector.replaceChildren(
-          ...status.settings.models.map((model) => {
-            const option = new Option(
-              model.id + (model.available ? '' : ' — unavailable'),
-              model.id,
-            );
-            option.disabled = !model.available;
-            return option;
-          }),
-        );
-        if (!status.settings.models.some((model) => model.id === status.settings.model)) {
-          modelSelector.add(
-            new Option(`${status.settings.model} — unsupported`, status.settings.model),
-          );
-        }
-        modelSelector.value = status.settings.model;
-        modelSelector.disabled = false;
-        document.querySelector('#model-availability').textContent = status.settings.models
-          .filter((model) => !model.available)
-          .map((model) => model.error)
-          .join('. ');
+      if (status.settings && !savingSettings && configTicket === settingsRevision) {
+        renderSettings(status.settings);
       }
       document.querySelector('#pair-diagnostics').hidden = !status.diagnostics;
       const pair = status.pairs.find((item) => item.id === status.activePair);
@@ -719,12 +743,12 @@ setInterval(async () => {
           const heading = document.createElement('strong');
           heading.textContent = `Turn ${index + 1}: ${turn.question}`;
           const usage = document.createElement('p');
-          const tokens = `Tokens: ${turn.usage?.input_tokens ?? 'unknown'} input / ${turn.usage?.output_tokens ?? 'unknown'} output`;
+          const tokens = `Tokens: ${turn.usage?.input_tokens ?? 'unknown'} input / ${turn.usage?.output_tokens ?? 'unknown'} output${turn.usage?.reasoning_tokens !== undefined ? ` (${turn.usage.reasoning_tokens} reasoning, included in output)` : ''}`;
           const cost =
             turn.usage?.estimated_usd !== undefined
               ? `estimated USD ${turn.usage.estimated_usd.toFixed(6)}${turn.usage.estimated ? ' (conservative allowance; final usage unavailable)' : ''}`
               : 'estimated cost pending; reserved allowance is included in monthly totals';
-          usage.textContent = `${turn.model || status.model} — ${turn.state === 'stopped' ? 'Interrupted' : turn.state} — ${tokens}; ${cost}.`;
+          usage.textContent = `${turn.model || status.model}; Thinking: ${turn.thinkingLevel || 'unknown'} — ${turn.state === 'stopped' ? 'Interrupted' : turn.state} — ${tokens}; ${cost}.`;
           usageEntry.append(heading, usage);
           turnUsage.append(usageEntry);
           transcript.append(entry);

@@ -25,6 +25,19 @@ MODEL_ERRORS = {
     "gpt-6-luna": "",
 }
 
+MODEL_LEVELS = {
+    "gpt-6.1-sol": ("low", "medium", "high", "xhigh", "max"),
+    "gpt-6-luna": ("none", "low", "medium", "high", "xhigh", "max"),
+}
+MODEL_DEFAULTS = {"gpt-6.1-sol": "medium", "gpt-6-luna": "none"}
+
+
+def validate_level(model: str, level: Any) -> str:
+    validate_model(model)
+    if not isinstance(level, str) or level not in MODEL_LEVELS[model]:
+        raise ValueError("Unsupported thinking level for this model; choose a level in Settings")
+    return level
+
 
 def validate_model(model: Any) -> str:
     if not isinstance(model, str) or model not in MODEL_ERRORS:
@@ -35,20 +48,26 @@ def validate_model(model: Any) -> str:
 
 
 class Provider:
-    def __init__(self, model: str = MODEL, fixture: bool = False) -> None:
+    def __init__(
+        self, model: str = MODEL, fixture: bool = False, thinking_level: str | None = None
+    ) -> None:
         self.model = model
         self.fixture = fixture
+        self.thinking_level = (
+            MODEL_DEFAULTS.get(model, "none") if thinking_level is None else thinking_level
+        )
 
     def configuration(self) -> dict[str, Any]:
         return {
             "model": self.model,
-            "reasoning": {"effort": "medium" if self.model == "gpt-6.1-sol" else "none"},
+            "reasoning": {"effort": self.thinking_level},
             "max_output_tokens": OUTPUT_TOKENS,
         }
 
     def stream(
         self, messages: list[dict[str, str]], cancelled: threading.Event, fault: str = ""
     ) -> Iterator[dict[str, Any]]:
+        validate_level(self.model, self.thinking_level)
         if self.fixture:
             yield from self.synthetic(messages, cancelled, fault)
             return
@@ -101,7 +120,8 @@ class Provider:
             if response.status != 200:
                 # Never reflect provider bodies, headers or credentials into the browser/logs.
                 raise ValueError(
-                    f"OpenAI HTTP {response.status}; check backend key, model access and quota"
+                    f"OpenAI HTTP {response.status}; check model/thinking level in Settings, "
+                    "backend key, model access and quota"
                 )
             total = 0
             while not cancelled.is_set():
@@ -142,6 +162,8 @@ class Provider:
             cancelled.wait(3)
         if cancelled.is_set():
             return
+        if fault == "llm-settings":
+            raise ValueError("Provider rejected model/thinking level; change Settings and retry")
         if fault == "llm":
             raise ValueError("Injected provider failure")
         text = "A black hole traps light. We detect one by its effects on nearby matter."
@@ -165,5 +187,9 @@ class Provider:
         yield {
             "done": True,
             "truncated": fault == "truncate",
-            "usage": {"input_tokens": 100, "output_tokens": 25},
+            "usage": {
+                "input_tokens": 100,
+                "output_tokens": 25,
+                "output_tokens_details": {"reasoning_tokens": 10},
+            },
         }

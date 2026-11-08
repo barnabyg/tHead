@@ -174,8 +174,7 @@ Named avatars are **JFK** and **Grace**. Use `-Avatar hopper-hazel` or
 
 **Model** changes apply to subsequent questions in the current server process,
 including after New conversation. An active turn retains its captured model,
-context and price reservation. Restarting uses `-Model` (if supplied), otherwise
-`THEAD_MODEL`, otherwise the compatible default `gpt-6-luna`. Browser choices do
+context and price reservation. Restarting uses `THEAD_MODEL`, otherwise the compatible default `gpt-6-luna`. Browser choices do
 not write environment variables or persist across restarts. Unknown startup models
 remain blocked by validation/pricing; choose an available model to recover.
 
@@ -200,3 +199,35 @@ then a contextual follow-up. Verify Sol on both turns in Session details. During
 a response choose legacy Luna; the current turn must retain Sol and the next use
 Luna. Lunar must be visibly unavailable. Account access, real-provider output,
 GPU speech and lip sync require this manual check; automated fixtures cost nothing.
+
+## Thinking level
+
+Settings shows the effective **Thinking level**. Higher effort may improve depth
+but increases response time. Sol supports `low`, `medium`, `high`, `xhigh`, `max`;
+legacy Luna also supports `none`. All map directly to Responses
+`reasoning: {effort: <level>}`. Sol initially uses its documented `medium`
+default; legacy Luna keeps the application's existing `none` default, overriding
+the provider default. There is no new startup environment variable or flag.
+The level lasts for the server process, survives New conversation and changes
+only future turns. Restart chooses the initial level for the startup model.
+Switching models retains a compatible level; moving from Luna's `none` to Sol
+visibly selects `medium` with an explanation. Unknown/unavailable models show a
+disabled level control. Validation never dispatches an unsupported combination.
+
+The official [Sol model](https://developers.openai.com/api/docs/models/gpt-6.1-sol),
+[Luna model](https://developers.openai.com/api/docs/models/gpt-6-luna) and
+[reasoning guide](https://developers.openai.com/api/docs/guides/reasoning)
+establish these mappings (checked 8 November 2026). The unchanged 384 output-token
+cap includes reasoning and visible output. High effort may exhaust it without a
+visible answer: lower Thinking level and submit again after the actionable error.
+Reported reasoning tokens are shown as a subset of output, never added again to
+cost. Interrupted or failed calls without final usage retain their reservation.
+
+Using the same `./run.bat` command above, choose two supported thinking levels
+and ask at each. Session details shows each turn's captured model and Thinking
+value (also `run.thinkingLevel` in Timing diagnostics), rather than inferring the
+setting from answer length or delay. Change level during a response and verify
+only the next turn changes. Switch from Luna/none to Sol: expect medium and a
+visible explanation. In fixture diagnostics, Reject provider settings must show
+an actionable error; select None, adjust the level and ask a contextual follow-up
+without restarting. Real provider access, timing and answer quality remain manual.

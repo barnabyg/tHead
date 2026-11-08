@@ -21,9 +21,12 @@ from provider import (
     INPUT_BOUND,
     INSTRUCTIONS,
     MODEL,
+    MODEL_DEFAULTS,
     MODEL_ERRORS,
+    MODEL_LEVELS,
     OUTPUT_TOKENS,
     Provider,
+    validate_level,
     validate_model,
 )
 from speech import Voice
@@ -75,6 +78,7 @@ class Turn(Session):
             "request": self.request_id,
             "pair": self.pair,
             "model": self.provider.model,
+            "thinkingLevel": self.provider.thinking_level,
         }
 
 
@@ -129,6 +133,7 @@ class Conversation(Demonstration):
         self.transcript: list[Turn] = []
         self.cancelled_requests: set[str] = set()
         self.provider = Provider(model, test_backend or fixture)
+        self.settings_message = ""
         self.budget: Budget | None = None
         self.budget_error = ""
         try:
@@ -144,17 +149,32 @@ class Conversation(Demonstration):
         with self.condition:
             if data.get("session") != self.identity:
                 raise ValueError("Stale session; reload before changing settings")
-            if set(data) - {"session", "model"}:
+            if set(data) - {"session", "model", "thinkingLevel"}:
                 raise ValueError("Unknown setting; reload Settings and retry")
             model = validate_model(data.get("model", self.provider.model))
-            self.provider = Provider(model, self.provider.fixture)
+            level = data.get("thinkingLevel", self.provider.thinking_level)
+            message = ""
+            if "thinkingLevel" not in data and level not in MODEL_LEVELS[model]:
+                level = MODEL_DEFAULTS[model]
+                message = f"Thinking level changed to {level}; the selected model requires it."
+            validate_level(model, level)
+            self.provider = Provider(model, self.provider.fixture, level)
+            self.settings_message = message
             return self.status()
 
     def settings(self) -> dict[str, Any]:
         return {
             "model": self.provider.model,
+            "thinkingLevel": self.provider.thinking_level,
+            "message": self.settings_message,
             "models": [
-                {"id": model, "available": not error, "error": error}
+                {
+                    "id": model,
+                    "available": not error,
+                    "error": error,
+                    "levels": MODEL_LEVELS.get(model, ()),
+                    "defaultLevel": MODEL_DEFAULTS.get(model),
+                }
                 for model, error in MODEL_ERRORS.items()
             ],
         }
@@ -325,6 +345,7 @@ class Conversation(Demonstration):
                         "usage": t.usage,
                         "pair": t.pair,
                         "model": t.provider.model,
+                        "thinkingLevel": t.provider.thinking_level,
                     }
                     for t in self.transcript
                 ],
@@ -399,6 +420,7 @@ class Conversation(Demonstration):
                 "llm",
                 "llm-delay",
                 "llm-connect",
+                "llm-settings",
                 "missing-completion",
                 "long",
                 "unbroken",
@@ -425,7 +447,7 @@ class Conversation(Demonstration):
                 raise ValueError("Set OPENAI_API_KEY in the backend and restart")
             if len(self.transcript) >= 100:
                 raise ValueError("Session reached 100 turns; start a New conversation")
-            validate_model(self.provider.model)
+            validate_level(self.provider.model, self.provider.thinking_level)
             messages, input_bound, omitted = self.context(question.strip())
             if not self.budget:
                 raise ValueError(self.budget_error)
@@ -449,11 +471,17 @@ class Conversation(Demonstration):
         super().finish_speech(session, producer)
         if isinstance(session, Turn) and self.budget:
             try:
+                # Provider output_tokens already includes reasoning; keep its detail separate.
+                details = session.usage.get("output_tokens_details") or {}
+                reasoning = details.get("reasoning_tokens") if isinstance(details, dict) else None
                 session.usage = self.budget.settle(
                     session.reservation,
                     session.usage.get("input_tokens"),
                     session.usage.get("output_tokens"),
                 )
+                output = session.usage.get("output_tokens")
+                if type(reasoning) is int and type(output) is int and 0 <= reasoning <= output:
+                    session.usage["reasoning_tokens"] = reasoning
             except BudgetError:
                 # The committed reservation remains charged; later dispatch fails closed.
                 self.budget_error = (
@@ -504,7 +532,10 @@ class Conversation(Demonstration):
         if session.cancelled.is_set():
             return
         if not done or not session.answer.strip():
-            raise ValueError("Provider returned no completed answer; submit again")
+            raise ValueError(
+                "Provider returned no completed answer within the output allowance; "
+                "try a lower thinking level in Settings or submit again"
+            )
         if pending.strip():
             yield pending
 

@@ -163,6 +163,96 @@ test('model settings validate exact identifiers and switch contextual turns with
   await expect(page.locator('#turn-usage')).toContainText('gpt-6.1-sol');
 });
 
+for (const [model, levels] of [
+  ['gpt-6.1-sol', ['low', 'medium', 'high', 'xhigh', 'max']],
+  ['gpt-6-luna', ['none', 'low', 'medium', 'high', 'xhigh', 'max']],
+]) {
+  test(`thinking levels for ${model} reach subsequent provider requests and usage`, async ({
+    page,
+    request,
+  }, info) => {
+    await openSettings(page);
+    await page.getByLabel('Model', { exact: true }).selectOption(model);
+    await expect(page.locator('#settings-status')).toContainText('Saved');
+    for (const [index, level] of levels.entries()) {
+      await openSettings(page);
+      await page.getByLabel('Thinking level', { exact: true }).selectOption(level);
+      await expect(page.locator('#settings-status')).toContainText('Saved');
+      await backToConversation(page);
+      await expect(page.getByRole('button', { name: 'Ask', exact: true })).toBeEnabled();
+      await page.getByLabel('Question', { exact: true }).fill(`Thinking question ${index}`);
+      await page.getByRole('button', { name: 'Ask', exact: true }).click();
+      await expect
+        .poll(async () => {
+          const status = await (await request.get(`${info.url}/status`)).json();
+          return (
+            status.transcript.at(-1)?.question === `Thinking question ${index}` &&
+            status.run.usage.estimated_usd
+          );
+        })
+        .toBe(model === 'gpt-6.1-sol' ? 0.0005 : 0.000025);
+      const done = await (await request.get(`${info.url}/status`)).json();
+      const config = done.run.events.find(
+        (event) => event.event === 'provider-request',
+      ).configuration;
+      expect(config).toEqual({ model, reasoning: { effort: level }, max_output_tokens: 384 });
+      expect(done.run.usage.reasoning_tokens).toBe(10);
+      await expect(page.locator('#turn-usage')).toContainText(`Thinking: ${level}`);
+      await expect(page.locator('#status')).toHaveText('Playback ended');
+    }
+  });
+}
+
+test('thinking compatibility, active capture and provider rejection recover without losing context', async ({
+  page,
+  request,
+}, info) => {
+  await openSettings(page);
+  await page.getByLabel('Model', { exact: true }).selectOption('gpt-6.1-sol');
+  await expect(page.locator('#settings-status')).toContainText('medium');
+  await expect(page.getByLabel('Thinking level', { exact: true })).toHaveValue('medium');
+  const before = await (await request.get(`${info.url}/status`)).json();
+  const invalid = await request.post(`${info.url}/settings`, {
+    data: { session: before.session, thinkingLevel: 'none' },
+  });
+  expect(invalid.status()).toBe(409);
+  expect((await invalid.json()).error).toContain('Unsupported thinking level');
+  await page.getByLabel('Thinking level', { exact: true }).selectOption('high');
+  await expect(page.locator('#settings-status')).toContainText('Saved');
+  await backToConversation(page);
+  await page.getByLabel('Diagnostic fault').selectOption('llm-connect');
+  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await openSettings(page);
+  await page.getByLabel('Thinking level', { exact: true }).selectOption('low');
+  await expect(page.locator('#settings-status')).toContainText('Saved');
+  const during = await (await request.get(`${info.url}/status`)).json();
+  expect(during.run.thinkingLevel).toBe('high');
+  expect(during.settings.thinkingLevel).toBe('low');
+  await backToConversation(page);
+  await expect(page.locator('#status')).toHaveText('Playback ended');
+  await expect(page.getByRole('button', { name: 'Ask', exact: true })).toBeEnabled();
+  await page.unroute('**/segment?*');
+  await page.getByLabel('Diagnostic fault').selectOption('llm-settings');
+  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await expect(page.locator('#status')).toContainText('change Settings and retry');
+  await page.route('**/segment?*', async (route) => {
+    const index = new URL(route.request().url()).searchParams.get('index');
+    if (index === '0')
+      await route.fulfill({ path: 'tests/fixtures/browser.mp4', contentType: 'video/mp4' });
+    else await route.fulfill({ status: 204, body: '' });
+  });
+  await page.getByLabel('Diagnostic fault').selectOption('');
+  await page.getByLabel('Question', { exact: true }).fill('Recovery follow-up');
+  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await expect
+    .poll(async () => (await (await request.get(`${info.url}/status`)).json()).run.answer)
+    .toContain('Earlier question: What is a black hole?');
+  await openSettings(page);
+  await page.getByLabel('Model', { exact: true }).selectOption('gpt-6-luna');
+  await expect(page.locator('#settings-status')).toContainText('Saved');
+  await expect(page.getByLabel('Thinking level', { exact: true })).toHaveValue('low');
+});
+
 test('Settings keeps active-turn controls usable and preserves playback', async ({
   page,
   request,
@@ -1005,7 +1095,7 @@ test('Session details combines turn usage, failures and interruptions without re
     await expect(page.locator('#status')).toHaveText('Playback ended');
     await expect(turns.nth(index)).toContainText(`Turn ${index + 1}: ${question}`);
     await expect(turns.nth(index)).toContainText(
-      'complete — Tokens: 100 input / 25 output; estimated USD',
+      'complete — Tokens: 100 input / 25 output (10 reasoning, included in output); estimated USD',
     );
   }
   await expect(page.locator('#transcript details')).toHaveCount(0);
