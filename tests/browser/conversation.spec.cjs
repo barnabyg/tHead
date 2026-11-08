@@ -225,6 +225,7 @@ async function startFixture(info) {
     },
   );
   info.app = child;
+  info.appClosed = new Promise((resolve) => child.once('close', resolve));
   info.output = output;
   // Drain stderr and retain a bounded tail so CI fixture failures expose their cause.
   let stderr = '';
@@ -258,7 +259,7 @@ async function startFixture(info) {
 }
 
 function killFixture(child) {
-  if (child.exitCode !== null) return;
+  if (child.exitCode !== null || child.signalCode !== null) return;
   if (process.platform === 'win32') {
     // Fixed task-owned PID; terminate the venv launcher and its interpreter together.
     execFileSync('taskkill', ['/PID', String(child.pid), '/T', '/F'], { timeout: 30_000 });
@@ -268,14 +269,19 @@ function killFixture(child) {
 async function stopFixture(info, interrupted = false) {
   clearTimeout(info.appTimeout);
   const child = info.app;
-  if (!child || child.exitCode !== null) return;
-  const closed = new Promise((resolve) => child.once('close', resolve));
+  if (!child) return;
+  const closed = info.appClosed;
   let timer;
   try {
-    if (interrupted) killFixture(child);
-    else {
-      // Let the backend cancel/join its worker and release SQLite handles before cleanup.
-      await fetch(`${info.url}/shutdown`, { method: 'POST', signal: AbortSignal.timeout(10_000) });
+    if (child.exitCode === null && child.signalCode === null) {
+      if (interrupted) killFixture(child);
+      else {
+        // Let the backend cancel/join its worker and release SQLite handles before cleanup.
+        await fetch(`${info.url}/shutdown`, {
+          method: 'POST',
+          signal: AbortSignal.timeout(10_000),
+        });
+      }
     }
     await Promise.race([
       closed,

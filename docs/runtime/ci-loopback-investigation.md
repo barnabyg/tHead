@@ -57,7 +57,7 @@ worker, and waits for the process's `close` event. Explicit interrupted-save
 scenarios and the hard lifetime cap terminate the owned process tree on Windows.
 Deletion checks the resolved path is a task-owned `thead-browser-` directory
 directly under the temporary root. It uses Node's bounded filesystem-lock retries
-(10 retries, 250 ms linear backoff, at most 13.75 s of backoff) for transient
+(10 retries, 250 ms linear backoff, 13.75 s of backoff per retry sequence) for transient
 Windows handle/antivirus locks. See [Node fs.rmSync options](https://nodejs.org/api/fs.html#fsrmsyncpath-options).
 This changes cleanup retries only; test/request retries remain unchanged.
 
