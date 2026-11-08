@@ -206,13 +206,23 @@ LibriSpeech, derived from LibriVox; [OpenSLR resource 12](https://www.openslr.or
 ## Verification and remaining work
 
 Canonical command: `uv run --locked python scripts/verify.py` passed during
-implementation (including 38 browser tests); final post-review verification remains
-to be recorded. Focused CLI tests, Ruff, strict mypy and static security
+implementation (including 38 browser tests); the exact post-review handoff result
+is recorded in the chat. Focused CLI tests, Ruff, strict mypy and static security
 checks run during implementation. No main-runtime dependency or security
 exception is changed. Manual scenario: run the documented command, listen to the
 complete passage, retry without `--prepare`, then supply a missing/invalid WAV
 and expect an explicit error. A newly generated WAV is always unreviewed until
 a human listens; the command never grants a quality gate itself.
+
+The code review against starting commit `4e77a5d` found no substantive spec defect.
+Both concrete standards findings (the exact upstream warning and subprocess
+analysis-exception documentation) were fixed and independently rechecked. The
+remaining acquisition-inventory limitation is explicit above: Git/Python transport
+bytes were not measured. This does not establish a production security clearance.
+The reviewed launcher was also rerun in the clean clone: identical WAV digest,
+with no warning output. Temporary clone/caches and duplicate diagnostic weights
+were removed after preserving reproduction logs; the primary audition environment
+is retained for re-use.
 
 Clean-checkout preparation/generation and the explicit setup listening verdict pass. #53 still needs
 its full two-speaker repeated-condition listening pack and explicit 1–5 human
