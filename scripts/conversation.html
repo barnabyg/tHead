@@ -117,19 +117,6 @@
       border-radius: 22px;
       background: radial-gradient(ellipse at 50% 35%, #3c5042, #1e2b24 70%);
     }
-    .portrait-fallback {
-      position: absolute;
-      inset: 0;
-      display: grid;
-      place-content: center;
-      text-align: center;
-      color: #b7c4ba;
-      gap: 12px;
-    }
-    .portrait-fallback span {
-      font-size: 72px;
-      color: #bce7a2;
-    }
     #portrait,
     #video {
       position: absolute;
@@ -151,26 +138,6 @@
     #video.presenting {
       opacity: 1;
     }
-    .avatar-caption {
-      position: absolute;
-      inset: auto 0 0;
-      padding: 64px 24px 24px;
-      background: linear-gradient(transparent, #0c1713ed);
-      pointer-events: none;
-    }
-    .eyebrow {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      color: #a8c496;
-      font-weight: 650;
-    }
-    h1 {
-      margin: 10px 0 8px;
-      font-weight: 500;
-      font-size: clamp(24px, 3vw, 38px);
-      letter-spacing: -1px;
-    }
     #conversation {
       margin: 0;
       color: #d0dbd2;
@@ -189,6 +156,7 @@
     #pair {
       width: 100%;
     }
+    #portrait-notice,
     #pair-status {
       color: #a6b5a9;
       font-size: 12px;
@@ -441,9 +409,6 @@
         flex: 0 0 42%;
         border-radius: 16px;
       }
-      .avatar-caption {
-        display: none;
-      }
       .avatar-settings {
         flex: 1;
         min-width: 0;
@@ -504,16 +469,6 @@
         min-height: 48px;
         max-height: 72px;
       }
-      .avatar-caption {
-        padding: 36px 16px 16px;
-      }
-      h1 {
-        font-size: 24px;
-        margin: 8px 0;
-      }
-      #conversation {
-        display: none;
-      }
     }
     </style>
   </head>
@@ -530,19 +485,13 @@
       <main class="workspace">
         <aside class="avatar-panel" aria-label="Your conversation partner">
           <div class="avatar-stage">
-            <div class="portrait-fallback">
-              <span aria-hidden="true">◌</span><small id="portrait-notice">Loading portrait…</small>
-            </div>
             <img id="portrait" alt="Conversation avatar">
             <!-- biome-ignore lint/a11y/useMediaCaption: Generated transcript is not a word-timed caption track; review when aligned captions are available. -->
             <video id="video" playsinline></video>
-            <div class="avatar-caption">
-              <span class="eyebrow">Your conversation partner</span>
-              <h1 id="avatar-name">Let's talk.</h1>
-              <p id="conversation">Loading the configured portrait and local English voice.</p>
-            </div>
           </div>
           <div class="avatar-settings">
+            <p id="conversation">Loading the configured portrait and local English voice.</p>
+            <p id="portrait-notice" role="status">Loading portrait…</p>
             <label for="pair">Avatar and voice</label>
             <select id="pair" disabled></select>
             <p id="pair-status" aria-live="polite">Preparing pair</p>

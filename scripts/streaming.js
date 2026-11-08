@@ -10,7 +10,10 @@ let notice = '';
 let audioOutput = null;
 const conversation = document.querySelector('#conversation');
 const portrait = document.querySelector('#portrait');
-portrait?.addEventListener('load', () => portrait.classList.add('loaded'));
+portrait?.addEventListener('load', () => {
+  portrait.classList.add('loaded');
+  document.querySelector('#portrait-notice').textContent = '';
+});
 portrait?.addEventListener('error', () => {
   portrait.classList.remove('loaded');
   document.querySelector('#portrait-notice').textContent =
@@ -528,7 +531,6 @@ setInterval(async () => {
           portrait.src = source;
           portrait.alt = `${displayPair.name.split(' / ')[0]} portrait`;
         }
-        document.querySelector('#avatar-name').textContent = displayPair.name.split(' / ')[0];
       }
       const transcript = document.querySelector('#transcript');
       const rendered = JSON.stringify([status.transcript, status.contextOmitted]);
