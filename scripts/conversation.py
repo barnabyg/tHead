@@ -186,11 +186,14 @@ class Conversation(Demonstration):
         if data.get("session") != self.identity:
             raise ValueError("Stale session; reload before saving")
         voice = data.get("voice")
+        self.validate_voice(voice)
+        avatar = self.avatars.create(data.get("name"), voice, data.get("image"))
+        return {"id": avatar.id, "name": avatar.name}
+
+    def validate_voice(self, voice: Any) -> None:
         available = voice_catalogue(self.test_backend, str(voice))
         if not any(v["id"] == voice and v["available"] for v in available):
             raise ValueError("Voice unavailable; restore the supported Windows voice and retry")
-        avatar = self.avatars.create(data.get("name"), voice, data.get("image"))
-        return {"id": avatar.id, "name": avatar.name}
 
     def portrait(self, identity: str) -> bytes:
         avatar = self.avatars.get(identity)
@@ -211,11 +214,7 @@ class Conversation(Demonstration):
                 avatar = self.avatars.get(DEFAULT_PAIR)
             else:
                 voice = data.get("voice", previous.voice)
-                available = voice_catalogue(self.test_backend, str(voice))
-                if not any(v["id"] == voice and v["available"] for v in available):
-                    raise ValueError(
-                        "Voice unavailable; restore the supported Windows voice and retry"
-                    )
+                self.validate_voice(voice)
                 avatar = self.avatars.update(
                     identity, data.get("name", previous.name), voice, data.get("image")
                 )
