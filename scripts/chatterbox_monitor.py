@@ -45,19 +45,16 @@ def main() -> None:
                             }
                 except (psutil.NoSuchProcess, psutil.AccessDenied):
                     continue
-            gpu = (
-                subprocess.check_output(
-                    [
-                        "nvidia-smi",
-                        "--query-gpu=memory.used,utilization.gpu",
-                        "--format=csv,noheader,nounits",
-                    ],
-                    text=True,
-                    timeout=30,
-                )
-                .strip()
-                .split(",")
+            raw_gpu = subprocess.check_output(  # nosec B603 B607
+                [
+                    "nvidia-smi",
+                    "--query-gpu=memory.used,utilization.gpu",
+                    "--format=csv,noheader,nounits",
+                ],
+                text=True,
+                timeout=30,
             )
+            gpu = raw_gpu.strip().split(",")
             sample = {
                 "epoch_seconds": time.time(),
                 "system_cpu_percent": psutil.cpu_percent(),
