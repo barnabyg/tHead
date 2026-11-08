@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import os
 import re
 import threading
@@ -12,8 +13,9 @@ from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
 
+from avatars import AvatarStore, decode_portrait, user_data_directory, voice_catalogue
 from budget import PRICES, Budget, BudgetError
-from pairs import DEFAULT_PAIR, configured_pair, configured_pairs
+from pairs import DEFAULT_PAIR
 from prepare import RUNTIME
 from provider import INPUT_BOUND, INSTRUCTIONS, MODEL, OUTPUT_TOKENS, Provider
 from speech import Voice
@@ -70,6 +72,8 @@ class Conversation(Demonstration):
     page = "conversation.html"
 
     def command(self, path: str, data: dict[str, Any]) -> dict[str, Any]:
+        if path == "/avatars":
+            return self.create_avatar(data)
         if path == "/reset":
             return self.reset(str(data.get("session", "")))
         if path == "/cancel":
@@ -98,8 +102,13 @@ class Conversation(Demonstration):
         budget_path: Path | None = None,
         initialize_budget: bool = False,
         pair: str = DEFAULT_PAIR,
+        user_data: Path | None = None,
     ) -> None:
-        self.selected_pair = configured_pair(pair)
+        self.avatars = AvatarStore(
+            user_data or (directory / "user-data" if test_backend else user_data_directory())
+        )
+        self.voices = voice_catalogue(test_backend)
+        self.selected_pair = self.avatars.get(pair)
         self.active_pair = ""
         self.pair_sequence = 0
         self.pair_preparation_seconds = 0.0
@@ -119,6 +128,23 @@ class Conversation(Demonstration):
             self.budget_error = str(error)
         super().__init__(inputs, directory, test_backend, 8, True, diagnostics or fixture)
 
+    def create_avatar(self, data: dict[str, Any]) -> dict[str, Any]:
+        # Saving is independent of turn state: no selection, context or provider mutation.
+        if data.get("session") != self.identity:
+            raise ValueError("Stale session; reload before saving")
+        voice = data.get("voice")
+        available = voice_catalogue(self.test_backend, str(voice))
+        if not any(v["id"] == voice and v["available"] for v in available):
+            raise ValueError("Voice unavailable; restore the supported Windows voice and retry")
+        avatar = self.avatars.create(data.get("name"), voice, data.get("image"))
+        return {"id": avatar.id, "name": avatar.name}
+
+    def portrait(self, identity: str) -> bytes:
+        avatar = self.avatars.get(identity)
+        if avatar.portrait.get("stored"):
+            return self.avatars.portrait(identity)
+        return (self.inputs / str(avatar.portrait["filename"])).read_bytes()
+
     def prepare_assets(self, pipeline: Any, inference: Any) -> None:
         pair = self.selected_pair
         if self.pair_fault in ("pair-delay", "pair-delay-fail"):
@@ -129,9 +155,13 @@ class Conversation(Demonstration):
                 "pair-portrait-missing", "pair-portrait-unreadable", "pair-portrait-invalid"
             )
             portrait = (
-                self.inputs / str(pair.portrait["filename"])
-                if self.test_backend
-                else pair.validate_portrait(self.inputs)
+                (
+                    self.inputs / str(pair.portrait["filename"])
+                    if self.test_backend
+                    else pair.validate_portrait(self.inputs)
+                )
+                if not pair.portrait.get("stored")
+                else self.imported_portrait(pair.id)
             )
             self.pair_probe("pair-voice-missing")
             if not self.test_backend:
@@ -149,6 +179,16 @@ class Conversation(Demonstration):
         finally:
             if self.voice is not candidate:
                 candidate.close()
+
+    def imported_portrait(self, identity: str) -> Path:
+        # One derived model input per server output directory, never the user's source path.
+        # The authoritative image remains in the atomic database record.
+        path = self.directory / "imported-portrait.png"
+        portrait = decode_portrait(
+            base64.b64encode(self.avatars.portrait(identity)).decode("ascii")
+        )
+        path.write_bytes(portrait)
+        return path
 
     def pair_probe(self, *faults: str) -> None:
         if self.pair_fault in faults:
@@ -172,7 +212,7 @@ class Conversation(Demonstration):
             self.pair_preparation_seconds = time.perf_counter() - started
 
     def select(self, identity: str, pair_id: str, fault: str = "") -> dict[str, Any]:
-        pair = configured_pair(pair_id)
+        pair = self.avatars.get(pair_id)
         if fault and (not self.diagnostics or fault not in (*PAIR_FAULTS, "pair-delay")):
             raise ValueError("Unknown pair diagnostic; launch with --diagnostics")
         with self.condition:
@@ -211,6 +251,10 @@ class Conversation(Demonstration):
 
     def status(self) -> dict[str, Any]:
         with self.condition:
+            avatars = [
+                {"id": p.id, "name": p.name, "voice": p.voice}
+                for p in self.avatars.avatars().values()
+            ]
             budget: dict[str, Any] = {"usable": False, "error": self.budget_error}
             if self.budget:
                 try:
@@ -220,11 +264,10 @@ class Conversation(Demonstration):
             result = {
                 **super().status(),
                 "conversationEnabled": True,
-                "pairs": [{"id": p.id, "name": p.name} for p in configured_pairs().values()],
-                "avatars": [
-                    {"id": p.id, "name": p.name, "voice": p.voice}
-                    for p in configured_pairs().values()
-                ],
+                "pairs": avatars,
+                "avatars": avatars,
+                "voices": self.voices,
+                "avatarStorageError": self.avatars.error or self.avatars.record_error,
                 "activeAvatar": self.active_pair,
                 "selectedAvatar": self.selected_pair.id,
                 "activePair": self.active_pair,
@@ -436,6 +479,7 @@ def main() -> None:
     parser.add_argument("--model", default=os.environ.get("THEAD_MODEL", MODEL))
     parser.add_argument("--budget", type=Path)
     parser.add_argument("--initialize-budget", action="store_true")
+    parser.add_argument("--user-data", type=Path)
     parser.add_argument(
         "--avatar",
         "--pair",
@@ -443,10 +487,6 @@ def main() -> None:
         default=os.environ.get("THEAD_AVATAR", os.environ.get("THEAD_PAIR", DEFAULT_PAIR)),
     )
     args = parser.parse_args()
-    try:
-        configured_pair(args.pair)
-    except ValueError as error:
-        parser.error(str(error))
     app = Conversation(
         args.inputs,
         args.output,
@@ -467,6 +507,7 @@ def main() -> None:
         ),
         args.initialize_budget,
         args.pair,
+        args.user_data,
     )
     server = LoopbackServer(("127.0.0.1", args.port), handler(app))
     lifetime = threading.Timer(7200, server.shutdown)

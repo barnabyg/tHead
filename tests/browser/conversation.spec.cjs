@@ -5,11 +5,8 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 
-test.beforeEach(async ({ page }, info) => {
-  const output = fs.mkdtempSync(path.join(os.tmpdir(), 'thead-browser-'));
-  for (const filename of ['portrait.jpg', 'hopper.jpg']) {
-    fs.copyFileSync('tests/fixtures/portrait.jpg', path.join(output, filename));
-  }
+async function startFixture(info) {
+  const output = info.output;
   const python = process.env.THEAD_TEST_PYTHON || 'python';
   const child = spawn(
     python,
@@ -22,6 +19,8 @@ test.beforeEach(async ({ page }, info) => {
       output,
       '--inputs',
       output,
+      '--user-data',
+      path.join(output, 'user-data'),
     ],
     {
       stdio: ['pipe', 'pipe', 'pipe'],
@@ -47,6 +46,14 @@ test.beforeEach(async ({ page }, info) => {
       }
     });
   });
+}
+
+test.beforeEach(async ({ page }, info) => {
+  info.output = fs.mkdtempSync(path.join(os.tmpdir(), 'thead-browser-'));
+  for (const filename of ['portrait.jpg', 'hopper.jpg']) {
+    fs.copyFileSync('tests/fixtures/portrait.jpg', path.join(info.output, filename));
+  }
+  await startFixture(info);
   // External media transport substitute: real playable synthetic colour/tone,
   // not an assertion of avatar/TTS quality. Conversation/backend remain real.
   await page.route('**/segment?*', async (route) => {
@@ -58,6 +65,344 @@ test.beforeEach(async ({ page }, info) => {
   await page.goto(info.url);
   await expect(page.getByRole('button', { name: 'Ask', exact: true })).toBeEnabled();
   await page.getByText('Session details', { exact: true }).click();
+});
+
+test('create a named avatar without changing selection or making a provider request', async ({
+  page,
+  request,
+}, info) => {
+  const before = await (await request.get(`${info.url}/status`)).json();
+  await page.getByRole('button', { name: 'Create avatar', exact: true }).click();
+  await page.getByLabel('Avatar name', { exact: true }).fill('  My avatar  ');
+  await page
+    .getByLabel('Portrait image', { exact: true })
+    .setInputFiles('tests/fixtures/portrait.jpg');
+  await expect(page.getByRole('img', { name: 'Portrait preview' })).toBeVisible();
+  await page.getByLabel('Voice', { exact: true }).selectOption('hazel');
+  await page.getByRole('button', { name: 'Save avatar', exact: true }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Created My avatar' })).toBeVisible();
+  await expect(
+    page.getByLabel('Avatar', { exact: true }).locator('option', { hasText: 'My avatar' }),
+  ).toHaveCount(1);
+  const saved = await (await request.get(`${info.url}/status`)).json();
+  expect(saved.activePair).toBe(before.activePair);
+  expect(saved.transcript).toEqual(before.transcript);
+  expect(saved.budget.estimated_usd).toBe(before.budget.estimated_usd);
+  const avatar = saved.avatars.find((item) => item.name === 'My avatar');
+  expect(avatar.voice).toBe('hazel');
+  await page.getByLabel('Avatar', { exact: true }).selectOption(avatar.id);
+  await expect(page.locator('#pair-status')).toContainText('Active: My avatar');
+  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await expect(page.locator('#status')).toHaveText('Playback ended');
+  expect((await (await request.get(`${info.url}/status`)).json()).run.pair).toBe(avatar.id);
+});
+
+test('creation validates decoded uploads and names, retains fields and cancels without saving', async ({
+  page,
+  request,
+}, info) => {
+  await page.getByRole('button', { name: 'Create avatar', exact: true }).click();
+  await page.getByLabel('Avatar name', { exact: true }).fill('My corrected avatar');
+  await page.getByLabel('Voice', { exact: true }).selectOption('zira');
+  await page.getByLabel('Portrait image', { exact: true }).setInputFiles({
+    name: '../../broken.png',
+    mimeType: 'image/png',
+    buffer: Buffer.from('not an image'),
+  });
+  await page.getByRole('button', { name: 'Save avatar', exact: true }).click();
+  await expect(page.locator('#avatar-save-status')).toContainText('valid JPEG or PNG');
+  await expect(page.getByLabel('Avatar name', { exact: true })).toHaveValue('My corrected avatar');
+  await expect(page.getByLabel('Voice', { exact: true })).toHaveValue('zira');
+  await page.getByRole('button', { name: 'Cancel', exact: true }).click();
+  expect((await (await request.get(`${info.url}/status`)).json()).avatars).toHaveLength(2);
+  const status = await (await request.get(`${info.url}/status`)).json();
+  const valid = {
+    session: status.session,
+    name: 'My avatar',
+    voice: 'zira',
+    image: fs.readFileSync('tests/fixtures/portrait.jpg').toString('base64'),
+  };
+  for (const [override, message] of [
+    [{ name: '   ' }, '1–80'],
+    [{ name: 'x'.repeat(81) }, '1–80'],
+    [{ name: 'gRaCe' }, 'already exists'],
+    [{ name: 'JFK' }, 'already exists'],
+    [{ voice: 'unsupported' }, 'Voice unavailable'],
+    [{ image: Buffer.from('broken').toString('base64') }, 'valid JPEG or PNG'],
+    [{ image: '%%%invalid' }, 'valid JPEG or PNG'],
+    [{ image: Buffer.alloc(5 * 1024 * 1024 + 1).toString('base64') }, '5 MiB'],
+    [
+      {
+        image: Buffer.from('R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==', 'base64').toString(
+          'base64',
+        ),
+      },
+      'JPEG or PNG',
+    ],
+  ]) {
+    const result = await request.post(`${info.url}/avatars`, { data: { ...valid, ...override } });
+    expect(result.status()).toBe(409);
+    expect((await result.json()).error).toContain(message);
+  }
+  const python = process.env.THEAD_TEST_PYTHON || 'python';
+  const large = execFileSync(
+    python,
+    [
+      '-c',
+      "import io,base64;from PIL import Image;b=io.BytesIO();Image.new('RGB',(4097,1)).save(b,format='PNG');print(base64.b64encode(b.getvalue()).decode())",
+    ],
+    { timeout: 30000 },
+  )
+    .toString()
+    .trim();
+  const oversized = await request.post(`${info.url}/avatars`, { data: { ...valid, image: large } });
+  expect((await oversized.json()).error).toContain('4096');
+  const results = await Promise.all([
+    request.post(`${info.url}/avatars`, { data: valid }),
+    request.post(`${info.url}/avatars`, { data: { ...valid, name: 'MY AVATAR' } }),
+  ]);
+  expect(results.map((result) => result.status()).sort()).toEqual([200, 409]);
+  const saved = await (await request.get(`${info.url}/status`)).json();
+  expect(saved.avatars).toHaveLength(3);
+  expect(saved.transcript).toEqual([]);
+  expect(saved.budget.estimated_usd).toBe(status.budget.estimated_usd);
+});
+
+test('saved portrait survives source removal, failed save and restart; corrupt storage preserves built-ins', async ({
+  page,
+  request,
+}, info) => {
+  const source = path.join(info.output, 'source.jpg');
+  fs.copyFileSync('tests/fixtures/portrait.jpg', source);
+  await page.getByRole('button', { name: 'Create avatar', exact: true }).click();
+  await page.getByLabel('Avatar name', { exact: true }).fill('Persistent avatar');
+  await page.getByLabel('Voice', { exact: true }).selectOption('hazel');
+  await page.getByLabel('Portrait image', { exact: true }).setInputFiles(source);
+  // Hold the response to verify UI submission protection without replacing the backend.
+  let requests = 0;
+  let release;
+  const gate = new Promise((resolve) => {
+    release = resolve;
+  });
+  await page.route('**/avatars', async (route) => {
+    requests++;
+    await gate;
+    await route.continue();
+  });
+  await page.getByRole('button', { name: 'Save avatar', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Save avatar', exact: true })).toBeDisabled();
+  await page.locator('#avatar-form').dispatchEvent('submit');
+  release();
+  await expect(page.locator('#avatar-result')).toContainText('Created Persistent avatar');
+  expect(requests).toBe(1);
+  await page.unroute('**/avatars');
+  fs.unlinkSync(source);
+  const before = await (await request.get(`${info.url}/status`)).json();
+  const saved = before.avatars.find((item) => item.name === 'Persistent avatar');
+  const db = path.join(info.output, 'user-data', 'avatars.sqlite3');
+  // Real storage failure: the database path becomes an unwritable directory.
+  fs.renameSync(db, `${db}.preserved`);
+  fs.mkdirSync(db);
+  try {
+    await page.getByRole('button', { name: 'Create avatar', exact: true }).click();
+    await page.getByLabel('Avatar name', { exact: true }).fill('Failed save');
+    await page.getByLabel('Voice', { exact: true }).selectOption('zira');
+    await page
+      .getByLabel('Portrait image', { exact: true })
+      .setInputFiles('tests/fixtures/portrait.jpg');
+    await page.getByRole('button', { name: 'Save avatar', exact: true }).click();
+    await expect(page.locator('#avatar-save-status')).toContainText('storage unavailable');
+    await expect(page.getByLabel('Avatar name', { exact: true })).toHaveValue('Failed save');
+  } finally {
+    fs.rmdirSync(db);
+    fs.renameSync(`${db}.preserved`, db);
+  }
+  clearTimeout(info.appTimeout);
+  const exited = new Promise((resolve) => info.app.once('exit', resolve));
+  info.app.kill();
+  await exited;
+  await startFixture(info);
+  await page.goto(info.url);
+  await expect(page.getByLabel('Avatar', { exact: true }).locator('option')).toHaveCount(3);
+  await page.getByLabel('Avatar', { exact: true }).selectOption(saved.id);
+  await expect(page.locator('#pair-status')).toContainText('Active: Persistent avatar');
+  const portrait = await request.get(`${info.url}/portrait?avatar=${saved.id}`);
+  expect(await portrait.body()).toEqual(fs.readFileSync('tests/fixtures/portrait.jpg'));
+  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await expect(page.locator('#status')).toHaveText('Playback ended');
+  await page.getByLabel('Question', { exact: true }).fill('How do we detect one?');
+  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await expect(page.locator('#status')).toHaveText('Playback ended');
+  await expect(page.locator('#transcript')).toContainText('Earlier question');
+  await page.getByRole('button', { name: 'New conversation' }).click();
+  await expect(page.locator('#transcript')).toBeEmpty();
+  clearTimeout(info.appTimeout);
+  const stopped = new Promise((resolve) => info.app.once('exit', resolve));
+  info.app.kill();
+  await stopped;
+  fs.writeFileSync(db, 'corrupt database');
+  await startFixture(info);
+  await page.goto(info.url);
+  await expect(page.locator('#avatar-storage-error')).toContainText('Preserve');
+  await expect(page.getByRole('button', { name: 'Ask', exact: true })).toBeEnabled();
+  await expect(page.getByLabel('Avatar', { exact: true }).locator('option')).toHaveCount(2);
+});
+
+test('creating and cancelling during playback preserve active media and context', async ({
+  page,
+  request,
+}, info) => {
+  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await expect(page.locator('#video')).toHaveClass('presenting');
+  const before = await (await request.get(`${info.url}/status`)).json();
+  await page.getByRole('button', { name: 'Create avatar', exact: true }).click();
+  await page.getByLabel('Avatar name', { exact: true }).fill('During playback');
+  await page.getByLabel('Voice', { exact: true }).selectOption('zira');
+  await page.getByLabel('Portrait image', { exact: true }).setInputFiles({
+    name: '../../outside.png',
+    mimeType: 'image/jpeg',
+    buffer: fs.readFileSync('tests/fixtures/portrait.jpg'),
+  });
+  await page.getByRole('button', { name: 'Save avatar', exact: true }).click();
+  await expect(page.locator('#avatar-result')).toContainText('Created During playback');
+  const after = await (await request.get(`${info.url}/status`)).json();
+  expect(after.run.id).toBe(before.run.id);
+  expect(after.activePair).toBe(before.activePair);
+  expect(after.session).toBe(before.session);
+  expect(after.transcript).toHaveLength(1);
+  await page.getByRole('button', { name: 'Create avatar', exact: true }).click();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).not.toBeVisible();
+  await page.getByRole('button', { name: 'Stop', exact: true }).click();
+  await expect(page.getByLabel('Avatar', { exact: true })).toBeEnabled();
+  const saved = after.avatars.find((item) => item.name === 'During playback');
+  await page.getByLabel('Avatar', { exact: true }).selectOption(saved.id);
+  await expect(page.locator('#pair-status')).toContainText('Active: During playback');
+  await page.getByLabel('Question', { exact: true }).fill('How do we detect one?');
+  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await expect(page.locator('#status')).toHaveText('Playback ended');
+  await expect(page.locator('#transcript')).toContainText('Earlier question');
+});
+
+test('PNG creation and saved avatar preparation errors recover without losing healthy avatars', async ({
+  page,
+  request,
+}, info) => {
+  const python = process.env.THEAD_TEST_PYTHON || 'python';
+  const png = execFileSync(
+    python,
+    [
+      '-c',
+      "import io,base64;from PIL import Image;b=io.BytesIO();Image.open('tests/fixtures/portrait.jpg').save(b,format='PNG');print(base64.b64encode(b.getvalue()).decode())",
+    ],
+    { timeout: 30000 },
+  )
+    .toString()
+    .trim();
+  const initial = await (await request.get(`${info.url}/status`)).json();
+  const saved = await (
+    await request.post(`${info.url}/avatars`, {
+      data: {
+        session: initial.session,
+        name: 'PNG avatar',
+        voice: 'zira',
+        image: png,
+        filename: '../../outside.png',
+      },
+    })
+  ).json();
+  expect(
+    (await request.get(`${info.url}/portrait?avatar=${saved.id}`)).headers()['content-type'],
+  ).toBe('image/png');
+  await expect(page.getByLabel('Avatar', { exact: true }).locator('option')).toHaveCount(3);
+  await page.getByLabel('Pair diagnostic', { exact: true }).selectOption('pair-voice-missing');
+  await page.getByLabel('Avatar', { exact: true }).selectOption(saved.id);
+  await expect(page.locator('#pair-status')).toContainText('PNG avatar preparation failed');
+  expect((await (await request.get(`${info.url}/status`)).json()).activePair).toBe('jfk-zira');
+  await page.getByLabel('Pair diagnostic', { exact: true }).selectOption('');
+  await page.getByLabel('Avatar', { exact: true }).selectOption('jfk-zira');
+  await expect(page.getByRole('button', { name: 'Ask', exact: true })).toBeEnabled();
+  // Simulate an invalid persisted record through the external storage boundary.
+  execFileSync(
+    python,
+    [
+      '-c',
+      "import sqlite3,sys;c=sqlite3.connect(sys.argv[1]);c.execute('UPDATE avatars SET voice = ? WHERE id = ?',('invalid',sys.argv[2]));c.commit();c.close()",
+      path.join(info.output, 'user-data', 'avatars.sqlite3'),
+      saved.id,
+    ],
+    { timeout: 30000 },
+  );
+  await expect(page.locator('#avatar-storage-error')).toContainText('Invalid saved avatar record');
+  await expect(page.getByRole('button', { name: 'Ask', exact: true })).toBeEnabled();
+  const healthy = await request.post(`${info.url}/avatars`, {
+    data: { session: initial.session, name: 'Healthy avatar', voice: 'hazel', image: png },
+  });
+  expect(healthy.status()).toBe(200);
+  const healthyId = (await healthy.json()).id;
+  await expect(
+    page.getByLabel('Avatar', { exact: true }).locator('option', { hasText: 'Healthy avatar' }),
+  ).toHaveCount(1);
+  await page.getByLabel('Avatar', { exact: true }).selectOption(healthyId);
+  await expect(page.locator('#pair-status')).toContainText('Active: Healthy avatar');
+});
+
+test('interrupted creation leaves existing avatars usable after restart', async ({
+  page,
+  request,
+}, info) => {
+  const initial = await (await request.get(`${info.url}/status`)).json();
+  const data = {
+    session: initial.session,
+    name: 'Preserved avatar',
+    voice: 'zira',
+    image: fs.readFileSync('tests/fixtures/portrait.jpg').toString('base64'),
+  };
+  expect((await request.post(`${info.url}/avatars`, { data })).status()).toBe(200);
+  const python = process.env.THEAD_TEST_PYTHON || 'python';
+  const locker = spawn(
+    python,
+    [
+      '-u',
+      '-c',
+      "import sqlite3,sys;c=sqlite3.connect(sys.argv[1]);c.execute('BEGIN EXCLUSIVE');print('locked',flush=True);sys.stdin.readline();c.rollback();c.close()",
+      path.join(info.output, 'user-data', 'avatars.sqlite3'),
+    ],
+    { stdio: ['pipe', 'pipe', 'pipe'] },
+  );
+  try {
+    await new Promise((resolve, reject) => {
+      const timer = setTimeout(() => reject(Error('storage lock exceeded 30s')), 30000);
+      locker.stdout.once('data', () => {
+        clearTimeout(timer);
+        resolve();
+      });
+    });
+    await page.getByRole('button', { name: 'Create avatar', exact: true }).click();
+    await page.getByLabel('Avatar name', { exact: true }).fill('Interrupted avatar');
+    await page.getByLabel('Voice', { exact: true }).selectOption('zira');
+    await page
+      .getByLabel('Portrait image', { exact: true })
+      .setInputFiles('tests/fixtures/portrait.jpg');
+    const dispatched = page.waitForRequest('**/avatars');
+    await page.getByRole('button', { name: 'Save avatar', exact: true }).click();
+    await dispatched;
+    await expect(page.getByRole('button', { name: 'Save avatar', exact: true })).toBeDisabled();
+    clearTimeout(info.appTimeout);
+    const exited = new Promise((resolve) => info.app.once('exit', resolve));
+    info.app.kill();
+    await exited;
+  } finally {
+    const released = new Promise((resolve) => locker.once('exit', resolve));
+    locker.stdin.end('\n');
+    await released;
+  }
+  await startFixture(info);
+  await page.goto(info.url);
+  await expect(page.getByRole('button', { name: 'Ask', exact: true })).toBeEnabled();
+  const avatars = (await (await request.get(`${info.url}/status`)).json()).avatars;
+  expect(avatars.map((item) => item.name)).toEqual(['JFK', 'Grace', 'Preserved avatar']);
+  expect(fs.readdirSync(path.join(info.output, 'user-data'))).toEqual(['avatars.sqlite3']);
 });
 
 test('portrait stays visible through preparation, playback, Stop, reset and pair changes', async ({

@@ -105,3 +105,7 @@ internal parallel worker mode. GPU runs are serial because they share one GPU
 and memory/timing measurements.
 There is no distributable application package at this phase, so wheel building
 and deployment verification are inapplicable.
+
+Use **Create avatar** in the conversation screen to save a named local JPEG/PNG
+portrait with an available English voice. Saved avatars survive restarts. See
+[the avatar guide](docs/runtime/windows-avatars.md) for limits, storage and testing.

@@ -1,7 +1,9 @@
 # Windows conversational application
 
-For configured portrait/voice pairs and `-Pair` / `THEAD_PAIR`, see
-[the pair guide](windows-pairs.md). The default remains JFK/Zira.
+For named avatars and legacy pair aliases, see [the avatar guide](windows-pairs.md).
+The default is **JFK**; **Grace** is also built in.
+Use **Create avatar** beside the selector to add your own portrait and voice.
+[Creation, storage and verification](windows-avatars.md) describes the workflow.
 
 From `C:/docs/git/tHead`, in PowerShell 7:
 

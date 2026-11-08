@@ -73,7 +73,7 @@ class ConversationTests(unittest.TestCase):
             timeout=30,
         )
         self.assertNotEqual(invalid.returncode, 0)
-        self.assertIn("Unknown pair", invalid.stderr)
+        self.assertIn("Unknown avatar", invalid.stderr)
 
     def stop_process(self) -> None:
         self.process.terminate()

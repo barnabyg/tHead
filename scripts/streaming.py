@@ -657,9 +657,17 @@ def handler(demo: Demonstration) -> type[BaseHTTPRequestHandler]:
             elif parsed.path == "/portrait":
                 # Resolve only declared assets; never accept a filesystem path from the URL.
                 try:
-                    pair = configured_pair(query.get("pair", [""])[0])
-                    portrait = demo.inputs / str(pair.portrait["filename"])
-                    self.reply(200, portrait.read_bytes(), "image/jpeg")
+                    identity = query.get("avatar", query.get("pair", [""]))[0]
+                    if hasattr(demo, "portrait"):
+                        picture = demo.portrait(identity)
+                    else:
+                        pair = configured_pair(identity)
+                        picture = (demo.inputs / str(pair.portrait["filename"])).read_bytes()
+                    self.reply(
+                        200,
+                        picture,
+                        "image/png" if picture.startswith(b"\x89PNG") else "image/jpeg",
+                    )
                 except ValueError:
                     self.reply(400, b'{"error":"Unknown avatar"}')
                 except OSError:
@@ -697,7 +705,8 @@ def handler(demo: Demonstration) -> type[BaseHTTPRequestHandler]:
                 return
             try:
                 size = int(self.headers.get("Content-Length", "0"))
-                if not 0 <= size <= 65536:
+                limit = 7 * 1024 * 1024 if self.path == "/avatars" else 65536
+                if not 0 <= size <= limit:
                     raise ValueError("Request too large")
                 data = json.loads(self.rfile.read(size) or b"{}")
                 if not isinstance(data, dict):
@@ -705,7 +714,7 @@ def handler(demo: Demonstration) -> type[BaseHTTPRequestHandler]:
                 if self.path == "/shutdown" and demo.diagnostics:
                     threading.Thread(target=self.server.shutdown, daemon=True).start()
                     result = {"ok": True}
-                elif self.path in ("/ask", "/reset", "/cancel", "/select"):
+                elif self.path in ("/ask", "/reset", "/cancel", "/select", "/avatars"):
                     result = demo.command(self.path, data)
                 elif demo.page == "conversation.html" and self.path in (
                     "/speak",

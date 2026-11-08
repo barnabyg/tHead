@@ -19,6 +19,7 @@
       margin: 0;
     }
     button,
+    input,
     select,
     textarea {
       font: inherit;
@@ -59,6 +60,23 @@
       margin: auto;
       display: flex;
       flex-direction: column;
+    }
+    dialog {
+      width: min(560px, calc(100vw - 28px));
+      max-height: calc(100dvh - 28px);
+      overflow: auto;
+      border: 1px solid #4b5b4f;
+      border-radius: 16px;
+      padding: 24px;
+    }
+    dialog::backdrop {
+      background: #000a;
+    }
+    dialog input,
+    dialog select {
+      width: 100%;
+      min-height: 44px;
+      margin-bottom: 16px;
     }
     .topbar {
       display: flex;
@@ -459,6 +477,9 @@
             <label for="pair">Avatar</label>
             <select id="pair" disabled></select>
             <p id="pair-status" aria-live="polite">Preparing avatar</p>
+            <button type="button" id="create-avatar">Create avatar</button>
+            <p id="avatar-result" role="status"></p>
+            <p id="avatar-storage-error" role="status"></p>
           </div>
         </aside>
         <section class="chat" aria-label="Conversation">
@@ -562,6 +583,29 @@
       </select></label
     >
 
+    <dialog id="avatar-editor" aria-labelledby="avatar-title">
+      <form id="avatar-form" novalidate>
+        <h2 id="avatar-title">Create avatar</h2>
+        <label for="avatar-name">Avatar name</label>
+        <input id="avatar-name" required maxlength="80" autocomplete="off">
+        <label for="avatar-image">Portrait image</label>
+        <input id="avatar-image" type="file" accept="image/jpeg,image/png" required>
+        <p>JPEG or PNG, at most 5 MiB and 4096 × 4096 pixels. Portraits stay on this computer.</p>
+        <img
+          id="avatar-preview"
+          alt="Portrait preview"
+          hidden
+          style="max-width: 100%; max-height: 200px; object-fit: contain;"
+        >
+        <label for="avatar-voice">Voice</label>
+        <select id="avatar-voice" required>
+          <option value="">Choose a voice</option>
+        </select>
+        <p id="avatar-save-status" role="status" aria-live="polite"></p>
+        <button type="submit" id="save-avatar">Save avatar</button>
+        <button type="button" id="cancel-avatar">Cancel</button>
+      </form>
+    </dialog>
     <script src="/player.js"></script>
   </body>
 </html>
