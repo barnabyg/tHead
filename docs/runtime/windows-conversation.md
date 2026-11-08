@@ -60,8 +60,13 @@ and after playback, Stop or New conversation. Moving video replaces the still
 portrait only once a decoded frame is available. Switching avatar/voice updates
 the portrait after successful preparation; a failed switch retains the active
 avatar. The conversation scrolls independently so the avatar stays on screen,
-including in the compact mobile layout. Session details contains budget totals,
-per-session timing diagnostics and diagnostic fault controls (when enabled).
+including in the compact mobile layout. Session details combines monthly budget totals and a numbered usage list for the
+current conversation. Each entry identifies the question and turn state with input/output
+tokens and estimated USD cost when available. Interrupted/failed turns retain their
+conservative allowance if final usage is missing. Timing diagnostics and diagnostic
+fault controls (when enabled) remain in the same area. The transcript contains no
+separate usage disclosures. New conversation clears this turn list and transcript,
+while monthly budget accounting remains intact.
 
 To manually check this UI from `C:/docs/git/tHead`, with the prerequisites and
 backend key above, run `./run.bat` in PowerShell 7. Open
@@ -69,8 +74,11 @@ backend key above, run `./run.bat` in PowerShell 7. Open
 Ask a question, Stop during preparation or playback, then start a new conversation;
 the avatar must remain visible throughout. Switch avatar/voice between turns and
 check the portrait changes. Resize to a narrow window and scroll a long transcript:
-the portrait and question controls should remain available. Check Session details
-for accounting and diagnostics. Real speech quality and lip sync still require
+the portrait and question controls should remain available. Open Session details after two questions: expect separate numbered usage entries
+alongside monthly totals and diagnostics. Stop another response, then start a new
+conversation: expect the turn list to clear while budget totals remain accurate.
+At desktop and narrow widths, expect no text over the portrait/video, no header
+tagline and no conversation header bar or blank strip above the transcript. Real speech quality and lip sync still require
 the existing GPU/manual listening checks.
 
 For a controlled stream without paid calls, use the same command with

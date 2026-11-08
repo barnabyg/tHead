@@ -121,6 +121,10 @@ test('compact layout keeps portrait and composer on screen while the transcript 
     await page.locator('.history').evaluate((element) => {
       element.scrollTop = 0;
     });
+    const panel = await page.locator('.avatar-panel').boundingBox();
+    const settings = await page.locator('.avatar-settings').boundingBox();
+    expect(settings.y).toBeGreaterThanOrEqual(panel.y);
+    expect(settings.y + settings.height).toBeLessThanOrEqual(panel.y + panel.height);
     await expect(page.locator('#portrait')).toBeInViewport({ ratio: 1 });
     await expect(ask).toBeInViewport({ ratio: 1 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
@@ -456,6 +460,75 @@ test('complete answer, contextual follow-up, idle Stop and fresh conversation', 
   await expect(page.locator('#transcript')).toContainText('A new topic');
   await expect(page.locator('#status')).toHaveText('Playback ended');
   await expect(page.locator('#transcript')).not.toContainText('Earlier question');
+});
+
+test('Session details combines turn usage, failures and interruptions without resetting budget', async ({
+  page,
+  request,
+}, info) => {
+  const ask = page.getByRole('button', { name: 'Ask', exact: true });
+  const details = page
+    .locator('details')
+    .filter({ has: page.getByText('Session details', { exact: true }) });
+  const turns = details
+    .getByRole('list', { name: 'Usage by conversation turn' })
+    .getByRole('listitem');
+  for (const [index, question] of ['First question', 'Second question'].entries()) {
+    await expect(ask).toBeEnabled();
+    await page.getByLabel('Question', { exact: true }).fill(question);
+    await ask.click();
+    await expect(page.locator('#status')).toHaveText('Playback ended');
+    await expect(turns.nth(index)).toContainText(`Turn ${index + 1}: ${question}`);
+    await expect(turns.nth(index)).toContainText(
+      'complete — Tokens: 100 input / 25 output; estimated USD',
+    );
+  }
+  await expect(page.locator('#transcript details')).toHaveCount(0);
+  await expect(page.getByText('Turn usage', { exact: true })).toHaveCount(0);
+  await expect(details).toContainText('Application estimates, not authoritative billing.');
+  await expect(details.getByText('Timing diagnostics', { exact: true })).toBeVisible();
+  await expect(details.getByLabel('Diagnostic fault')).toBeVisible();
+  await expect(details.getByLabel('Pair diagnostic', { exact: true })).toBeVisible();
+
+  await expect(ask).toBeEnabled();
+  await page.getByLabel('Diagnostic fault').selectOption('llm-delay');
+  await page.getByLabel('Question', { exact: true }).fill('Interrupted question');
+  await ask.click();
+  await expect(turns.nth(2)).toContainText('Turn 3: Interrupted question');
+  await page.getByRole('button', { name: 'Stop', exact: true }).click();
+  await expect(turns.nth(2)).toContainText('Interrupted — Tokens: unknown input / unknown output');
+  await expect(turns.nth(2)).toContainText('conservative allowance; final usage unavailable');
+
+  await expect(ask).toBeEnabled();
+  await page.getByLabel('Diagnostic fault').selectOption('llm');
+  await page.getByLabel('Question', { exact: true }).fill('Failed question');
+  await ask.click();
+  await expect(turns.nth(3)).toContainText('Turn 4: Failed question');
+  await expect(turns.nth(3)).toContainText('failed — Tokens: unknown input / unknown output');
+  await expect(turns.nth(3)).toContainText('conservative allowance; final usage unavailable');
+  for (const viewport of [
+    { width: 1280, height: 900 },
+    { width: 320, height: 568 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await expect(turns.nth(3)).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+  }
+  const before = await (await request.get(`${info.url}/status`)).json();
+  await expect(page.locator('#usage')).toContainText(
+    `estimated USD ${before.budget.estimated_usd.toFixed(6)} spent`,
+  );
+  await page.getByRole('button', { name: 'New conversation' }).click();
+  await expect(turns).toHaveCount(0);
+  await expect(page.locator('#transcript')).toBeEmpty();
+  await expect(page.locator('#usage')).toContainText(
+    `estimated USD ${before.budget.estimated_usd.toFixed(6)} spent`,
+  );
+  const after = await (await request.get(`${info.url}/status`)).json();
+  expect(after.budget.estimated_usd).toBe(before.budget.estimated_usd);
+  expect(after.budget.reserved_usd).toBe(before.budget.reserved_usd);
 });
 
 test('Stop cancels an accepted request whose start reply is delayed', async ({

@@ -85,13 +85,6 @@
       background: #bce7a2;
       font-size: 23px;
     }
-    .tagline {
-      color: #a4b1a8;
-      font-size: 13px;
-      letter-spacing: 0;
-      font-weight: 400;
-      margin-left: 12px;
-    }
     .quiet {
       background: transparent;
     }
@@ -117,19 +110,6 @@
       border-radius: 22px;
       background: radial-gradient(ellipse at 50% 35%, #3c5042, #1e2b24 70%);
     }
-    .portrait-fallback {
-      position: absolute;
-      inset: 0;
-      display: grid;
-      place-content: center;
-      text-align: center;
-      color: #b7c4ba;
-      gap: 12px;
-    }
-    .portrait-fallback span {
-      font-size: 72px;
-      color: #bce7a2;
-    }
     #portrait,
     #video {
       position: absolute;
@@ -151,26 +131,6 @@
     #video.presenting {
       opacity: 1;
     }
-    .avatar-caption {
-      position: absolute;
-      inset: auto 0 0;
-      padding: 64px 24px 24px;
-      background: linear-gradient(transparent, #0c1713ed);
-      pointer-events: none;
-    }
-    .eyebrow {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      color: #a8c496;
-      font-weight: 650;
-    }
-    h1 {
-      margin: 10px 0 8px;
-      font-weight: 500;
-      font-size: clamp(24px, 3vw, 38px);
-      letter-spacing: -1px;
-    }
     #conversation {
       margin: 0;
       color: #d0dbd2;
@@ -189,6 +149,7 @@
     #pair {
       width: 100%;
     }
+    #portrait-notice,
     #pair-status {
       color: #a6b5a9;
       font-size: 12px;
@@ -203,23 +164,6 @@
       background: #1a221e;
       border: 1px solid #344139;
       border-radius: 22px;
-    }
-    .chat-heading {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 24px 26px 18px;
-      border-bottom: 1px solid #303d34;
-    }
-    h2 {
-      margin: 0;
-      font-size: 16px;
-      font-weight: 600;
-    }
-    .chat-heading span {
-      color: #a4b1a8;
-      font-size: 12px;
     }
     .history {
       flex: 1;
@@ -266,7 +210,6 @@
     #transcript:not(:empty) {
       padding: 24px 0;
     }
-    .chat-heading,
     .composer {
       flex-shrink: 0;
     }
@@ -309,10 +252,13 @@
       line-height: 1.6;
       overflow-wrap: anywhere;
     }
-    .turn-details {
-      margin: 0;
-      font-size: 11px;
-      color: #a6b5a9;
+    #turn-usage {
+      padding-left: 24px;
+      line-height: 1.6;
+      overflow-wrap: anywhere;
+    }
+    #turn-usage li {
+      margin-bottom: 12px;
     }
     .composer {
       border-top: 1px solid #344139;
@@ -421,9 +367,6 @@
         font-size: 21px;
         gap: 8px;
       }
-      .tagline {
-        display: none;
-      }
       .topbar button {
         font-size: 12px;
         padding: 0.6rem 0.8rem;
@@ -441,13 +384,12 @@
         flex: 0 0 42%;
         border-radius: 16px;
       }
-      .avatar-caption {
-        display: none;
-      }
       .avatar-settings {
         flex: 1;
         min-width: 0;
         align-self: center;
+        max-height: 100%;
+        overflow: auto;
       }
       #pair {
         font-size: 12px;
@@ -455,12 +397,6 @@
       }
       .chat {
         border-radius: 16px;
-      }
-      .chat-heading {
-        padding: 14px 16px;
-      }
-      .chat-heading span {
-        display: none;
       }
       .history {
         padding: 0 16px;
@@ -494,9 +430,6 @@
       .topbar {
         min-height: 64px;
       }
-      .chat-heading {
-        padding: 12px 18px;
-      }
       .composer {
         padding: 12px 16px;
       }
@@ -504,55 +437,31 @@
         min-height: 48px;
         max-height: 72px;
       }
-      .avatar-caption {
-        padding: 36px 16px 16px;
-      }
-      h1 {
-        font-size: 24px;
-        margin: 8px 0;
-      }
-      #conversation {
-        display: none;
-      }
     }
     </style>
   </head>
   <body>
     <div class="app">
       <header class="topbar">
-        <div class="brand">
-          <span class="brand-mark" aria-hidden="true">t</span>tHead<span class="tagline"
-            >A little more human.</span
-          >
-        </div>
+        <div class="brand"><span class="brand-mark" aria-hidden="true">t</span>tHead</div>
         <button type="button" id="reset" class="quiet">New conversation</button>
       </header>
       <main class="workspace">
         <aside class="avatar-panel" aria-label="Your conversation partner">
           <div class="avatar-stage">
-            <div class="portrait-fallback">
-              <span aria-hidden="true">◌</span><small id="portrait-notice">Loading portrait…</small>
-            </div>
             <img id="portrait" alt="Conversation avatar">
             <!-- biome-ignore lint/a11y/useMediaCaption: Generated transcript is not a word-timed caption track; review when aligned captions are available. -->
             <video id="video" playsinline></video>
-            <div class="avatar-caption">
-              <span class="eyebrow">Your conversation partner</span>
-              <h1 id="avatar-name">Let's talk.</h1>
-              <p id="conversation">Loading the configured portrait and local English voice.</p>
-            </div>
           </div>
           <div class="avatar-settings">
+            <p id="conversation">Loading the configured portrait and local English voice.</p>
+            <p id="portrait-notice" role="status">Loading portrait…</p>
             <label for="pair">Avatar and voice</label>
             <select id="pair" disabled></select>
             <p id="pair-status" aria-live="polite">Preparing pair</p>
           </div>
         </aside>
         <section class="chat" aria-label="Conversation">
-          <div class="chat-heading">
-            <h2>Conversation</h2>
-            <span>A space for curiosity</span>
-          </div>
           <div class="history">
             <div class="empty-state">
               <span class="spark" aria-hidden="true">✳</span>
@@ -595,6 +504,7 @@
         <summary>Session details</summary>
         <div class="utility-content">
           <p id="usage"></p>
+          <ol id="turn-usage" aria-label="Usage by conversation turn"></ol>
           <div id="pair-diagnostics" hidden>
             <label for="pair-fault">Pair diagnostic</label>
             <select id="pair-fault">
