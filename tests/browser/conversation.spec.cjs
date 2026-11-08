@@ -75,7 +75,9 @@ test.beforeEach(async ({ page }, info) => {
     else await route.fulfill({ status: 204, body: '' });
   });
   await page.goto(info.url);
-  await expect(page.getByRole('button', { name: 'Ask', exact: true })).toBeEnabled();
+  await expect(
+    page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }),
+  ).toBeEnabled();
   await page.getByText('Session details', { exact: true }).click();
 });
 
@@ -84,7 +86,7 @@ test('Settings navigation preserves draft, transcript, context and budget with k
   request,
 }, info) => {
   await backToConversation(page);
-  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await expect(page.locator('#status')).toHaveText('Playback ended');
   await backToConversation(page);
   await page.getByLabel('Question', { exact: true }).fill('How do we detect one?');
@@ -92,15 +94,23 @@ test('Settings navigation preserves draft, transcript, context and budget with k
   for (const width of [1280, 320]) {
     await page.setViewportSize({ width, height: 844 });
     await expect(page.getByLabel('Avatar', { exact: true })).toBeHidden();
+    const workspace = await page.locator('.workspace').boundingBox();
     await page.getByRole('button', { name: 'Settings', exact: true }).focus();
     await page.keyboard.press('Enter');
     await expect(page.getByRole('heading', { name: 'Settings', exact: true })).toBeFocused();
+    await expect(page.locator('.avatar-panel')).toBeHidden();
+    await expect(page.getByLabel('Question', { exact: true })).toBeHidden();
+    const settings = await page.locator('#settings-page').boundingBox();
+    expect(settings.x).toBe(workspace.x);
+    expect(settings.width).toBe(workspace.width);
+    expect(settings.height).toBeGreaterThan(0);
     await expect(page.getByLabel('Avatar', { exact: true })).toHaveValue('jfk-zira');
     await expect(page.getByLabel('Avatar', { exact: true })).toBeInViewport({ ratio: 1 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
       true,
     );
     await page.getByRole('button', { name: 'Back to conversation' }).click();
+    await expect(page.locator('.avatar-panel')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Settings', exact: true })).toBeFocused();
     await expect(page.getByLabel('Question', { exact: true })).toHaveValue('How do we detect one?');
   }
@@ -108,7 +118,7 @@ test('Settings navigation preserves draft, transcript, context and budget with k
   expect(after.transcript).toEqual(before.transcript);
   expect(after.budget).toEqual(before.budget);
   await backToConversation(page);
-  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await expect(page.locator('#status')).toHaveText('Playback ended');
   await expect
     .poll(async () => (await (await request.get(`${info.url}/status`)).json()).run.answer)
@@ -132,7 +142,7 @@ test('model settings validate exact identifiers and switch contextual turns with
   }
   await backToConversation(page);
   await page.getByLabel('Diagnostic fault').selectOption('llm-connect');
-  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await openSettings(page);
   await page.getByLabel('Model', { exact: true }).selectOption('gpt-6.1-sol');
   await expect(page.locator('#settings-status')).toContainText('Saved');
@@ -148,7 +158,7 @@ test('model settings validate exact identifiers and switch contextual turns with
     .toBe(0.000025);
   await page.getByLabel('Diagnostic fault').selectOption('');
   await page.getByLabel('Question', { exact: true }).fill('How do we detect one?');
-  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await expect
     .poll(
       async () => (await (await request.get(`${info.url}/status`)).json()).run.usage.estimated_usd,
@@ -179,9 +189,11 @@ for (const [model, levels] of [
       await page.getByLabel('Thinking level', { exact: true }).selectOption(level);
       await expect(page.locator('#settings-status')).toContainText('Saved');
       await backToConversation(page);
-      await expect(page.getByRole('button', { name: 'Ask', exact: true })).toBeEnabled();
+      await expect(
+        page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }),
+      ).toBeEnabled();
       await page.getByLabel('Question', { exact: true }).fill(`Thinking question ${index}`);
-      await page.getByRole('button', { name: 'Ask', exact: true }).click();
+      await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
       await expect
         .poll(async () => {
           const status = await (await request.get(`${info.url}/status`)).json();
@@ -221,7 +233,7 @@ test('thinking compatibility, active capture and provider rejection recover with
   await expect(page.locator('#settings-status')).toContainText('Saved');
   await backToConversation(page);
   await page.getByLabel('Diagnostic fault').selectOption('llm-connect');
-  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await openSettings(page);
   await page.getByLabel('Thinking level', { exact: true }).selectOption('low');
   await expect(page.locator('#settings-status')).toContainText('Saved');
@@ -230,10 +242,12 @@ test('thinking compatibility, active capture and provider rejection recover with
   expect(during.settings.thinkingLevel).toBe('low');
   await backToConversation(page);
   await expect(page.locator('#status')).toHaveText('Playback ended');
-  await expect(page.getByRole('button', { name: 'Ask', exact: true })).toBeEnabled();
+  await expect(
+    page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }),
+  ).toBeEnabled();
   await page.unroute('**/segment?*');
   await page.getByLabel('Diagnostic fault').selectOption('llm-settings');
-  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await expect(page.locator('#status')).toContainText('change Settings and retry');
   await page.route('**/segment?*', async (route) => {
     const index = new URL(route.request().url()).searchParams.get('index');
@@ -243,7 +257,7 @@ test('thinking compatibility, active capture and provider rejection recover with
   });
   await page.getByLabel('Diagnostic fault').selectOption('');
   await page.getByLabel('Question', { exact: true }).fill('Recovery follow-up');
-  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await expect
     .poll(async () => (await (await request.get(`${info.url}/status`)).json()).run.answer)
     .toContain('Earlier question: What is a black hole?');
@@ -257,7 +271,7 @@ test('Settings keeps active-turn controls usable and preserves playback', async 
   page,
   request,
 }, info) => {
-  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await expect(page.locator('#video')).toHaveClass('presenting');
   const before = await (await request.get(`${info.url}/status`)).json();
   const source = await page.locator('#video').getAttribute('src');
@@ -275,7 +289,9 @@ test('Settings keeps active-turn controls usable and preserves playback', async 
   await page.getByRole('button', { name: 'New conversation' }).click();
   await expect(page.locator('#transcript')).toBeEmpty();
   await backToConversation(page);
-  await expect(page.getByRole('button', { name: 'Ask', exact: true })).toBeEnabled();
+  await expect(
+    page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }),
+  ).toBeEnabled();
 });
 
 test('create a named avatar without changing selection or making a provider request', async ({
@@ -306,7 +322,7 @@ test('create a named avatar without changing selection or making a provider requ
   await page.getByLabel('Avatar', { exact: true }).selectOption(avatar.id);
   await expect(page.locator('#pair-status')).toContainText('Active: My avatar');
   await backToConversation(page);
-  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await expect(page.locator('#status')).toHaveText('Playback ended');
   expect((await (await request.get(`${info.url}/status`)).json()).run.pair).toBe(avatar.id);
 });
@@ -447,12 +463,12 @@ test('saved portrait survives source removal, failed save and restart; corrupt s
   const portrait = await request.get(`${info.url}/portrait?avatar=${saved.id}`);
   expect(await portrait.body()).toEqual(fs.readFileSync('tests/fixtures/portrait.jpg'));
   await backToConversation(page);
-  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await expect(page.locator('#status')).toHaveText('Playback ended');
   await backToConversation(page);
   await page.getByLabel('Question', { exact: true }).fill('How do we detect one?');
   await backToConversation(page);
-  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await expect(page.locator('#status')).toHaveText('Playback ended');
   await expect(page.locator('#transcript')).toContainText('Earlier question');
   await page.getByRole('button', { name: 'New conversation' }).click();
@@ -465,7 +481,9 @@ test('saved portrait survives source removal, failed save and restart; corrupt s
   await startFixture(info);
   await page.goto(info.url);
   await expect(page.locator('#avatar-storage-error')).toContainText('Preserve');
-  await expect(page.getByRole('button', { name: 'Ask', exact: true })).toBeEnabled();
+  await expect(
+    page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }),
+  ).toBeEnabled();
   await expect(page.getByLabel('Avatar', { exact: true }).locator('option')).toHaveCount(2);
 });
 
@@ -474,7 +492,7 @@ test('creating and cancelling during playback preserve active media and context'
   request,
 }, info) => {
   await backToConversation(page);
-  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await expect(page.locator('#video')).toHaveClass('presenting');
   const before = await (await request.get(`${info.url}/status`)).json();
   await openSettings(page);
@@ -506,7 +524,7 @@ test('creating and cancelling during playback preserve active media and context'
   await backToConversation(page);
   await page.getByLabel('Question', { exact: true }).fill('How do we detect one?');
   await backToConversation(page);
-  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await expect(page.locator('#status')).toHaveText('Playback ended');
   await expect(page.locator('#transcript')).toContainText('Earlier question');
 });
@@ -550,7 +568,9 @@ test('PNG creation and saved avatar preparation errors recover without losing he
   await page.getByLabel('Pair diagnostic', { exact: true }).selectOption('');
   await openSettings(page);
   await page.getByLabel('Avatar', { exact: true }).selectOption('jfk-zira');
-  await expect(page.getByRole('button', { name: 'Ask', exact: true })).toBeEnabled();
+  await expect(
+    page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }),
+  ).toBeEnabled();
   // Simulate an invalid persisted record through the external storage boundary.
   execFileSync(
     python,
@@ -563,7 +583,9 @@ test('PNG creation and saved avatar preparation errors recover without losing he
     { timeout: 30000 },
   );
   await expect(page.locator('#avatar-storage-error')).toContainText('Invalid saved avatar record');
-  await expect(page.getByRole('button', { name: 'Ask', exact: true })).toBeEnabled();
+  await expect(
+    page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }),
+  ).toBeEnabled();
   const healthy = await request.post(`${info.url}/avatars`, {
     data: { session: initial.session, name: 'Healthy avatar', voice: 'hazel', image: png },
   });
@@ -630,7 +652,9 @@ test('interrupted creation leaves existing avatars usable after restart', async 
   }
   await startFixture(info);
   await page.goto(info.url);
-  await expect(page.getByRole('button', { name: 'Ask', exact: true })).toBeEnabled();
+  await expect(
+    page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }),
+  ).toBeEnabled();
   const avatars = (await (await request.get(`${info.url}/status`)).json()).avatars;
   expect(avatars.map((item) => item.name)).toEqual(['JFK', 'Grace', 'Preserved avatar']);
   expect(fs.readdirSync(path.join(info.output, 'user-data'))).toEqual(['avatars.sqlite3']);
@@ -640,7 +664,11 @@ test('portrait stays visible through preparation, playback, Stop, reset and pair
   page,
   request,
 }, info) => {
-  const portrait = page.getByRole('img', { name: 'JFK portrait', exact: true });
+  const portrait = page.getByRole('img', {
+    name: 'JFK portrait',
+    exact: true,
+    includeHidden: true,
+  });
   await expect(portrait).toHaveClass('loaded');
   const response = await request.get(`${info.url}/portrait?pair=jfk-zira`);
   expect(response.headers()['content-type']).toBe('image/jpeg');
@@ -648,7 +676,7 @@ test('portrait stays visible through preparation, playback, Stop, reset and pair
   expect((await request.get(`${info.url}/portrait?pair=../../README.md`)).status()).toBe(400);
   await page.getByLabel('Diagnostic fault').selectOption('llm-delay');
   await backToConversation(page);
-  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await expect(portrait).toHaveCSS('opacity', '1');
   await expect(page.locator('#video')).toHaveCSS('opacity', '0');
   await page.getByRole('button', { name: 'Stop', exact: true }).click();
@@ -658,9 +686,11 @@ test('portrait stays visible through preparation, playback, Stop, reset and pair
   await expect(portrait).toHaveClass('loaded');
   await expect(page.locator('#transcript')).toBeEmpty();
   await page.getByLabel('Diagnostic fault').selectOption('');
-  await expect(page.getByRole('button', { name: 'Ask', exact: true })).toBeEnabled();
+  await expect(
+    page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }),
+  ).toBeEnabled();
   await backToConversation(page);
-  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await expect(page.locator('#video')).toHaveClass('presenting');
   await expect(page.locator('#status')).toHaveText('Playback ended');
   await expect(page.locator('#video')).toHaveCSS('opacity', '0');
@@ -668,16 +698,16 @@ test('portrait stays visible through preparation, playback, Stop, reset and pair
   await expect(page.getByLabel('Avatar', { exact: true })).toBeEnabled();
   await openSettings(page);
   await page.getByLabel('Avatar', { exact: true }).selectOption('hopper-hazel');
-  await expect(page.getByRole('img', { name: 'Grace portrait', exact: true })).toHaveClass(
-    'loaded',
-  );
+  await expect(
+    page.getByRole('img', { name: 'Grace portrait', exact: true, includeHidden: true }),
+  ).toHaveClass('loaded');
   await page.getByLabel('Pair diagnostic', { exact: true }).selectOption('pair-prepare');
   await openSettings(page);
   await page.getByLabel('Avatar', { exact: true }).selectOption('jfk-zira');
   await expect(page.locator('#pair-status')).toContainText('failed');
-  await expect(page.getByRole('img', { name: 'Grace portrait', exact: true })).toHaveClass(
-    'loaded',
-  );
+  await expect(
+    page.getByRole('img', { name: 'Grace portrait', exact: true, includeHidden: true }),
+  ).toHaveClass('loaded');
 });
 
 test('compact layout keeps portrait and composer on screen while the transcript scrolls', async ({
@@ -685,7 +715,7 @@ test('compact layout keeps portrait and composer on screen while the transcript 
 }) => {
   await page.getByText('Session details', { exact: true }).click();
   await page.setViewportSize({ width: 390, height: 844 });
-  const ask = page.getByRole('button', { name: 'Ask', exact: true });
+  const ask = page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true });
   for (let index = 0; index < 3; index++) {
     await expect(ask).toBeEnabled();
     await backToConversation(page);
@@ -727,9 +757,9 @@ test('missing portrait gives a useful fallback and another avatar can recover', 
   await expect(page.getByLabel('Avatar', { exact: true })).toBeEnabled();
   await openSettings(page);
   await page.getByLabel('Avatar', { exact: true }).selectOption('hopper-hazel');
-  await expect(page.getByRole('img', { name: 'Grace portrait', exact: true })).toHaveClass(
-    'loaded',
-  );
+  await expect(
+    page.getByRole('img', { name: 'Grace portrait', exact: true, includeHidden: true }),
+  ).toHaveClass('loaded');
 });
 
 test('bounded 100-turn session trims context, rejects turn 101 and resets', async ({
@@ -737,7 +767,7 @@ test('bounded 100-turn session trims context, rejects turn 101 and resets', asyn
   request,
 }, info) => {
   test.setTimeout(900_000);
-  const ask = page.getByRole('button', { name: 'Ask', exact: true });
+  const ask = page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true });
   for (let index = 0; index < 100; index++) {
     await expect(ask).toBeEnabled();
     const question = `Turn ${index}: ${'context '.repeat(120)}`;
@@ -790,7 +820,7 @@ test('switch both directions between turns, reject busy selection, retain contex
   page,
   request,
 }, info) => {
-  const ask = page.getByRole('button', { name: 'Ask', exact: true });
+  const ask = page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true });
   const pair = page.getByLabel('Avatar', { exact: true });
   await expect(pair).toHaveValue('jfk-zira');
   await backToConversation(page);
@@ -842,7 +872,7 @@ test('reset and Stop during loading retain choice, reject overlapping selection 
   page,
   request,
 }, info) => {
-  const ask = page.getByRole('button', { name: 'Ask', exact: true });
+  const ask = page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true });
   const pair = page.getByLabel('Avatar', { exact: true });
   await backToConversation(page);
   await ask.click();
@@ -892,7 +922,7 @@ for (const fault of [
     page,
     request,
   }, info) => {
-    const ask = page.getByRole('button', { name: 'Ask', exact: true });
+    const ask = page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true });
     const pair = page.getByLabel('Avatar', { exact: true });
     await backToConversation(page);
     await ask.click();
@@ -930,7 +960,7 @@ test('late old media and delayed failed selection cannot revive playback after r
   page,
   request,
 }, info) => {
-  const ask = page.getByRole('button', { name: 'Ask', exact: true });
+  const ask = page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true });
   const pair = page.getByLabel('Avatar', { exact: true });
   let releaseMedia;
   let receivedMedia;
@@ -990,7 +1020,7 @@ test('reset acknowledgement gates the next selection and response', async ({ pag
   await page.getByRole('button', { name: 'New conversation' }).click();
   await accepted;
   const pair = page.getByLabel('Avatar', { exact: true });
-  const ask = page.getByRole('button', { name: 'Ask', exact: true });
+  const ask = page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true });
   try {
     expect(await pair.isDisabled()).toBe(true);
     expect(await ask.isDisabled()).toBe(true);
@@ -1015,7 +1045,7 @@ test('selection waits for backend playback completion acknowledgement', async ({
   });
   const pair = page.getByLabel('Avatar', { exact: true });
   await backToConversation(page);
-  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await expect(page.locator('#status')).toHaveText('Playback ended');
   try {
     // Wait for a post-ending status poll while the backend's ended event is held.
@@ -1038,7 +1068,7 @@ test('complete answer, contextual follow-up, idle Stop and fresh conversation', 
   request,
 }, info) => {
   await backToConversation(page);
-  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await expect(page.locator('#transcript')).toContainText('A black hole traps light.');
   await expect(page.locator('#status')).toHaveText('Playback ended');
   const measured = (await (await request.get(`${info.url}/status`)).json()).run.events;
@@ -1047,7 +1077,9 @@ test('complete answer, contextual follow-up, idle Stop and fresh conversation', 
   const audible = measured.find((event) => event.event === 'digital-audio-onset');
   expect(submitted.clientMilliseconds).toBeLessThan(moving.clientMilliseconds);
   expect(submitted.clientMilliseconds).toBeLessThan(audible.clientMilliseconds);
-  await expect(page.getByRole('button', { name: 'Ask', exact: true })).toBeEnabled();
+  await expect(
+    page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }),
+  ).toBeEnabled();
   await page.getByRole('button', { name: 'Stop', exact: true }).click();
   await expect
     .poll(async () => (await (await request.get(`${info.url}/status`)).json()).run.state)
@@ -1055,7 +1087,7 @@ test('complete answer, contextual follow-up, idle Stop and fresh conversation', 
   await backToConversation(page);
   await page.getByLabel('Question', { exact: true }).fill('How do we detect one?');
   await backToConversation(page);
-  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await expect(page.locator('#transcript')).toContainText(
     'Earlier question: What is a black hole?',
   );
@@ -1067,9 +1099,11 @@ test('complete answer, contextual follow-up, idle Stop and fresh conversation', 
   await expect(page.locator('#transcript')).toBeEmpty();
   await backToConversation(page);
   await page.getByLabel('Question', { exact: true }).fill('A new topic');
-  await expect(page.getByRole('button', { name: 'Ask', exact: true })).toBeEnabled();
+  await expect(
+    page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }),
+  ).toBeEnabled();
   await backToConversation(page);
-  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await expect(page.locator('#transcript')).toContainText('A new topic');
   await expect(page.locator('#status')).toHaveText('Playback ended');
   await expect(page.locator('#transcript')).not.toContainText('Earlier question');
@@ -1079,7 +1113,7 @@ test('Session details combines turn usage, failures and interruptions without re
   page,
   request,
 }, info) => {
-  const ask = page.getByRole('button', { name: 'Ask', exact: true });
+  const ask = page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true });
   const details = page
     .locator('details')
     .filter({ has: page.getByText('Session details', { exact: true }) });
@@ -1170,13 +1204,15 @@ test('Stop cancels an accepted request whose start reply is delayed', async ({
   });
   await page.getByLabel('Diagnostic fault').selectOption('llm-delay');
   await backToConversation(page);
-  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await accept;
   await page.getByRole('button', { name: 'Stop', exact: true }).click();
   await expect
     .poll(async () => (await (await request.get(`${info.url}/status`)).json()).run.state)
     .toBe('stopped');
-  await expect(page.getByRole('button', { name: 'Ask', exact: true })).toBeEnabled();
+  await expect(
+    page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }),
+  ).toBeEnabled();
   release();
   await expect(page.locator('#transcript')).toContainText('Interrupted');
 });
@@ -1185,7 +1221,7 @@ test('repeated Stop across delayed stages retains questions and excludes interru
   page,
   request,
 }, info) => {
-  const ask = page.getByRole('button', { name: 'Ask', exact: true });
+  const ask = page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true });
   for (const [fault, stage] of [
     ['llm-connect', 'llm-connect'],
     ['llm-delay', 'llm-first-text'],
@@ -1230,14 +1266,16 @@ test('busy reset rejects late text and safe rendering keeps provider markup lite
 }) => {
   await page.getByLabel('Diagnostic fault').selectOption('tts-delay');
   await backToConversation(page);
-  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await expect(page.locator('#transcript')).toContainText('You: What is a black hole?');
   await page.getByRole('button', { name: 'New conversation' }).click();
   await expect(page.locator('#transcript')).toBeEmpty();
-  await expect(page.getByRole('button', { name: 'Ask', exact: true })).toBeEnabled();
+  await expect(
+    page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }),
+  ).toBeEnabled();
   await page.getByLabel('Diagnostic fault').selectOption('markup');
   await backToConversation(page);
-  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await expect(page.locator('#transcript')).toContainText("<script>alert('text')</script>");
   await expect(page.locator('#transcript script')).toHaveCount(0);
 });
@@ -1251,11 +1289,13 @@ test('provider, TTS and media failures recover, then budget rejection prevents d
   for (const fault of ['llm', 'missing-completion', 'tts', 'media']) {
     await page.getByLabel('Diagnostic fault').selectOption(fault);
     await backToConversation(page);
-    await page.getByRole('button', { name: 'Ask', exact: true }).click();
+    await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
     await expect
       .poll(async () => (await (await request.get(`${info.url}/status`)).json()).run.state)
       .toBe('failed');
-    await expect(page.getByRole('button', { name: 'Ask', exact: true })).toBeEnabled();
+    await expect(
+      page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }),
+    ).toBeEnabled();
     await page.route('**/segment?*', async (route) => {
       const index = new URL(route.request().url()).searchParams.get('index');
       if (index === '0')
@@ -1264,9 +1304,11 @@ test('provider, TTS and media failures recover, then budget rejection prevents d
     });
     await page.getByLabel('Diagnostic fault').selectOption('');
     await backToConversation(page);
-    await page.getByRole('button', { name: 'Ask', exact: true }).click();
+    await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
     await expect(page.locator('#status')).toHaveText('Playback ended');
-    await expect(page.getByRole('button', { name: 'Ask', exact: true })).toBeEnabled();
+    await expect(
+      page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }),
+    ).toBeEnabled();
     await page.unroute('**/segment?*');
   }
   const python = process.env.THEAD_TEST_PYTHON || 'python';
@@ -1293,7 +1335,7 @@ test('provider, TTS and media failures recover, then budget rejection prevents d
   await page.getByLabel('Diagnostic fault').selectOption('');
   const before = await (await request.get(`${info.url}/status`)).json();
   await backToConversation(page);
-  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await expect(page.locator('#status')).toContainText('budget');
   const after = await (await request.get(`${info.url}/status`)).json();
   expect(after.transcript.length).toBe(before.transcript.length);

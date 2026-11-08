@@ -30,16 +30,16 @@ let stopping = 0;
 let resetting = 0;
 const settingsButton = document.querySelector('#settings');
 const settingsPage = document.querySelector('#settings-page');
-const chatPage = document.querySelector('.chat');
+const conversationPage = document.querySelector('.workspace');
 settingsButton?.addEventListener('click', () => {
   settingsPage.hidden = false;
-  chatPage.hidden = true;
+  conversationPage.hidden = true;
   settingsButton.setAttribute('aria-expanded', 'true');
   document.querySelector('#settings-title').focus();
 });
 document.querySelector('#settings-back')?.addEventListener('click', () => {
   settingsPage.hidden = true;
-  chatPage.hidden = false;
+  conversationPage.hidden = false;
   settingsButton.setAttribute('aria-expanded', 'false');
   settingsButton.focus();
 });

@@ -2,7 +2,7 @@
 
 For named avatars and legacy pair aliases, see [the avatar guide](windows-pairs.md).
 The default is **JFK**; **Grace** is also built in.
-Open **Settings** to choose the current **Avatar** by name. Use **Back to conversation**
+Open the full-screen **Settings** page to choose the current **Avatar** by name. Use **Back to conversation**
 to return without losing your draft, transcript, context, playback or accounting.
 **Stop** and **New conversation** remain available on both pages. Avatar changes
 remain disabled until the current response ends; preparation errors appear beside

@@ -110,6 +110,7 @@
       gap: 8px;
     }
     #settings-page {
+      flex: 1;
       min-height: 0;
       overflow: auto;
       padding: 24px;
@@ -128,6 +129,9 @@
     }
     .quiet {
       background: transparent;
+    }
+    .workspace[hidden] {
+      display: none;
     }
     .workspace {
       display: grid;
@@ -557,28 +561,28 @@
             <button type="button" id="play" hidden>Play audio/video</button>
           </div>
         </section>
-        <section id="settings-page" aria-labelledby="settings-title" hidden>
-          <h1 id="settings-title" tabindex="-1">Settings</h1>
-          <button type="button" id="settings-back">Back to conversation</button>
-          <div class="settings-controls">
-            <label for="pair">Avatar</label>
-            <select id="pair" disabled></select>
-            <p id="pair-status" aria-live="polite">Preparing avatar</p>
-            <button type="button" id="create-avatar">Create avatar</button>
-            <p id="avatar-result" role="status"></p>
-            <p id="avatar-storage-error" role="status"></p>
-            <label for="model">Model</label>
-            <select id="model" disabled aria-describedby="model-availability"></select>
-            <p id="model-availability"></p>
-            <label for="thinking-level">Thinking level</label>
-            <select id="thinking-level" disabled aria-describedby="thinking-help"></select>
-            <p id="thinking-help">
-              Higher thinking levels can explore answers more deeply but take longer. The response
-              limit still applies.
-            </p>
-            <p id="settings-status" role="status" aria-live="polite"></p>
-          </div>
-        </section>
+      </main>
+      <main id="settings-page" aria-labelledby="settings-title" hidden>
+        <h1 id="settings-title" tabindex="-1">Settings</h1>
+        <button type="button" id="settings-back">Back to conversation</button>
+        <div class="settings-controls">
+          <label for="pair">Avatar</label>
+          <select id="pair" disabled></select>
+          <p id="pair-status" aria-live="polite">Preparing avatar</p>
+          <button type="button" id="create-avatar">Create avatar</button>
+          <p id="avatar-result" role="status"></p>
+          <p id="avatar-storage-error" role="status"></p>
+          <label for="model">Model</label>
+          <select id="model" disabled aria-describedby="model-availability"></select>
+          <p id="model-availability"></p>
+          <label for="thinking-level">Thinking level</label>
+          <select id="thinking-level" disabled aria-describedby="thinking-help"></select>
+          <p id="thinking-help">
+            Higher thinking levels can explore answers more deeply but take longer. The response
+            limit still applies.
+          </p>
+          <p id="settings-status" role="status" aria-live="polite"></p>
+        </div>
       </main>
       <details class="utilities">
         <summary>Session details</summary>
