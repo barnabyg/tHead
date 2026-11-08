@@ -57,6 +57,9 @@ async function main() {
       'scripts/streaming.js',
       'scripts/chatterbox-benchmark.cjs',
       'chatterbox-lock.json',
+      'chatterbox-gpu-lock.json',
+      'scripts/chatterbox_eval.py',
+      'docs/runtime/chatterbox/requirements-gpu.lock',
     ].map((file) => ({
       path: file,
       sha256: createHash('sha256').update(fs.readFileSync(file)).digest('hex'),
