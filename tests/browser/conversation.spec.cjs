@@ -121,6 +121,10 @@ test('compact layout keeps portrait and composer on screen while the transcript 
     await page.locator('.history').evaluate((element) => {
       element.scrollTop = 0;
     });
+    const panel = await page.locator('.avatar-panel').boundingBox();
+    const settings = await page.locator('.avatar-settings').boundingBox();
+    expect(settings.y).toBeGreaterThanOrEqual(panel.y);
+    expect(settings.y + settings.height).toBeLessThanOrEqual(panel.y + panel.height);
     await expect(page.locator('#portrait')).toBeInViewport({ ratio: 1 });
     await expect(ask).toBeInViewport({ ratio: 1 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
