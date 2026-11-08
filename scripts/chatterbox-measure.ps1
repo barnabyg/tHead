@@ -32,7 +32,7 @@ try {
     } while (-not $listener -and [DateTime]::UtcNow -lt $deadline)
     if (-not $listener) { throw 'Experimental application did not bind its task port' }
     $serverPid = $listener.OwningProcess
-    $monitor = Start-Process .runtime/venv/Scripts/python.exe -ArgumentList @('scripts/chatterbox_monitor.py','--pid',"$serverPid","$($bench.Id)",'--output',"$prefix-resources.jsonl",'--stop-file',"$prefix.stop",'--seconds','3600') -WindowStyle Hidden -PassThru -RedirectStandardOutput "$prefix-monitor.out.log" -RedirectStandardError "$prefix-monitor.err.log"
+    $monitor = Start-Process .runtime/venv/Scripts/python.exe -ArgumentList @('-I','scripts/chatterbox_monitor.py','--pid',"$serverPid","$($bench.Id)",'--output',"$prefix-resources.jsonl",'--stop-file',"$prefix.stop",'--seconds','3600') -WindowStyle Hidden -PassThru -RedirectStandardOutput "$prefix-monitor.out.log" -RedirectStandardError "$prefix-monitor.err.log"
     if (-not $bench.WaitForExit(3900000)) { throw 'Benchmark exceeded its 65-minute wall limit' }
     $code = $bench.ExitCode
 } finally {
@@ -48,6 +48,7 @@ try {
         if (-not $app.WaitForExit(150000)) { taskkill /PID $app.Id /T /F | Out-Null }
     }
 }
+if ($monitor -and $monitor.ExitCode -ne 0) { throw "Resource monitor failed; retain this attempt and investigate its error log." }
 Get-Content "$prefix.out.log" -Tail 6
 Get-Content "$prefix.err.log" -Tail 6
 exit $code
