@@ -34,11 +34,17 @@ To reopen the pack generated for this evaluation, without generating anything:
 uv run --locked python scripts/chatterbox_quality.py --pack .runtime/chatterbox-quality-pack --open
 ```
 
-Expected: a labelled local HTML index with source references, exact new text,
-candidate/baseline audio controls, attempt logs and `scores.csv`. It contains no
-scripts, server, automatic scoring or network media. Edit the CSV in a text or
-spreadsheet editor after listening. Keep the reference ID and sample ID with
-each score; do not replace missing scores with favourable aggregate impressions.
+Expected: a local HTML index that starts with **four clips and two reference
+excerpts, about 70 seconds of audio**. No Excel or CSV work is needed for this
+initial screen. Reply in chat with four lines, A–D: similarity/naturalness (1–5)
+and any missing/extra words or ending defects. Clear defects can justify stopping
+early; a good screen only justifies further review, not passing the full gate.
+
+The complete experiment matrix, baselines, diagnostics and optional score CSV
+remain under a collapsed advanced section. The index contains no scripts, server,
+automatic scoring or network media. The initial screen uses the first declared
+seed (17), 10-second clean references and the baseline/long-answer passages for
+both speakers; it does not select favourable samples after listening.
 
 ## Fixed experiment matrix
 
@@ -121,8 +127,11 @@ All generation outputs remain `generated_unreviewed`. The score sheet records
 the earlier explicit user confirmation that one identical #52 baseline sample
 was intelligible and complete; its similarity/naturalness fields are blank.
 This prior confirmation is not a #53 quality score. Human per-sample similarity,
-naturalness, accent and defect judgements are still required. The full pack was
-provided to the user with an explicit request to complete the CSV.
+naturalness, accent and defect judgements are still required. After the user
+reported that Excel was unavailable and the 78-row CSV was burdensome, the default
+review was narrowed to the four-clip screen above, with chat replies. The original
+matrix/evidence is retained; this changes review workload, not the formal quality
+gate or the generated audio.
 
 Both contaminated references produced WAVs without automatic rejection. This
 establishes that reference hygiene must be a manual preparation step; it does

@@ -174,14 +174,54 @@ def render(pack: Path, manifest: dict[str, Any]) -> None:
     rows = [
         "<!doctype html><html lang='en'><meta charset='utf-8'>"
         "<title>Chatterbox quality audition</title><h1>Chatterbox quality audition</h1>"
-        "<p>Quality gate UNRESOLVED. Synthetic audio. Compare each reference with new text. "
-        "Score similarity and naturalness 1 (poor), 3 (usable with defects), 5 (convincing). "
-        "Also record accent, intelligibility, joins, missing/extra words and endings in "
-        "<a href='scores.csv'>scores.csv</a>. Baseline similarity is not applicable. "
-        "No automatic speaker/noise rejection exists. "
-        "<a href='ATTRIBUTION.md'>Reference attribution and transformations</a>.</p>"
-        "<h2>References</h2>"
+        "<style>body{font:17px system-ui,sans-serif;max-width:850px;margin:32px auto;"
+        "padding:0 20px;line-height:1.5}audio{display:block;width:100%;margin:12px 0 24px}"
+        "details{margin-top:40px}summary{cursor:pointer;font-weight:600}"
+        "small{color:#555}</style>"
+        "<h2>Start with four clips — no spreadsheet needed</h2>"
+        "<p>About 70 seconds of audio, including the two references. Compare each generated "
+        "voice with its reference. For A–D, reply in the chat with similarity/naturalness "
+        "scores and any missing or extra words: <strong>A: 3/4, complete</strong>. "
+        "Use 1 = poor, 3 = usable with clear defects, 5 = convincing/clear.</p>"
+        "<p>This is an initial screen. Clear defects can stop the evaluation early; "
+        "promising results justify further review, not a full quality-gate pass. "
+        "All generated speech is synthetic.</p>"
     ]
+    samples = {sample["id"]: sample for sample in manifest["samples"]}
+    for speaker, labels in (("1089", ("A", "B")), ("121", ("C", "D"))):
+        reference = next(ref for ref in manifest["references"] if ref["id"] == f"{speaker}-10s")
+        rows.append(
+            f"<h2>{html.escape(SPEAKERS[speaker])}: reference</h2>"
+            f"<audio controls preload='none' src='{html.escape(reference['path'])}'></audio>"
+        )
+        for label, text_id in zip(labels, ("baseline", "long-answer"), strict=True):
+            identifier = f"{speaker}-10s-{text_id}-17"
+            rows.append(
+                f"<h3>{label}: {'Short passage' if text_id == 'baseline' else 'Longer answer'}</h3>"
+                f"<p>{html.escape(TEXTS[text_id])}</p>"
+            )
+            sample = samples.get(identifier)
+            if sample and sample.get("audio"):
+                rows.append(
+                    f"<audio controls preload='none' src='{html.escape(sample['audio'])}'></audio>"
+                )
+            else:
+                rows.append(
+                    "<p>This sample did not generate; see the retained attempt evidence.</p>"
+                )
+    rows.extend(
+        [
+            "<p>Reply in four lines: A, B, C and D. You do not need to open or edit a CSV.</p>"
+            "<details><summary>Full experiment matrix, diagnostics and optional CSV</summary>"
+            "<p>Quality gate UNRESOLVED. Synthetic audio. Compare each reference with new text. "
+            "Score similarity and naturalness 1 (poor), 3 (usable with defects), 5 (convincing). "
+            "Also record accent, intelligibility, joins, missing/extra words and endings in "
+            "<a href='scores.csv'>scores.csv</a>. Baseline similarity is not applicable. "
+            "No automatic speaker/noise rejection exists. "
+            "<a href='ATTRIBUTION.md'>Reference attribution and transformations</a>.</p>"
+            "<h2>References</h2>"
+        ]
+    )
     for reference in manifest["references"]:
         rows.append(
             f"<p id='ref-{html.escape(reference['id'])}'>{html.escape(reference['id'])}: "
@@ -217,7 +257,7 @@ def render(pack: Path, manifest: dict[str, Any]) -> None:
                 rows.append(f"<p>{html.escape(sample.get('error', 'Not generated'))}</p>")
             if sample.get("log"):
                 rows.append(f"<p><a href='{html.escape(sample['log'])}'>Attempt log</a></p>")
-    rows.append("</html>")
+    rows.append("</details></html>")
     (pack / "index.html").write_text("\n".join(rows) + "\n", encoding="utf-8")
 
 
