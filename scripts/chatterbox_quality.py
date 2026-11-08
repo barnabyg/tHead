@@ -20,10 +20,11 @@ from pathlib import Path
 from typing import Any
 
 from chatterbox_eval import sha256
+from prepare import run
 from speech import Voice
 
-# B404/B603/B607: fixed shell-free local commands and numeric task-owned PIDs only.
-# Revisit these exceptions if executables or commands become externally supplied.
+# B404: fixed shell-free local commands via the shared bounded runner.
+# Revisit if executables or commands become externally supplied.
 
 ROOT = Path(__file__).resolve().parents[1]
 TEXTS = {
@@ -45,19 +46,11 @@ SEEDS = (17, 23, 42)
 
 def command_log(command: list[str], log: Path, timeout: int) -> int:
     with log.open("wb") as stream:
-        with subprocess.Popen(command, cwd=ROOT, stdout=stream, stderr=stream) as process:  # nosec B603
-            try:
-                return process.wait(timeout=timeout)
-            except (subprocess.TimeoutExpired, KeyboardInterrupt):
-                if sys.platform == "win32":
-                    subprocess.run(  # nosec B603 B607
-                        ["taskkill", "/PID", str(process.pid), "/T", "/F"],
-                        check=False,
-                        timeout=30,
-                    )
-                else:
-                    process.kill()
-                raise
+        try:
+            run(command, timeout, output=stream)
+            return 0
+        except subprocess.CalledProcessError as error:
+            return error.returncode
 
 
 def write_wav(path: Path, samples: array.array[int]) -> None:
