@@ -227,6 +227,10 @@ class Conversation(Demonstration):
 
     def prepare_assets(self, pipeline: Any, inference: Any) -> None:
         pair = self.selected_pair
+        if not pair.portrait.get("stored"):
+            # The derived input is needed only while a saved avatar is selected.
+            # Remove its private bytes on fallback without touching source/bundled images.
+            (self.directory / "imported-portrait.png").unlink(missing_ok=True)
         if self.pair_fault in ("pair-delay", "pair-delay-fail"):
             time.sleep(2)  # Simulated preparation completing after Stop/reset.
         candidate = Voice(pair.voice_lock)

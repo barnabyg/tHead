@@ -59,8 +59,8 @@ switches to the permanent default **JFK**. Built-in JFK and Grace cannot be edit
 or deleted through either UI or API. Transcript, context and budget are retained.
 Source image files and bundled assets are never deleted. Portrait bytes are
 owned by their individual database record, so deleting one avatar cannot remove
-another avatar's image. The single derived model-input image remains a reusable
-output cache, replaced on the next imported-avatar preparation.
+another avatar's image. Switching to a built-in avatar also removes the single
+derived model-input image from the output directory.
 
 Manual scenario using the preparation-and-launch command above: create/select
 an avatar, change image/voice, save and speak. Verify actual image/voice playback,

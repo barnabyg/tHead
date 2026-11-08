@@ -95,6 +95,7 @@ test('cancel editing and deletion; confirmed selected deletion falls back perman
     'Deleted Delete me. Switched to default JFK',
   );
   await expect(page.locator('#pair-status')).toContainText('Active: JFK');
+  expect(fs.existsSync(path.join(info.output, 'imported-portrait.png'))).toBe(false);
   await expect(page.getByLabel('Avatar', { exact: true }).locator('option')).toHaveCount(2);
   await expect(page.getByRole('button', { name: 'Delete avatar', exact: true })).toBeHidden();
   status = await (await request.get(`${info.url}/status`)).json();
