@@ -28,6 +28,81 @@ let pendingController = null;
 let selecting = false;
 let stopping = 0;
 let resetting = 0;
+const settingsButton = document.querySelector('#settings');
+const settingsPage = document.querySelector('#settings-page');
+const conversationPage = document.querySelector('.workspace');
+settingsButton?.addEventListener('click', () => {
+  settingsPage.hidden = false;
+  conversationPage.hidden = true;
+  settingsButton.setAttribute('aria-expanded', 'true');
+  document.querySelector('#settings-title').focus();
+});
+document.querySelector('#settings-back')?.addEventListener('click', () => {
+  settingsPage.hidden = true;
+  conversationPage.hidden = false;
+  settingsButton.setAttribute('aria-expanded', 'false');
+  settingsButton.focus();
+});
+const modelSelector = document.querySelector('#model');
+const thinkingSelector = document.querySelector('#thinking-level');
+let savingSettings = false;
+let settingsRevision = 0;
+let modelCatalog = '';
+let thinkingCatalog = '';
+function renderSettings(settings) {
+  const catalog = JSON.stringify([settings.models, settings.model]);
+  if (catalog !== modelCatalog) {
+    modelSelector.replaceChildren(
+      ...settings.models.map((model) => {
+        const option = new Option(model.id + (model.available ? '' : ' — unavailable'), model.id);
+        option.disabled = !model.available;
+        return option;
+      }),
+    );
+    if (!settings.models.some((model) => model.id === settings.model)) {
+      modelSelector.add(new Option(`${settings.model} — unsupported`, settings.model));
+    }
+    modelCatalog = catalog;
+  }
+  modelSelector.value = settings.model;
+  modelSelector.disabled = false;
+  const levels = settings.models.find((model) => model.id === settings.model)?.levels || [];
+  const levelCatalog = JSON.stringify(levels);
+  if (levelCatalog !== thinkingCatalog) {
+    thinkingSelector.replaceChildren(
+      ...(levels.length ? levels : ['Unavailable']).map((level) => new Option(level, level)),
+    );
+    thinkingCatalog = levelCatalog;
+  }
+  if (levels.length) thinkingSelector.value = settings.thinkingLevel;
+  thinkingSelector.disabled = !levels.length;
+  document.querySelector('#model-availability').textContent = settings.models
+    .filter((model) => !model.available)
+    .map((model) => model.error)
+    .join('. ');
+}
+async function saveSettings(change) {
+  if (savingSettings) return;
+  savingSettings = true;
+  settingsRevision++;
+  modelSelector.disabled = true;
+  thinkingSelector.disabled = true;
+  const feedback = document.querySelector('#settings-status');
+  feedback.textContent = 'Saving…';
+  try {
+    const saved = await post('/settings', { session: sessionIdentity, ...change });
+    renderSettings(saved.settings);
+    feedback.textContent = `Saved. ${saved.settings.message || 'Applies to the next question.'}`;
+  } catch (error) {
+    feedback.textContent = String(error);
+  } finally {
+    savingSettings = false;
+  }
+}
+modelSelector?.addEventListener('change', () => saveSettings({ model: modelSelector.value }));
+thinkingSelector?.addEventListener('change', () =>
+  saveSettings({ thinkingLevel: thinkingSelector.value }),
+);
 const pairSelector = document.querySelector('#pair');
 const avatarEditor = document.querySelector('#avatar-editor');
 const avatarForm = document.querySelector('#avatar-form');
@@ -35,7 +110,64 @@ const imagePicker = document.querySelector('#avatar-image');
 const voicePicker = document.querySelector('#avatar-voice');
 let savingAvatar = false;
 let previewUrl = '';
+let editingAvatar = null;
+let avatarCatalogue = [];
+const deletionDialog = document.querySelector('#avatar-deletion');
+let deletingAvatar = null;
+document.querySelector('#delete-avatar')?.addEventListener('click', () => {
+  deletingAvatar = avatarCatalogue.find((a) => a.id === pairSelector.value);
+  if (!deletingAvatar?.editable || pairSelector.disabled) return;
+  document.querySelector('#delete-confirmation').textContent =
+    `Delete ${deletingAvatar.name}? This removes its saved portrait and switches to default JFK.`;
+  document.querySelector('#delete-status').textContent = '';
+  deletionDialog.showModal();
+});
+function cancelDeletion() {
+  if (!savingAvatar) deletionDialog.close();
+}
+document.querySelector('#cancel-delete-avatar')?.addEventListener('click', cancelDeletion);
+deletionDialog?.addEventListener('cancel', (event) => {
+  event.preventDefault();
+  cancelDeletion();
+});
+document.querySelector('#confirm-delete-avatar')?.addEventListener('click', async () => {
+  if (savingAvatar || !deletingAvatar) return;
+  savingAvatar = true;
+  const buttons = deletionDialog.querySelectorAll('button');
+  for (const button of buttons) button.disabled = true;
+  try {
+    const saved = await post('/avatars/delete', {
+      session: sessionIdentity,
+      id: deletingAvatar.id,
+      name: deletingAvatar.name,
+    });
+    epoch++;
+    release();
+    document.querySelector('#avatar-result').textContent =
+      `Deleted ${saved.name}. Switched to default JFK.`;
+    deletionDialog.close();
+  } catch (error) {
+    document.querySelector('#delete-status').textContent = String(error);
+  } finally {
+    savingAvatar = false;
+    for (const button of buttons) button.disabled = false;
+  }
+});
 document.querySelector('#create-avatar')?.addEventListener('click', () => {
+  editingAvatar = null;
+  document.querySelector('#avatar-title').textContent = 'Create avatar';
+  document.querySelector('#avatar-result').textContent = '';
+  avatarEditor.showModal();
+});
+document.querySelector('#edit-avatar')?.addEventListener('click', () => {
+  editingAvatar = avatarCatalogue.find((a) => a.id === pairSelector.value);
+  if (!editingAvatar?.editable || pairSelector.disabled) return;
+  document.querySelector('#avatar-title').textContent = 'Edit avatar';
+  document.querySelector('#avatar-name').value = editingAvatar.name;
+  voicePicker.value = editingAvatar.voice;
+  const preview = document.querySelector('#avatar-preview');
+  preview.src = `/portrait?avatar=${encodeURIComponent(editingAvatar.id)}&revision=${Date.now()}`;
+  preview.hidden = false;
   document.querySelector('#avatar-result').textContent = '';
   avatarEditor.showModal();
 });
@@ -43,6 +175,7 @@ function closeAvatarEditor() {
   if (savingAvatar) return;
   avatarEditor.close();
   avatarForm.reset();
+  editingAvatar = null;
   document.querySelector('#avatar-save-status').textContent = '';
   URL.revokeObjectURL(previewUrl);
   previewUrl = '';
@@ -71,7 +204,7 @@ avatarForm?.addEventListener('submit', async (event) => {
     feedback.textContent = 'Enter an Avatar name of 1–80 characters';
     return;
   }
-  if (!file || file.size > 5 * 1024 * 1024) {
+  if ((!file && !editingAvatar) || (file && file.size > 5 * 1024 * 1024)) {
     feedback.textContent = 'Choose a JPEG or PNG of at most 5 MiB';
     return;
   }
@@ -83,24 +216,33 @@ avatarForm?.addEventListener('submit', async (event) => {
   for (const control of avatarForm.elements) control.disabled = true;
   feedback.textContent = 'Saving avatar…';
   try {
-    const image = await new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(String(reader.result).split(',')[1]);
-      reader.onerror = () => reject(Error('Cannot read image; choose the file again'));
-      reader.readAsDataURL(file);
-    });
+    const image = file
+      ? await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(String(reader.result).split(',')[1]);
+          reader.onerror = () => reject(Error('Cannot read image; choose the file again'));
+          reader.readAsDataURL(file);
+        })
+      : undefined;
+    const updating = !!editingAvatar;
     const saved = await post(
-      '/avatars',
+      updating ? '/avatars/update' : '/avatars',
       {
         session: sessionIdentity,
+        id: editingAvatar?.id,
         name,
         voice: voicePicker.value,
         image,
       },
       AbortSignal.timeout(360000),
     );
-    document.querySelector('#avatar-result').textContent =
-      `Created ${saved.name}. Select it from Avatar when ready.`;
+    if (updating) {
+      epoch++;
+      release();
+    }
+    document.querySelector('#avatar-result').textContent = updating
+      ? `Updated ${saved.name}. Preparing the saved portrait and voice.`
+      : `Created ${saved.name}. Select it from Avatar when ready.`;
     savingAvatar = false;
     closeAvatarEditor();
   } catch (error) {
@@ -575,16 +717,21 @@ setInterval(async () => {
   if (polling) return;
   polling = true;
   const ticket = epoch;
+  const configTicket = settingsRevision;
   try {
     const status = await (await fetch('/status', { signal: AbortSignal.timeout(10000) })).json();
     if (ticket !== epoch) return;
     if (conversation) {
+      if (status.settings && !savingSettings && configTicket === settingsRevision) {
+        renderSettings(status.settings);
+      }
       document.querySelector('#pair-diagnostics').hidden = !status.diagnostics;
       const pair = status.pairs.find((item) => item.id === status.activePair);
-      for (const item of status.pairs) {
-        if (![...pairSelector.options].some((option) => option.value === item.id)) {
-          pairSelector.add(new Option(item.name, item.id));
-        }
+      avatarCatalogue = status.avatars;
+      const catalogue = JSON.stringify(status.pairs);
+      if (pairSelector.dataset.catalogue !== catalogue) {
+        pairSelector.replaceChildren(...status.pairs.map((item) => new Option(item.name, item.id)));
+        pairSelector.dataset.catalogue = catalogue;
       }
       if (voicePicker.options.length === 1) {
         for (const voice of status.voices) {
@@ -606,6 +753,12 @@ setInterval(async () => {
         submitting ||
         status.state !== 'idle' ||
         !!(active && !active.ended);
+      const editable = status.avatars.find((a) => a.id === status.selectedPair)?.editable;
+      for (const id of ['edit-avatar', 'delete-avatar']) {
+        const button = document.querySelector(`#${id}`);
+        button.hidden = !editable;
+        button.disabled = pairSelector.disabled || savingAvatar;
+      }
       document.querySelector('#pair-status').textContent =
         status.state === 'selecting' || status.state === 'loading'
           ? `Preparing ${status.pairs.find((item) => item.id === status.selectedPair)?.name}…`
@@ -621,7 +774,7 @@ setInterval(async () => {
       sessionIdentity = status.session;
       const displayPair = pair || status.pairs.find((item) => item.id === status.selectedPair);
       if (portrait && displayPair) {
-        const source = `/portrait?pair=${encodeURIComponent(displayPair.id)}`;
+        const source = `/portrait?pair=${encodeURIComponent(displayPair.id)}&revision=${status.pairSequence}`;
         if (portrait.getAttribute('src') !== source) {
           portrait.classList.remove('loaded');
           portrait.src = source;
@@ -664,12 +817,12 @@ setInterval(async () => {
           const heading = document.createElement('strong');
           heading.textContent = `Turn ${index + 1}: ${turn.question}`;
           const usage = document.createElement('p');
-          const tokens = `Tokens: ${turn.usage?.input_tokens ?? 'unknown'} input / ${turn.usage?.output_tokens ?? 'unknown'} output`;
+          const tokens = `Tokens: ${turn.usage?.input_tokens ?? 'unknown'} input / ${turn.usage?.output_tokens ?? 'unknown'} output${turn.usage?.reasoning_tokens !== undefined ? ` (${turn.usage.reasoning_tokens} reasoning, included in output)` : ''}`;
           const cost =
             turn.usage?.estimated_usd !== undefined
               ? `estimated USD ${turn.usage.estimated_usd.toFixed(6)}${turn.usage.estimated ? ' (conservative allowance; final usage unavailable)' : ''}`
               : 'estimated cost pending; reserved allowance is included in monthly totals';
-          usage.textContent = `${turn.state === 'stopped' ? 'Interrupted' : turn.state} — ${tokens}; ${cost}.`;
+          usage.textContent = `${turn.model || status.model}; Thinking: ${turn.thinkingLevel || 'unknown'} — ${turn.state === 'stopped' ? 'Interrupted' : turn.state} — ${tokens}; ${cost}.`;
           usageEntry.append(heading, usage);
           turnUsage.append(usageEntry);
           transcript.append(entry);

@@ -2,7 +2,12 @@
 
 For named avatars and legacy pair aliases, see [the avatar guide](windows-pairs.md).
 The default is **JFK**; **Grace** is also built in.
-Use **Create avatar** beside the selector to add your own portrait and voice.
+Open the full-screen **Settings** page to choose the current **Avatar** by name. Use **Back to conversation**
+to return without losing your draft, transcript, context, playback or accounting.
+**Stop** and **New conversation** remain available on both pages. Avatar changes
+remain disabled until the current response ends; preparation errors appear beside
+the selector and can be recovered by choosing a healthy avatar.
+Use **Create avatar** beside the selector in Settings to add your own portrait and voice.
 [Creation, storage and verification](windows-avatars.md) describes the workflow.
 
 From `C:/docs/git/tHead`, in PowerShell 7:
@@ -74,8 +79,13 @@ To manually check this UI from `C:/docs/git/tHead`, with the prerequisites and
 backend key above, run `./run.bat` in PowerShell 7. Open
 [the application](http://127.0.0.1:8765): expect the portrait before asking anything.
 Ask a question, Stop during preparation or playback, then start a new conversation;
-the avatar must remain visible throughout. Switch avatar/voice between turns and
-check the portrait changes. Resize to a narrow window and scroll a long transcript:
+the avatar must remain visible throughout. Open Settings using the keyboard, select a different Avatar between turns, and
+check the portrait changes after preparation. Return and ask a contextual follow-up;
+expect the new portrait/voice with the earlier context. Type a draft, open Settings
+and return: the draft and transcript must remain. Open Settings during playback:
+expect uninterrupted playback, a disabled Avatar selector and usable Stop/New conversation.
+Repeat at 320 px width; controls must fit and keyboard focus must move to the
+Settings heading on entry and the Settings action on return. Resize to a narrow window and scroll a long transcript:
 the portrait and question controls should remain available. Open Session details after two questions: expect separate numbered usage entries
 alongside monthly totals and diagnostics. Stop another response, then start a new
 conversation: expect the turn list to clear while budget totals remain accurate.
@@ -159,3 +169,65 @@ delayed-provider and delayed-TTS probes; then try New conversation while busy.
 Named avatars are **JFK** and **Grace**. Use `-Avatar hopper-hazel` or
 `THEAD_AVATAR`; legacy Pair flags and THEAD_PAIR remain supported. See the
 [avatar guide](windows-pairs.md) for selection and manual verification.
+
+## Model selection in Settings
+
+**Model** changes apply to subsequent questions in the current server process,
+including after New conversation. An active turn retains its captured model,
+context and price reservation. Restarting uses `THEAD_MODEL`, otherwise the compatible default `gpt-6-luna`. Browser choices do
+not write environment variables or persist across restarts. Unknown startup models
+remain blocked by validation/pricing; choose an available model to recover.
+
+Checked on 8 November 2026 using the backend account's free model metadata API:
+`gpt-6.1-sol` is available; the requested `gpt-6.1-lunar` returns HTTP 404 and
+is shown disabled with an explanation. It has no verified pricing or reasoning
+mapping. `gpt-6-luna` is the separate legacy selection, not an alias for Lunar.
+The app never silently falls back. Other accounts may lack Sol access; a redacted
+provider error asks you to check model access or select another available model.
+
+The guard reserves worst-case cache-write input and total output rates:
+Sol USD 2.50 / 10 per million tokens, legacy Luna USD 0.125 / 0.50.
+See the official [Sol model](https://developers.openai.com/api/docs/models/gpt-6.1-sol)
+and [Luna model](https://developers.openai.com/api/docs/models/gpt-6-luna) pricing.
+Session details identifies each turn's captured model and cost; Timing diagnostics
+also shows `run.model`. No credentials are included.
+
+For manual verification, from `C:/docs/git/tHead` in PowerShell 7, use the single
+preparation-and-launch command `./run.bat` with the prerequisites above (first use
+adds `-InitializeBudget`). Open Settings, choose Sol, return and ask a question,
+then a contextual follow-up. Verify Sol on both turns in Session details. During
+a response choose legacy Luna; the current turn must retain Sol and the next use
+Luna. Lunar must be visibly unavailable. Account access, real-provider output,
+GPU speech and lip sync require this manual check; automated fixtures cost nothing.
+
+## Thinking level
+
+Settings shows the effective **Thinking level**. Higher effort may improve depth
+but increases response time. Sol supports `low`, `medium`, `high`, `xhigh`, `max`;
+legacy Luna also supports `none`. All map directly to Responses
+`reasoning: {effort: <level>}`. Sol initially uses its documented `medium`
+default; legacy Luna keeps the application's existing `none` default, overriding
+the provider default. There is no new startup environment variable or flag.
+The level lasts for the server process, survives New conversation and changes
+only future turns. Restart chooses the initial level for the startup model.
+Switching models retains a compatible level; moving from Luna's `none` to Sol
+visibly selects `medium` with an explanation. Unknown/unavailable models show a
+disabled level control. Validation never dispatches an unsupported combination.
+
+The official [Sol model](https://developers.openai.com/api/docs/models/gpt-6.1-sol),
+[Luna model](https://developers.openai.com/api/docs/models/gpt-6-luna) and
+[reasoning guide](https://developers.openai.com/api/docs/guides/reasoning)
+establish these mappings (checked 8 November 2026). The unchanged 384 output-token
+cap includes reasoning and visible output. High effort may exhaust it without a
+visible answer: lower Thinking level and submit again after the actionable error.
+Reported reasoning tokens are shown as a subset of output, never added again to
+cost. Interrupted or failed calls without final usage retain their reservation.
+
+Using the same `./run.bat` command above, choose two supported thinking levels
+and ask at each. Session details shows each turn's captured model and Thinking
+value (also `run.thinkingLevel` in Timing diagnostics), rather than inferring the
+setting from answer length or delay. Change level during a response and verify
+only the next turn changes. Switch from Luna/none to Sol: expect medium and a
+visible explanation. In fixture diagnostics, Reject provider settings must show
+an actionable error; select None, adjust the level and ask a contextual follow-up
+without restarting. Real provider access, timing and answer quality remain manual.

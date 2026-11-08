@@ -169,6 +169,18 @@ class AvatarStore:
             raise ValueError(self.recovery(error)) from error
 
     def create(self, name: Any, voice: Any, encoded: Any) -> Avatar:
+        return self.save(name, voice, encoded)
+
+    def update(self, identity: str, name: Any, voice: Any, encoded: Any = None) -> Avatar:
+        self.require_user_avatar(identity)
+        return self.save(name, voice, encoded, identity)
+
+    def require_user_avatar(self, identity: str) -> Avatar:
+        if identity in configured_avatars():
+            raise ValueError("Built-in avatars cannot be edited or deleted")
+        return self.get(identity)
+
+    def save(self, name: Any, voice: Any, encoded: Any, identity: str = "") -> Avatar:
         if not isinstance(name, str) or not 1 <= len(name.strip()) <= MAX_NAME:
             raise ValueError("Enter an Avatar name of 1–80 characters")
         name = name.strip()
@@ -176,20 +188,46 @@ class AvatarStore:
             raise ValueError("Choose an available supported local English voice")
         if any(a.name.casefold() == name.casefold() for a in configured_avatars().values()):
             raise ValueError("An avatar with this name already exists; choose another name")
-        portrait = decode_portrait(encoded)
+        portrait = decode_portrait(encoded) if encoded is not None or not identity else None
         if self.error:
             raise ValueError(self.error)
-        identity = "avatar-" + uuid.uuid4().hex
+        updating = bool(identity)
+        identity = identity or "avatar-" + uuid.uuid4().hex
         try:
             with self.connect() as connection:
-                connection.execute(
-                    "INSERT INTO avatars VALUES (?, ?, ?, ?, ?)",
-                    (identity, name, name.casefold(), voice, portrait),
-                )
+                if updating:
+                    cursor = connection.execute(
+                        "UPDATE avatars SET name=?, name_key=?, voice=?, "
+                        "portrait=COALESCE(?, portrait) WHERE id=?",
+                        (name, name.casefold(), voice, portrait, identity),
+                    )
+                    if cursor.rowcount != 1:
+                        raise ValueError("Unknown avatar; reload Settings")
+                else:
+                    connection.execute(
+                        "INSERT INTO avatars VALUES (?, ?, ?, ?, ?)",
+                        (identity, name, name.casefold(), voice, portrait),
+                    )
         except sqlite3.IntegrityError as error:
-            raise ValueError(
-                "An avatar with this name already exists; choose another name"
-            ) from error
+            if "UNIQUE constraint failed: avatars.name_key" in str(error):
+                raise ValueError(
+                    "An avatar with this name already exists; choose another name"
+                ) from error
+            raise ValueError(self.recovery(error)) from error
         except sqlite3.Error as error:
             raise ValueError(self.recovery(error)) from error
         return Avatar(identity, name, {"stored": True}, voice)
+
+    def delete(self, identity: str, name: Any) -> None:
+        avatar = self.require_user_avatar(identity)
+        if name != avatar.name:
+            raise ValueError("Avatar name changed; reload and confirm deletion again")
+        try:
+            with self.connect() as connection:
+                cursor = connection.execute(
+                    "DELETE FROM avatars WHERE id=? AND name=?", (identity, name)
+                )
+                if cursor.rowcount != 1:
+                    raise ValueError("Avatar changed; reload Settings")
+        except sqlite3.Error as error:
+            raise ValueError(self.recovery(error)) from error

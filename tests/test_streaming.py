@@ -2,6 +2,7 @@
 
 import base64
 import json
+import socket
 import subprocess  # nosec B404
 import sys
 import tempfile
@@ -9,12 +10,38 @@ import time
 import unittest
 import urllib.error
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor
+from http.server import BaseHTTPRequestHandler
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+
+from streaming import LoopbackServer  # noqa: E402
 
 
 class StreamingTests(unittest.TestCase):
+    def test_loopback_accepts_browser_connection_burst_before_dispatch(self) -> None:
+        # Model a descheduled accept loop on a busy host: browser polling, telemetry,
+        # media and control connections must queue until request dispatch resumes.
+        connections: list[socket.socket] = []
+        with LoopbackServer(("127.0.0.1", 0), BaseHTTPRequestHandler) as server:
+
+            def connect() -> None:
+                connections.append(
+                    socket.create_connection(("127.0.0.1", server.server_port), timeout=10)
+                )
+
+            try:
+                with ThreadPoolExecutor(max_workers=16) as pool:
+                    results = [pool.submit(connect) for _ in range(16)]
+                    for result in results:
+                        result.result()
+                self.assertEqual(len(connections), 16)
+            finally:
+                for connection in connections:
+                    connection.close()
+
     def test_stopped_run_cannot_publish_delayed_results_and_replacement_completes(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             # Explicit CPU-only system-boundary probe, never GPU/playback evidence.

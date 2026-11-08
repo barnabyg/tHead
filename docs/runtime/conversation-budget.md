@@ -77,3 +77,7 @@ also cover exact-limit acceptance, rejection, retry allowance, missing usage, re
 UTC rollover, unknown model rejection, corrupt/missing accounting and concurrent
 connections from multiple Budget instances in threads. Cross-process contention and
 changes to the published price table have not been independently exercised.
+
+Sol model selection uses USD 2.50 input / 10 output per million tokens, including
+the conservative cache-write allowance; active turns retain their original model
+and reservation when Settings changes. See [model selection](windows-conversation.md#model-selection-in-settings).

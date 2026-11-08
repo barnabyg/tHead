@@ -1,8 +1,9 @@
-# Create a local avatar
+# Manage local avatars
 
 This is the #43 extension beyond Phase 6's fixed pairs and original exclusion of
-a custom avatar editor. It adds creation from an existing image. Editing,
-deleting, cropping, cloning voices and persistent conversations are out of scope.
+a custom avatar editor. It adds creation from an existing image and, with #49,
+editing/deletion of user-created avatars. Cropping, cloning voices and persistent
+conversations are out of scope.
 Historical Phase 6 evidence retains its original pair labels.
 
 From `C:/docs/git/tHead`, in PowerShell 7, use this single preparation-and-launch
@@ -21,7 +22,7 @@ the real local speech/video pipeline and opens http://127.0.0.1:8765 with
 no-cost deterministic provider answers. It requires no API key. Omit
 `-FixtureProvider` for normal provider operation with a backend API key.
 
-Choose **Create avatar**. Enter **My avatar**, pick a local JPEG/PNG and an
+Open **Settings**, then choose **Create avatar**. Enter **My avatar**, pick a local JPEG/PNG and an
 available **Voice**, inspect the preview and choose **Save avatar**. Expect a
 confirmation and one entry under that name. Saving does not select the new
 avatar or stop existing playback. Select it between turns, ask “What is a black
@@ -37,6 +38,37 @@ say “Image is corrupt or oversized; choose a valid JPEG or PNG” and preserve
 name and voice. Replace the file and retry. Cancel or Escape closes the form
 without saving. Save is disabled while in progress; repeated submissions cannot
 create duplicate names.
+
+## Edit and delete
+
+Select a user-created avatar in Settings and choose **Edit avatar**. The saved
+name, voice and portrait preview are filled in. Replace the image and/or voice,
+optionally change the name, then save. An empty image picker retains the saved
+portrait. Saving updates the same identity without another catalogue entry.
+Cancel or Escape discards edits. Invalid images and failed saves retain the
+previous saved record and leave the form available for correction.
+
+Editing/deletion require the interval between turns, after playback ends or
+Stop releases resources. Saving the selected avatar prepares its portrait and
+voice together before accepting another question. A preparation failure reports
+an error rather than substituting a voice.
+
+**Delete avatar** opens a confirmation naming the selected avatar. Cancel keeps
+it. Confirming removes its saved record and portrait bytes, and explicitly
+switches to the permanent default **JFK**. Built-in JFK and Grace cannot be edited
+or deleted through either UI or API. Transcript, context and budget are retained.
+Source image files and bundled assets are never deleted. Portrait bytes are
+owned by their individual database record, so deleting one avatar cannot remove
+another avatar's image. Switching to a built-in avatar also removes the single
+derived model-input image from the output directory.
+
+Manual scenario using the preparation-and-launch command above: create/select
+an avatar, change image/voice, save and speak. Verify actual image/voice playback,
+restart, reselect and check persistence. Cancel an edit and deletion and check
+no changes. Delete the selected user avatar and check the named fallback to JFK,
+retained transcript and subsequent speech. Confirm JFK stays available and has
+no delete action. Native Windows listening/viewing is required to verify audible
+voice identity and perceived synchronisation.
 
 ## Limits and voices
 
@@ -88,6 +120,28 @@ cancellation, failed saves, restart, source removal, saved selection, context,
 Stop/reset and recovery. These checks cannot establish physical speaker output,
 voice quality or perceived lip sync. Real Windows/GPU digital media observations
 are distinct from human listening/viewing confirmation.
+
+### Native edit/delete verification (#49)
+
+On 2026-11-08, native Windows 11 / RTX 3090 / Chromium, implementation commit
+`0ce6c3d`, an isolated fixture-provider run completed this sequence:
+
+| Response | Saved avatar state | Actual prepared SAPI voice |
+| --- | --- | --- |
+| Before edit | Imported portrait, stable user ID | Microsoft Zira Desktop |
+| After image/voice edit | Grace portrait bytes replace the original, same ID | Microsoft Hazel Desktop |
+| After server restart and reselection | Replacement portrait/voice persist | Microsoft Hazel Desktop |
+| After confirmed deletion | Named fallback to permanent JFK, derived portrait removed | Microsoft Zira Desktop |
+
+All four responses recorded digital audio onset, moving video and playback end.
+The portrait API returned the exact replacement image bytes. SAPI preparation
+validated the declared voice tokens; no speech/GPU transport was substituted.
+The run used separate output/user-data/budget directories and an ephemeral port,
+and made no paid provider requests. The existing application was left running;
+these are functional observations, not latency/resource benchmarks. Task-owned
+servers and the browser were shut down after verification. Human audible voice
+identity and perceived synchronisation remain unverified; use the manual
+scenario above for those checks.
 
 Observed on 2026-11-08 on native Windows 11 / RTX 3090 / Chromium: imported a
 JPEG as **My avatar** with Microsoft Hazel Desktop; four complete responses

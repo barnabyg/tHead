@@ -17,7 +17,18 @@ from avatars import AvatarStore, decode_portrait, user_data_directory, voice_cat
 from budget import PRICES, Budget, BudgetError
 from pairs import DEFAULT_PAIR
 from prepare import RUNTIME
-from provider import INPUT_BOUND, INSTRUCTIONS, MODEL, OUTPUT_TOKENS, Provider
+from provider import (
+    INPUT_BOUND,
+    INSTRUCTIONS,
+    MODEL,
+    MODEL_DEFAULTS,
+    MODEL_ERRORS,
+    MODEL_LEVELS,
+    OUTPUT_TOKENS,
+    Provider,
+    validate_level,
+    validate_model,
+)
 from speech import Voice
 from streaming import Demonstration, LoopbackServer, Session, handler
 
@@ -50,6 +61,7 @@ class Turn(Session):
         self.progressive = True
         self.pair = ""
         self.text = ["conversation"]
+        self.provider = Provider()
 
     def save(self) -> None:
         # Conversation text and transcript events remain in memory only.
@@ -65,6 +77,8 @@ class Turn(Session):
             "inputBound": self.input_bound,
             "request": self.request_id,
             "pair": self.pair,
+            "model": self.provider.model,
+            "thinkingLevel": self.provider.thinking_level,
         }
 
 
@@ -72,8 +86,12 @@ class Conversation(Demonstration):
     page = "conversation.html"
 
     def command(self, path: str, data: dict[str, Any]) -> dict[str, Any]:
+        if path == "/settings":
+            return self.configure(data)
         if path == "/avatars":
             return self.create_avatar(data)
+        if path in ("/avatars/update", "/avatars/delete"):
+            return self.change_avatar(data, path.endswith("delete"))
         if path == "/reset":
             return self.reset(str(data.get("session", "")))
         if path == "/cancel":
@@ -117,6 +135,7 @@ class Conversation(Demonstration):
         self.transcript: list[Turn] = []
         self.cancelled_requests: set[str] = set()
         self.provider = Provider(model, test_backend or fixture)
+        self.settings_message = ""
         self.budget: Budget | None = None
         self.budget_error = ""
         try:
@@ -128,16 +147,53 @@ class Conversation(Demonstration):
             self.budget_error = str(error)
         super().__init__(inputs, directory, test_backend, 8, True, diagnostics or fixture)
 
+    def configure(self, data: dict[str, Any]) -> dict[str, Any]:
+        with self.condition:
+            if data.get("session") != self.identity:
+                raise ValueError("Stale session; reload before changing settings")
+            if set(data) - {"session", "model", "thinkingLevel"}:
+                raise ValueError("Unknown setting; reload Settings and retry")
+            model = validate_model(data.get("model", self.provider.model))
+            level = data.get("thinkingLevel", self.provider.thinking_level)
+            message = ""
+            if "thinkingLevel" not in data and level not in MODEL_LEVELS[model]:
+                level = MODEL_DEFAULTS[model]
+                message = f"Thinking level changed to {level}; the selected model requires it."
+            validate_level(model, level)
+            self.provider = Provider(model, self.provider.fixture, level)
+            self.settings_message = message
+            return self.status()
+
+    def settings(self) -> dict[str, Any]:
+        return {
+            "model": self.provider.model,
+            "thinkingLevel": self.provider.thinking_level,
+            "message": self.settings_message,
+            "models": [
+                {
+                    "id": model,
+                    "available": not error,
+                    "error": error,
+                    "levels": MODEL_LEVELS.get(model, ()),
+                    "defaultLevel": MODEL_DEFAULTS.get(model),
+                }
+                for model, error in MODEL_ERRORS.items()
+            ],
+        }
+
     def create_avatar(self, data: dict[str, Any]) -> dict[str, Any]:
         # Saving is independent of turn state: no selection, context or provider mutation.
         if data.get("session") != self.identity:
             raise ValueError("Stale session; reload before saving")
         voice = data.get("voice")
+        self.validate_voice(voice)
+        avatar = self.avatars.create(data.get("name"), voice, data.get("image"))
+        return {"id": avatar.id, "name": avatar.name}
+
+    def validate_voice(self, voice: Any) -> None:
         available = voice_catalogue(self.test_backend, str(voice))
         if not any(v["id"] == voice and v["available"] for v in available):
             raise ValueError("Voice unavailable; restore the supported Windows voice and retry")
-        avatar = self.avatars.create(data.get("name"), voice, data.get("image"))
-        return {"id": avatar.id, "name": avatar.name}
 
     def portrait(self, identity: str) -> bytes:
         avatar = self.avatars.get(identity)
@@ -145,8 +201,35 @@ class Conversation(Demonstration):
             return self.avatars.portrait(identity)
         return (self.inputs / str(avatar.portrait["filename"])).read_bytes()
 
+    def change_avatar(self, data: dict[str, Any], deleting: bool) -> dict[str, Any]:
+        identity = str(data.get("id", ""))
+        with self.condition:
+            if data.get("session") != self.identity:
+                raise ValueError("Stale session; reload before changing avatars")
+            if not self.pair_selectable():
+                raise ValueError("Change avatars between turns; Stop and wait for resource release")
+            previous = self.avatars.require_user_avatar(identity)
+            if deleting:
+                self.avatars.delete(identity, data.get("name"))
+                avatar = self.avatars.get(DEFAULT_PAIR)
+            else:
+                voice = data.get("voice", previous.voice)
+                self.validate_voice(voice)
+                avatar = self.avatars.update(
+                    identity, data.get("name", previous.name), voice, data.get("image")
+                )
+            if self.selected_pair.id == identity:
+                # Invalidate prepared media even when the stable avatar ID is unchanged.
+                self.active_pair = ""
+                self.select(self.identity, avatar.id)
+            return {"id": avatar.id, "name": previous.name if deleting else avatar.name}
+
     def prepare_assets(self, pipeline: Any, inference: Any) -> None:
         pair = self.selected_pair
+        if not pair.portrait.get("stored"):
+            # The derived input is needed only while a saved avatar is selected.
+            # Remove its private bytes on fallback without touching source/bundled images.
+            (self.directory / "imported-portrait.png").unlink(missing_ok=True)
         if self.pair_fault in ("pair-delay", "pair-delay-fail"):
             time.sleep(2)  # Simulated preparation completing after Stop/reset.
         candidate = Voice(pair.voice_lock)
@@ -252,7 +335,12 @@ class Conversation(Demonstration):
     def status(self) -> dict[str, Any]:
         with self.condition:
             avatars = [
-                {"id": p.id, "name": p.name, "voice": p.voice}
+                {
+                    "id": p.id,
+                    "name": p.name,
+                    "voice": p.voice,
+                    "editable": bool(p.portrait.get("stored")),
+                }
                 for p in self.avatars.avatars().values()
             ]
             budget: dict[str, Any] = {"usable": False, "error": self.budget_error}
@@ -277,6 +365,7 @@ class Conversation(Demonstration):
                 "pairPreparationSeconds": self.pair_preparation_seconds,
                 "session": self.identity,
                 "model": self.provider.model,
+                "settings": self.settings(),
                 "fixtureProvider": self.provider.fixture,
                 "budget": budget,
                 "contextOmitted": self.current.omitted if isinstance(self.current, Turn) else 0,
@@ -292,6 +381,8 @@ class Conversation(Demonstration):
                         "truncated": t.truncated,
                         "usage": t.usage,
                         "pair": t.pair,
+                        "model": t.provider.model,
+                        "thinkingLevel": t.provider.thinking_level,
                     }
                     for t in self.transcript
                 ],
@@ -301,7 +392,9 @@ class Conversation(Demonstration):
             if not budget["usable"]:
                 result["configurationError"] = budget["error"]
             elif self.provider.model not in PRICES:
-                result["configurationError"] = "Unknown model pricing; select gpt-6-luna"
+                result["configurationError"] = (
+                    "Unknown model pricing; choose an available model in Settings"
+                )
             return result
 
     def reset(self, identity: str) -> dict[str, Any]:
@@ -364,6 +457,7 @@ class Conversation(Demonstration):
                 "llm",
                 "llm-delay",
                 "llm-connect",
+                "llm-settings",
                 "missing-completion",
                 "long",
                 "unbroken",
@@ -390,6 +484,7 @@ class Conversation(Demonstration):
                 raise ValueError("Set OPENAI_API_KEY in the backend and restart")
             if len(self.transcript) >= 100:
                 raise ValueError("Session reached 100 turns; start a New conversation")
+            validate_level(self.provider.model, self.provider.thinking_level)
             messages, input_bound, omitted = self.context(question.strip())
             if not self.budget:
                 raise ValueError(self.budget_error)
@@ -397,6 +492,7 @@ class Conversation(Demonstration):
             # enters here and receives its own durable reservation before dispatch.
             reservation = self.budget.reserve(self.provider.model, input_bound, OUTPUT_TOKENS)
             session = Turn(self.directory, self.fragment_frames, self.identity, question.strip())
+            session.provider = self.provider
             session.reservation = reservation
             session.request_id = request_id
             session.pair = self.active_pair
@@ -412,11 +508,17 @@ class Conversation(Demonstration):
         super().finish_speech(session, producer)
         if isinstance(session, Turn) and self.budget:
             try:
+                # Provider output_tokens already includes reasoning; keep its detail separate.
+                details = session.usage.get("output_tokens_details") or {}
+                reasoning = details.get("reasoning_tokens") if isinstance(details, dict) else None
                 session.usage = self.budget.settle(
                     session.reservation,
                     session.usage.get("input_tokens"),
                     session.usage.get("output_tokens"),
                 )
+                output = session.usage.get("output_tokens")
+                if type(reasoning) is int and type(output) is int and 0 <= reasoning <= output:
+                    session.usage["reasoning_tokens"] = reasoning
             except BudgetError:
                 # The committed reservation remains charged; later dispatch fails closed.
                 self.budget_error = (
@@ -430,9 +532,13 @@ class Conversation(Demonstration):
         pending = ""
         done = False
         session.event("llm-connect")
-        if self.provider.fixture:
-            session.event("provider-request", messages=session.messages)
-        for event in self.provider.stream(session.messages, session.cancelled, session.fault):
+        if session.provider.fixture:
+            session.event(
+                "provider-request",
+                messages=session.messages,
+                configuration=session.provider.configuration(),
+            )
+        for event in session.provider.stream(session.messages, session.cancelled, session.fault):
             if session.cancelled.is_set():
                 return
             if "text" in event:
@@ -463,7 +569,10 @@ class Conversation(Demonstration):
         if session.cancelled.is_set():
             return
         if not done or not session.answer.strip():
-            raise ValueError("Provider returned no completed answer; submit again")
+            raise ValueError(
+                "Provider returned no completed answer within the output allowance; "
+                "try a lower thinking level in Settings or submit again"
+            )
         if pending.strip():
             yield pending
 

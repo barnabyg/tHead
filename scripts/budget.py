@@ -14,9 +14,9 @@ from urllib.parse import quote
 
 NANODOLLARS = 1_000_000_000
 LIMIT = 40 * NANODOLLARS
-# Standard text pricing verified 2026-11-07; no cache, batch or regional discounts.
+# Standard text/cache-write pricing verified 2026-11-08; no cache, batch or regional discounts.
 # Source/assumptions and review condition: docs/runtime/conversation-budget.md.
-PRICES = {"gpt-6-luna": (125, 500)}
+PRICES = {"gpt-6-luna": (125, 500), "gpt-6.1-sol": (2500, 10000)}
 
 
 class BudgetError(ValueError):

@@ -33,6 +33,9 @@ SAMPLES = 15360
 class LoopbackServer(ThreadingHTTPServer):
     # Windows SO_REUSEADDR permits two live listeners, routing to the wrong app.
     allow_reuse_address = False
+    # Polling, media and telemetry can burst while a busy Windows host delays accept().
+    # The stdlib backlog of five refuses live-server connections in that case.
+    request_queue_size = 128
 
     def server_bind(self) -> None:
         if hasattr(socket, "SO_EXCLUSIVEADDRUSE"):
@@ -705,7 +708,7 @@ def handler(demo: Demonstration) -> type[BaseHTTPRequestHandler]:
                 return
             try:
                 size = int(self.headers.get("Content-Length", "0"))
-                limit = 7 * 1024 * 1024 if self.path == "/avatars" else 65536
+                limit = 7 * 1024 * 1024 if self.path in ("/avatars", "/avatars/update") else 65536
                 if not 0 <= size <= limit:
                     raise ValueError("Request too large")
                 data = json.loads(self.rfile.read(size) or b"{}")
@@ -714,7 +717,16 @@ def handler(demo: Demonstration) -> type[BaseHTTPRequestHandler]:
                 if self.path == "/shutdown" and demo.diagnostics:
                     threading.Thread(target=self.server.shutdown, daemon=True).start()
                     result = {"ok": True}
-                elif self.path in ("/ask", "/reset", "/cancel", "/select", "/avatars"):
+                elif self.path in (
+                    "/ask",
+                    "/reset",
+                    "/cancel",
+                    "/select",
+                    "/avatars",
+                    "/avatars/update",
+                    "/avatars/delete",
+                    "/settings",
+                ):
                     result = demo.command(self.path, data)
                 elif demo.page == "conversation.html" and self.path in (
                     "/speak",

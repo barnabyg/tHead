@@ -97,7 +97,7 @@ digital results from listening confirmation.
 
 ## Between-turn selection (#31)
 
-Choose **Avatar and voice** after playback ends or after Stop releases resources.
+Open **Settings** and choose **Avatar** after playback ends or after Stop releases resources.
 The labelled active pair changes only when portrait and voice preparation finish;
 Ask and the selector remain disabled during preparation. Stop and New conversation
 remain usable. Switching keeps the transcript/context; New conversation clears

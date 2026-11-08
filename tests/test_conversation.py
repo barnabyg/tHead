@@ -1,5 +1,6 @@
 """Conversation acceptance at the loopback HTTP boundary; no paid calls or GPU."""
 
+import base64
 import json
 import subprocess  # nosec B404
 import sys
@@ -126,6 +127,112 @@ class ConversationTests(unittest.TestCase):
                 "request": uuid.uuid4().hex,
             },
         )
+
+    def test_model_settings_preserve_context_and_capture_active_turn(self) -> None:
+        status = self.request("/status")
+        self.assertEqual(status["settings"]["model"], "gpt-6-luna")
+        run = self.ask(fault="llm-connect")
+        changed = self.request("/settings", {"session": status["session"], "model": "gpt-6.1-sol"})
+        self.assertEqual(changed["model"], "gpt-6.1-sol")
+        self.assertEqual(changed["run"]["model"], "gpt-6-luna")
+        done = self.wait(lambda s: s["state"] == "idle")
+        self.assertEqual(done["run"]["id"], run["id"])
+        self.assertEqual(done["run"]["usage"]["estimated_usd"], 0.000025)
+        self.ask("How do we detect one?")
+        done = self.wait(lambda s: s["state"] == "idle")
+        self.assertIn("Earlier question", done["run"]["answer"])
+        self.assertEqual(done["run"]["model"], "gpt-6.1-sol")
+        self.assertEqual(done["run"]["usage"]["estimated_usd"], 0.0005)
+        request = next(e for e in done["run"]["events"] if e["event"] == "provider-request")
+        self.assertEqual(request["configuration"]["model"], "gpt-6.1-sol")
+        self.assertEqual(request["configuration"]["reasoning"], {"effort": "medium"})
+
+        for model in ("gpt-6.1-lunar", "unknown", 123):
+            with self.assertRaises(urllib.error.HTTPError):
+                self.request("/settings", {"session": status["session"], "model": model})
+        self.assertEqual(self.request("/status")["model"], "gpt-6.1-sol")
+        with self.assertRaises(urllib.error.HTTPError):
+            self.request("/settings", {"session": "stale", "model": "gpt-6-luna"})
+        recovered = self.request("/settings", {"session": status["session"], "model": "gpt-6-luna"})
+        self.assertEqual(recovered["model"], "gpt-6-luna")
+
+    def test_avatar_mutation_guards_and_selected_repreparation(self) -> None:
+        status = self.request("/status")
+        data = {"session": status["session"], "name": "Saved", "voice": "hazel"}
+        created = self.request(
+            "/avatars",
+            {
+                **data,
+                "image": base64.b64encode(
+                    (ROOT / "tests/fixtures/portrait.jpg").read_bytes()
+                ).decode("ascii"),
+            },
+        )
+        for endpoint in ("/avatars/update", "/avatars/delete"):
+            for identity in ("jfk-zira", "hopper-hazel"):
+                with self.assertRaises(urllib.error.HTTPError) as failure:
+                    self.request(endpoint, {**data, "id": identity})
+                self.assertIn("Built-in", failure.exception.read().decode())
+            with self.assertRaises(urllib.error.HTTPError) as failure:
+                self.request(endpoint, {**data, "id": created["id"], "session": "stale"})
+            self.assertIn("Stale session", failure.exception.read().decode())
+        self.request("/select", {"session": status["session"], "avatar": created["id"]})
+        self.wait(lambda s: s["ready"])
+        self.request("/avatars/update", {**data, "id": created["id"], "voice": "zira"})
+        prepared = self.wait(lambda s: s["ready"])
+        self.assertEqual(prepared["activeAvatar"], created["id"])
+        self.assertEqual(prepared["pairSequence"], 2)
+        run = self.ask(fault="llm-connect")
+        for endpoint in ("/avatars/update", "/avatars/delete"):
+            with self.assertRaises(urllib.error.HTTPError) as failure:
+                self.request(endpoint, {**data, "id": created["id"]})
+            self.assertIn("between turns", failure.exception.read().decode())
+        self.request("/cancel", {"session": status["session"], "request": run["request"]})
+        self.wait(lambda s: s["state"] == "idle")
+        self.request("/avatars/delete", {**data, "id": created["id"]})
+        fallback = self.wait(lambda s: s["ready"])
+        self.assertEqual(fallback["activeAvatar"], "jfk-zira")
+        self.assertEqual(len(fallback["avatars"]), 2)
+
+    def test_thinking_settings_capture_and_supported_model_combinations(self) -> None:
+        status = self.request("/status")
+        identity = status["session"]
+        self.assertEqual(status["settings"]["thinkingLevel"], "none")
+        run = self.ask(fault="llm-connect")
+        changed = self.request("/settings", {"session": identity, "model": "gpt-6.1-sol"})
+        self.assertEqual(changed["settings"]["thinkingLevel"], "medium")
+        self.assertIn("medium", changed["settings"]["message"])
+        self.assertEqual(changed["run"]["thinkingLevel"], "none")
+        self.wait(lambda s: s["state"] == "idle")
+        for model, levels in (
+            ("gpt-6.1-sol", ("low", "medium", "high", "xhigh", "max")),
+            ("gpt-6-luna", ("none", "low", "medium", "high", "xhigh", "max")),
+        ):
+            for level in levels:
+                self.request(
+                    "/settings", {"session": identity, "model": model, "thinkingLevel": level}
+                )
+                self.ask()
+                done = self.wait(lambda s: s["state"] == "idle")
+                request = next(e for e in done["run"]["events"] if e["event"] == "provider-request")
+                self.assertEqual(request["configuration"]["reasoning"], {"effort": level})
+                self.assertEqual(done["run"]["thinkingLevel"], level)
+                self.assertEqual(done["run"]["usage"]["reasoning_tokens"], 10)
+        self.request("/settings", {"session": identity, "model": "gpt-6.1-sol"})
+        self.assertEqual(self.request("/status")["settings"]["thinkingLevel"], "max")
+        for invalid in ("none", "minimal", 123, None):
+            with self.assertRaises(urllib.error.HTTPError):
+                self.request("/settings", {"session": identity, "thinkingLevel": invalid})
+        self.assertEqual(self.request("/status")["settings"]["thinkingLevel"], "max")
+        self.ask(fault="llm-settings")
+        failed = self.wait(lambda s: s["state"] == "idle")
+        self.assertEqual(failed["run"]["state"], "failed")
+        self.assertIn("Settings", failed["run"]["error"])
+        self.assertTrue(failed["run"]["usage"]["estimated"])
+        self.request("/settings", {"session": identity, "thinkingLevel": "low"})
+        self.ask()
+        self.assertEqual(self.wait(lambda s: s["state"] == "idle")["run"]["state"], "complete")
+        self.assertEqual(run["thinkingLevel"], "none")
 
     def test_streamed_answer_and_progressive_speech(self) -> None:
         for question in ("", " \n", "x" * 1201):
