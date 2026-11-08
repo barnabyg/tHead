@@ -8,10 +8,12 @@ import importlib
 import json
 import os
 import random
+import re
 import subprocess  # nosec B404
 import sys
 import time
 import uuid
+import warnings
 import wave
 from pathlib import Path
 from typing import Any
@@ -59,6 +61,21 @@ def synthesize(args: argparse.Namespace, lock: dict[str, Any]) -> None:
             DO_NOT_TRACK="1",
         )
         sys.addaudithook(reject_network)
+        # Upstream's pinned S3Gen still uses this compatibility layer. The warning
+        # does not affect inference; revisit/remove this exact filter when either
+        # the model/source or diffusers pin changes. All other warnings remain errors
+        # when callers enable that policy.
+        warnings.filterwarnings(
+            "ignore",
+            message=re.escape(
+                "`LoRACompatibleLinear` is deprecated and will be removed in version 1.0.0. "
+                "Use of `LoRACompatibleLinear` is deprecated. Please switch to PEFT backend "
+                "by installing PEFT: `pip install peft`."
+            )
+            + "$",
+            category=FutureWarning,
+            module=r"diffusers\.models\.lora",
+        )
         torch = importlib.import_module("torch")
         np = importlib.import_module("numpy")
         soundfile = importlib.import_module("soundfile")

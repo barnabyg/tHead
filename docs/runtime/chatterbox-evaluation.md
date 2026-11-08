@@ -130,10 +130,11 @@ reduces exposure but does not resolve vulnerable dependencies or the absence of
 upstream fixes. Production adoption requires a maintained, re-audited dependency
 plan; this evaluation must not be wired into normal startup meanwhile.
 
-The manual candidate emits an upstream `LoRACompatibleLinear` FutureWarning from
-diffusers/models/lora.py:393. It remains visible in experiment logs, with no
-warning suppression added. The application verification does not import this
-isolated candidate. A narrow Bandit B606 exception permits opt-in OS playback
+The manual candidate emitted an upstream `LoRACompatibleLinear` FutureWarning from
+diffusers/models/lora.py:393. The harness now filters only that exact message,
+FutureWarning category and module: the pinned S3Gen needs this compatibility
+layer and inference is unaffected. Remove/review the filter when the source/model
+or diffusers pin changes. Other warnings are unaffected. A narrow Bandit B606 exception permits opt-in OS playback
 of the fixed generated WAV; review it if that file type changes.
 
 ## Setup measurements and investigation log
