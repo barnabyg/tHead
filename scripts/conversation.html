@@ -1,98 +1,657 @@
 <!doctype html>
-<meta charset="utf-8">
-<title>tHead conversation</title>
-<style>
-body {
-  font: 16px system-ui;
-  max-width: 1000px;
-  margin: 2rem auto;
-  background: #151923;
-  color: #eee;
-}
-button,
-select {
-  font: inherit;
-  padding: 0.6rem;
-  margin-right: 0.6rem;
-}
-video {
-  display: block;
-  width: 512px;
-  max-width: 100%;
-  background: black;
-  margin: 1rem 0;
-}
-pre {
-  white-space: pre-wrap;
-  max-height: 22rem;
-  overflow: auto;
-}
-</style>
-<h1>tHead conversation</h1>
-<p id="conversation">Loading the configured portrait and local English voice.</p>
-<label for="pair">Avatar and voice</label>
-<select id="pair" disabled></select>
-<p id="pair-status" aria-live="polite">Preparing pair</p>
-<div id="pair-diagnostics" hidden>
-  <label for="pair-fault">Pair diagnostic</label>
-  <select id="pair-fault">
-    <option value="">None</option>
-    <option value="pair-delay">Delay preparation</option>
-    <option value="pair-portrait-missing">Missing portrait</option>
-    <option value="pair-portrait-unreadable">Unreadable portrait</option>
-    <option value="pair-portrait-invalid">Invalid portrait</option>
-    <option value="pair-voice-missing">Unavailable Desktop voice</option>
-    <option value="pair-voice-invalid">Invalid voice assets</option>
-    <option value="pair-prepare">Fail after partial preparation</option>
-    <option value="pair-delay-fail">Delay then fail preparation</option>
-  </select>
-</div>
-<pre id="transcript" aria-live="polite"></pre>
-<p id="usage"></p>
-<label for="text">Question</label>
-<textarea id="text" maxlength="1200" rows="4" cols="70">What is a black hole?</textarea>
-<p id="status">Loading the native Windows model…</p>
-<label hidden
-  >Speech
-  <select id="clip">
-    <option value="text">Entered English text</option>
-    <option value="six">6 seconds</option>
-    <option value="long">20 seconds</option>
-    <option value="short">0.35 seconds</option>
-  </select></label
->
-<label hidden
-  >Input
-  <select id="mode">
-    <option value="complete">Complete recording</option>
-    <option value="progressive">Arriving every 0.96 s</option>
-    <option value="delayed">Arriving with a 3 s pause</option>
-  </select></label
->
-<button type="button" id="start" disabled>Ask</button>
-<label id="diagnostics" hidden
-  >Diagnostic fault
-  <select id="fault">
-    <option value="">None</option>
-    <option value="llm-delay">Delay provider stream</option>
-    <option value="llm-connect">Delay provider connection (fixture only)</option>
-    <option value="llm">Fail provider</option>
-    <option value="missing-completion">Disconnect provider</option>
-    <option value="markup">Literal markup</option>
-    <option value="long">Long fixture answer</option>
-    <option value="tts-delay">Delay synthesis (Stop probe)</option>
-    <option value="buffer-delay">Delay buffering (Stop probe)</option>
-    <option value="tts">Fail local TTS</option>
-    <option value="media">Fail media</option>
-  </select>
-</label>
-<button type="button" id="stop">Stop</button>
-<button type="button" id="reset">New conversation</button>
-<button type="button" id="play" hidden>Play audio/video</button>
-<!-- biome-ignore lint/a11y/useMediaCaption: Generated transcript is not a word-timed caption track; review when aligned captions are available. -->
-<video id="video" playsinline></video>
-<details>
-  <summary>Timing diagnostics</summary>
-  <pre id="report"></pre>
-</details>
-<script src="/player.js"></script>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>tHead · Conversation</title>
+    <style>
+    :root {
+      color-scheme: dark;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      color: #eceeea;
+      background: #111715;
+      font-synthesis: none;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+    }
+    button,
+    select,
+    textarea {
+      font: inherit;
+    }
+    button,
+    select {
+      min-height: 44px;
+      border: 1px solid #3b4942;
+      border-radius: 10px;
+      padding: 0.65rem 1rem;
+      color: inherit;
+      background: #25312b;
+    }
+    button {
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button:hover:enabled {
+      background: #34473b;
+    }
+    button:disabled,
+    select:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+    :focus-visible {
+      outline: 2px solid #bce7a2;
+      outline-offset: 4px;
+    }
+    [hidden] {
+      display: none;
+    }
+    .app {
+      max-width: 1480px;
+      height: 100dvh;
+      min-height: 0;
+      padding: 0 40px 22px;
+      margin: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      min-height: 96px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 23px;
+      font-weight: 650;
+      letter-spacing: -0.8px;
+    }
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 11px;
+      color: #172216;
+      background: #bce7a2;
+      font-size: 23px;
+    }
+    .tagline {
+      color: #a4b1a8;
+      font-size: 13px;
+      letter-spacing: 0;
+      font-weight: 400;
+      margin-left: 12px;
+    }
+    .quiet {
+      background: transparent;
+    }
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(280px, 0.9fr) minmax(340px, 1.2fr);
+      gap: 26px;
+      min-height: 0;
+      flex: 1;
+    }
+    .avatar-panel {
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .avatar-stage {
+      position: relative;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      border: 1px solid #3a4840;
+      border-radius: 22px;
+      background: radial-gradient(ellipse at 50% 35%, #3c5042, #1e2b24 70%);
+    }
+    .portrait-fallback {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-content: center;
+      text-align: center;
+      color: #b7c4ba;
+      gap: 12px;
+    }
+    .portrait-fallback span {
+      font-size: 72px;
+      color: #bce7a2;
+    }
+    #portrait,
+    #video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 30%;
+    }
+    #portrait {
+      opacity: 0;
+    }
+    #portrait.loaded {
+      opacity: 1;
+    }
+    #video {
+      opacity: 0;
+    }
+    #video.presenting {
+      opacity: 1;
+    }
+    .avatar-caption {
+      position: absolute;
+      inset: auto 0 0;
+      padding: 64px 24px 24px;
+      background: linear-gradient(transparent, #0c1713ed);
+      pointer-events: none;
+    }
+    .eyebrow {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #a8c496;
+      font-weight: 650;
+    }
+    h1 {
+      margin: 10px 0 8px;
+      font-weight: 500;
+      font-size: clamp(24px, 3vw, 38px);
+      letter-spacing: -1px;
+    }
+    #conversation {
+      margin: 0;
+      color: #d0dbd2;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .avatar-settings {
+      padding: 0 4px;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      color: #c7d2c9;
+      margin-bottom: 8px;
+    }
+    #pair {
+      width: 100%;
+    }
+    #pair-status {
+      color: #a6b5a9;
+      font-size: 12px;
+      line-height: 1.5;
+      margin: 10px 0 0;
+    }
+    .chat {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+      background: #1a221e;
+      border: 1px solid #344139;
+      border-radius: 22px;
+    }
+    .chat-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 24px 26px 18px;
+      border-bottom: 1px solid #303d34;
+    }
+    h2 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .chat-heading span {
+      color: #a4b1a8;
+      font-size: 12px;
+    }
+    .history {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      padding: 0 26px;
+      scrollbar-color: #4d6051 transparent;
+    }
+    .empty-state {
+      height: 100%;
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      max-width: 360px;
+      margin: auto;
+      padding: 24px 0;
+    }
+    .empty-state .spark {
+      color: #bce7a2;
+      font-size: 32px;
+    }
+    .empty-state h3 {
+      font-size: 27px;
+      font-weight: 450;
+      letter-spacing: -0.7px;
+      margin: 18px 0 10px;
+    }
+    .empty-state p {
+      color: #aebbb1;
+      font-size: 14px;
+      line-height: 1.7;
+      margin: 0;
+    }
+    .history:has(#transcript:not(:empty)) .empty-state {
+      display: none;
+    }
+    #transcript {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    #transcript:not(:empty) {
+      padding: 24px 0;
+    }
+    .chat-heading,
+    .composer {
+      flex-shrink: 0;
+    }
+    .exchange {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .message {
+      max-width: 95%;
+      padding: 14px 16px;
+      border-radius: 14px;
+      font-size: 14px;
+      line-height: 1.65;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+    .message strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 11px;
+      letter-spacing: 0.6px;
+      color: #bce7a2;
+    }
+    .question {
+      align-self: flex-end;
+      background: #2d3e31;
+    }
+    .question strong {
+      color: #c7d2c9;
+    }
+    .answer {
+      background: #232e27;
+    }
+    .turn-note {
+      margin: 0;
+      font-size: 11px;
+      color: #a6b5a9;
+      line-height: 1.6;
+      overflow-wrap: anywhere;
+    }
+    .turn-details {
+      margin: 0;
+      font-size: 11px;
+      color: #a6b5a9;
+    }
+    .composer {
+      border-top: 1px solid #344139;
+      padding: 18px 24px 20px;
+    }
+    textarea {
+      display: block;
+      width: 100%;
+      resize: vertical;
+      min-height: 72px;
+      max-height: 160px;
+      border: 1px solid #4b5b4f;
+      border-radius: 12px;
+      padding: 12px 14px;
+      background: #141d17;
+      color: #f0f3ed;
+      line-height: 1.5;
+    }
+    textarea::placeholder {
+      color: #8f9e92;
+    }
+    .composer-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .status-line {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      min-width: 0;
+    }
+    .status-dot {
+      flex: 0 0 6px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #bce7a2;
+    }
+    #status {
+      color: #b6c3b9;
+      font-size: 12px;
+      line-height: 1.5;
+      margin: 0;
+      overflow-wrap: anywhere;
+    }
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    #start {
+      color: #172216;
+      background: #bce7a2;
+      border-color: #bce7a2;
+      min-width: 90px;
+    }
+    #start:hover:enabled {
+      background: #d2f2be;
+    }
+    #play {
+      margin-top: 12px;
+      width: 100%;
+    }
+    .utilities {
+      margin-top: 16px;
+      color: #9dad9f;
+      font-size: 12px;
+    }
+    summary {
+      cursor: pointer;
+      padding: 5px 0;
+    }
+    .utility-content {
+      max-height: 24vh;
+      overflow: auto;
+      padding: 12px 0;
+    }
+    #usage {
+      line-height: 1.6;
+      margin: 0 0 14px;
+    }
+    pre {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      font-size: 11px;
+    }
+    @media (min-width: 1500px) {
+      .app {
+        padding-top: 16px;
+        padding-bottom: 32px;
+      }
+    }
+    @media (max-width: 760px) {
+      .app {
+        padding: 0 14px 12px;
+        min-height: 0;
+      }
+      .topbar {
+        min-height: 72px;
+        gap: 10px;
+      }
+      .brand {
+        font-size: 21px;
+        gap: 8px;
+      }
+      .tagline {
+        display: none;
+      }
+      .topbar button {
+        font-size: 12px;
+        padding: 0.6rem 0.8rem;
+      }
+      .workspace {
+        grid-template-columns: 1fr;
+        grid-template-rows: minmax(160px, 28dvh) minmax(0, 1fr);
+        gap: 14px;
+      }
+      .avatar-panel {
+        flex-direction: row;
+        gap: 14px;
+      }
+      .avatar-stage {
+        flex: 0 0 42%;
+        border-radius: 16px;
+      }
+      .avatar-caption {
+        display: none;
+      }
+      .avatar-settings {
+        flex: 1;
+        min-width: 0;
+        align-self: center;
+      }
+      #pair {
+        font-size: 12px;
+        padding: 0.6rem 0.3rem;
+      }
+      .chat {
+        border-radius: 16px;
+      }
+      .chat-heading {
+        padding: 14px 16px;
+      }
+      .chat-heading span {
+        display: none;
+      }
+      .history {
+        padding: 0 16px;
+      }
+      .empty-state h3 {
+        font-size: 23px;
+        margin-top: 8px;
+      }
+      .empty-state .spark {
+        display: none;
+      }
+      .composer {
+        padding: 12px 14px;
+      }
+      textarea {
+        min-height: 64px;
+        max-height: 100px;
+      }
+      .composer-actions {
+        gap: 8px;
+      }
+      .action-buttons button {
+        padding: 0.6rem 0.75rem;
+        min-width: 0;
+      }
+      .utilities {
+        margin-top: 8px;
+      }
+    }
+    @media (max-height: 600px) {
+      .topbar {
+        min-height: 64px;
+      }
+      .chat-heading {
+        padding: 12px 18px;
+      }
+      .composer {
+        padding: 12px 16px;
+      }
+      textarea {
+        min-height: 48px;
+        max-height: 72px;
+      }
+      .avatar-caption {
+        padding: 36px 16px 16px;
+      }
+      h1 {
+        font-size: 24px;
+        margin: 8px 0;
+      }
+      #conversation {
+        display: none;
+      }
+    }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">t</span>tHead<span class="tagline"
+            >A little more human.</span
+          >
+        </div>
+        <button type="button" id="reset" class="quiet">New conversation</button>
+      </header>
+      <main class="workspace">
+        <aside class="avatar-panel" aria-label="Your conversation partner">
+          <div class="avatar-stage">
+            <div class="portrait-fallback">
+              <span aria-hidden="true">◌</span><small id="portrait-notice">Loading portrait…</small>
+            </div>
+            <img id="portrait" alt="Conversation avatar">
+            <!-- biome-ignore lint/a11y/useMediaCaption: Generated transcript is not a word-timed caption track; review when aligned captions are available. -->
+            <video id="video" playsinline></video>
+            <div class="avatar-caption">
+              <span class="eyebrow">Your conversation partner</span>
+              <h1 id="avatar-name">Let's talk.</h1>
+              <p id="conversation">Loading the configured portrait and local English voice.</p>
+            </div>
+          </div>
+          <div class="avatar-settings">
+            <label for="pair">Avatar and voice</label>
+            <select id="pair" disabled></select>
+            <p id="pair-status" aria-live="polite">Preparing pair</p>
+          </div>
+        </aside>
+        <section class="chat" aria-label="Conversation">
+          <div class="chat-heading">
+            <h2>Conversation</h2>
+            <span>A space for curiosity</span>
+          </div>
+          <div class="history">
+            <div class="empty-state">
+              <span class="spark" aria-hidden="true">✳</span>
+              <h3>Where shall we begin?</h3>
+              <p>
+                Ask a question, explore an idea, or follow your curiosity. Your conversation starts
+                here.
+              </p>
+            </div>
+            <div
+              id="transcript"
+              role="log"
+              aria-live="polite"
+              aria-label="Conversation transcript"
+            ></div>
+          </div>
+          <div class="composer">
+            <label for="text">Question</label>
+            <textarea
+              id="text"
+              maxlength="1200"
+              rows="2"
+              placeholder="What are you curious about?"
+            >What is a black hole?</textarea>
+            <div class="composer-actions">
+              <div class="status-line">
+                <span class="status-dot" aria-hidden="true"></span>
+                <p id="status" role="status">Loading the native Windows model…</p>
+              </div>
+              <div class="action-buttons">
+                <button type="button" id="stop" class="quiet">Stop</button
+                ><button type="button" id="start" disabled>Ask</button>
+              </div>
+            </div>
+            <button type="button" id="play" hidden>Play audio/video</button>
+          </div>
+        </section>
+      </main>
+      <details class="utilities">
+        <summary>Session details</summary>
+        <div class="utility-content">
+          <p id="usage"></p>
+          <div id="pair-diagnostics" hidden>
+            <label for="pair-fault">Pair diagnostic</label>
+            <select id="pair-fault">
+              <option value="">None</option>
+              <option value="pair-delay">Delay preparation</option>
+              <option value="pair-portrait-missing">Missing portrait</option>
+              <option value="pair-portrait-unreadable">Unreadable portrait</option>
+              <option value="pair-portrait-invalid">Invalid portrait</option>
+              <option value="pair-voice-missing">Unavailable Desktop voice</option>
+              <option value="pair-voice-invalid">Invalid voice assets</option>
+              <option value="pair-prepare">Fail after partial preparation</option>
+              <option value="pair-delay-fail">Delay then fail preparation</option>
+            </select>
+          </div>
+
+          <label id="diagnostics" hidden
+            >Diagnostic fault
+            <select id="fault">
+              <option value="">None</option>
+              <option value="llm-delay">Delay provider stream</option>
+              <option value="llm-connect">Delay provider connection (fixture only)</option>
+              <option value="llm">Fail provider</option>
+              <option value="missing-completion">Disconnect provider</option>
+              <option value="markup">Literal markup</option>
+              <option value="long">Long fixture answer</option>
+              <option value="tts-delay">Delay synthesis (Stop probe)</option>
+              <option value="buffer-delay">Delay buffering (Stop probe)</option>
+              <option value="tts">Fail local TTS</option>
+              <option value="media">Fail media</option>
+            </select>
+          </label>
+
+          <details>
+            <summary>Timing diagnostics</summary>
+            <pre id="report"></pre>
+          </details>
+        </div>
+      </details>
+    </div>
+    <label hidden
+      >Speech
+      <select id="clip">
+        <option value="text">Entered English text</option>
+        <option value="six">6 seconds</option>
+        <option value="long">20 seconds</option>
+        <option value="short">0.35 seconds</option>
+      </select></label
+    >
+    <label hidden
+      >Input
+      <select id="mode">
+        <option value="complete">Complete recording</option>
+        <option value="progressive">Arriving every 0.96 s</option>
+        <option value="delayed">Arriving with a 3 s pause</option>
+      </select></label
+    >
+
+    <script src="/player.js"></script>
+  </body>
+</html>

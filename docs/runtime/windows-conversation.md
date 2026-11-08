@@ -55,6 +55,24 @@ has finished generating. The transcript labels generated text separately from
 spoken playback. A short response can finish generating before playback starts.
 Click Play if the browser blocks autoplay. Stop immediately detaches playback.
 
+The portrait remains visible before the first answer, while a response prepares,
+and after playback, Stop or New conversation. Moving video replaces the still
+portrait only once a decoded frame is available. Switching avatar/voice updates
+the portrait after successful preparation; a failed switch retains the active
+avatar. The conversation scrolls independently so the avatar stays on screen,
+including in the compact mobile layout. Session details contains budget totals,
+per-session timing diagnostics and diagnostic fault controls (when enabled).
+
+To manually check this UI from `C:/docs/git/tHead`, with the prerequisites and
+backend key above, run `./run.bat` in PowerShell 7. Open
+[the application](http://127.0.0.1:8765): expect the portrait before asking anything.
+Ask a question, Stop during preparation or playback, then start a new conversation;
+the avatar must remain visible throughout. Switch avatar/voice between turns and
+check the portrait changes. Resize to a narrow window and scroll a long transcript:
+the portrait and question controls should remain available. Check Session details
+for accounting and diagnostics. Real speech quality and lip sync still require
+the existing GPU/manual listening checks.
+
 For a controlled stream without paid calls, use the same command with
 `-FixtureProvider -Diagnostics -InitializeBudget` on first fixture use. This uses
 real local TTS/GPU/media but replaces

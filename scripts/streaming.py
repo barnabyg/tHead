@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, urlparse
 
+from pairs import configured_pair
 from prepare import ROOT, RUNTIME
 from smoke import load_pipeline
 from speech import Voice, segments
@@ -653,6 +654,16 @@ def handler(demo: Demonstration) -> type[BaseHTTPRequestHandler]:
                 self.reply(200, (ROOT / "scripts/streaming.js").read_bytes(), "text/javascript")
             elif parsed.path == "/status":
                 self.reply(200, json.dumps(demo.status()).encode())
+            elif parsed.path == "/portrait":
+                # Resolve only declared assets; never accept a filesystem path from the URL.
+                try:
+                    pair = configured_pair(query.get("pair", [""])[0])
+                    portrait = demo.inputs / str(pair.portrait["filename"])
+                    self.reply(200, portrait.read_bytes(), "image/jpeg")
+                except ValueError:
+                    self.reply(400, b'{"error":"Unknown avatar"}')
+                except OSError:
+                    self.reply(404, b'{"error":"Portrait unavailable; rerun preparation"}')
             elif parsed.path == "/audio":
                 try:
                     self.reply(

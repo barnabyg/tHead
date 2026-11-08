@@ -15,3 +15,11 @@ $ffmpeg = Join-Path ./.runtime/media ($lock.media.directory + '/bin/ffmpeg.exe')
 ```
 
 Running tests needs the tracked fixture and Playwright Chromium, not FFmpeg or a GPU.
+
+`portrait.jpg` is a 96 × 96 solid green JPEG used to check the portrait HTTP
+endpoint and browser image decoding without downloaded portraits. Reproduce with
+the same `$ffmpeg` above:
+
+```powershell
+& $ffmpeg -nostdin -v error -y -f lavfi -i 'color=c=0x405547:s=96x96' -frames:v 1 -update 1 ./tests/fixtures/portrait.jpg
+```
