@@ -76,7 +76,7 @@ from physical-speaker and perceptual validation.
 
 [Selectable avatar/voice pairs](docs/runtime/windows-pairs.md) add JFK/Zira
 (the default) and Grace Hopper/Hazel. Use `-Pair hopper-hazel` at launch or choose
-**Avatar and voice** between turns in the browser. Switching preserves context;
+**Avatar** in **Settings** between turns in the browser. Switching preserves context;
 preparation failures identify the requested pair and allow recovery. The
 [Phase 6 handoff](docs/runtime/phase-6-assessment.md) records native timing,
 switching/recovery evidence, user listening/viewing confirmation and limitations.
@@ -106,6 +106,6 @@ and memory/timing measurements.
 There is no distributable application package at this phase, so wheel building
 and deployment verification are inapplicable.
 
-Use **Create avatar** in the conversation screen to save a named local JPEG/PNG
+Use **Create avatar** in **Settings** to save a named local JPEG/PNG
 portrait with an available English voice. Saved avatars survive restarts. See
 [the avatar guide](docs/runtime/windows-avatars.md) for limits, storage and testing.

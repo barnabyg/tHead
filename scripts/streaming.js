@@ -28,6 +28,21 @@ let pendingController = null;
 let selecting = false;
 let stopping = 0;
 let resetting = 0;
+const settingsButton = document.querySelector('#settings');
+const settingsPage = document.querySelector('#settings-page');
+const chatPage = document.querySelector('.chat');
+settingsButton?.addEventListener('click', () => {
+  settingsPage.hidden = false;
+  chatPage.hidden = true;
+  settingsButton.setAttribute('aria-expanded', 'true');
+  document.querySelector('#settings-title').focus();
+});
+document.querySelector('#settings-back')?.addEventListener('click', () => {
+  settingsPage.hidden = true;
+  chatPage.hidden = false;
+  settingsButton.setAttribute('aria-expanded', 'false');
+  settingsButton.focus();
+});
 const pairSelector = document.querySelector('#pair');
 const avatarEditor = document.querySelector('#avatar-editor');
 const avatarForm = document.querySelector('#avatar-form');

@@ -103,6 +103,29 @@
       background: #bce7a2;
       font-size: 23px;
     }
+    .topbar-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+    #settings-page {
+      min-height: 0;
+      overflow: auto;
+      padding: 24px;
+      background: #1a221e;
+      border: 1px solid #344139;
+      border-radius: 22px;
+    }
+    #settings-title {
+      margin-top: 0;
+    }
+    .settings-controls {
+      margin-top: 24px;
+    }
+    #settings-back {
+      max-width: 100%;
+    }
     .quiet {
       background: transparent;
     }
@@ -378,8 +401,15 @@
         min-height: 0;
       }
       .topbar {
-        min-height: 72px;
+        min-height: 100px;
         gap: 10px;
+      }
+      .topbar-actions {
+        max-width: 220px;
+      }
+      #settings-page {
+        padding: 16px;
+        border-radius: 16px;
       }
       .brand {
         font-size: 21px;
@@ -462,7 +492,19 @@
     <div class="app">
       <header class="topbar">
         <div class="brand"><span class="brand-mark" aria-hidden="true">t</span>tHead</div>
-        <button type="button" id="reset" class="quiet">New conversation</button>
+        <nav aria-label="Conversation actions" class="topbar-actions">
+          <button
+            type="button"
+            id="settings"
+            class="quiet"
+            aria-controls="settings-page"
+            aria-expanded="false"
+          >
+            Settings
+          </button>
+          <button type="button" id="stop" class="quiet">Stop</button>
+          <button type="button" id="reset" class="quiet">New conversation</button>
+        </nav>
       </header>
       <main class="workspace">
         <aside class="avatar-panel" aria-label="Your conversation partner">
@@ -474,12 +516,6 @@
           <div class="avatar-settings">
             <p id="conversation">Loading the configured portrait and local English voice.</p>
             <p id="portrait-notice" role="status">Loading portrait…</p>
-            <label for="pair">Avatar</label>
-            <select id="pair" disabled></select>
-            <p id="pair-status" aria-live="polite">Preparing avatar</p>
-            <button type="button" id="create-avatar">Create avatar</button>
-            <p id="avatar-result" role="status"></p>
-            <p id="avatar-storage-error" role="status"></p>
           </div>
         </aside>
         <section class="chat" aria-label="Conversation">
@@ -513,11 +549,22 @@
                 <p id="status" role="status">Loading the native Windows model…</p>
               </div>
               <div class="action-buttons">
-                <button type="button" id="stop" class="quiet">Stop</button
-                ><button type="button" id="start" disabled>Ask</button>
+                <button type="button" id="start" disabled>Ask</button>
               </div>
             </div>
             <button type="button" id="play" hidden>Play audio/video</button>
+          </div>
+        </section>
+        <section id="settings-page" aria-labelledby="settings-title" hidden>
+          <h1 id="settings-title" tabindex="-1">Settings</h1>
+          <button type="button" id="settings-back">Back to conversation</button>
+          <div class="settings-controls">
+            <label for="pair">Avatar</label>
+            <select id="pair" disabled></select>
+            <p id="pair-status" aria-live="polite">Preparing avatar</p>
+            <button type="button" id="create-avatar">Create avatar</button>
+            <p id="avatar-result" role="status"></p>
+            <p id="avatar-storage-error" role="status"></p>
           </div>
         </section>
       </main>

@@ -21,7 +21,7 @@ the real local speech/video pipeline and opens http://127.0.0.1:8765 with
 no-cost deterministic provider answers. It requires no API key. Omit
 `-FixtureProvider` for normal provider operation with a backend API key.
 
-Choose **Create avatar**. Enter **My avatar**, pick a local JPEG/PNG and an
+Open **Settings**, then choose **Create avatar**. Enter **My avatar**, pick a local JPEG/PNG and an
 available **Voice**, inspect the preview and choose **Save avatar**. Expect a
 confirmation and one entry under that name. Saving does not select the new
 avatar or stop existing playback. Select it between turns, ask “What is a black

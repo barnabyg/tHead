@@ -2,7 +2,12 @@
 
 For named avatars and legacy pair aliases, see [the avatar guide](windows-pairs.md).
 The default is **JFK**; **Grace** is also built in.
-Use **Create avatar** beside the selector to add your own portrait and voice.
+Open **Settings** to choose the current **Avatar** by name. Use **Back to conversation**
+to return without losing your draft, transcript, context, playback or accounting.
+**Stop** and **New conversation** remain available on both pages. Avatar changes
+remain disabled until the current response ends; preparation errors appear beside
+the selector and can be recovered by choosing a healthy avatar.
+Use **Create avatar** beside the selector in Settings to add your own portrait and voice.
 [Creation, storage and verification](windows-avatars.md) describes the workflow.
 
 From `C:/docs/git/tHead`, in PowerShell 7:
@@ -74,8 +79,13 @@ To manually check this UI from `C:/docs/git/tHead`, with the prerequisites and
 backend key above, run `./run.bat` in PowerShell 7. Open
 [the application](http://127.0.0.1:8765): expect the portrait before asking anything.
 Ask a question, Stop during preparation or playback, then start a new conversation;
-the avatar must remain visible throughout. Switch avatar/voice between turns and
-check the portrait changes. Resize to a narrow window and scroll a long transcript:
+the avatar must remain visible throughout. Open Settings using the keyboard, select a different Avatar between turns, and
+check the portrait changes after preparation. Return and ask a contextual follow-up;
+expect the new portrait/voice with the earlier context. Type a draft, open Settings
+and return: the draft and transcript must remain. Open Settings during playback:
+expect uninterrupted playback, a disabled Avatar selector and usable Stop/New conversation.
+Repeat at 320 px width; controls must fit and keyboard focus must move to the
+Settings heading on entry and the Settings action on return. Resize to a narrow window and scroll a long transcript:
 the portrait and question controls should remain available. Open Session details after two questions: expect separate numbered usage entries
 alongside monthly totals and diagnostics. Stop another response, then start a new
 conversation: expect the turn list to clear while budget totals remain accurate.
