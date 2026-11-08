@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "C:\docs\git\tHead\scripts\chatterbox_monitor.py", line 5, in <module>
+    import argparse
+  File "C:\Users\Bob\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\argparse.py", line 89, in <module>
+    import re as _re
+  File "C:\Users\Bob\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\re\__init__.py", line 126, in <module>
+    from . import _compiler, _parser
+  File "C:\Users\Bob\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\re\_compiler.py", line 18, in <module>
+    assert _sre.MAGIC == MAGIC, "SRE module mismatch"
+           ^^^^^^^^^^^^^^^^^^^
+AssertionError: SRE module mismatch

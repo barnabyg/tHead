@@ -112,5 +112,6 @@ between turns in Settings; built-in avatars remain permanent. Saved avatars surv
 [the avatar guide](docs/runtime/windows-avatars.md) for limits, storage and testing.
 
 The [isolated Chatterbox evaluation](docs/runtime/chatterbox-evaluation.md) provides
-an opt-in pinned reference-audio audition. It is research tooling with unresolved
-adoption gates and candidate security findings; it is not an application voice.
+an opt-in pinned reference-audio audition and [FlashHead integration harness](docs/runtime/chatterbox-integration.md).
+It remains research tooling with unresolved production adoption gates and candidate
+security findings. Normal voices and saved avatar formats are unchanged.

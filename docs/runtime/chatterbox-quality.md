@@ -151,9 +151,9 @@ cloning is not expected to be 100% identical. The numeric scores remain unchange
 clarification. This is a **positive initial screen**, not a negative result and
 not a claim that all remaining samples or accents were reviewed. The original
 issue's cutoff of 3 was provisional; it is not used to override the experienced
-user's explicit acceptability judgement. Whether this screen replaces the broader
-listening matrix as the gate for the bounded #54 prototype is a scope decision;
-it does not require changing a score from 2 to 3.
+user's explicit acceptability judgement. The user explicitly approved this screen as the passing gate for the bounded #54
+prototype, replacing the broader provisional listening requirement. #53 is closed.
+The remaining 74 generated clips stay unreviewed; the scores are unchanged.
 
 Both contaminated references produced WAVs without automatic rejection. This
 establishes that reference hygiene must be a manual preparation step; it does
@@ -198,5 +198,5 @@ Generation timings include separate worker setup and two-process CPU contention.
 They are not warm conversational turns or evidence for the 3–5-second browser
 first-speech target. Long answers here use whole-utterance generation; they do not
 prove bounded phrase streaming, media continuity, avatar synchronisation or Stop.
-Those remain #54 checks after a passing, closed #53 gate. Production adoption is
-not warranted while quality/integration and the candidate security plan are unresolved.
+Those are #54 integration checks. The four-clip quality gate passes for this
+bounded prototype; production adoption also requires integration and security approval.

@@ -45,3 +45,10 @@ noise (seed 20261108) to Peter Bobbe's first 10 seconds, and constructs a two-sp
 example from his first 5 seconds followed by Nikolle Doolin's first 5 seconds.
 These transformations are labelled in the pack. Generated cloning examples are
 synthetic research audio and do not imply either reader's endorsement.
+
+## Integration reference excerpt (#54)
+
+`reference-121-10s.wav` contains the first 160,000 decoded samples (10 seconds)
+of the same Nikolle Doolin recording described above, cropped without other
+processing. It has the same CC BY 4.0 attribution and does not imply endorsement.
+Its pinned digest is in the root Chatterbox lock.

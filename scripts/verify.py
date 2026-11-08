@@ -194,10 +194,21 @@ def main() -> None:
             "docs/runtime/chatterbox/quality-manifest.json",
             "docs/runtime/chatterbox/alignment-verification.json",
             "docs/runtime/chatterbox/wheel-inventory.json",
+            "docs/runtime/chatterbox/integration/media-validation.json",
+            "docs/runtime/chatterbox/integration/baseline.json",
+            "docs/runtime/chatterbox/integration/cpu-1089.json",
+            "docs/runtime/chatterbox/integration/cpu-1089-r2.json",
+            "docs/runtime/chatterbox/integration/cpu-121.json",
+            "docs/runtime/chatterbox/integration/cpu-assets.json",
+            "docs/runtime/chatterbox/integration/cpu-restart.json",
+            "docs/runtime/chatterbox/integration/cuda-1089.json",
+            "docs/runtime/chatterbox/integration/cuda-1089-r2.json",
+            "docs/runtime/chatterbox/integration/environment.json",
+            "docs/runtime/chatterbox/integration/cuda-121.json",
         )
     }
     public_metadata = re.compile(
-        r'\s*"(?:id|session|request)": "[0-9a-f-]{32,36}",?\s*'
+        r'\s*"(?:id|session|request|run)": "[0-9a-f-]{32,36}",?\s*'
         r'|\s*"(?:sha256|declared_pcm_sha256)": "[0-9a-f]{64}",?\s*'
     )
     # Only the new explicit evidence captures' Git source pin; review on schema changes.
@@ -214,11 +225,22 @@ def main() -> None:
             "docs/runtime/chatterbox/quality-manifest.json",
             "docs/runtime/chatterbox/alignment-verification.json",
             "docs/runtime/chatterbox/wheel-inventory.json",
+            "docs/runtime/chatterbox/integration/media-validation.json",
+            "docs/runtime/chatterbox/integration/baseline.json",
+            "docs/runtime/chatterbox/integration/cpu-1089.json",
+            "docs/runtime/chatterbox/integration/cpu-1089-r2.json",
+            "docs/runtime/chatterbox/integration/cpu-121.json",
+            "docs/runtime/chatterbox/integration/cpu-assets.json",
+            "docs/runtime/chatterbox/integration/cpu-restart.json",
+            "docs/runtime/chatterbox/integration/cuda-1089.json",
+            "docs/runtime/chatterbox/integration/cuda-1089-r2.json",
+            "docs/runtime/chatterbox/integration/environment.json",
+            "docs/runtime/chatterbox/integration/cuda-121.json",
         )
     }
     chatterbox_pin = re.compile(
         r'\s*"(?:perth_revision|source_revision|model_revision)": "[0-9a-f]{40}",?\s*'
-        r'|\s*"(?:sha256|reference_sha256|output_sha256)": "[0-9a-f]{64}",?\s*'
+        r'|\s*"(?:sha256|reference_sha256|output_sha256|asset_sha256)": "[0-9a-f]{64}",?\s*'
     )
     for filename in list(findings):
         evidence_path = (ROOT / filename).resolve()

@@ -5,7 +5,7 @@
   "overall": "Positive/acceptable initial screen, comparable to the user’s prior voice-cloning experience",
   "raw_scores": "A 2/4, complete. B 3/4, complete. C 3/4, complete. D 3/4, complete.",
   "user_clarification": "I do not believe that was a negative outcome. I have done lots of voice cloning before and it is never 100% accurate. The accuracy here was comparable to what I am used to.",
-  "gate_note": "Scores are unchanged. This is a positive human initial screen, not a complete review of the original matrix or an automatic pass of its provisional numeric cutoff.",
+  "gate_note": "User explicitly approved this four-clip verdict as the passing quality gate for the bounded #54 prototype and authorised closing #53. This replaces the wider provisional listening requirement; 74 generated clips remain unreviewed.",
   "samples": [
     {
       "label": "A",
@@ -35,5 +35,11 @@
       "naturalness": 4,
       "reported_complete": true
     }
-  ]
+  ],
+  "prototype_gate": "pass",
+  "integration_playback": {
+    "reviewer": "User, in chat",
+    "verdict": "Synchronised and complete",
+    "scope": "Manual #54 speech/lip-sync and ending check requested for short-1 and multi-2 in native prototype; actual CPU Peter FlashHead output clip was also supplied. Live buffering timing is measured separately."
+  }
 }

@@ -1,18 +1,18 @@
 # Chatterbox evaluation (#52–#54)
 
 Evaluated on native Windows 11 / RTX 3090, 8 November 2026. This is an
-isolated research audition, not an application voice or approval to ship cloning.
+isolated research prototype with an opt-in application harness. Production cloning is not approved.
 
 ## Gates
 
 | Issue | Verdict | Evidence / remaining condition |
 | --- | --- | --- |
 | #52 native setup | Pass; issue closed 8 November 2026 | Fresh local clone, independent caches/venvs, identical output digest, offline synthesis and explicit user confirmation of an intelligible complete utterance |
-| #53 voice quality | User judged the four-clip initial screen acceptable; broader gate scope pending | Scores A 2/4, B 3/4, C 3/4, D 3/4 (similarity/naturalness), all complete; [verdict and full evidence](chatterbox-quality.md) |
-| #54 integration/adoption | Deferred | Requires #53 to close with a passing verdict; no adapter, GPU benchmark or production UI added |
+| #53 voice quality | Pass for the bounded prototype; issue closed with explicit user approval | Scores A 2/4, B 3/4, C 3/4, D 3/4 (similarity/naturalness), all complete; [verdict and full evidence](chatterbox-quality.md) |
+| #54 integration/adoption | GPU prototype viable; production no-go | [Integration report](chatterbox-integration.md) |
 
-Do not adopt on this evidence. Native setup alone establishes neither similarity
-nor conversational performance. The candidate dependency audit has unresolved
+Do not adopt in production on this evidence. The bounded GPU prototype meets warm
+latency and playback checks; reload recovery still takes 14–16 seconds. The candidate dependency audit has unresolved
 security findings; normal tHead remains on its existing environment and voice path.
 
 ## Run the audition
@@ -227,36 +227,7 @@ is retained for re-use.
 Clean-checkout preparation/generation and the explicit setup listening verdict pass.
 The two-speaker repeated-condition #53 pack is delivered. The user explicitly
 accepted the four-clip initial screen; the remaining 74 clips are unreviewed.
-The prototype-gate scope is pending confirmation, rather than a negative quality
-verdict. #54's browser/media latency, cancellation, recovery,
-reference lifecycle, RAM/VRAM and continuous resampling checks remain untested.
-Do not extrapolate these isolated whole-utterance CPU measurements to FlashHead.
-
-## Integration and adoption decision (#54)
-
-**No adoption at present. Integration evaluation is deferred, not passed or
-technically rejected.** Issue #54 explicitly requires #53 to close with a passing
-human quality verdict. The user judges the four-clip initial screen acceptable,
-with all utterances complete. The remaining matrix is unreviewed, and #53 has not
-yet closed with an agreed prototype-gate scope. This is not a negative quality
-outcome; the written stage dependency is still pending. The retired upstream and 90 candidate dependency advisories also
-remain material adoption risks; no production security/licensing clearance exists.
-
-| Adoption requirement | Evidence/status |
-| --- | --- |
-| Native reproducibility | Pass; #52 closed with explicit user listening confirmation |
-| Two-speaker quality and reference preparation | Positive/acceptable four-clip user screen; broader gate scope pending (#53 remains open) |
-| Fresh FlashHead/browser baseline; cold and ten warmed turns per configuration | Not run: integration gate deferred |
-| CPU/GPU coexistence, stalls, peak RAM/VRAM and allocation release | Not measured; the quality matrix uses CPU in separate processes and is not a coexistence benchmark |
-| Browser first audible speech with a decoded moving frame; 3–5 s warm target | Not measured; isolated complete-WAV timing does not establish this |
-| Continuous mono 16 kHz PCM16 resampling, bounded queues and phrase endings | Not integrated or verified for Chatterbox |
-| Stop, reset, replacement, repeated voice switches, crashes/missing assets and recovery through browser/API | Not exercised for an experimental adapter; existing application tests remain separate |
-
-No experimental application voice, reference-storage lifecycle, avatar persistence
-change or adapter has been added. There is no experimental-app launch command
-to claim for this deferred stage. Manual integration verification is inapplicable
-until the gate permits that implementation; the #52/#53 audition commands are
-not substitutes. No new production implementation tickets are warranted on the
-current conditional evidence. If #53 later passes and closes, the next authorised
-stage is the bounded #54 prototype and its existing acceptance matrix, with shared-GPU
-measurements serialised and independent correctness checks parallelised safely.
+The user explicitly approved the four-clip verdict as the passing gate for the
+bounded #54 prototype and authorised closing #53. This replaces the wider
+provisional listening requirement, with no score changes. See the
+[integration report](chatterbox-integration.md).

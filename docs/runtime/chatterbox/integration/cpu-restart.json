@@ -1,0 +1,1692 @@
+{
+  "revision": "ff76e508c666b00b95312e55d3fd11e45eb2386f",
+  "captured": "2026-11-08T19:53:41.323Z",
+  "browser": "158.0.8127.18",
+  "measurement": "digital audio onset plus decoded moving frame; not physical-speaker latency",
+  "timing": "client performance clock in milliseconds; status polling 100 ms",
+  "source_files": [
+    {
+      "path": "scripts/chatterbox_app.py",
+      "sha256": "557f8d53ff70f0803de03e966867d127a9aed047fc0e0708e9737b5ce57719ee"
+    },
+    {
+      "path": "scripts/chatterbox_voice.py",
+      "sha256": "c3a1bae86a7dfec6c91dde63b782c1d6b778b3881f27893a7a1e588e6f51c2e2"
+    },
+    {
+      "path": "scripts/chatterbox_worker.py",
+      "sha256": "3273632291eedd5ae44637c38675a128ccbfe7e02fee35553afe59b3d235b9e1"
+    },
+    {
+      "path": "scripts/conversation.py",
+      "sha256": "99fc72ab0444147f2759b400ca2aab9d1aaad6e9e9d7bf8f797224cd9280face"
+    },
+    {
+      "path": "scripts/speech.py",
+      "sha256": "408cd1c398b1aa71fecf483ea7682fa7fb7c4872440b71cb26697d6ea1d3230b"
+    },
+    {
+      "path": "scripts/streaming.py",
+      "sha256": "ff0732e318a393f61f6b2292cc5da686c82bf535071cce2d398ec51048a4a98a"
+    },
+    {
+      "path": "scripts/streaming.js",
+      "sha256": "29c525363f81f95e1cf62adca44882e55037550a6ba804457e0cbff15a682073"
+    },
+    {
+      "path": "scripts/chatterbox-benchmark.cjs",
+      "sha256": "4a4467e517ce3a16c1871e86c837471184ec7f70d351180af4366fd1198c3039"
+    },
+    {
+      "path": "chatterbox-lock.json",
+      "sha256": "d7b811573486160ba31374f5c893d5fcfb3a1b23a98ee2728e85df34b0b93171"
+    }
+  ],
+  "configurations": [
+    {
+      "identity": "chatterbox-nano-1089",
+      "preparation_seconds": 0.04663639999999941,
+      "readiness": {
+        "state": "idle",
+        "ready": true,
+        "error": "",
+        "loading": {
+          "platform": "Windows-11-10.0.26300-SP0",
+          "python": "3.12.10",
+          "lock": {
+            "upstream_url": "https://github.com/Soul-AILab/SoulX-FlashHead.git",
+            "upstream_revision": "9bc03de06bb0de82cd6bc477804512ae06144bf2",
+            "python": "3.12.10",
+            "models": [
+              {
+                "repository": "Soul-AILab/SoulX-FlashHead-1_3B",
+                "revision": "5fbd2e44ba08ab2deb28bd55cff2c15523e51ba5",
+                "directory": "FlashHead",
+                "files": [
+                  "Model_Lite/config.json",
+                  "Model_Lite/diffusion_pytorch_model.safetensors",
+                  "VAE_LTX/config.json",
+                  "VAE_LTX/diffusion_pytorch_model.safetensors",
+                  "README.md"
+                ]
+              },
+              {
+                "repository": "facebook/wav2vec2-base-960h",
+                "revision": "22aad52d435eb6dbaf354bdad9b0da84ce7d6156",
+                "directory": "wav2vec2",
+                "files": [
+                  "config.json",
+                  "model.safetensors",
+                  "preprocessor_config.json",
+                  "README.md"
+                ]
+              }
+            ]
+          },
+          "stage": "pipeline-load",
+          "upstream_revision": "9bc03de06bb0de82cd6bc477804512ae06144bf2",
+          "packages": {
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "diffusers": "0.42.1",
+            "transformers": "5.22.2"
+          },
+          "cuda_runtime": "12.8",
+          "gpu": "NVIDIA GeForce RTX 3090",
+          "gpu_memory_bytes": 25769279488,
+          "load_seconds": 4.071135199999844,
+          "tts": {
+            "reference_id": "librispeech-1089-10s",
+            "worker_alive": true,
+            "ready": true,
+            "reference_sha256": "bba0af570fd5a873ac6150ed8f7d7fd6eaf1b5943002af18bf9947b5b0c2d06c",
+            "worker_pid": 12916,
+            "sample_rate": 16000,
+            "source_rate": 24000,
+            "configuration": "cpu",
+            "fixture": false,
+            "preparation_seconds": 11.586451499999384,
+            "conditioning_diagnostics": []
+          },
+          "ready_seconds": 23.184611100004986
+        },
+        "speechEnabled": true,
+        "diagnostics": true,
+        "run": null,
+        "conversationEnabled": true,
+        "pairs": [
+          {
+            "id": "jfk-zira",
+            "name": "JFK",
+            "voice": "zira",
+            "editable": false
+          },
+          {
+            "id": "hopper-hazel",
+            "name": "Grace",
+            "voice": "hazel",
+            "editable": false
+          },
+          {
+            "id": "chatterbox-nano-1089",
+            "name": "JFK / Nano: Peter Bobbe (experimental)",
+            "voice": "chatterbox-nano-1089",
+            "editable": false
+          },
+          {
+            "id": "chatterbox-nano-121",
+            "name": "JFK / Nano: Nikolle Doolin (experimental)",
+            "voice": "chatterbox-nano-121",
+            "editable": false
+          }
+        ],
+        "avatars": [
+          {
+            "id": "jfk-zira",
+            "name": "JFK",
+            "voice": "zira",
+            "editable": false
+          },
+          {
+            "id": "hopper-hazel",
+            "name": "Grace",
+            "voice": "hazel",
+            "editable": false
+          },
+          {
+            "id": "chatterbox-nano-1089",
+            "name": "JFK / Nano: Peter Bobbe (experimental)",
+            "voice": "chatterbox-nano-1089",
+            "editable": false
+          },
+          {
+            "id": "chatterbox-nano-121",
+            "name": "JFK / Nano: Nikolle Doolin (experimental)",
+            "voice": "chatterbox-nano-121",
+            "editable": false
+          }
+        ],
+        "voices": [
+          {
+            "id": "zira",
+            "name": "Zira — English (United States)",
+            "available": true,
+            "error": ""
+          },
+          {
+            "id": "hazel",
+            "name": "Hazel — English (United Kingdom)",
+            "available": true,
+            "error": ""
+          }
+        ],
+        "avatarStorageError": "",
+        "activeAvatar": "chatterbox-nano-1089",
+        "selectedAvatar": "chatterbox-nano-1089",
+        "activePair": "chatterbox-nano-1089",
+        "selectedPair": "chatterbox-nano-1089",
+        "pairSequence": 0,
+        "pairSelectable": true,
+        "pairPreparationSeconds": 13.688159899997117,
+        "session": "c6d08bcc7ebc492da94706114c110524",
+        "model": "gpt-6-luna",
+        "settings": {
+          "model": "gpt-6-luna",
+          "thinkingLevel": "none",
+          "message": "",
+          "models": [
+            {
+              "id": "gpt-6.1-sol",
+              "available": true,
+              "error": "",
+              "levels": [
+                "low",
+                "medium",
+                "high",
+                "xhigh",
+                "max"
+              ],
+              "defaultLevel": "medium"
+            },
+            {
+              "id": "gpt-6.1-lunar",
+              "available": false,
+              "error": "gpt-6.1-lunar is unavailable; choose an available model in Settings",
+              "levels": [],
+              "defaultLevel": null
+            },
+            {
+              "id": "gpt-6-luna",
+              "available": true,
+              "error": "",
+              "levels": [
+                "none",
+                "low",
+                "medium",
+                "high",
+                "xhigh",
+                "max"
+              ],
+              "defaultLevel": "none"
+            }
+          ]
+        },
+        "fixtureProvider": true,
+        "budget": {
+          "month": "2026-11",
+          "timezone": "UTC",
+          "currency": "USD",
+          "limit_usd": 40,
+          "estimated_usd": 0.001029125,
+          "reserved_usd": 0,
+          "remaining_usd": 39.998970875,
+          "input_tokens": 1100,
+          "output_tokens": 275,
+          "usable": true,
+          "error": ""
+        },
+        "contextOmitted": 0,
+        "configurationError": "",
+        "transcript": [],
+        "experimental": {
+          "enabled": true,
+          "configuration": "cpu",
+          "fixed_fixture_text": true,
+          "reference_id": "librispeech-1089-10s",
+          "worker_alive": true,
+          "voice": {
+            "reference_id": "librispeech-1089-10s",
+            "worker_alive": true,
+            "ready": true,
+            "reference_sha256": "bba0af570fd5a873ac6150ed8f7d7fd6eaf1b5943002af18bf9947b5b0c2d06c",
+            "worker_pid": 12916,
+            "sample_rate": 16000,
+            "source_rate": 24000,
+            "configuration": "cpu",
+            "fixture": false,
+            "preparation_seconds": 11.586451499999384,
+            "conditioning_diagnostics": []
+          }
+        }
+      },
+      "turns": [
+        {
+          "question": "multi-1",
+          "cold": true,
+          "started_epoch": 1794167646.173,
+          "status": {
+            "state": "idle",
+            "ready": true,
+            "error": "",
+            "loading": {
+              "platform": "Windows-11-10.0.26300-SP0",
+              "python": "3.12.10",
+              "lock": {
+                "upstream_url": "https://github.com/Soul-AILab/SoulX-FlashHead.git",
+                "upstream_revision": "9bc03de06bb0de82cd6bc477804512ae06144bf2",
+                "python": "3.12.10",
+                "models": [
+                  {
+                    "repository": "Soul-AILab/SoulX-FlashHead-1_3B",
+                    "revision": "5fbd2e44ba08ab2deb28bd55cff2c15523e51ba5",
+                    "directory": "FlashHead",
+                    "files": [
+                      "Model_Lite/config.json",
+                      "Model_Lite/diffusion_pytorch_model.safetensors",
+                      "VAE_LTX/config.json",
+                      "VAE_LTX/diffusion_pytorch_model.safetensors",
+                      "README.md"
+                    ]
+                  },
+                  {
+                    "repository": "facebook/wav2vec2-base-960h",
+                    "revision": "22aad52d435eb6dbaf354bdad9b0da84ce7d6156",
+                    "directory": "wav2vec2",
+                    "files": [
+                      "config.json",
+                      "model.safetensors",
+                      "preprocessor_config.json",
+                      "README.md"
+                    ]
+                  }
+                ]
+              },
+              "stage": "pipeline-load",
+              "upstream_revision": "9bc03de06bb0de82cd6bc477804512ae06144bf2",
+              "packages": {
+                "torch": "2.11.0+cu128",
+                "torchvision": "0.26.0+cu128",
+                "diffusers": "0.42.1",
+                "transformers": "5.22.2"
+              },
+              "cuda_runtime": "12.8",
+              "gpu": "NVIDIA GeForce RTX 3090",
+              "gpu_memory_bytes": 25769279488,
+              "load_seconds": 4.071135199999844,
+              "tts": {
+                "reference_id": "librispeech-1089-10s",
+                "worker_alive": true,
+                "ready": true,
+                "reference_sha256": "bba0af570fd5a873ac6150ed8f7d7fd6eaf1b5943002af18bf9947b5b0c2d06c",
+                "worker_pid": 12916,
+                "sample_rate": 16000,
+                "source_rate": 24000,
+                "configuration": "cpu",
+                "fixture": false,
+                "preparation_seconds": 11.586451499999384,
+                "conditioning_diagnostics": [],
+                "last_synthesis": {
+                  "synthesis_seconds": 2.6315672999990056,
+                  "source_samples": 69120,
+                  "source_rate": 24000,
+                  "output_samples": 46487,
+                  "real_time_factor": 0.9137386458329881,
+                  "reference_id": "librispeech-1089-10s",
+                  "worker_pid": 12916,
+                  "whole_phrase": true,
+                  "resampler": "continuous soxr HQ"
+                }
+              },
+              "ready_seconds": 23.184611100004986
+            },
+            "speechEnabled": true,
+            "diagnostics": true,
+            "run": {
+              "id": "075e9a10f0014f82bff9b17268c75e9b",
+              "state": "complete",
+              "parts": 17,
+              "error": "",
+              "events": [
+                {
+                  "event": "accepted",
+                  "seconds": 0.000025199995434377342
+                },
+                {
+                  "event": "submit-action",
+                  "seconds": 0.002561599998443853,
+                  "clientMilliseconds": 24606.20000000298,
+                  "utc": "2026-11-08T19:54:07.018Z",
+                  "currentTime": 0,
+                  "buffered": 0,
+                  "request": "664c21e3-2e92-47de-a668-5981b896763e"
+                },
+                {
+                  "event": "generation-start",
+                  "seconds": 0.003249199995480012,
+                  "progressive": true,
+                  "clip": "six"
+                },
+                {
+                  "event": "transport-profile",
+                  "seconds": 0.003250999994634185,
+                  "fragment_frames": 8,
+                  "fragment_seconds": 0.32,
+                  "max_pending_fragments": 9
+                },
+                {
+                  "event": "client-settings",
+                  "seconds": 0.0035847999970428646,
+                  "clientMilliseconds": 24659.30000000447,
+                  "utc": "2026-11-08T19:54:07.071Z",
+                  "currentTime": 0,
+                  "buffered": 0,
+                  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36",
+                  "mode": "complete",
+                  "clip": "text",
+                  "initialBufferSeconds": 1.28
+                },
+                {
+                  "event": "llm-connect",
+                  "seconds": 0.004550599995127413
+                },
+                {
+                  "event": "provider-request",
+                  "seconds": 0.004556100000627339,
+                  "messages": [
+                    {
+                      "role": "user",
+                      "content": "multi-1"
+                    }
+                  ],
+                  "configuration": {
+                    "model": "gpt-6-luna",
+                    "reasoning": {
+                      "effort": "none"
+                    },
+                    "max_output_tokens": 384
+                  }
+                },
+                {
+                  "event": "llm-first-text",
+                  "seconds": 0.004562499998428393
+                },
+                {
+                  "event": "tts-start",
+                  "seconds": 0.00465260000055423,
+                  "index": 0
+                },
+                {
+                  "event": "portrait-ready",
+                  "seconds": 0.061760199998389,
+                  "settings": {
+                    "frame_num": 33,
+                    "motion_frames_latent_num": 2,
+                    "tgt_fps": 25,
+                    "sample_rate": 16000,
+                    "sample_shift": 5,
+                    "color_correction_strength": 1,
+                    "cached_audio_duration": 8,
+                    "num_heads": 12,
+                    "height": 512,
+                    "width": 512,
+                    "motion_frames_num": 9,
+                    "sample_steps": 4
+                  }
+                },
+                {
+                  "event": "input-underrun",
+                  "seconds": 0.07350349999614991
+                },
+                {
+                  "event": "occupancy",
+                  "seconds": 0.47739159999764524,
+                  "clientMilliseconds": 25132.20000000298,
+                  "utc": "2026-11-08T19:54:07.544Z",
+                  "currentTime": 0,
+                  "buffered": 0
+                },
+                {
+                  "event": "occupancy",
+                  "seconds": 0.9778905999992276,
+                  "clientMilliseconds": 25632.39999999851,
+                  "utc": "2026-11-08T19:54:08.044Z",
+                  "currentTime": 0,
+                  "buffered": 0
+                },
+                {
+                  "event": "occupancy",
+                  "seconds": 1.4766136999969603,
+                  "clientMilliseconds": 26131.70000000298,
+                  "utc": "2026-11-08T19:54:08.544Z",
+                  "currentTime": 0,
+                  "buffered": 0
+                },
+                {
+                  "event": "occupancy",
+                  "seconds": 1.9769243999980972,
+                  "clientMilliseconds": 26632.5,
+                  "utc": "2026-11-08T19:54:09.044Z",
+                  "currentTime": 0,
+                  "buffered": 0
+                },
+                {
+                  "event": "tts-segment",
+                  "seconds": 2.069261500000721,
+                  "index": 0,
+                  "text": "A black hole traps light. ",
+                  "samples": 30828,
+                  "preparation_seconds": 2.0646039999992354,
+                  "engine_metrics": {
+                    "synthesis_seconds": 2.063328199998068,
+                    "source_samples": 47040,
+                    "source_rate": 24000,
+                    "output_samples": 30828,
+                    "real_time_factor": 1.0527184693867695,
+                    "reference_id": "librispeech-1089-10s",
+                    "worker_pid": 12916,
+                    "whole_phrase": true,
+                    "resampler": "continuous soxr HQ"
+                  }
+                },
+                {
+                  "event": "audio-arrived",
+                  "seconds": 2.0693288999973447,
+                  "index": 0,
+                  "samples": 15360,
+                  "received_samples": 15360,
+                  "final": false,
+                  "queued": 1
+                },
+                {
+                  "event": "audio-arrived",
+                  "seconds": 2.0693680999975186,
+                  "index": 1,
+                  "samples": 15360,
+                  "received_samples": 30720,
+                  "final": false,
+                  "queued": 2
+                },
+                {
+                  "event": "input-resumed",
+                  "seconds": 2.0693907999957446
+                },
+                {
+                  "event": "llm-complete",
+                  "seconds": 2.0694030999948154,
+                  "truncated": false
+                },
+                {
+                  "event": "chunk-generation-start",
+                  "seconds": 2.0694164999949862,
+                  "index": 0,
+                  "received_samples": 30720
+                },
+                {
+                  "event": "inference-start",
+                  "seconds": 2.162380800000392,
+                  "index": 0
+                },
+                {
+                  "event": "occupancy",
+                  "seconds": 2.4763670999964233,
+                  "clientMilliseconds": 27132,
+                  "utc": "2026-11-08T19:54:09.544Z",
+                  "currentTime": 0,
+                  "buffered": 0
+                },
+                {
+                  "event": "frames-ready",
+                  "seconds": 2.877565399998275,
+                  "index": 0,
+                  "frames": 24,
+                  "generation_seconds": 0.8076100000034785
+                },
+                {
+                  "event": "chunk-generation-start",
+                  "seconds": 2.879444699996384,
+                  "index": 1,
+                  "received_samples": 30720
+                },
+                {
+                  "event": "tts-start",
+                  "seconds": 2.879510399994615,
+                  "index": 1
+                },
+                {
+                  "event": "media-ready",
+                  "seconds": 2.8916039999967325,
+                  "index": 0,
+                  "bytes": 1234,
+                  "pending": 0
+                },
+                {
+                  "event": "inference-start",
+                  "seconds": 2.898417899996275,
+                  "index": 1
+                },
+                {
+                  "event": "media-ready",
+                  "seconds": 2.9021418999982416,
+                  "index": 1,
+                  "bytes": 167359,
+                  "pending": 1
+                },
+                {
+                  "event": "media-ready",
+                  "seconds": 2.9059740000011516,
+                  "index": 2,
+                  "bytes": 178771,
+                  "pending": 2
+                },
+                {
+                  "event": "appended",
+                  "seconds": 2.941767999996955,
+                  "clientMilliseconds": 27596.60000000149,
+                  "utc": "2026-11-08T19:54:10.009Z",
+                  "currentTime": 0,
+                  "buffered": 0,
+                  "index": 0
+                },
+                {
+                  "event": "appended",
+                  "seconds": 2.952797699996154,
+                  "clientMilliseconds": 27608.20000000298,
+                  "utc": "2026-11-08T19:54:10.020Z",
+                  "currentTime": 0,
+                  "buffered": 0.384,
+                  "index": 1
+                },
+                {
+                  "event": "appended",
+                  "seconds": 2.9643028999998933,
+                  "clientMilliseconds": 27619.5,
+                  "utc": "2026-11-08T19:54:10.031Z",
+                  "currentTime": 0,
+                  "buffered": 0.704,
+                  "index": 2
+                },
+                {
+                  "event": "occupancy",
+                  "seconds": 2.9783362000016496,
+                  "clientMilliseconds": 27632.70000000298,
+                  "utc": "2026-11-08T19:54:10.045Z",
+                  "currentTime": 0,
+                  "buffered": 0.704
+                },
+                {
+                  "event": "occupancy",
+                  "seconds": 3.477689100000134,
+                  "clientMilliseconds": 28132.70000000298,
+                  "utc": "2026-11-08T19:54:10.545Z",
+                  "currentTime": 0,
+                  "buffered": 0.704
+                },
+                {
+                  "event": "frames-ready",
+                  "seconds": 3.517177800000354,
+                  "index": 1,
+                  "frames": 24,
+                  "generation_seconds": 0.6368573999934597
+                },
+                {
+                  "event": "input-underrun",
+                  "seconds": 3.520120399996813
+                },
+                {
+                  "event": "media-ready",
+                  "seconds": 3.5236596999966423,
+                  "index": 3,
+                  "bytes": 179701,
+                  "pending": 3
+                },
+                {
+                  "event": "media-ready",
+                  "seconds": 3.5279290999969817,
+                  "index": 4,
+                  "bytes": 150815,
+                  "pending": 4
+                },
+                {
+                  "event": "media-ready",
+                  "seconds": 3.5362782000011066,
+                  "index": 5,
+                  "bytes": 158747,
+                  "pending": 5
+                },
+                {
+                  "event": "appended",
+                  "seconds": 3.5389391999997315,
+                  "clientMilliseconds": 28194.20000000298,
+                  "utc": "2026-11-08T19:54:10.606Z",
+                  "currentTime": 0,
+                  "buffered": 1.024,
+                  "index": 3
+                },
+                {
+                  "event": "appended",
+                  "seconds": 3.5504052999967826,
+                  "clientMilliseconds": 28205.5,
+                  "utc": "2026-11-08T19:54:10.617Z",
+                  "currentTime": 0,
+                  "buffered": 1.344,
+                  "index": 4
+                },
+                {
+                  "event": "play-request",
+                  "seconds": 3.551246099996206,
+                  "clientMilliseconds": 28205.80000000447,
+                  "utc": "2026-11-08T19:54:10.618Z",
+                  "currentTime": 0,
+                  "buffered": 1.344
+                },
+                {
+                  "event": "playing",
+                  "seconds": 3.558656900000642,
+                  "clientMilliseconds": 28207.39999999851,
+                  "utc": "2026-11-08T19:54:10.619Z",
+                  "currentTime": 0,
+                  "buffered": 1.344
+                },
+                {
+                  "event": "appended",
+                  "seconds": 3.5619519999963813,
+                  "clientMilliseconds": 28217.39999999851,
+                  "utc": "2026-11-08T19:54:10.629Z",
+                  "currentTime": 0.008,
+                  "buffered": 1.656,
+                  "index": 5
+                },
+                {
+                  "event": "digital-audio-onset",
+                  "seconds": 3.5770141999964835,
+                  "clientMilliseconds": 28231.80000000447,
+                  "utc": "2026-11-08T19:54:10.644Z",
+                  "currentTime": 0.020018,
+                  "buffered": 1.6439819999999998,
+                  "rms": 0.000020574150746953738,
+                  "measurement": "browser-audio-graph",
+                  "sampleIntervalMilliseconds": 25
+                },
+                {
+                  "event": "first-frame-presented",
+                  "seconds": 3.6318179000008968,
+                  "clientMilliseconds": 28287.39999999851,
+                  "utc": "2026-11-08T19:54:10.699Z",
+                  "currentTime": 0.08,
+                  "buffered": 1.5839999999999999,
+                  "mediaTime": 0.104062
+                },
+                {
+                  "event": "moving-video",
+                  "seconds": 3.699531799997203,
+                  "clientMilliseconds": 28354.60000000149,
+                  "utc": "2026-11-08T19:54:10.767Z",
+                  "currentTime": 0.142819,
+                  "buffered": 1.521181,
+                  "mediaTime": 0.144062
+                },
+                {
+                  "event": "occupancy",
+                  "seconds": 3.977544699999271,
+                  "clientMilliseconds": 28632.5,
+                  "utc": "2026-11-08T19:54:11.044Z",
+                  "currentTime": 0.420633,
+                  "buffered": 1.2433669999999999
+                },
+                {
+                  "event": "occupancy",
+                  "seconds": 4.477760699999635,
+                  "clientMilliseconds": 29132.5,
+                  "utc": "2026-11-08T19:54:11.544Z",
+                  "currentTime": 0.924734,
+                  "buffered": 0.739266
+                },
+                {
+                  "event": "occupancy",
+                  "seconds": 4.97673489999579,
+                  "clientMilliseconds": 29632,
+                  "utc": "2026-11-08T19:54:12.044Z",
+                  "currentTime": 1.42023,
+                  "buffered": 0.24376999999999982
+                },
+                {
+                  "event": "waiting",
+                  "seconds": 5.222193999994488,
+                  "clientMilliseconds": 29877.89999999851,
+                  "utc": "2026-11-08T19:54:12.290Z",
+                  "currentTime": 1.664,
+                  "buffered": 0
+                },
+                {
+                  "event": "occupancy",
+                  "seconds": 5.477449199999683,
+                  "clientMilliseconds": 30132.39999999851,
+                  "utc": "2026-11-08T19:54:12.544Z",
+                  "currentTime": 1.664,
+                  "buffered": 0
+                },
+                {
+                  "event": "tts-segment",
+                  "seconds": 5.512603299997863,
+                  "index": 1,
+                  "text": "We detect one by its effects on nearby matter.",
+                  "samples": 46487,
+                  "preparation_seconds": 2.633090199997241,
+                  "engine_metrics": {
+                    "synthesis_seconds": 2.6315672999990056,
+                    "source_samples": 69120,
+                    "source_rate": 24000,
+                    "output_samples": 46487,
+                    "real_time_factor": 0.9137386458329881,
+                    "reference_id": "librispeech-1089-10s",
+                    "worker_pid": 12916,
+                    "whole_phrase": true,
+                    "resampler": "continuous soxr HQ"
+                  }
+                },
+                {
+                  "event": "audio-arrived",
+                  "seconds": 5.5126321999996435,
+                  "index": 2,
+                  "samples": 15360,
+                  "received_samples": 46080,
+                  "final": false,
+                  "queued": 1
+                },
+                {
+                  "event": "audio-arrived",
+                  "seconds": 5.512657300001592,
+                  "index": 3,
+                  "samples": 15360,
+                  "received_samples": 61440,
+                  "final": false,
+                  "queued": 2
+                },
+                {
+                  "event": "input-resumed",
+                  "seconds": 5.512673500001256
+                },
+                {
+                  "event": "audio-arrived",
+                  "seconds": 5.512696899997536,
+                  "index": 4,
+                  "samples": 15360,
+                  "received_samples": 76800,
+                  "final": false,
+                  "queued": 2
+                },
+                {
+                  "event": "chunk-generation-start",
+                  "seconds": 5.512720699996862,
+                  "index": 2,
+                  "received_samples": 61440
+                },
+                {
+                  "event": "tts-tail",
+                  "seconds": 5.5183440999971936,
+                  "samples": 125
+                },
+                {
+                  "event": "inference-start",
+                  "seconds": 5.54754359999788,
+                  "index": 2
+                },
+                {
+                  "event": "occupancy",
+                  "seconds": 5.976525599995512,
+                  "clientMilliseconds": 30632,
+                  "utc": "2026-11-08T19:54:13.044Z",
+                  "currentTime": 1.664,
+                  "buffered": 0
+                },
+                {
+                  "event": "frames-ready",
+                  "seconds": 6.356607699999586,
+                  "index": 2,
+                  "frames": 24,
+                  "generation_seconds": 0.8433957000015653
+                },
+                {
+                  "event": "chunk-generation-start",
+                  "seconds": 6.358541900001001,
+                  "index": 3,
+                  "received_samples": 76800
+                },
+                {
+                  "event": "audio-arrived",
+                  "seconds": 6.36372560000018,
+                  "index": 5,
+                  "samples": 640,
+                  "received_samples": 77440,
+                  "final": true,
+                  "queued": 2
+                },
+                {
+                  "event": "input-complete",
+                  "seconds": 6.363744299997052,
+                  "samples": 77440,
+                  "sha256": "07b20db54011830b884caf91dc88c1c5a5f66b584c96d974bd14981336b48e89"
+                },
+                {
+                  "event": "tts-complete",
+                  "seconds": 6.3637479999961215,
+                  "samples": 77440,
+                  "sha256": "07b20db54011830b884caf91dc88c1c5a5f66b584c96d974bd14981336b48e89"
+                },
+                {
+                  "event": "media-ready",
+                  "seconds": 6.367178399996192,
+                  "index": 6,
+                  "bytes": 161847,
+                  "pending": 1
+                },
+                {
+                  "event": "media-ready",
+                  "seconds": 6.371843399996578,
+                  "index": 7,
+                  "bytes": 145799,
+                  "pending": 2
+                },
+                {
+                  "event": "media-ready",
+                  "seconds": 6.3751158000013675,
+                  "index": 8,
+                  "bytes": 153775,
+                  "pending": 3
+                },
+                {
+                  "event": "inference-start",
+                  "seconds": 6.376714899997751,
+                  "index": 3
+                },
+                {
+                  "event": "appended",
+                  "seconds": 6.397536199998285,
+                  "clientMilliseconds": 31053.20000000298,
+                  "utc": "2026-11-08T19:54:13.465Z",
+                  "currentTime": 1.664,
+                  "buffered": 0.32000000000000006,
+                  "index": 6
+                },
+                {
+                  "event": "appended",
+                  "seconds": 6.4102875999960816,
+                  "clientMilliseconds": 31065.60000000149,
+                  "utc": "2026-11-08T19:54:13.477Z",
+                  "currentTime": 1.664,
+                  "buffered": 0.6399999999999999,
+                  "index": 7
+                },
+                {
+                  "event": "playing",
+                  "seconds": 6.416342699994857,
+                  "clientMilliseconds": 31066.5,
+                  "utc": "2026-11-08T19:54:13.478Z",
+                  "currentTime": 1.664,
+                  "buffered": 0.6399999999999999
+                },
+                {
+                  "event": "appended",
+                  "seconds": 6.418674900000042,
+                  "clientMilliseconds": 31074.60000000149,
+                  "utc": "2026-11-08T19:54:13.487Z",
+                  "currentTime": 1.670824,
+                  "buffered": 0.953176,
+                  "index": 8
+                },
+                {
+                  "event": "occupancy",
+                  "seconds": 6.478230799999437,
+                  "clientMilliseconds": 31133,
+                  "utc": "2026-11-08T19:54:13.545Z",
+                  "currentTime": 1.733196,
+                  "buffered": 0.8908040000000002
+                },
+                {
+                  "event": "occupancy",
+                  "seconds": 6.976752199996554,
+                  "clientMilliseconds": 31632.10000000149,
+                  "utc": "2026-11-08T19:54:14.044Z",
+                  "currentTime": 2.228383,
+                  "buffered": 0.3956170000000001
+                },
+                {
+                  "event": "frames-ready",
+                  "seconds": 7.0315171999973245,
+                  "index": 3,
+                  "frames": 24,
+                  "generation_seconds": 0.6721564999970724
+                },
+                {
+                  "event": "chunk-generation-start",
+                  "seconds": 7.033479099998658,
+                  "index": 4,
+                  "received_samples": 77440
+                },
+                {
+                  "event": "media-ready",
+                  "seconds": 7.0397243999977945,
+                  "index": 9,
+                  "bytes": 158872,
+                  "pending": 3
+                },
+                {
+                  "event": "media-ready",
+                  "seconds": 7.042561399997794,
+                  "index": 10,
+                  "bytes": 138608,
+                  "pending": 4
+                },
+                {
+                  "event": "media-ready",
+                  "seconds": 7.045271800001501,
+                  "index": 11,
+                  "bytes": 146665,
+                  "pending": 5
+                },
+                {
+                  "event": "inference-start",
+                  "seconds": 7.049093000001449,
+                  "index": 4
+                },
+                {
+                  "event": "appended",
+                  "seconds": 7.090590100000554,
+                  "clientMilliseconds": 31746.39999999851,
+                  "utc": "2026-11-08T19:54:14.158Z",
+                  "currentTime": 2.344,
+                  "buffered": 0.6000000000000001,
+                  "index": 9
+                },
+                {
+                  "event": "appended",
+                  "seconds": 7.098177200001373,
+                  "clientMilliseconds": 31753.89999999851,
+                  "utc": "2026-11-08T19:54:14.166Z",
+                  "currentTime": 2.350061,
+                  "buffered": 0.9139389999999996,
+                  "index": 10
+                },
+                {
+                  "event": "appended",
+                  "seconds": 7.106794200000877,
+                  "clientMilliseconds": 31762.39999999851,
+                  "utc": "2026-11-08T19:54:14.174Z",
+                  "currentTime": 2.364603,
+                  "buffered": 1.2193970000000003,
+                  "index": 11
+                },
+                {
+                  "event": "occupancy",
+                  "seconds": 7.477529499999946,
+                  "clientMilliseconds": 32132.60000000149,
+                  "utc": "2026-11-08T19:54:14.544Z",
+                  "currentTime": 2.732808,
+                  "buffered": 0.8511920000000002
+                },
+                {
+                  "event": "frames-ready",
+                  "seconds": 7.675730399998429,
+                  "index": 4,
+                  "frames": 24,
+                  "generation_seconds": 0.6412517999997362
+                },
+                {
+                  "event": "chunk-generation-start",
+                  "seconds": 7.677845699996396,
+                  "index": 5,
+                  "received_samples": 77440
+                },
+                {
+                  "event": "inference-start",
+                  "seconds": 7.691574600001331,
+                  "index": 5
+                },
+                {
+                  "event": "media-ready",
+                  "seconds": 7.702677399996901,
+                  "index": 12,
+                  "bytes": 153680,
+                  "pending": 4
+                },
+                {
+                  "event": "media-ready",
+                  "seconds": 7.705438899996807,
+                  "index": 13,
+                  "bytes": 135818,
+                  "pending": 5
+                },
+                {
+                  "event": "media-ready",
+                  "seconds": 7.70831879999605,
+                  "index": 14,
+                  "bytes": 139002,
+                  "pending": 6
+                },
+                {
+                  "event": "appended",
+                  "seconds": 7.725078399998893,
+                  "clientMilliseconds": 32380.80000000447,
+                  "utc": "2026-11-08T19:54:14.793Z",
+                  "currentTime": 2.979038,
+                  "buffered": 0.9249619999999998,
+                  "index": 12
+                },
+                {
+                  "event": "appended",
+                  "seconds": 7.732658399996581,
+                  "clientMilliseconds": 32388.5,
+                  "utc": "2026-11-08T19:54:14.800Z",
+                  "currentTime": 2.984697,
+                  "buffered": 1.239303,
+                  "index": 13
+                },
+                {
+                  "event": "appended",
+                  "seconds": 7.74181580000004,
+                  "clientMilliseconds": 32397.70000000298,
+                  "utc": "2026-11-08T19:54:14.810Z",
+                  "currentTime": 2.992,
+                  "buffered": 1.5519999999999996,
+                  "index": 14
+                },
+                {
+                  "event": "occupancy",
+                  "seconds": 7.9769204999975045,
+                  "clientMilliseconds": 32632.10000000149,
+                  "utc": "2026-11-08T19:54:15.044Z",
+                  "currentTime": 3.228371,
+                  "buffered": 1.3156289999999995
+                },
+                {
+                  "event": "frames-ready",
+                  "seconds": 8.304390500001318,
+                  "index": 5,
+                  "frames": 1,
+                  "generation_seconds": 0.6261977999965893
+                },
+                {
+                  "event": "render-complete",
+                  "seconds": 8.305274799997278,
+                  "samples": 77440,
+                  "allocated_bytes": 4314651648,
+                  "peak_allocated_bytes": 5347216896,
+                  "reserved_bytes": 5943328768,
+                  "rss_bytes": 2986455040
+                },
+                {
+                  "event": "media-ready",
+                  "seconds": 8.308326799997303,
+                  "index": 15,
+                  "bytes": 160670,
+                  "pending": 5
+                },
+                {
+                  "event": "media-ready",
+                  "seconds": 8.308707399999548,
+                  "index": 16,
+                  "bytes": 46939,
+                  "pending": 6
+                },
+                {
+                  "event": "appended",
+                  "seconds": 8.358619200000248,
+                  "clientMilliseconds": 33014.60000000149,
+                  "utc": "2026-11-08T19:54:15.426Z",
+                  "currentTime": 3.6141,
+                  "buffered": 1.2498999999999998,
+                  "index": 15
+                },
+                {
+                  "event": "appended",
+                  "seconds": 8.364616599996225,
+                  "clientMilliseconds": 33020.60000000149,
+                  "utc": "2026-11-08T19:54:15.433Z",
+                  "currentTime": 3.618923,
+                  "buffered": 1.2850769999999998,
+                  "index": 16
+                },
+                {
+                  "event": "transport-complete",
+                  "seconds": 8.408557599999767
+                },
+                {
+                  "event": "tts-released",
+                  "seconds": 8.409295400000701
+                },
+                {
+                  "event": "resources-released",
+                  "seconds": 8.418775400001323,
+                  "allocated_bytes": 4308569088,
+                  "reserved_bytes": 5943328768,
+                  "rss_bytes": 2986401792,
+                  "queued_audio": 0
+                },
+                {
+                  "event": "end-of-stream",
+                  "seconds": 8.428226899995934,
+                  "clientMilliseconds": 33084.20000000298,
+                  "utc": "2026-11-08T19:54:15.496Z",
+                  "currentTime": 3.6865,
+                  "buffered": 1.2175619999999996
+                },
+                {
+                  "event": "occupancy",
+                  "seconds": 8.476608599994506,
+                  "clientMilliseconds": 33132.5,
+                  "utc": "2026-11-08T19:54:15.544Z",
+                  "currentTime": 3.73206,
+                  "buffered": 1.1720019999999995
+                },
+                {
+                  "event": "occupancy",
+                  "seconds": 8.976744999999937,
+                  "clientMilliseconds": 33632.20000000298,
+                  "utc": "2026-11-08T19:54:16.044Z",
+                  "currentTime": 4.228516,
+                  "buffered": 0.6755459999999998
+                },
+                {
+                  "event": "occupancy",
+                  "seconds": 9.477439199996297,
+                  "clientMilliseconds": 34132.89999999851,
+                  "utc": "2026-11-08T19:54:16.545Z",
+                  "currentTime": 4.73315,
+                  "buffered": 0.1709119999999995
+                },
+                {
+                  "event": "ended",
+                  "seconds": 9.67326189999585,
+                  "clientMilliseconds": 34329,
+                  "utc": "2026-11-08T19:54:16.741Z",
+                  "currentTime": 4.904062,
+                  "buffered": 0
+                }
+              ],
+              "session": "c6d08bcc7ebc492da94706114c110524",
+              "answer": "A black hole traps light. We detect one by its effects on nearby matter.",
+              "truncated": false,
+              "usage": {
+                "input_tokens": 100,
+                "output_tokens": 25,
+                "estimated_usd": 0.000025,
+                "estimated": false
+              },
+              "inputBound": 475,
+              "request": "664c21e3-2e92-47de-a668-5981b896763e",
+              "pair": "chatterbox-nano-1089",
+              "model": "gpt-6-luna",
+              "thinkingLevel": "none"
+            },
+            "conversationEnabled": true,
+            "pairs": [
+              {
+                "id": "jfk-zira",
+                "name": "JFK",
+                "voice": "zira",
+                "editable": false
+              },
+              {
+                "id": "hopper-hazel",
+                "name": "Grace",
+                "voice": "hazel",
+                "editable": false
+              },
+              {
+                "id": "chatterbox-nano-1089",
+                "name": "JFK / Nano: Peter Bobbe (experimental)",
+                "voice": "chatterbox-nano-1089",
+                "editable": false
+              },
+              {
+                "id": "chatterbox-nano-121",
+                "name": "JFK / Nano: Nikolle Doolin (experimental)",
+                "voice": "chatterbox-nano-121",
+                "editable": false
+              }
+            ],
+            "avatars": [
+              {
+                "id": "jfk-zira",
+                "name": "JFK",
+                "voice": "zira",
+                "editable": false
+              },
+              {
+                "id": "hopper-hazel",
+                "name": "Grace",
+                "voice": "hazel",
+                "editable": false
+              },
+              {
+                "id": "chatterbox-nano-1089",
+                "name": "JFK / Nano: Peter Bobbe (experimental)",
+                "voice": "chatterbox-nano-1089",
+                "editable": false
+              },
+              {
+                "id": "chatterbox-nano-121",
+                "name": "JFK / Nano: Nikolle Doolin (experimental)",
+                "voice": "chatterbox-nano-121",
+                "editable": false
+              }
+            ],
+            "voices": [
+              {
+                "id": "zira",
+                "name": "Zira — English (United States)",
+                "available": true,
+                "error": ""
+              },
+              {
+                "id": "hazel",
+                "name": "Hazel — English (United Kingdom)",
+                "available": true,
+                "error": ""
+              }
+            ],
+            "avatarStorageError": "",
+            "activeAvatar": "chatterbox-nano-1089",
+            "selectedAvatar": "chatterbox-nano-1089",
+            "activePair": "chatterbox-nano-1089",
+            "selectedPair": "chatterbox-nano-1089",
+            "pairSequence": 0,
+            "pairSelectable": true,
+            "pairPreparationSeconds": 13.688159899997117,
+            "session": "c6d08bcc7ebc492da94706114c110524",
+            "model": "gpt-6-luna",
+            "settings": {
+              "model": "gpt-6-luna",
+              "thinkingLevel": "none",
+              "message": "",
+              "models": [
+                {
+                  "id": "gpt-6.1-sol",
+                  "available": true,
+                  "error": "",
+                  "levels": [
+                    "low",
+                    "medium",
+                    "high",
+                    "xhigh",
+                    "max"
+                  ],
+                  "defaultLevel": "medium"
+                },
+                {
+                  "id": "gpt-6.1-lunar",
+                  "available": false,
+                  "error": "gpt-6.1-lunar is unavailable; choose an available model in Settings",
+                  "levels": [],
+                  "defaultLevel": null
+                },
+                {
+                  "id": "gpt-6-luna",
+                  "available": true,
+                  "error": "",
+                  "levels": [
+                    "none",
+                    "low",
+                    "medium",
+                    "high",
+                    "xhigh",
+                    "max"
+                  ],
+                  "defaultLevel": "none"
+                }
+              ]
+            },
+            "fixtureProvider": true,
+            "budget": {
+              "month": "2026-11",
+              "timezone": "UTC",
+              "currency": "USD",
+              "limit_usd": 40,
+              "estimated_usd": 0.001054125,
+              "reserved_usd": 0,
+              "remaining_usd": 39.998945875,
+              "input_tokens": 1200,
+              "output_tokens": 300,
+              "usable": true,
+              "error": ""
+            },
+            "contextOmitted": 0,
+            "configurationError": "",
+            "transcript": [
+              {
+                "id": "075e9a10f0014f82bff9b17268c75e9b",
+                "question": "multi-1",
+                "answer": "A black hole traps light. We detect one by its effects on nearby matter.",
+                "state": "complete",
+                "truncated": false,
+                "usage": {
+                  "input_tokens": 100,
+                  "output_tokens": 25,
+                  "estimated_usd": 0.000025,
+                  "estimated": false
+                },
+                "pair": "chatterbox-nano-1089",
+                "model": "gpt-6-luna",
+                "thinkingLevel": "none"
+              }
+            ],
+            "experimental": {
+              "enabled": true,
+              "configuration": "cpu",
+              "fixed_fixture_text": true,
+              "reference_id": "librispeech-1089-10s",
+              "worker_alive": true,
+              "voice": {
+                "reference_id": "librispeech-1089-10s",
+                "worker_alive": true,
+                "ready": true,
+                "reference_sha256": "bba0af570fd5a873ac6150ed8f7d7fd6eaf1b5943002af18bf9947b5b0c2d06c",
+                "worker_pid": 12916,
+                "sample_rate": 16000,
+                "source_rate": 24000,
+                "configuration": "cpu",
+                "fixture": false,
+                "preparation_seconds": 11.586451499999384,
+                "conditioning_diagnostics": [],
+                "last_synthesis": {
+                  "synthesis_seconds": 2.6315672999990056,
+                  "source_samples": 69120,
+                  "source_rate": 24000,
+                  "output_samples": 46487,
+                  "real_time_factor": 0.9137386458329881,
+                  "reference_id": "librispeech-1089-10s",
+                  "worker_pid": 12916,
+                  "whole_phrase": true,
+                  "resampler": "continuous soxr HQ"
+                }
+              }
+            }
+          },
+          "valid": true,
+          "first_speech_seconds": 3.74839999999851,
+          "first_pcm_seconds": 2.069261500000721,
+          "total_seconds": 9.67326189999585,
+          "stalls": 1,
+          "tts_seconds": 4.6976941999964765,
+          "audio_seconds": 4.84,
+          "tts_rtf": 0.9705979752058836,
+          "meets_five_seconds": true,
+          "failed_experience": false,
+          "finished_epoch": 1794167656.84
+        }
+      ],
+      "summary": {
+        "first_speech": {
+          "count": 0,
+          "median": null,
+          "minimum": null,
+          "maximum": null,
+          "exploratoryP95": null,
+          "p95Method": "nearest rank; ten warmed samples are exploratory, failures retained separately"
+        },
+        "first_pcm": {
+          "count": 0,
+          "median": null,
+          "minimum": null,
+          "maximum": null,
+          "exploratoryP95": null,
+          "p95Method": "nearest rank; ten warmed samples are exploratory, failures retained separately"
+        },
+        "total_turn": {
+          "count": 0,
+          "median": null,
+          "minimum": null,
+          "maximum": null,
+          "exploratoryP95": null,
+          "p95Method": "nearest rank; ten warmed samples are exploratory, failures retained separately"
+        },
+        "tts_rtf": {
+          "count": 0,
+          "median": null,
+          "minimum": null,
+          "maximum": null,
+          "exploratoryP95": null,
+          "p95Method": "nearest rank; ten warmed samples are exploratory, failures retained separately"
+        },
+        "valid": 0,
+        "above_five_seconds": 0,
+        "failed_experiences": 0,
+        "stalls": 0
+      }
+    }
+  ],
+  "probes": [],
+  "initial": {
+    "state": "idle",
+    "ready": true,
+    "error": "",
+    "loading": {
+      "platform": "Windows-11-10.0.26300-SP0",
+      "python": "3.12.10",
+      "lock": {
+        "upstream_url": "https://github.com/Soul-AILab/SoulX-FlashHead.git",
+        "upstream_revision": "9bc03de06bb0de82cd6bc477804512ae06144bf2",
+        "python": "3.12.10",
+        "models": [
+          {
+            "repository": "Soul-AILab/SoulX-FlashHead-1_3B",
+            "revision": "5fbd2e44ba08ab2deb28bd55cff2c15523e51ba5",
+            "directory": "FlashHead",
+            "files": [
+              "Model_Lite/config.json",
+              "Model_Lite/diffusion_pytorch_model.safetensors",
+              "VAE_LTX/config.json",
+              "VAE_LTX/diffusion_pytorch_model.safetensors",
+              "README.md"
+            ]
+          },
+          {
+            "repository": "facebook/wav2vec2-base-960h",
+            "revision": "22aad52d435eb6dbaf354bdad9b0da84ce7d6156",
+            "directory": "wav2vec2",
+            "files": [
+              "config.json",
+              "model.safetensors",
+              "preprocessor_config.json",
+              "README.md"
+            ]
+          }
+        ]
+      },
+      "stage": "pipeline-load",
+      "upstream_revision": "9bc03de06bb0de82cd6bc477804512ae06144bf2",
+      "packages": {
+        "torch": "2.11.0+cu128",
+        "torchvision": "0.26.0+cu128",
+        "diffusers": "0.42.1",
+        "transformers": "5.22.2"
+      },
+      "cuda_runtime": "12.8",
+      "gpu": "NVIDIA GeForce RTX 3090",
+      "gpu_memory_bytes": 25769279488,
+      "load_seconds": 4.071135199999844,
+      "tts": {
+        "reference_id": "librispeech-1089-10s",
+        "worker_alive": true,
+        "ready": true,
+        "reference_sha256": "bba0af570fd5a873ac6150ed8f7d7fd6eaf1b5943002af18bf9947b5b0c2d06c",
+        "worker_pid": 12916,
+        "sample_rate": 16000,
+        "source_rate": 24000,
+        "configuration": "cpu",
+        "fixture": false,
+        "preparation_seconds": 11.586451499999384,
+        "conditioning_diagnostics": []
+      },
+      "ready_seconds": 23.184611100004986
+    },
+    "speechEnabled": true,
+    "diagnostics": true,
+    "run": null,
+    "conversationEnabled": true,
+    "pairs": [
+      {
+        "id": "jfk-zira",
+        "name": "JFK",
+        "voice": "zira",
+        "editable": false
+      },
+      {
+        "id": "hopper-hazel",
+        "name": "Grace",
+        "voice": "hazel",
+        "editable": false
+      },
+      {
+        "id": "chatterbox-nano-1089",
+        "name": "JFK / Nano: Peter Bobbe (experimental)",
+        "voice": "chatterbox-nano-1089",
+        "editable": false
+      },
+      {
+        "id": "chatterbox-nano-121",
+        "name": "JFK / Nano: Nikolle Doolin (experimental)",
+        "voice": "chatterbox-nano-121",
+        "editable": false
+      }
+    ],
+    "avatars": [
+      {
+        "id": "jfk-zira",
+        "name": "JFK",
+        "voice": "zira",
+        "editable": false
+      },
+      {
+        "id": "hopper-hazel",
+        "name": "Grace",
+        "voice": "hazel",
+        "editable": false
+      },
+      {
+        "id": "chatterbox-nano-1089",
+        "name": "JFK / Nano: Peter Bobbe (experimental)",
+        "voice": "chatterbox-nano-1089",
+        "editable": false
+      },
+      {
+        "id": "chatterbox-nano-121",
+        "name": "JFK / Nano: Nikolle Doolin (experimental)",
+        "voice": "chatterbox-nano-121",
+        "editable": false
+      }
+    ],
+    "voices": [
+      {
+        "id": "zira",
+        "name": "Zira — English (United States)",
+        "available": true,
+        "error": ""
+      },
+      {
+        "id": "hazel",
+        "name": "Hazel — English (United Kingdom)",
+        "available": true,
+        "error": ""
+      }
+    ],
+    "avatarStorageError": "",
+    "activeAvatar": "chatterbox-nano-1089",
+    "selectedAvatar": "chatterbox-nano-1089",
+    "activePair": "chatterbox-nano-1089",
+    "selectedPair": "chatterbox-nano-1089",
+    "pairSequence": 0,
+    "pairSelectable": true,
+    "pairPreparationSeconds": 13.688159899997117,
+    "session": "1662c053fc2e475c9f8820ef3c2e64f6",
+    "model": "gpt-6-luna",
+    "settings": {
+      "model": "gpt-6-luna",
+      "thinkingLevel": "none",
+      "message": "",
+      "models": [
+        {
+          "id": "gpt-6.1-sol",
+          "available": true,
+          "error": "",
+          "levels": [
+            "low",
+            "medium",
+            "high",
+            "xhigh",
+            "max"
+          ],
+          "defaultLevel": "medium"
+        },
+        {
+          "id": "gpt-6.1-lunar",
+          "available": false,
+          "error": "gpt-6.1-lunar is unavailable; choose an available model in Settings",
+          "levels": [],
+          "defaultLevel": null
+        },
+        {
+          "id": "gpt-6-luna",
+          "available": true,
+          "error": "",
+          "levels": [
+            "none",
+            "low",
+            "medium",
+            "high",
+            "xhigh",
+            "max"
+          ],
+          "defaultLevel": "none"
+        }
+      ]
+    },
+    "fixtureProvider": true,
+    "budget": {
+      "month": "2026-11",
+      "timezone": "UTC",
+      "currency": "USD",
+      "limit_usd": 40,
+      "estimated_usd": 0.001029125,
+      "reserved_usd": 0,
+      "remaining_usd": 39.998970875,
+      "input_tokens": 1100,
+      "output_tokens": 275,
+      "usable": true,
+      "error": ""
+    },
+    "contextOmitted": 0,
+    "configurationError": "",
+    "transcript": [],
+    "experimental": {
+      "enabled": true,
+      "configuration": "cpu",
+      "fixed_fixture_text": true,
+      "reference_id": "librispeech-1089-10s",
+      "worker_alive": true,
+      "voice": {
+        "reference_id": "librispeech-1089-10s",
+        "worker_alive": true,
+        "ready": true,
+        "reference_sha256": "bba0af570fd5a873ac6150ed8f7d7fd6eaf1b5943002af18bf9947b5b0c2d06c",
+        "worker_pid": 12916,
+        "sample_rate": 16000,
+        "source_rate": 24000,
+        "configuration": "cpu",
+        "fixture": false,
+        "preparation_seconds": 11.586451499999384,
+        "conditioning_diagnostics": []
+      }
+    }
+  }
+}
