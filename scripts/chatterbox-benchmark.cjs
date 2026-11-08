@@ -99,7 +99,7 @@ async function main() {
     return (await response.json()).id;
   };
   const turn = async (question, cold = false) => {
-    const result = { question, cold, started_epoch: Date.now() / 1000 };
+    const result = { question, cold, started_epoch: Date.now() / 1000, failed_experience: true };
     try {
       const id = await submit(question);
       await expect
