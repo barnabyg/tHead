@@ -110,3 +110,7 @@ Use **Create avatar** in **Settings** to save a named local JPEG/PNG
 portrait with an available English voice. Edit or delete user-created avatars
 between turns in Settings; built-in avatars remain permanent. Saved avatars survive restarts. See
 [the avatar guide](docs/runtime/windows-avatars.md) for limits, storage and testing.
+
+The [isolated Chatterbox evaluation](docs/runtime/chatterbox-evaluation.md) provides
+an opt-in pinned reference-audio audition. It is research tooling with unresolved
+adoption gates and candidate security findings; it is not an application voice.

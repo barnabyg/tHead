@@ -157,6 +157,7 @@ def main() -> None:
         "runtime-lock.json",
         "speech-lock.json",
         "hazel-lock.json",
+        "chatterbox-lock.json",
         "avatar-pairs.json",
         "package.json",
         "package-lock.json",
@@ -181,6 +182,9 @@ def main() -> None:
             "docs/runtime/rtx3090-phase6-real.json",
             "docs/runtime/rtx3090-phase6-stop.json",
             "docs/runtime/phase6-clean-startup.json",
+            "chatterbox-lock.json",
+            "docs/runtime/chatterbox/setup-result.json",
+            "docs/runtime/chatterbox/wheel-inventory.json",
         )
     }
     public_metadata = re.compile(
@@ -189,6 +193,20 @@ def main() -> None:
     )
     # Only the new explicit evidence captures' Git source pin; review on schema changes.
     source_pin = re.compile(r'\s*"source": "[0-9a-f]{40}",?\s*')
+    # Public artifact hashes/source pins only in the named Chatterbox evidence schemas.
+    # Review these exact fields if the schemas or artifact sources change.
+    chatterbox_evidence = {
+        (ROOT / name).resolve()
+        for name in (
+            "chatterbox-lock.json",
+            "docs/runtime/chatterbox/setup-result.json",
+            "docs/runtime/chatterbox/wheel-inventory.json",
+        )
+    }
+    chatterbox_pin = re.compile(
+        r'\s*"(?:perth_revision|source_revision|model_revision)": "[0-9a-f]{40}",?\s*'
+        r'|\s*"(?:sha256|reference_sha256|output_sha256)": "[0-9a-f]{64}",?\s*'
+    )
     for filename in list(findings):
         evidence_path = (ROOT / filename).resolve()
         if evidence_path in evidence_paths:
@@ -200,6 +218,10 @@ def main() -> None:
                     finding["type"] == "Hex High Entropy String"
                     and (
                         public_metadata.fullmatch(evidence_lines[finding["line_number"] - 1])
+                        or (
+                            evidence_path in chatterbox_evidence
+                            and chatterbox_pin.fullmatch(evidence_lines[finding["line_number"] - 1])
+                        )
                         or (
                             evidence_path.name
                             in (
