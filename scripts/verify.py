@@ -26,10 +26,12 @@ def main() -> None:
         "scripts/benchmark.cjs",
         "scripts/resilience.cjs",
         "scripts/pair-assessment.cjs",
+        "scripts/chatterbox-benchmark.cjs",
         "scripts/streaming.html",
         "scripts/conversation.html",
         "playwright.config.cjs",
         "tests/browser/conversation.spec.cjs",
+        "tests/browser/chatterbox.spec.cjs",
     ]
     run([biome, "format", *browser_files], 120)
     run([python, "-m", "ruff", "check", "scripts", "tests"], 120)
@@ -42,7 +44,9 @@ def main() -> None:
     run(["node", "--check", "scripts/benchmark.cjs"], 120)
     run(["node", "--check", "scripts/resilience.cjs"], 120)
     run(["node", "--check", "scripts/pair-assessment.cjs"], 120)
+    run(["node", "--check", "scripts/chatterbox-benchmark.cjs"], 120)
     run(["node", "--check", "tests/browser/conversation.spec.cjs"], 120)
+    run(["node", "--check", "tests/browser/chatterbox.spec.cjs"], 120)
     run(["node", "--check", "playwright.config.cjs"], 120)
     run([python, "-m", "bandit", "-q", "-c", "pyproject.toml", "-r", "scripts", "tests"], 120)
     modules = sorted((ROOT / "tests").glob("test_*.py"))
@@ -157,6 +161,8 @@ def main() -> None:
         "runtime-lock.json",
         "speech-lock.json",
         "hazel-lock.json",
+        "chatterbox-lock.json",
+        "chatterbox-gpu-lock.json",
         "avatar-pairs.json",
         "package.json",
         "package-lock.json",
@@ -181,14 +187,61 @@ def main() -> None:
             "docs/runtime/rtx3090-phase6-real.json",
             "docs/runtime/rtx3090-phase6-stop.json",
             "docs/runtime/phase6-clean-startup.json",
+            "chatterbox-lock.json",
+            "chatterbox-gpu-lock.json",
+            "docs/runtime/chatterbox/setup-result.json",
+            "docs/runtime/chatterbox/clean-result.json",
+            "docs/runtime/chatterbox/quality-manifest.json",
+            "docs/runtime/chatterbox/alignment-verification.json",
+            "docs/runtime/chatterbox/wheel-inventory.json",
+            "docs/runtime/chatterbox/integration/media-validation.json",
+            "docs/runtime/chatterbox/integration/baseline.json",
+            "docs/runtime/chatterbox/integration/cpu-1089.json",
+            "docs/runtime/chatterbox/integration/cpu-1089-r2.json",
+            "docs/runtime/chatterbox/integration/cpu-121.json",
+            "docs/runtime/chatterbox/integration/cpu-assets.json",
+            "docs/runtime/chatterbox/integration/cpu-restart.json",
+            "docs/runtime/chatterbox/integration/cuda-1089.json",
+            "docs/runtime/chatterbox/integration/cuda-1089-r2.json",
+            "docs/runtime/chatterbox/integration/environment.json",
+            "docs/runtime/chatterbox/integration/cuda-121.json",
         )
     }
     public_metadata = re.compile(
-        r'\s*"(?:id|session|request)": "[0-9a-f-]{32,36}",?\s*'
+        r'\s*"(?:id|session|request|run)": "[0-9a-f-]{32,36}",?\s*'
         r'|\s*"(?:sha256|declared_pcm_sha256)": "[0-9a-f]{64}",?\s*'
     )
     # Only the new explicit evidence captures' Git source pin; review on schema changes.
     source_pin = re.compile(r'\s*"source": "[0-9a-f]{40}",?\s*')
+    # Public artifact hashes/source pins only in the named Chatterbox evidence schemas.
+    # Review these exact fields if the schemas or artifact sources change.
+    chatterbox_evidence = {
+        (ROOT / name).resolve()
+        for name in (
+            "chatterbox-lock.json",
+            "chatterbox-gpu-lock.json",
+            "docs/runtime/chatterbox/setup-result.json",
+            "docs/runtime/chatterbox/clean-result.json",
+            "docs/runtime/chatterbox/quality-manifest.json",
+            "docs/runtime/chatterbox/alignment-verification.json",
+            "docs/runtime/chatterbox/wheel-inventory.json",
+            "docs/runtime/chatterbox/integration/media-validation.json",
+            "docs/runtime/chatterbox/integration/baseline.json",
+            "docs/runtime/chatterbox/integration/cpu-1089.json",
+            "docs/runtime/chatterbox/integration/cpu-1089-r2.json",
+            "docs/runtime/chatterbox/integration/cpu-121.json",
+            "docs/runtime/chatterbox/integration/cpu-assets.json",
+            "docs/runtime/chatterbox/integration/cpu-restart.json",
+            "docs/runtime/chatterbox/integration/cuda-1089.json",
+            "docs/runtime/chatterbox/integration/cuda-1089-r2.json",
+            "docs/runtime/chatterbox/integration/environment.json",
+            "docs/runtime/chatterbox/integration/cuda-121.json",
+        )
+    }
+    chatterbox_pin = re.compile(
+        r'\s*"(?:perth_revision|source_revision|model_revision)": "[0-9a-f]{40}",?\s*'
+        r'|\s*"(?:sha256|reference_sha256|output_sha256|asset_sha256)": "[0-9a-f]{64}",?\s*'
+    )
     for filename in list(findings):
         evidence_path = (ROOT / filename).resolve()
         if evidence_path in evidence_paths:
@@ -200,6 +253,10 @@ def main() -> None:
                     finding["type"] == "Hex High Entropy String"
                     and (
                         public_metadata.fullmatch(evidence_lines[finding["line_number"] - 1])
+                        or (
+                            evidence_path in chatterbox_evidence
+                            and chatterbox_pin.fullmatch(evidence_lines[finding["line_number"] - 1])
+                        )
                         or (
                             evidence_path.name
                             in (

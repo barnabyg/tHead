@@ -1,0 +1,1652 @@
+[
+  {
+    "configuration": "baseline",
+    "run": "cffb365e828a456aaf36e911bae3a637",
+    "source_pcm_seconds": 5.74,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "5.824063",
+          "nb_read_frames": "144"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "5.804000",
+          "nb_read_frames": "91"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "baseline",
+    "run": "27daa2bdcb65406a93ac0428e481ff70",
+    "source_pcm_seconds": 2.56,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "2.624062",
+          "nb_read_frames": "64"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "2.624000",
+          "nb_read_frames": "41"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "baseline",
+    "run": "caed0bc494db460c82f65b2d6606d6ad",
+    "source_pcm_seconds": 5.74,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "5.824063",
+          "nb_read_frames": "144"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "5.804000",
+          "nb_read_frames": "91"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "baseline",
+    "run": "e58f69df7f2f4988b376f579f80d0546",
+    "source_pcm_seconds": 2.87,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "2.944063",
+          "nb_read_frames": "72"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "2.934000",
+          "nb_read_frames": "46"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "baseline",
+    "run": "a6cc98955f0b4bd8bf80bc700211cbb0",
+    "source_pcm_seconds": 14.59,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "14.664062",
+          "nb_read_frames": "365"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "14.654000",
+          "nb_read_frames": "229"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "baseline",
+    "run": "1740396940fe4c6da63479dd5f813392",
+    "source_pcm_seconds": 1.9,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "1.984063",
+          "nb_read_frames": "48"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "1.964000",
+          "nb_read_frames": "31"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "baseline",
+    "run": "f8a6c06ff76c4bd8860ce12c0b8e29b0",
+    "source_pcm_seconds": 5.74,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "5.824063",
+          "nb_read_frames": "144"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "5.804000",
+          "nb_read_frames": "91"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "baseline",
+    "run": "92384a5c6ccf40c596e6206348e37d9e",
+    "source_pcm_seconds": 2.56,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "2.624062",
+          "nb_read_frames": "64"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "2.624000",
+          "nb_read_frames": "41"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "baseline",
+    "run": "9ab896f96560402689d76880f0e4e3e8",
+    "source_pcm_seconds": 14.59,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "14.664062",
+          "nb_read_frames": "365"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "14.654000",
+          "nb_read_frames": "229"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "baseline",
+    "run": "9d0ccffc5b264514a12d1d8758835edf",
+    "source_pcm_seconds": 2.87,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "2.944063",
+          "nb_read_frames": "72"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "2.934000",
+          "nb_read_frames": "46"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "baseline",
+    "run": "d0a95b623d2a49b598e146630d001c6d",
+    "source_pcm_seconds": 5.74,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "5.824063",
+          "nb_read_frames": "144"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "5.804000",
+          "nb_read_frames": "91"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cpu-1089-r2",
+    "run": "ce9664a96dc4443c8a135c4623dd52df",
+    "source_pcm_seconds": 4.84,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "4.904063",
+          "nb_read_frames": "121"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "4.904000",
+          "nb_read_frames": "77"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cpu-1089-r2",
+    "run": "790241e4c7554a9d92f4406d898c1cfd",
+    "source_pcm_seconds": 1.56,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "1.624062",
+          "nb_read_frames": "39"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "1.624000",
+          "nb_read_frames": "26"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cpu-1089-r2",
+    "run": "6b6c74ffe0c94a3e9fbbdb9636018781",
+    "source_pcm_seconds": 4.84,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "4.904063",
+          "nb_read_frames": "121"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "4.904000",
+          "nb_read_frames": "77"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cpu-1089-r2",
+    "run": "3a9a17c368c94ce48ddff3ca67aa5292",
+    "source_pcm_seconds": 2.36,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "2.424063",
+          "nb_read_frames": "59"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "2.424000",
+          "nb_read_frames": "38"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cpu-1089-r2",
+    "run": "4b83e858b5924399bcb080b6380fa97a",
+    "source_pcm_seconds": 12.48,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "12.544063",
+          "nb_read_frames": "312"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "12.544000",
+          "nb_read_frames": "196"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cpu-1089-r2",
+    "run": "25aafeb805c646f79aaa5c813a5f5fbf",
+    "source_pcm_seconds": 1.2,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "1.264063",
+          "nb_read_frames": "30"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "1.264000",
+          "nb_read_frames": "20"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cpu-1089-r2",
+    "run": "443a4aca01204bcd8f877b299ba7718d",
+    "source_pcm_seconds": 4.84,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "4.904063",
+          "nb_read_frames": "121"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "4.904000",
+          "nb_read_frames": "77"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cpu-1089-r2",
+    "run": "dbaaa790a57f4fa7ae5204c0a08b9d37",
+    "source_pcm_seconds": 1.56,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "1.624062",
+          "nb_read_frames": "39"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "1.624000",
+          "nb_read_frames": "26"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cpu-1089-r2",
+    "run": "443fffc9ca17411cb703ab9918fd4a8e",
+    "source_pcm_seconds": 12.48,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "12.544063",
+          "nb_read_frames": "312"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "12.544000",
+          "nb_read_frames": "196"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cpu-1089-r2",
+    "run": "9783cc8c922e444993680b261a01a7bf",
+    "source_pcm_seconds": 2.36,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "2.424063",
+          "nb_read_frames": "59"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "2.424000",
+          "nb_read_frames": "38"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cpu-1089-r2",
+    "run": "5f8cecd31d274103a8802c4d1f036640",
+    "source_pcm_seconds": 4.84,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "4.904063",
+          "nb_read_frames": "121"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "4.904000",
+          "nb_read_frames": "77"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cpu-121",
+    "run": "a9fb0017f5a144d2ad34dadbb1867c4b",
+    "source_pcm_seconds": 4.96,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "5.024063",
+          "nb_read_frames": "124"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "5.024000",
+          "nb_read_frames": "79"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cpu-121",
+    "run": "b82551691ec94f3aa5a183bfc9a04e1f",
+    "source_pcm_seconds": 1.68,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "1.744063",
+          "nb_read_frames": "42"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "1.744000",
+          "nb_read_frames": "28"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cpu-121",
+    "run": "036e0acf27d740d38a9702c0afbc3b1b",
+    "source_pcm_seconds": 4.96,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "5.024063",
+          "nb_read_frames": "124"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "5.024000",
+          "nb_read_frames": "79"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cpu-121",
+    "run": "62841d997862462cae55e2dfc4abedd9",
+    "source_pcm_seconds": 2.48,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "2.544062",
+          "nb_read_frames": "62"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "2.544000",
+          "nb_read_frames": "40"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cpu-121",
+    "run": "2dd0dd2da13647aaabf27c755b0fd7b4",
+    "source_pcm_seconds": 13.68,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "13.744063",
+          "nb_read_frames": "342"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "13.744000",
+          "nb_read_frames": "215"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cpu-121",
+    "run": "2bbe91f697a945d28a52cca150a8e73e",
+    "source_pcm_seconds": 1.44,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "1.504063",
+          "nb_read_frames": "36"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "1.504000",
+          "nb_read_frames": "24"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cpu-121",
+    "run": "018f857c699344fabff975c4ec8d3279",
+    "source_pcm_seconds": 4.96,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "5.024063",
+          "nb_read_frames": "124"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "5.024000",
+          "nb_read_frames": "79"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cpu-121",
+    "run": "48677c1df2744ec9a21c54b8b61cefe3",
+    "source_pcm_seconds": 1.68,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "1.744063",
+          "nb_read_frames": "42"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "1.744000",
+          "nb_read_frames": "28"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cpu-121",
+    "run": "acf6b1280b1c40678e19a928884baee7",
+    "source_pcm_seconds": 13.68,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "13.744063",
+          "nb_read_frames": "342"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "13.744000",
+          "nb_read_frames": "215"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cpu-121",
+    "run": "1bc1006c224042a49dc2369ede138ec5",
+    "source_pcm_seconds": 2.48,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "2.544062",
+          "nb_read_frames": "62"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "2.544000",
+          "nb_read_frames": "40"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cpu-121",
+    "run": "2b36d5aaeaa44b95a75e1afaee9c58bb",
+    "source_pcm_seconds": 4.96,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "5.024063",
+          "nb_read_frames": "124"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "5.024000",
+          "nb_read_frames": "79"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cuda-1089",
+    "run": "298d94b47b1248a399efc0e6440536f7",
+    "source_pcm_seconds": 4.6,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "4.664062",
+          "nb_read_frames": "115"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "4.664000",
+          "nb_read_frames": "73"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cuda-1089",
+    "run": "3606cfeb21c74ff790b84a9a30fc4199",
+    "source_pcm_seconds": 1.56,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "1.624062",
+          "nb_read_frames": "39"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "1.624000",
+          "nb_read_frames": "26"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cuda-1089",
+    "run": "16299ae826af47a6a411c86552c75c85",
+    "source_pcm_seconds": 4.6,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "4.664062",
+          "nb_read_frames": "115"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "4.664000",
+          "nb_read_frames": "73"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cuda-1089",
+    "run": "98ab53155a874b50a147bbd488de50ba",
+    "source_pcm_seconds": 2.44,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "2.504062",
+          "nb_read_frames": "61"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "2.504000",
+          "nb_read_frames": "40"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cuda-1089",
+    "run": "504cacaff11e4162acea6b7b21ba9353",
+    "source_pcm_seconds": 12.52,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "12.584062",
+          "nb_read_frames": "313"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "12.584000",
+          "nb_read_frames": "197"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cuda-1089",
+    "run": "95417de5d9044e4ea05f33f6a6a9c6c9",
+    "source_pcm_seconds": 1.28,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "1.344062",
+          "nb_read_frames": "32"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "1.344000",
+          "nb_read_frames": "21"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cuda-1089",
+    "run": "c4b9f99f5e884dd08750f599afeeee32",
+    "source_pcm_seconds": 4.6,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "4.664062",
+          "nb_read_frames": "115"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "4.664000",
+          "nb_read_frames": "73"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cuda-1089",
+    "run": "f5001a40ae38421ebd7c399fbc699461",
+    "source_pcm_seconds": 1.56,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "1.624062",
+          "nb_read_frames": "39"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "1.624000",
+          "nb_read_frames": "26"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cuda-1089",
+    "run": "3c6f175425e24229ac13210fc36dfd5d",
+    "source_pcm_seconds": 12.52,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "12.584062",
+          "nb_read_frames": "313"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "12.584000",
+          "nb_read_frames": "197"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cuda-1089",
+    "run": "79d35821e9a64c64b3ff32b7d76b9798",
+    "source_pcm_seconds": 2.44,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "2.504062",
+          "nb_read_frames": "61"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "2.504000",
+          "nb_read_frames": "40"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cuda-1089",
+    "run": "bdb0fb3fbdbb467f822d0426fc6607a0",
+    "source_pcm_seconds": 4.6,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "4.664062",
+          "nb_read_frames": "115"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "4.664000",
+          "nb_read_frames": "73"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cuda-1089-r2",
+    "run": "38ae4fee97e34d67acfbf964758261b4",
+    "source_pcm_seconds": 4.6,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "4.664062",
+          "nb_read_frames": "115"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "4.664000",
+          "nb_read_frames": "73"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cuda-1089-r2",
+    "run": "3b13472f5728463f9bb2d613dbb15935",
+    "source_pcm_seconds": 1.56,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "1.624062",
+          "nb_read_frames": "39"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "1.624000",
+          "nb_read_frames": "26"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cuda-1089-r2",
+    "run": "0e0da004ffde456fb27e3af827af5871",
+    "source_pcm_seconds": 4.6,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "4.664062",
+          "nb_read_frames": "115"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "4.664000",
+          "nb_read_frames": "73"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cuda-1089-r2",
+    "run": "c1832c4b46004757b4841d74252e328f",
+    "source_pcm_seconds": 2.44,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "2.504062",
+          "nb_read_frames": "61"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "2.504000",
+          "nb_read_frames": "40"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cuda-1089-r2",
+    "run": "0a34fcfa53824797b2b54736ee20757b",
+    "source_pcm_seconds": 12.52,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "12.584062",
+          "nb_read_frames": "313"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "12.584000",
+          "nb_read_frames": "197"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cuda-1089-r2",
+    "run": "a83309a5e4e6439588705f7c960323cc",
+    "source_pcm_seconds": 1.28,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "1.344062",
+          "nb_read_frames": "32"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "1.344000",
+          "nb_read_frames": "21"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cuda-1089-r2",
+    "run": "36d021915e2f47a481871426393a3402",
+    "source_pcm_seconds": 4.6,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "4.664062",
+          "nb_read_frames": "115"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "4.664000",
+          "nb_read_frames": "73"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cuda-1089-r2",
+    "run": "b4897bdce6fa48f4bf155207bca3a923",
+    "source_pcm_seconds": 1.56,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "1.624062",
+          "nb_read_frames": "39"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "1.624000",
+          "nb_read_frames": "26"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cuda-1089-r2",
+    "run": "5cef8d98c3394568aeacf0040f1e728b",
+    "source_pcm_seconds": 12.52,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "12.584062",
+          "nb_read_frames": "313"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "12.584000",
+          "nb_read_frames": "197"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cuda-1089-r2",
+    "run": "2b953033b41c4c77bea3fe220c6dd696",
+    "source_pcm_seconds": 2.44,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "2.504062",
+          "nb_read_frames": "61"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "2.504000",
+          "nb_read_frames": "40"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cuda-1089-r2",
+    "run": "f656f0b649934531830e7e352afbd044",
+    "source_pcm_seconds": 4.6,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "4.664062",
+          "nb_read_frames": "115"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "4.664000",
+          "nb_read_frames": "73"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cuda-121",
+    "run": "87c94fca4fcd4f65ad0d7162bb4bd229",
+    "source_pcm_seconds": 5.32,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "5.384062",
+          "nb_read_frames": "133"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "5.384000",
+          "nb_read_frames": "85"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cuda-121",
+    "run": "96491f242aa54a42931fbf3985cfbc8d",
+    "source_pcm_seconds": 1.76,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "1.824063",
+          "nb_read_frames": "44"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "1.824000",
+          "nb_read_frames": "29"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cuda-121",
+    "run": "f3bbad57cfeb461fb3014c2f8309106b",
+    "source_pcm_seconds": 5.32,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "5.384062",
+          "nb_read_frames": "133"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "5.384000",
+          "nb_read_frames": "85"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cuda-121",
+    "run": "f4b4ca1494a94c69b0979a27b5731016",
+    "source_pcm_seconds": 3.04,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "3.104062",
+          "nb_read_frames": "76"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "3.104000",
+          "nb_read_frames": "49"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cuda-121",
+    "run": "f7b1a466999c4da583bd68b33bac56cc",
+    "source_pcm_seconds": 13.36,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "13.424062",
+          "nb_read_frames": "334"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "13.424000",
+          "nb_read_frames": "210"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cuda-121",
+    "run": "216d1a51a1364506b2bfd127feb9f05b",
+    "source_pcm_seconds": 1.36,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "1.424063",
+          "nb_read_frames": "34"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "1.424000",
+          "nb_read_frames": "23"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cuda-121",
+    "run": "f65bcadc54cb4885b9d88e18db1858ff",
+    "source_pcm_seconds": 5.32,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "5.384062",
+          "nb_read_frames": "133"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "5.384000",
+          "nb_read_frames": "85"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cuda-121",
+    "run": "22f9cd47f66143e29b03aa6d2273eab4",
+    "source_pcm_seconds": 1.76,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "1.824063",
+          "nb_read_frames": "44"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "1.824000",
+          "nb_read_frames": "29"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cuda-121",
+    "run": "a76945e738c24672aa75b336ef3c9113",
+    "source_pcm_seconds": 13.36,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "13.424062",
+          "nb_read_frames": "334"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "13.424000",
+          "nb_read_frames": "210"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cuda-121",
+    "run": "ff9201d639904f70b000b34f2a159827",
+    "source_pcm_seconds": 3.04,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "3.104062",
+          "nb_read_frames": "76"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "3.104000",
+          "nb_read_frames": "49"
+        }
+      ]
+    }
+  },
+  {
+    "configuration": "cuda-121",
+    "run": "a448cab58fb14318b7d8486c95a3be50",
+    "source_pcm_seconds": 5.32,
+    "decoded": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_type": "video",
+          "start_time": "0.000000",
+          "duration": "5.384062",
+          "nb_read_frames": "133"
+        },
+        {
+          "codec_type": "audio",
+          "sample_rate": "16000",
+          "channels": 1,
+          "start_time": "0.000000",
+          "duration": "5.384000",
+          "nb_read_frames": "85"
+        }
+      ]
+    }
+  }
+]

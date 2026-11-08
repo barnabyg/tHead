@@ -1,0 +1,7 @@
+{
+  "note": "Device-wide values include background applications; app shutdown waited before sampling.",
+  "kept_open": false,
+  "global_vram_before_mib": 836,
+  "task_app_exited": true,
+  "global_vram_after_mib": 836
+}

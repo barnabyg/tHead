@@ -1,0 +1,47 @@
+{
+  "revision": "ff76e508c666b00b95312e55d3fd11e45eb2386f",
+  "captured": "2026-11-08T19:22:53.335Z",
+  "browser": "158.0.8127.18",
+  "measurement": "digital audio onset plus decoded moving frame; not physical-speaker latency",
+  "timing": "client performance clock in milliseconds; status polling 100 ms",
+  "source_files": [
+    {
+      "path": "scripts/chatterbox_app.py",
+      "sha256": "f94897833dc4bb700876312e3c38477599c2f0ab97cbb4cf6a6f4e2e74398df5"
+    },
+    {
+      "path": "scripts/chatterbox_voice.py",
+      "sha256": "6962367530a71c1c32557565c4c1832484ea57cda836f2426ab3e4d0b0b11623"
+    },
+    {
+      "path": "scripts/chatterbox_worker.py",
+      "sha256": "d5e9ea19dd82770e99ad7553dbce50e3138c80becc3c678bd65ed72528dbe106"
+    },
+    {
+      "path": "scripts/conversation.py",
+      "sha256": "99fc72ab0444147f2759b400ca2aab9d1aaad6e9e9d7bf8f797224cd9280face"
+    },
+    {
+      "path": "scripts/speech.py",
+      "sha256": "408cd1c398b1aa71fecf483ea7682fa7fb7c4872440b71cb26697d6ea1d3230b"
+    },
+    {
+      "path": "scripts/streaming.py",
+      "sha256": "ff0732e318a393f61f6b2292cc5da686c82bf535071cce2d398ec51048a4a98a"
+    },
+    {
+      "path": "scripts/streaming.js",
+      "sha256": "29c525363f81f95e1cf62adca44882e55037550a6ba804457e0cbff15a682073"
+    },
+    {
+      "path": "scripts/chatterbox-benchmark.cjs",
+      "sha256": "d54bba8b84103624b48a9ce329907fd29a7e5e8ce21419cc269dc84c4e0d2dbc"
+    },
+    {
+      "path": "chatterbox-lock.json",
+      "sha256": "d7b811573486160ba31374f5c893d5fcfb3a1b23a98ee2728e85df34b0b93171"
+    }
+  ],
+  "configurations": [],
+  "probes": []
+}

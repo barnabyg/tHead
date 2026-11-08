@@ -15,7 +15,7 @@ from typing import Any
 
 from avatars import AvatarStore, decode_portrait, user_data_directory, voice_catalogue
 from budget import PRICES, Budget, BudgetError
-from pairs import DEFAULT_PAIR
+from pairs import DEFAULT_PAIR, Avatar
 from prepare import RUNTIME
 from provider import (
     INPUT_BOUND,
@@ -29,7 +29,7 @@ from provider import (
     validate_level,
     validate_model,
 )
-from speech import Voice
+from speech import SpeechVoice, Voice
 from streaming import Demonstration, LoopbackServer, Session, handler
 
 PAIR_FAULTS = {
@@ -121,8 +121,9 @@ class Conversation(Demonstration):
         initialize_budget: bool = False,
         pair: str = DEFAULT_PAIR,
         user_data: Path | None = None,
+        avatar_store: AvatarStore | None = None,
     ) -> None:
-        self.avatars = AvatarStore(
+        self.avatars = avatar_store or AvatarStore(
             user_data or (directory / "user-data" if test_backend else user_data_directory())
         )
         self.voices = voice_catalogue(test_backend)
@@ -232,7 +233,7 @@ class Conversation(Demonstration):
             (self.directory / "imported-portrait.png").unlink(missing_ok=True)
         if self.pair_fault in ("pair-delay", "pair-delay-fail"):
             time.sleep(2)  # Simulated preparation completing after Stop/reset.
-        candidate = Voice(pair.voice_lock)
+        candidate = self.make_voice(pair)
         try:
             self.pair_probe(
                 "pair-portrait-missing", "pair-portrait-unreadable", "pair-portrait-invalid"
@@ -247,8 +248,7 @@ class Conversation(Demonstration):
                 else self.imported_portrait(pair.id)
             )
             self.pair_probe("pair-voice-missing")
-            if not self.test_backend:
-                candidate.prepare(self.shutdown)
+            self.prepare_voice(candidate)
             self.pair_probe("pair-voice-invalid")
             if not self.test_backend:
                 inference.get_base_data(pipeline, str(portrait), 42, False)
@@ -262,6 +262,13 @@ class Conversation(Demonstration):
         finally:
             if self.voice is not candidate:
                 candidate.close()
+
+    def make_voice(self, avatar: Avatar) -> SpeechVoice:
+        return Voice(avatar.voice_lock)
+
+    def prepare_voice(self, voice: SpeechVoice) -> None:
+        if not self.test_backend:
+            voice.prepare(self.shutdown)
 
     def imported_portrait(self, identity: str) -> Path:
         # One derived model input per server output directory, never the user's source path.

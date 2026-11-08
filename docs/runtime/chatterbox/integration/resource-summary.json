@@ -1,0 +1,72 @@
+{
+  "baseline": {
+    "samples": 182,
+    "peak_global_vram_mib": 6798,
+    "peak_scoped_rss_bytes": 3758612480,
+    "system_cpu_percent_mean": 11.942307692307692,
+    "system_cpu_percent_max": 37.8,
+    "gpu_percent_mean": 53.142857142857146,
+    "gpu_percent_max": 100,
+    "duration_seconds": 90.56382751464844
+  },
+  "cpu-1089": {
+    "samples": 11,
+    "peak_global_vram_mib": 842,
+    "peak_scoped_rss_bytes": 1675522048,
+    "system_cpu_percent_mean": 17.181818181818183,
+    "system_cpu_percent_max": 26.8,
+    "gpu_percent_mean": 5.181818181818182,
+    "gpu_percent_max": 7,
+    "duration_seconds": 5.0234055519104
+  },
+  "cpu-1089-r2": {
+    "samples": 255,
+    "peak_global_vram_mib": 6799,
+    "peak_scoped_rss_bytes": 6946906112,
+    "system_cpu_percent_mean": 38.19372549019608,
+    "system_cpu_percent_max": 83.6,
+    "gpu_percent_mean": 35.12156862745098,
+    "gpu_percent_max": 100,
+    "duration_seconds": 127.18480086326599
+  },
+  "cpu-121": {
+    "samples": 534,
+    "peak_global_vram_mib": 6798,
+    "peak_scoped_rss_bytes": 11181912064,
+    "system_cpu_percent_mean": 32.369662921348315,
+    "system_cpu_percent_max": 87.3,
+    "gpu_percent_mean": 28.153558052434455,
+    "gpu_percent_max": 100,
+    "duration_seconds": 266.69436597824097
+  },
+  "cuda-1089": {
+    "samples": 318,
+    "peak_global_vram_mib": 9474,
+    "peak_scoped_rss_bytes": 8196399104,
+    "system_cpu_percent_mean": 22.778930817610064,
+    "system_cpu_percent_max": 100.0,
+    "gpu_percent_mean": 35.09748427672956,
+    "gpu_percent_max": 100,
+    "duration_seconds": 158.77192378044128
+  },
+  "cuda-1089-r2": {
+    "samples": 207,
+    "peak_global_vram_mib": 9470,
+    "peak_scoped_rss_bytes": 6904578048,
+    "system_cpu_percent_mean": 19.705314009661837,
+    "system_cpu_percent_max": 67.0,
+    "gpu_percent_mean": 50.2512077294686,
+    "gpu_percent_max": 100,
+    "duration_seconds": 103.11122989654541
+  },
+  "cuda-121": {
+    "samples": 516,
+    "peak_global_vram_mib": 9487,
+    "peak_scoped_rss_bytes": 8286879744,
+    "system_cpu_percent_mean": 20.651356589147287,
+    "system_cpu_percent_max": 79.4,
+    "gpu_percent_mean": 33.62403100775194,
+    "gpu_percent_max": 100,
+    "duration_seconds": 257.74782609939575
+  }
+}

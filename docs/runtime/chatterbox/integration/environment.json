@@ -1,0 +1,36 @@
+{
+  "platform": "Windows-11-10.0.26300-SP0",
+  "cpu": "AMD Ryzen 5 7600, 6 cores / 12 logical processors",
+  "physical_ram_bytes": 102665969664,
+  "gpu": "NVIDIA RTX 3090",
+  "gpu_total_mib": 24576,
+  "nvidia_driver": "621.14",
+  "gpu_configuration": {
+    "python": "3.12.10",
+    "torch": "2.6.0+cu124",
+    "cuda": "12.4",
+    "model_and_source": "same pins as CPU",
+    "package_differences": {
+      "torch": {
+        "cpu": "2.6.0",
+        "cuda": "2.6.0+cu124"
+      },
+      "torchaudio": {
+        "cpu": "2.6.0",
+        "cuda": "2.6.0+cu124"
+      }
+    }
+  },
+  "licence_notices": [
+    {
+      "file": "LICENSE",
+      "bytes": 501642,
+      "sha256": "413915e56980e2f0a1afca6c222982ac871bfa90178e4eab412c2f655c523728"
+    },
+    {
+      "file": "NOTICE",
+      "bytes": 24088,
+      "sha256": "1c3dec6c0342c7ed9e12af59b296c7bb1d394af5cf881db74191cc8299efce5c"
+    }
+  ]
+}

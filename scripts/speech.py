@@ -12,7 +12,17 @@ import subprocess  # nosec B404
 import threading
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Protocol
+
+
+class SpeechVoice(Protocol):
+    metadata: dict[str, Any]
+
+    def prepare(self, cancelled: threading.Event) -> None: ...
+    def begin_turn(self, cancelled: threading.Event) -> None: ...
+    def speak(self, text: str, cancelled: threading.Event) -> bytes: ...
+    def finish_turn(self, cancelled: threading.Event) -> bytes: ...
+    def close(self) -> None: ...
 
 
 def segments(text: str) -> list[str]:
@@ -130,6 +140,12 @@ class Voice:
         except Exception:
             self.close()
             raise
+
+    def begin_turn(self, cancelled: threading.Event) -> None:
+        pass
+
+    def finish_turn(self, cancelled: threading.Event) -> bytes:
+        return b""
 
     def close(self) -> None:
         process, self.process = self.process, None

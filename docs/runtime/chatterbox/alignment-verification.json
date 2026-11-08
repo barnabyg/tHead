@@ -1,0 +1,27 @@
+{
+  "status": "generated_unreviewed",
+  "source_revision": "ab55923c27757c90cfcc407baa57dc25a7d25217",
+  "model_revision": "71ccd1d0081b430592cea481f4307e764e07bc64",
+  "reference_sha256": "a1bf497d1b186469876f3dfc91f8fcfd00b81c82890fb84f63280901f9d08438",
+  "text": "Hello. This is a local text to speech demonstration. The avatar should speak this passage clearly, then finish without repeating any words.",
+  "seed": 17,
+  "device": "cpu",
+  "threads": 8,
+  "network_policy": "offline environment flags and Python socket audit hook",
+  "streaming": false,
+  "conditioning_diagnostics": [
+    "Reference mel length is not equal to 2 * reference token length."
+  ],
+  "import_seconds": 9.908762899998692,
+  "ready_seconds": 13.088811199999327,
+  "conditioning_seconds": 0.8601654999984021,
+  "synthesis_seconds": 5.459301700000651,
+  "first_pcm_seconds": 19.408284100001765,
+  "sample_rate": 24000,
+  "channels": 1,
+  "duration_seconds": 8.06,
+  "real_time_factor": 0.6773327171216689,
+  "output_sha256": "0d59d394307119dc648f33e35e067dff802db481cfdfb4bcba324e5027d3dcb3",
+  "watermark": "upstream PerthImplicitWatermarker, unmodified",
+  "total_seconds": 19.418560599999182
+}

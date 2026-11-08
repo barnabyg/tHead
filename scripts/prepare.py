@@ -11,17 +11,25 @@ import sys
 import threading
 import time
 from pathlib import Path
+from typing import BinaryIO
 
 ROOT = Path(__file__).resolve().parents[1]
 RUNTIME = ROOT / ".runtime"
 
 
 def run(
-    command: list[str], timeout: int, cwd: Path = ROOT, cancelled: threading.Event | None = None
+    command: list[str],
+    timeout: int,
+    cwd: Path = ROOT,
+    cancelled: threading.Event | None = None,
+    *,
+    output: BinaryIO | None = None,
 ) -> None:
     print(f"Running: {' '.join(command)}", flush=True)
-    # Commands come only from this module or the checked-in verification runner.
-    with subprocess.Popen(command, cwd=cwd) as process:  # nosec B603
+    # Commands come only from checked-in preparation, evaluation and verification tooling.
+    with subprocess.Popen(  # nosec B603
+        command, cwd=cwd, stdout=output, stderr=subprocess.STDOUT if output is not None else None
+    ) as process:
         code: int | None
         try:
             if cancelled is None:
