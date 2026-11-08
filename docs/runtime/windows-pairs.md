@@ -1,3 +1,31 @@
+# Named avatars (extension after Phase 6)
+
+Issue #42 extends the original Phase 6 pair-selector scope. Historical measurements
+below retain their original labels. The selector is **Avatar**; built-ins are
+**JFK** (`jfk-zira`, Zira) and **Grace** (`hopper-hazel`, Hazel). Avatar identity,
+name, portrait and voice are separate; multiple avatars can share a voice.
+
+Use `-Avatar hopper-hazel`, `--avatar` or `THEAD_AVATAR`. `-Pair`, `--pair`,
+`THEAD_PAIR` and existing IDs remain compatibility aliases. THEAD_AVATAR takes
+precedence over THEAD_PAIR. HTTP selection accepts `avatar` or legacy `pair`.
+Selection applies portrait and voice together between turns without clearing
+context. Native voice validation and model resource ownership are unchanged.
+
+From `C:/docs/git/tHead`, with the prerequisites in the
+[conversation guide](windows-conversation.md), run in PowerShell 7:
+
+```powershell
+pwsh -NoProfile -File ./scripts/conversation.ps1 -Avatar hopper-hazel -FixtureProvider -InitializeBudget
+```
+
+Select Grace, ask “What is a black hole?”, confirm Grace's portrait, audible Hazel
+speech and moving synchronised video. Switch to JFK, ask a contextual follow-up,
+then exercise Stop and New conversation. Provider answers are deterministic and
+free. Listening and lip-sync need human confirmation; browser fixtures establish
+control flow using substitute media.
+
+---
+
 # Configured avatars and local voices (#30–#32)
 
 From `C:/docs/git/tHead` in PowerShell 7:

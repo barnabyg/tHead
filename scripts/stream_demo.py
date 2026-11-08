@@ -23,7 +23,12 @@ def main() -> None:
     parser.add_argument("--initialize-budget", action="store_true")
     parser.add_argument("--budget")
     parser.add_argument("--port", type=int, default=8765)
-    parser.add_argument("--pair", default=os.environ.get("THEAD_PAIR", DEFAULT_PAIR))
+    parser.add_argument(
+        "--avatar",
+        "--pair",
+        dest="pair",
+        default=os.environ.get("THEAD_AVATAR", os.environ.get("THEAD_PAIR", DEFAULT_PAIR)),
+    )
     args = parser.parse_args()
     if args.conversation:
         try:

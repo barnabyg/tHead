@@ -87,15 +87,15 @@ test('portrait stays visible through preparation, playback, Stop, reset and pair
   await expect(page.locator('#status')).toHaveText('Playback ended');
   await expect(page.locator('#video')).toHaveCSS('opacity', '0');
   await expect(portrait).toHaveClass('loaded');
-  await expect(page.getByLabel('Avatar and voice', { exact: true })).toBeEnabled();
-  await page.getByLabel('Avatar and voice', { exact: true }).selectOption('hopper-hazel');
-  await expect(page.getByRole('img', { name: 'Grace Hopper portrait', exact: true })).toHaveClass(
+  await expect(page.getByLabel('Avatar', { exact: true })).toBeEnabled();
+  await page.getByLabel('Avatar', { exact: true }).selectOption('hopper-hazel');
+  await expect(page.getByRole('img', { name: 'Grace portrait', exact: true })).toHaveClass(
     'loaded',
   );
   await page.getByLabel('Pair diagnostic', { exact: true }).selectOption('pair-prepare');
-  await page.getByLabel('Avatar and voice', { exact: true }).selectOption('jfk-zira');
+  await page.getByLabel('Avatar', { exact: true }).selectOption('jfk-zira');
   await expect(page.locator('#pair-status')).toContainText('failed');
-  await expect(page.getByRole('img', { name: 'Grace Hopper portrait', exact: true })).toHaveClass(
+  await expect(page.getByRole('img', { name: 'Grace portrait', exact: true })).toHaveClass(
     'loaded',
   );
 });
@@ -142,9 +142,9 @@ test('missing portrait gives a useful fallback and another avatar can recover', 
   await page.reload();
   await expect(page.locator('#portrait-notice')).toContainText('Rerun the launch command');
   await expect(page.locator('#portrait')).not.toHaveClass('loaded');
-  await expect(page.getByLabel('Avatar and voice', { exact: true })).toBeEnabled();
-  await page.getByLabel('Avatar and voice', { exact: true }).selectOption('hopper-hazel');
-  await expect(page.getByRole('img', { name: 'Grace Hopper portrait', exact: true })).toHaveClass(
+  await expect(page.getByLabel('Avatar', { exact: true })).toBeEnabled();
+  await page.getByLabel('Avatar', { exact: true }).selectOption('hopper-hazel');
+  await expect(page.getByRole('img', { name: 'Grace portrait', exact: true })).toHaveClass(
     'loaded',
   );
 });
@@ -203,7 +203,7 @@ test('switch both directions between turns, reject busy selection, retain contex
   request,
 }, info) => {
   const ask = page.getByRole('button', { name: 'Ask', exact: true });
-  const pair = page.getByLabel('Avatar and voice', { exact: true });
+  const pair = page.getByLabel('Avatar', { exact: true });
   await expect(pair).toHaveValue('jfk-zira');
   await ask.click();
   await expect(pair).toBeDisabled();
@@ -215,7 +215,7 @@ test('switch both directions between turns, reject busy selection, retain contex
   await expect(page.locator('#status')).toHaveText('Playback ended');
   await expect(pair).toBeEnabled();
   await pair.selectOption('hopper-hazel');
-  await expect(page.locator('#pair-status')).toContainText('Active: Grace Hopper');
+  await expect(page.locator('#pair-status')).toContainText('Active: Grace');
   await expect(ask).toBeEnabled();
   await page.getByLabel('Question', { exact: true }).fill('How do we detect one?');
   await ask.click();
@@ -249,14 +249,14 @@ test('reset and Stop during loading retain choice, reject overlapping selection 
   request,
 }, info) => {
   const ask = page.getByRole('button', { name: 'Ask', exact: true });
-  const pair = page.getByLabel('Avatar and voice', { exact: true });
+  const pair = page.getByLabel('Avatar', { exact: true });
   await ask.click();
   await expect(page.locator('#status')).toHaveText('Playback ended');
   const before = await (await request.get(`${info.url}/status`)).json();
   await page.getByLabel('Pair diagnostic', { exact: true }).selectOption('pair-delay');
   await expect(pair).toBeEnabled();
   await pair.selectOption('hopper-hazel');
-  await expect(page.locator('#pair-status')).toContainText('Preparing Grace Hopper');
+  await expect(page.locator('#pair-status')).toContainText('Preparing Grace');
   await expect(ask).toBeDisabled();
   await expect(pair).toBeDisabled();
   const conflict = await request.post(`${info.url}/select`, {
@@ -296,14 +296,14 @@ for (const fault of [
     request,
   }, info) => {
     const ask = page.getByRole('button', { name: 'Ask', exact: true });
-    const pair = page.getByLabel('Avatar and voice', { exact: true });
+    const pair = page.getByLabel('Avatar', { exact: true });
     await ask.click();
     await expect(page.locator('#status')).toHaveText('Playback ended');
     const before = await (await request.get(`${info.url}/status`)).json();
     await page.getByLabel('Pair diagnostic', { exact: true }).selectOption(fault);
     await expect(pair).toBeEnabled();
     await pair.selectOption('hopper-hazel');
-    await expect(page.locator('#pair-status')).toContainText('Grace Hopper / Hazel');
+    await expect(page.locator('#pair-status')).toContainText('Grace');
     await expect(page.locator('#pair-status')).toContainText('failed');
     await expect(ask).toBeDisabled();
     const failed = await (await request.get(`${info.url}/status`)).json();
@@ -329,7 +329,7 @@ test('late old media and delayed failed selection cannot revive playback after r
   request,
 }, info) => {
   const ask = page.getByRole('button', { name: 'Ask', exact: true });
-  const pair = page.getByLabel('Avatar and voice', { exact: true });
+  const pair = page.getByLabel('Avatar', { exact: true });
   let releaseMedia;
   let receivedMedia;
   const mediaGate = new Promise((resolve) => {
@@ -351,7 +351,7 @@ test('late old media and delayed failed selection cannot revive playback after r
   await expect(pair).toBeEnabled();
   await page.getByLabel('Pair diagnostic', { exact: true }).selectOption('pair-delay-fail');
   await pair.selectOption('hopper-hazel');
-  await expect(page.locator('#pair-status')).toContainText('Preparing Grace Hopper');
+  await expect(page.locator('#pair-status')).toContainText('Preparing Grace');
   await page.getByRole('button', { name: 'New conversation' }).click();
   releaseMedia();
   await expect(page.locator('#pair-status')).toContainText('failed');
@@ -384,7 +384,7 @@ test('reset acknowledgement gates the next selection and response', async ({ pag
   });
   await page.getByRole('button', { name: 'New conversation' }).click();
   await accepted;
-  const pair = page.getByLabel('Avatar and voice', { exact: true });
+  const pair = page.getByLabel('Avatar', { exact: true });
   const ask = page.getByRole('button', { name: 'Ask', exact: true });
   try {
     expect(await pair.isDisabled()).toBe(true);
@@ -394,7 +394,7 @@ test('reset acknowledgement gates the next selection and response', async ({ pag
   }
   await expect(pair).toBeEnabled();
   await pair.selectOption('hopper-hazel');
-  await expect(page.locator('#pair-status')).toContainText('Active: Grace Hopper');
+  await expect(page.locator('#pair-status')).toContainText('Active: Grace');
   await expect(ask).toBeEnabled();
 });
 
@@ -407,7 +407,7 @@ test('selection waits for backend playback completion acknowledgement', async ({
     if (route.request().postDataJSON().event === 'ended') await gate;
     await route.continue();
   });
-  const pair = page.getByLabel('Avatar and voice', { exact: true });
+  const pair = page.getByLabel('Avatar', { exact: true });
   await page.getByRole('button', { name: 'Ask', exact: true }).click();
   await expect(page.locator('#status')).toHaveText('Playback ended');
   try {
@@ -422,7 +422,7 @@ test('selection waits for backend playback completion acknowledgement', async ({
   }
   await expect(pair).toBeEnabled();
   await pair.selectOption('hopper-hazel');
-  await expect(page.locator('#pair-status')).toContainText('Active: Grace Hopper');
+  await expect(page.locator('#pair-status')).toContainText('Active: Grace');
 });
 
 test('complete answer, contextual follow-up, idle Stop and fresh conversation', async ({

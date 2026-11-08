@@ -153,3 +153,7 @@ latency. No automatic retries replay partial speech. For recovery, select a prov
 TTS or media failure under `-FixtureProvider -Diagnostics`, Ask, observe a clear
 failure, select None and Ask again without restarting. Repeat Stop during the
 delayed-provider and delayed-TTS probes; then try New conversation while busy.
+
+Named avatars are **JFK** and **Grace**. Use `-Avatar hopper-hazel` or
+`THEAD_AVATAR`; legacy Pair flags and THEAD_PAIR remain supported. See the
+[avatar guide](windows-pairs.md) for selection and manual verification.

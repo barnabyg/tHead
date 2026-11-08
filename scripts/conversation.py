@@ -25,8 +25,8 @@ PAIR_FAULTS = {
     "pair-portrait-invalid": "Portrait invalid; restore the declared portrait and retry",
     "pair-voice-missing": "Desktop voice unavailable; install the declared legacy English voice",
     "pair-voice-invalid": "Voice assets invalid; restore the declared Windows voice version",
-    "pair-prepare": "Avatar failed after voice preparation; retry or select another pair",
-    "pair-delay-fail": "Delayed avatar preparation failed; retry or select another pair",
+    "pair-prepare": "Avatar failed after voice preparation; retry or select another avatar",
+    "pair-delay-fail": "Delayed avatar preparation failed; retry or select another avatar",
 }
 
 
@@ -77,7 +77,7 @@ class Conversation(Demonstration):
         if path == "/select":
             return self.select(
                 str(data.get("session", "")),
-                str(data.get("pair", "")),
+                str(data.get("avatar", data.get("pair", ""))),
                 str(data.get("fault", "")),
             )
         return self.ask(
@@ -165,7 +165,7 @@ class Conversation(Demonstration):
                 self.error = (
                     f"{self.selected_pair.name} preparation failed: "
                     f"{type(error).__name__}: {error}. "
-                    "See docs/runtime/windows-pairs.md; select an available pair to recover."
+                    "See docs/runtime/windows-pairs.md; select an available avatar to recover."
                 )
                 self.condition.notify_all()
         finally:
@@ -221,6 +221,12 @@ class Conversation(Demonstration):
                 **super().status(),
                 "conversationEnabled": True,
                 "pairs": [{"id": p.id, "name": p.name} for p in configured_pairs().values()],
+                "avatars": [
+                    {"id": p.id, "name": p.name, "voice": p.voice}
+                    for p in configured_pairs().values()
+                ],
+                "activeAvatar": self.active_pair,
+                "selectedAvatar": self.selected_pair.id,
                 "activePair": self.active_pair,
                 "selectedPair": self.selected_pair.id,
                 "pairSequence": self.pair_sequence,
@@ -430,7 +436,12 @@ def main() -> None:
     parser.add_argument("--model", default=os.environ.get("THEAD_MODEL", MODEL))
     parser.add_argument("--budget", type=Path)
     parser.add_argument("--initialize-budget", action="store_true")
-    parser.add_argument("--pair", default=os.environ.get("THEAD_PAIR", DEFAULT_PAIR))
+    parser.add_argument(
+        "--avatar",
+        "--pair",
+        dest="pair",
+        default=os.environ.get("THEAD_AVATAR", os.environ.get("THEAD_PAIR", DEFAULT_PAIR)),
+    )
     args = parser.parse_args()
     try:
         configured_pair(args.pair)

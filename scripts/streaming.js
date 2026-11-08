@@ -517,8 +517,8 @@ setInterval(async () => {
           ? `Preparing ${status.pairs.find((item) => item.id === status.selectedPair)?.name}…`
           : status.error || `Active: ${pair?.name || 'none'}${status.ready ? ' — Ready' : ''}`;
       conversation.textContent = pair
-        ? `Active pair: ${pair.name}. Synthetic speech.`
-        : 'Preparing pair';
+        ? `Active avatar: ${pair.name}. Synthetic speech.`
+        : 'Preparing avatar';
       if (sessionIdentity && status.session !== sessionIdentity) {
         epoch++;
         release();
@@ -531,7 +531,7 @@ setInterval(async () => {
         if (portrait.getAttribute('src') !== source) {
           portrait.classList.remove('loaded');
           portrait.src = source;
-          portrait.alt = `${displayPair.name.split(' / ')[0]} portrait`;
+          portrait.alt = `${displayPair.name} portrait`;
         }
       }
       const transcript = document.querySelector('#transcript');
