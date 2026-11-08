@@ -9,6 +9,16 @@ let submitting = false;
 let notice = '';
 let audioOutput = null;
 const conversation = document.querySelector('#conversation');
+const portrait = document.querySelector('#portrait');
+portrait?.addEventListener('load', () => portrait.classList.add('loaded'));
+portrait?.addEventListener('error', () => {
+  portrait.classList.remove('loaded');
+  document.querySelector('#portrait-notice').textContent =
+    'Portrait unavailable. Rerun the launch command to prepare assets.';
+});
+// Keep the still portrait underneath until a decoded video frame is presented.
+video.addEventListener('ended', () => video.classList.remove('presenting'));
+
 let sessionIdentity = null;
 let pendingRequest = null;
 let pendingController = null;
@@ -48,11 +58,13 @@ document.querySelector('#reset')?.addEventListener('click', async () => {
   const run = active;
   release();
   observeSilence(run, before, beforeRms);
-  document.querySelector('#transcript').textContent = '';
+  document.querySelector('#transcript').replaceChildren();
+  delete document.querySelector('#transcript').dataset.rendered;
   try {
     const fresh = await post('/reset', { session: sessionIdentity });
     sessionIdentity = fresh.session;
-    document.querySelector('#transcript').textContent = '';
+    document.querySelector('#transcript').replaceChildren();
+    delete document.querySelector('#transcript').dataset.rendered;
     notice = 'New conversation';
   } catch (error) {
     statusText.textContent = String(error);
@@ -192,6 +204,7 @@ function release() {
   active = null;
   run?.controller?.abort();
   video.pause();
+  video.classList.remove('presenting');
   video.removeAttribute('src');
   video.load();
   if (run?.url) URL.revokeObjectURL(run.url);
@@ -201,6 +214,7 @@ function release() {
 function observeVideo(run) {
   video.requestVideoFrameCallback((_now, first) => {
     if (active !== run) return;
+    video.classList.add('presenting');
     telemetry('first-frame-presented', { mediaTime: first.mediaTime });
     const next = (_time, frame) => {
       if (active !== run) return;
@@ -506,23 +520,66 @@ setInterval(async () => {
         notice = 'Server session lost or reset; conversation cleared';
       }
       sessionIdentity = status.session;
+      const displayPair = pair || status.pairs.find((item) => item.id === status.selectedPair);
+      if (portrait && displayPair) {
+        const source = `/portrait?pair=${encodeURIComponent(displayPair.id)}`;
+        if (portrait.getAttribute('src') !== source) {
+          portrait.classList.remove('loaded');
+          portrait.src = source;
+          portrait.alt = `${displayPair.name.split(' / ')[0]} portrait`;
+        }
+        document.querySelector('#avatar-name').textContent = displayPair.name.split(' / ')[0];
+      }
       const transcript = document.querySelector('#transcript');
-      transcript.textContent = '';
-      for (const turn of status.transcript) {
-        const entry = document.createElement('p');
-        entry.textContent = `You: ${turn.question}\nAvatar: ${turn.answer}\n${turn.state === 'stopped' ? 'Interrupted' : turn.state}${turn.truncated ? ' (output limit reached)' : ''} — Generated text may not all have been spoken.`;
-        if (turn.usage?.estimated_usd !== undefined)
-          entry.textContent += `\nTokens: ${turn.usage.input_tokens ?? 'unknown'} input / ${turn.usage.output_tokens ?? 'unknown'} output; estimated USD ${turn.usage.estimated_usd.toFixed(6)}${turn.usage.estimated ? ' (conservative allowance; final usage unavailable)' : ''}.`;
-        transcript.append(entry);
+      const rendered = JSON.stringify([status.transcript, status.contextOmitted]);
+      if (transcript.dataset.rendered !== rendered) {
+        const history = transcript.closest('.history');
+        const follow =
+          !history || history.scrollHeight - history.scrollTop - history.clientHeight < 80;
+        transcript.replaceChildren();
+        for (const turn of status.transcript) {
+          const entry = document.createElement('article');
+          entry.className = 'exchange';
+          for (const [role, text, kind] of [
+            ['You', turn.question, 'question'],
+            ['Avatar', turn.answer, 'answer'],
+          ]) {
+            if (!text) continue;
+            const message = document.createElement('div');
+            message.className = `message ${kind}`;
+            const label = document.createElement('strong');
+            label.textContent = `${role}: `;
+            message.append(label, document.createTextNode(text));
+            entry.append(message);
+          }
+          const note = document.createElement('p');
+          note.className = 'turn-note';
+          note.textContent = `${turn.state === 'stopped' ? 'Interrupted' : turn.state}${turn.truncated ? ' (output limit reached)' : ''} — Generated text may not all have been spoken.`;
+          entry.append(note);
+          if (turn.usage?.estimated_usd !== undefined) {
+            const details = document.createElement('details');
+            details.className = 'turn-details';
+            const summary = document.createElement('summary');
+            summary.textContent = 'Turn usage';
+            const usage = document.createElement('p');
+            usage.textContent = `Tokens: ${turn.usage.input_tokens ?? 'unknown'} input / ${turn.usage.output_tokens ?? 'unknown'} output; estimated USD ${turn.usage.estimated_usd.toFixed(6)}${turn.usage.estimated ? ' (conservative allowance; final usage unavailable)' : ''}.`;
+            details.append(summary, usage);
+            entry.append(details);
+          }
+          transcript.append(entry);
+        }
+        if (status.contextOmitted) {
+          const note = document.createElement('p');
+          note.className = 'turn-note';
+          note.textContent = `${status.contextOmitted} earlier exchanges omitted from model context to fit the input allowance.`;
+          transcript.append(note);
+        }
+        transcript.dataset.rendered = rendered;
+        if (follow && history) history.scrollTop = history.scrollHeight;
       }
       document.querySelector('#usage').textContent = status.budget?.usable
         ? `${status.budget.month} (UTC): estimated USD ${status.budget.estimated_usd.toFixed(6)} spent; USD ${status.budget.reserved_usd.toFixed(6)} reserved; USD ${status.budget.remaining_usd.toFixed(6)} remaining of USD 40. Application estimates, not authoritative billing.`
         : status.budget?.error || '';
-      if (status.contextOmitted) {
-        const note = document.createElement('p');
-        note.textContent = `${status.contextOmitted} earlier exchanges omitted from model context to fit the input allowance.`;
-        transcript.append(note);
-      }
     }
     document.querySelector('#clip option[value="text"]').disabled = !status.speechEnabled;
     document.querySelector('#diagnostics').hidden = !status.diagnostics;

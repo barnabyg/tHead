@@ -7,10 +7,22 @@ const path = require('node:path');
 
 test.beforeEach(async ({ page }, info) => {
   const output = fs.mkdtempSync(path.join(os.tmpdir(), 'thead-browser-'));
+  for (const filename of ['portrait.jpg', 'hopper.jpg']) {
+    fs.copyFileSync('tests/fixtures/portrait.jpg', path.join(output, filename));
+  }
   const python = process.env.THEAD_TEST_PYTHON || 'python';
   const child = spawn(
     python,
-    ['scripts/conversation.py', '--test-backend', '--port', '0', '--output', output],
+    [
+      'scripts/conversation.py',
+      '--test-backend',
+      '--port',
+      '0',
+      '--output',
+      output,
+      '--inputs',
+      output,
+    ],
     {
       stdio: ['pipe', 'pipe', 'pipe'],
     },
@@ -45,6 +57,92 @@ test.beforeEach(async ({ page }, info) => {
   });
   await page.goto(info.url);
   await expect(page.getByRole('button', { name: 'Ask', exact: true })).toBeEnabled();
+  await page.getByText('Session details', { exact: true }).click();
+});
+
+test('portrait stays visible through preparation, playback, Stop, reset and pair changes', async ({
+  page,
+  request,
+}, info) => {
+  const portrait = page.getByRole('img', { name: 'JFK portrait', exact: true });
+  await expect(portrait).toHaveClass('loaded');
+  const response = await request.get(`${info.url}/portrait?pair=jfk-zira`);
+  expect(response.headers()['content-type']).toBe('image/jpeg');
+  expect(await response.body()).toEqual(fs.readFileSync('tests/fixtures/portrait.jpg'));
+  expect((await request.get(`${info.url}/portrait?pair=../../README.md`)).status()).toBe(400);
+  await page.getByLabel('Diagnostic fault').selectOption('llm-delay');
+  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await expect(portrait).toHaveCSS('opacity', '1');
+  await expect(page.locator('#video')).toHaveCSS('opacity', '0');
+  await page.getByRole('button', { name: 'Stop', exact: true }).click();
+  await expect(portrait).toHaveClass('loaded');
+  await expect(page.locator('#video')).not.toHaveAttribute('src');
+  await page.getByRole('button', { name: 'New conversation' }).click();
+  await expect(portrait).toHaveClass('loaded');
+  await expect(page.locator('#transcript')).toBeEmpty();
+  await page.getByLabel('Diagnostic fault').selectOption('');
+  await expect(page.getByRole('button', { name: 'Ask', exact: true })).toBeEnabled();
+  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await expect(page.locator('#video')).toHaveClass('presenting');
+  await expect(page.locator('#status')).toHaveText('Playback ended');
+  await expect(page.locator('#video')).toHaveCSS('opacity', '0');
+  await expect(portrait).toHaveClass('loaded');
+  await expect(page.getByLabel('Avatar and voice', { exact: true })).toBeEnabled();
+  await page.getByLabel('Avatar and voice', { exact: true }).selectOption('hopper-hazel');
+  await expect(page.getByRole('img', { name: 'Grace Hopper portrait', exact: true })).toHaveClass(
+    'loaded',
+  );
+  await page.getByLabel('Pair diagnostic', { exact: true }).selectOption('pair-prepare');
+  await page.getByLabel('Avatar and voice', { exact: true }).selectOption('jfk-zira');
+  await expect(page.locator('#pair-status')).toContainText('failed');
+  await expect(page.getByRole('img', { name: 'Grace Hopper portrait', exact: true })).toHaveClass(
+    'loaded',
+  );
+});
+
+test('compact layout keeps portrait and composer on screen while the transcript scrolls', async ({
+  page,
+}) => {
+  await page.getByText('Session details', { exact: true }).click();
+  await page.setViewportSize({ width: 390, height: 844 });
+  const ask = page.getByRole('button', { name: 'Ask', exact: true });
+  for (let index = 0; index < 3; index++) {
+    await expect(ask).toBeEnabled();
+    await page.getByLabel('Question', { exact: true }).fill(`Question ${index}`);
+    await ask.click();
+    await expect(page.locator('#status')).toHaveText('Playback ended');
+  }
+  for (const viewport of [
+    { width: 390, height: 844 },
+    { width: 320, height: 568 },
+    { width: 844, height: 390 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.locator('.history').evaluate((element) => {
+      element.scrollTop = 0;
+    });
+    await expect(page.locator('#portrait')).toBeInViewport({ ratio: 1 });
+    await expect(ask).toBeInViewport({ ratio: 1 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+  }
+});
+
+test('missing portrait gives a useful fallback and another avatar can recover', async ({
+  page,
+  request,
+}, info) => {
+  fs.unlinkSync(path.join(info.output, 'portrait.jpg'));
+  expect((await request.get(`${info.url}/portrait?pair=jfk-zira`)).status()).toBe(404);
+  await page.reload();
+  await expect(page.locator('#portrait-notice')).toContainText('Rerun the launch command');
+  await expect(page.locator('#portrait')).not.toHaveClass('loaded');
+  await expect(page.getByLabel('Avatar and voice', { exact: true })).toBeEnabled();
+  await page.getByLabel('Avatar and voice', { exact: true }).selectOption('hopper-hazel');
+  await expect(page.getByRole('img', { name: 'Grace Hopper portrait', exact: true })).toHaveClass(
+    'loaded',
+  );
 });
 
 test('bounded 100-turn session trims context, rejects turn 101 and resets', async ({
