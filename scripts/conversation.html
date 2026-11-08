@@ -187,6 +187,7 @@
       color: #c7d2c9;
       margin-bottom: 8px;
     }
+    #model,
     #pair {
       width: 100%;
     }
@@ -565,6 +566,10 @@
             <button type="button" id="create-avatar">Create avatar</button>
             <p id="avatar-result" role="status"></p>
             <p id="avatar-storage-error" role="status"></p>
+            <label for="model">Model</label>
+            <select id="model" disabled aria-describedby="model-availability"></select>
+            <p id="model-availability"></p>
+            <p id="settings-status" role="status" aria-live="polite"></p>
           </div>
         </section>
       </main>

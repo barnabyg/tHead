@@ -43,6 +43,23 @@ document.querySelector('#settings-back')?.addEventListener('click', () => {
   settingsButton.setAttribute('aria-expanded', 'false');
   settingsButton.focus();
 });
+const modelSelector = document.querySelector('#model');
+let savingSettings = false;
+modelSelector?.addEventListener('change', async () => {
+  if (savingSettings) return;
+  savingSettings = true;
+  modelSelector.disabled = true;
+  const feedback = document.querySelector('#settings-status');
+  feedback.textContent = 'Saving…';
+  try {
+    await post('/settings', { session: sessionIdentity, model: modelSelector.value });
+    feedback.textContent = 'Saved. Applies to the next question.';
+  } catch (error) {
+    feedback.textContent = String(error);
+  } finally {
+    savingSettings = false;
+  }
+});
 const pairSelector = document.querySelector('#pair');
 const avatarEditor = document.querySelector('#avatar-editor');
 const avatarForm = document.querySelector('#avatar-form');
@@ -594,6 +611,29 @@ setInterval(async () => {
     const status = await (await fetch('/status', { signal: AbortSignal.timeout(10000) })).json();
     if (ticket !== epoch) return;
     if (conversation) {
+      if (status.settings && !savingSettings) {
+        modelSelector.replaceChildren(
+          ...status.settings.models.map((model) => {
+            const option = new Option(
+              model.id + (model.available ? '' : ' — unavailable'),
+              model.id,
+            );
+            option.disabled = !model.available;
+            return option;
+          }),
+        );
+        if (!status.settings.models.some((model) => model.id === status.settings.model)) {
+          modelSelector.add(
+            new Option(`${status.settings.model} — unsupported`, status.settings.model),
+          );
+        }
+        modelSelector.value = status.settings.model;
+        modelSelector.disabled = false;
+        document.querySelector('#model-availability').textContent = status.settings.models
+          .filter((model) => !model.available)
+          .map((model) => model.error)
+          .join('. ');
+      }
       document.querySelector('#pair-diagnostics').hidden = !status.diagnostics;
       const pair = status.pairs.find((item) => item.id === status.activePair);
       for (const item of status.pairs) {
@@ -684,7 +724,7 @@ setInterval(async () => {
             turn.usage?.estimated_usd !== undefined
               ? `estimated USD ${turn.usage.estimated_usd.toFixed(6)}${turn.usage.estimated ? ' (conservative allowance; final usage unavailable)' : ''}`
               : 'estimated cost pending; reserved allowance is included in monthly totals';
-          usage.textContent = `${turn.state === 'stopped' ? 'Interrupted' : turn.state} — ${tokens}; ${cost}.`;
+          usage.textContent = `${turn.model || status.model} — ${turn.state === 'stopped' ? 'Interrupted' : turn.state} — ${tokens}; ${cost}.`;
           usageEntry.append(heading, usage);
           turnUsage.append(usageEntry);
           transcript.append(entry);

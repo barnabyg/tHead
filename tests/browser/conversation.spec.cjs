@@ -115,6 +115,54 @@ test('Settings navigation preserves draft, transcript, context and budget with k
     .toContain('Earlier question: What is a black hole?');
 });
 
+test('model settings validate exact identifiers and switch contextual turns with captured accounting', async ({
+  page,
+  request,
+}, info) => {
+  await openSettings(page);
+  await expect(page.getByLabel('Model', { exact: true })).toHaveValue('gpt-6-luna');
+  await expect(page.locator('#model-availability')).toContainText('gpt-6.1-lunar is unavailable');
+  const initial = await (await request.get(`${info.url}/status`)).json();
+  for (const model of ['gpt-6.1-lunar', 'unknown']) {
+    const rejected = await request.post(`${info.url}/settings`, {
+      data: { session: initial.session, model },
+    });
+    expect(rejected.status()).toBe(409);
+    expect((await rejected.json()).error).toContain('model');
+  }
+  await backToConversation(page);
+  await page.getByLabel('Diagnostic fault').selectOption('llm-connect');
+  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await openSettings(page);
+  await page.getByLabel('Model', { exact: true }).selectOption('gpt-6.1-sol');
+  await expect(page.locator('#settings-status')).toContainText('Saved');
+  const during = await (await request.get(`${info.url}/status`)).json();
+  expect(during.run.model).toBe('gpt-6-luna');
+  expect(during.settings.model).toBe('gpt-6.1-sol');
+  await backToConversation(page);
+  await expect(page.locator('#status')).toHaveText('Playback ended');
+  await expect
+    .poll(
+      async () => (await (await request.get(`${info.url}/status`)).json()).run.usage.estimated_usd,
+    )
+    .toBe(0.000025);
+  await page.getByLabel('Diagnostic fault').selectOption('');
+  await page.getByLabel('Question', { exact: true }).fill('How do we detect one?');
+  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await expect
+    .poll(
+      async () => (await (await request.get(`${info.url}/status`)).json()).run.usage.estimated_usd,
+    )
+    .toBe(0.0005);
+  const done = await (await request.get(`${info.url}/status`)).json();
+  expect(done.run.model).toBe('gpt-6.1-sol');
+  expect(done.run.answer).toContain('Earlier question: What is a black hole?');
+  expect(
+    done.run.events.find((event) => event.event === 'provider-request').configuration.model,
+  ).toBe('gpt-6.1-sol');
+  await expect(page.locator('#turn-usage')).toContainText('gpt-6.1-sol');
+});
+
 test('Settings keeps active-turn controls usable and preserves playback', async ({
   page,
   request,

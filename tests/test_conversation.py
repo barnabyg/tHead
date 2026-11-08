@@ -127,6 +127,33 @@ class ConversationTests(unittest.TestCase):
             },
         )
 
+    def test_model_settings_preserve_context_and_capture_active_turn(self) -> None:
+        status = self.request("/status")
+        self.assertEqual(status["settings"]["model"], "gpt-6-luna")
+        run = self.ask(fault="llm-connect")
+        changed = self.request("/settings", {"session": status["session"], "model": "gpt-6.1-sol"})
+        self.assertEqual(changed["model"], "gpt-6.1-sol")
+        self.assertEqual(changed["run"]["model"], "gpt-6-luna")
+        done = self.wait(lambda s: s["state"] == "idle")
+        self.assertEqual(done["run"]["id"], run["id"])
+        self.assertEqual(done["run"]["usage"]["estimated_usd"], 0.000025)
+        self.ask("How do we detect one?")
+        done = self.wait(lambda s: s["state"] == "idle")
+        self.assertIn("Earlier question", done["run"]["answer"])
+        self.assertEqual(done["run"]["model"], "gpt-6.1-sol")
+        self.assertEqual(done["run"]["usage"]["estimated_usd"], 0.0005)
+        request = next(e for e in done["run"]["events"] if e["event"] == "provider-request")
+        self.assertEqual(request["configuration"]["model"], "gpt-6.1-sol")
+        self.assertEqual(request["configuration"]["reasoning"], {"effort": "medium"})
+        for model in ("gpt-6.1-lunar", "unknown", 123):
+            with self.assertRaises(urllib.error.HTTPError):
+                self.request("/settings", {"session": status["session"], "model": model})
+        self.assertEqual(self.request("/status")["model"], "gpt-6.1-sol")
+        with self.assertRaises(urllib.error.HTTPError):
+            self.request("/settings", {"session": "stale", "model": "gpt-6-luna"})
+        recovered = self.request("/settings", {"session": status["session"], "model": "gpt-6-luna"})
+        self.assertEqual(recovered["model"], "gpt-6-luna")
+
     def test_streamed_answer_and_progressive_speech(self) -> None:
         for question in ("", " \n", "x" * 1201):
             with self.assertRaises(urllib.error.HTTPError):

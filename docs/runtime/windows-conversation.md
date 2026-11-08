@@ -169,3 +169,34 @@ delayed-provider and delayed-TTS probes; then try New conversation while busy.
 Named avatars are **JFK** and **Grace**. Use `-Avatar hopper-hazel` or
 `THEAD_AVATAR`; legacy Pair flags and THEAD_PAIR remain supported. See the
 [avatar guide](windows-pairs.md) for selection and manual verification.
+
+## Model selection in Settings
+
+**Model** changes apply to subsequent questions in the current server process,
+including after New conversation. An active turn retains its captured model,
+context and price reservation. Restarting uses `-Model` (if supplied), otherwise
+`THEAD_MODEL`, otherwise the compatible default `gpt-6-luna`. Browser choices do
+not write environment variables or persist across restarts. Unknown startup models
+remain blocked by validation/pricing; choose an available model to recover.
+
+Checked on 8 November 2026 using the backend account's free model metadata API:
+`gpt-6.1-sol` is available; the requested `gpt-6.1-lunar` returns HTTP 404 and
+is shown disabled with an explanation. It has no verified pricing or reasoning
+mapping. `gpt-6-luna` is the separate legacy selection, not an alias for Lunar.
+The app never silently falls back. Other accounts may lack Sol access; a redacted
+provider error asks you to check model access or select another available model.
+
+The guard reserves worst-case cache-write input and total output rates:
+Sol USD 2.50 / 10 per million tokens, legacy Luna USD 0.125 / 0.50.
+See the official [Sol model](https://developers.openai.com/api/docs/models/gpt-6.1-sol)
+and [Luna model](https://developers.openai.com/api/docs/models/gpt-6-luna) pricing.
+Session details identifies each turn's captured model and cost; Timing diagnostics
+also shows `run.model`. No credentials are included.
+
+For manual verification, from `C:/docs/git/tHead` in PowerShell 7, use the single
+preparation-and-launch command `./run.bat` with the prerequisites above (first use
+adds `-InitializeBudget`). Open Settings, choose Sol, return and ask a question,
+then a contextual follow-up. Verify Sol on both turns in Session details. During
+a response choose legacy Luna; the current turn must retain Sol and the next use
+Luna. Lunar must be visibly unavailable. Account access, real-provider output,
+GPU speech and lip sync require this manual check; automated fixtures cost nothing.

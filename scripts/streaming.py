@@ -714,7 +714,7 @@ def handler(demo: Demonstration) -> type[BaseHTTPRequestHandler]:
                 if self.path == "/shutdown" and demo.diagnostics:
                     threading.Thread(target=self.server.shutdown, daemon=True).start()
                     result = {"ok": True}
-                elif self.path in ("/ask", "/reset", "/cancel", "/select", "/avatars"):
+                elif self.path in ("/ask", "/reset", "/cancel", "/select", "/avatars", "/settings"):
                     result = demo.command(self.path, data)
                 elif demo.page == "conversation.html" and self.path in (
                     "/speak",

@@ -18,12 +18,33 @@ INSTRUCTIONS = (
 MODEL = "gpt-6-luna"
 OUTPUT_TOKENS = 384
 INPUT_BOUND = 8192
+# Official model identifiers verified 2026-11-08; see runtime documentation.
+MODEL_ERRORS = {
+    "gpt-6.1-sol": "",
+    "gpt-6.1-lunar": "gpt-6.1-lunar is unavailable; choose an available model in Settings",
+    "gpt-6-luna": "",
+}
+
+
+def validate_model(model: Any) -> str:
+    if not isinstance(model, str) or model not in MODEL_ERRORS:
+        raise ValueError("Unknown model; choose an available model in Settings")
+    if MODEL_ERRORS[model]:
+        raise ValueError(MODEL_ERRORS[model])
+    return model
 
 
 class Provider:
     def __init__(self, model: str = MODEL, fixture: bool = False) -> None:
         self.model = model
         self.fixture = fixture
+
+    def configuration(self) -> dict[str, Any]:
+        return {
+            "model": self.model,
+            "reasoning": {"effort": "medium" if self.model == "gpt-6.1-sol" else "none"},
+            "max_output_tokens": OUTPUT_TOKENS,
+        }
 
     def stream(
         self, messages: list[dict[str, str]], cancelled: threading.Event, fault: str = ""
@@ -66,14 +87,12 @@ class Provider:
                 "/v1/responses",
                 body=json.dumps(
                     {
-                        "model": self.model,
+                        **self.configuration(),
                         "instructions": INSTRUCTIONS,
                         "input": messages,
                         "stream": True,
                         "store": False,
                         "service_tier": "default",
-                        "reasoning": {"effort": "none"},
-                        "max_output_tokens": OUTPUT_TOKENS,
                     }
                 ).encode(),
                 headers={"Authorization": "Bearer " + key, "Content-Type": "application/json"},

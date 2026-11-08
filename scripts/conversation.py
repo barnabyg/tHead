@@ -17,7 +17,15 @@ from avatars import AvatarStore, decode_portrait, user_data_directory, voice_cat
 from budget import PRICES, Budget, BudgetError
 from pairs import DEFAULT_PAIR
 from prepare import RUNTIME
-from provider import INPUT_BOUND, INSTRUCTIONS, MODEL, OUTPUT_TOKENS, Provider
+from provider import (
+    INPUT_BOUND,
+    INSTRUCTIONS,
+    MODEL,
+    MODEL_ERRORS,
+    OUTPUT_TOKENS,
+    Provider,
+    validate_model,
+)
 from speech import Voice
 from streaming import Demonstration, LoopbackServer, Session, handler
 
@@ -50,6 +58,7 @@ class Turn(Session):
         self.progressive = True
         self.pair = ""
         self.text = ["conversation"]
+        self.provider = Provider()
 
     def save(self) -> None:
         # Conversation text and transcript events remain in memory only.
@@ -65,6 +74,7 @@ class Turn(Session):
             "inputBound": self.input_bound,
             "request": self.request_id,
             "pair": self.pair,
+            "model": self.provider.model,
         }
 
 
@@ -72,6 +82,8 @@ class Conversation(Demonstration):
     page = "conversation.html"
 
     def command(self, path: str, data: dict[str, Any]) -> dict[str, Any]:
+        if path == "/settings":
+            return self.configure(data)
         if path == "/avatars":
             return self.create_avatar(data)
         if path == "/reset":
@@ -127,6 +139,25 @@ class Conversation(Demonstration):
         except BudgetError as error:
             self.budget_error = str(error)
         super().__init__(inputs, directory, test_backend, 8, True, diagnostics or fixture)
+
+    def configure(self, data: dict[str, Any]) -> dict[str, Any]:
+        with self.condition:
+            if data.get("session") != self.identity:
+                raise ValueError("Stale session; reload before changing settings")
+            if set(data) - {"session", "model"}:
+                raise ValueError("Unknown setting; reload Settings and retry")
+            model = validate_model(data.get("model", self.provider.model))
+            self.provider = Provider(model, self.provider.fixture)
+            return self.status()
+
+    def settings(self) -> dict[str, Any]:
+        return {
+            "model": self.provider.model,
+            "models": [
+                {"id": model, "available": not error, "error": error}
+                for model, error in MODEL_ERRORS.items()
+            ],
+        }
 
     def create_avatar(self, data: dict[str, Any]) -> dict[str, Any]:
         # Saving is independent of turn state: no selection, context or provider mutation.
@@ -277,6 +308,7 @@ class Conversation(Demonstration):
                 "pairPreparationSeconds": self.pair_preparation_seconds,
                 "session": self.identity,
                 "model": self.provider.model,
+                "settings": self.settings(),
                 "fixtureProvider": self.provider.fixture,
                 "budget": budget,
                 "contextOmitted": self.current.omitted if isinstance(self.current, Turn) else 0,
@@ -292,6 +324,7 @@ class Conversation(Demonstration):
                         "truncated": t.truncated,
                         "usage": t.usage,
                         "pair": t.pair,
+                        "model": t.provider.model,
                     }
                     for t in self.transcript
                 ],
@@ -301,7 +334,9 @@ class Conversation(Demonstration):
             if not budget["usable"]:
                 result["configurationError"] = budget["error"]
             elif self.provider.model not in PRICES:
-                result["configurationError"] = "Unknown model pricing; select gpt-6-luna"
+                result["configurationError"] = (
+                    "Unknown model pricing; choose an available model in Settings"
+                )
             return result
 
     def reset(self, identity: str) -> dict[str, Any]:
@@ -390,6 +425,7 @@ class Conversation(Demonstration):
                 raise ValueError("Set OPENAI_API_KEY in the backend and restart")
             if len(self.transcript) >= 100:
                 raise ValueError("Session reached 100 turns; start a New conversation")
+            validate_model(self.provider.model)
             messages, input_bound, omitted = self.context(question.strip())
             if not self.budget:
                 raise ValueError(self.budget_error)
@@ -397,6 +433,7 @@ class Conversation(Demonstration):
             # enters here and receives its own durable reservation before dispatch.
             reservation = self.budget.reserve(self.provider.model, input_bound, OUTPUT_TOKENS)
             session = Turn(self.directory, self.fragment_frames, self.identity, question.strip())
+            session.provider = self.provider
             session.reservation = reservation
             session.request_id = request_id
             session.pair = self.active_pair
@@ -430,9 +467,13 @@ class Conversation(Demonstration):
         pending = ""
         done = False
         session.event("llm-connect")
-        if self.provider.fixture:
-            session.event("provider-request", messages=session.messages)
-        for event in self.provider.stream(session.messages, session.cancelled, session.fault):
+        if session.provider.fixture:
+            session.event(
+                "provider-request",
+                messages=session.messages,
+                configuration=session.provider.configuration(),
+            )
+        for event in session.provider.stream(session.messages, session.cancelled, session.fault):
             if session.cancelled.is_set():
                 return
             if "text" in event:
