@@ -69,7 +69,8 @@ The printed fixture has USD 40 estimated spend and USD 0 remaining. Launch the
 conversation application with this path and its deterministic provider/media fixtures;
 submit “What is a black hole?”. Expect an understandable budget rejection and no new
 provider dispatch or speech. Use a separate freshly initialised fixture for a normal
-answer: inspect per-turn input/output usage and estimated cost, then Stop or reset and
+answer: open Session details and inspect the numbered per-turn input/output usage
+and estimated cost alongside monthly totals, then Stop or reset and
 confirm the monthly totals remain. The complete preparation/launch command and browser
 scenario are documented with the conversation application. The automated budget tests
 also cover exact-limit acceptance, rejection, retry allowance, missing usage, reopening,

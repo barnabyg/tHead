@@ -252,10 +252,13 @@
       line-height: 1.6;
       overflow-wrap: anywhere;
     }
-    .turn-details {
-      margin: 0;
-      font-size: 11px;
-      color: #a6b5a9;
+    #turn-usage {
+      padding-left: 24px;
+      line-height: 1.6;
+      overflow-wrap: anywhere;
+    }
+    #turn-usage li {
+      margin-bottom: 12px;
     }
     .composer {
       border-top: 1px solid #344139;
@@ -499,6 +502,7 @@
         <summary>Session details</summary>
         <div class="utility-content">
           <p id="usage"></p>
+          <ol id="turn-usage" aria-label="Usage by conversation turn"></ol>
           <div id="pair-diagnostics" hidden>
             <label for="pair-fault">Pair diagnostic</label>
             <select id="pair-fault">

@@ -61,11 +61,13 @@ document.querySelector('#reset')?.addEventListener('click', async () => {
   const run = active;
   release();
   observeSilence(run, before, beforeRms);
+  document.querySelector('#turn-usage').replaceChildren();
   document.querySelector('#transcript').replaceChildren();
   delete document.querySelector('#transcript').dataset.rendered;
   try {
     const fresh = await post('/reset', { session: sessionIdentity });
     sessionIdentity = fresh.session;
+    document.querySelector('#turn-usage').replaceChildren();
     document.querySelector('#transcript').replaceChildren();
     delete document.querySelector('#transcript').dataset.rendered;
     notice = 'New conversation';
@@ -539,7 +541,9 @@ setInterval(async () => {
         const follow =
           !history || history.scrollHeight - history.scrollTop - history.clientHeight < 80;
         transcript.replaceChildren();
-        for (const turn of status.transcript) {
+        const turnUsage = document.querySelector('#turn-usage');
+        turnUsage.replaceChildren();
+        for (const [index, turn] of status.transcript.entries()) {
           const entry = document.createElement('article');
           entry.className = 'exchange';
           for (const [role, text, kind] of [
@@ -558,16 +562,18 @@ setInterval(async () => {
           note.className = 'turn-note';
           note.textContent = `${turn.state === 'stopped' ? 'Interrupted' : turn.state}${turn.truncated ? ' (output limit reached)' : ''} — Generated text may not all have been spoken.`;
           entry.append(note);
-          if (turn.usage?.estimated_usd !== undefined) {
-            const details = document.createElement('details');
-            details.className = 'turn-details';
-            const summary = document.createElement('summary');
-            summary.textContent = 'Turn usage';
-            const usage = document.createElement('p');
-            usage.textContent = `Tokens: ${turn.usage.input_tokens ?? 'unknown'} input / ${turn.usage.output_tokens ?? 'unknown'} output; estimated USD ${turn.usage.estimated_usd.toFixed(6)}${turn.usage.estimated ? ' (conservative allowance; final usage unavailable)' : ''}.`;
-            details.append(summary, usage);
-            entry.append(details);
-          }
+          const usageEntry = document.createElement('li');
+          const heading = document.createElement('strong');
+          heading.textContent = `Turn ${index + 1}: ${turn.question}`;
+          const usage = document.createElement('p');
+          const tokens = `Tokens: ${turn.usage?.input_tokens ?? 'unknown'} input / ${turn.usage?.output_tokens ?? 'unknown'} output`;
+          const cost =
+            turn.usage?.estimated_usd !== undefined
+              ? `estimated USD ${turn.usage.estimated_usd.toFixed(6)}${turn.usage.estimated ? ' (conservative allowance; final usage unavailable)' : ''}`
+              : 'estimated cost pending; reserved allowance is included in monthly totals';
+          usage.textContent = `${turn.state === 'stopped' ? 'Interrupted' : turn.state} — ${tokens}; ${cost}.`;
+          usageEntry.append(heading, usage);
+          turnUsage.append(usageEntry);
           transcript.append(entry);
         }
         if (status.contextOmitted) {
