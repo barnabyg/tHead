@@ -1,4 +1,4 @@
-"""Declared portrait/voice pairs and their asset validation, independent of turns."""
+"""Named built-in avatars; legacy pair interfaces remain compatibility aliases."""
 
 from __future__ import annotations
 
@@ -14,12 +14,21 @@ from prepare import ROOT
 DEFAULT_PAIR = "jfk-zira"
 
 
+def supported_voices() -> dict[str, Path]:
+    """Voice references are independent of avatars and may be reused."""
+    return {"zira": ROOT / "speech-lock.json", "hazel": ROOT / "hazel-lock.json"}
+
+
 @dataclass(frozen=True)
-class Pair:
+class Avatar:
     id: str
     name: str
     portrait: dict[str, Any]
-    voice_lock: Path
+    voice: str
+
+    @property
+    def voice_lock(self) -> Path:
+        return supported_voices()[self.voice]
 
     def validate_portrait(self, inputs: Path) -> Path:
         path = inputs / str(self.portrait["filename"])
@@ -31,16 +40,21 @@ class Pair:
         return path
 
 
-def configured_pairs() -> dict[str, Pair]:
+def configured_avatars() -> dict[str, Avatar]:
     data = json.loads((ROOT / "avatar-pairs.json").read_text(encoding="utf-8"))
     return {
-        item["id"]: Pair(item["id"], item["name"], item["portrait"], ROOT / item["voice_lock"])
+        item["id"]: Avatar(item["id"], item["name"], item["portrait"], item["voice"])
         for item in data["pairs"]
     }
 
 
-def configured_pair(identity: str) -> Pair:
-    pairs = configured_pairs()
+def configured_avatar(identity: str) -> Avatar:
+    pairs = configured_avatars()
     if identity not in pairs:
         raise ValueError(f"Unknown pair {identity!r}; choose {', '.join(pairs)}")
     return pairs[identity]
+
+
+Pair = Avatar
+configured_pairs = configured_avatars
+configured_pair = configured_avatar

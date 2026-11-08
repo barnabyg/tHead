@@ -6,9 +6,11 @@ import os
 import sys
 import threading
 import webbrowser
+from pathlib import Path
 
+from avatars import AvatarStore, user_data_directory
 from demo import acquire
-from pairs import DEFAULT_PAIR, configured_pair, configured_pairs
+from pairs import DEFAULT_PAIR, configured_pairs
 from prepare import ROOT, RUNTIME, run
 
 
@@ -22,12 +24,18 @@ def main() -> None:
     parser.add_argument("--fixture-provider", action="store_true")
     parser.add_argument("--initialize-budget", action="store_true")
     parser.add_argument("--budget")
+    parser.add_argument("--user-data", type=Path)
     parser.add_argument("--port", type=int, default=8765)
-    parser.add_argument("--pair", default=os.environ.get("THEAD_PAIR", DEFAULT_PAIR))
+    parser.add_argument(
+        "--avatar",
+        "--pair",
+        dest="pair",
+        default=os.environ.get("THEAD_AVATAR", os.environ.get("THEAD_PAIR", DEFAULT_PAIR)),
+    )
     args = parser.parse_args()
     if args.conversation:
         try:
-            configured_pair(args.pair)
+            AvatarStore(args.user_data or user_data_directory()).get(args.pair)
         except ValueError as error:
             parser.error(str(error))
     run([sys.executable, str(ROOT / "scripts/demo.py"), "--prepare-only"], 18000)
@@ -77,6 +85,7 @@ def main() -> None:
             *(["--fixture-provider"] if args.fixture_provider and args.conversation else []),
             *(["--initialize-budget"] if args.initialize_budget else []),
             *(["--budget", args.budget] if args.budget else []),
+            *(["--user-data", str(args.user_data)] if args.user_data else []),
             *(["--speech", "--output", str(RUNTIME / "speech")] if args.speech else []),
             *(["--diagnostics"] if args.diagnostics else []),
         ],

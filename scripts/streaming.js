@@ -29,6 +29,87 @@ let selecting = false;
 let stopping = 0;
 let resetting = 0;
 const pairSelector = document.querySelector('#pair');
+const avatarEditor = document.querySelector('#avatar-editor');
+const avatarForm = document.querySelector('#avatar-form');
+const imagePicker = document.querySelector('#avatar-image');
+const voicePicker = document.querySelector('#avatar-voice');
+let savingAvatar = false;
+let previewUrl = '';
+document.querySelector('#create-avatar')?.addEventListener('click', () => {
+  document.querySelector('#avatar-result').textContent = '';
+  avatarEditor.showModal();
+});
+function closeAvatarEditor() {
+  if (savingAvatar) return;
+  avatarEditor.close();
+  avatarForm.reset();
+  document.querySelector('#avatar-save-status').textContent = '';
+  URL.revokeObjectURL(previewUrl);
+  previewUrl = '';
+  document.querySelector('#avatar-preview').hidden = true;
+}
+document.querySelector('#cancel-avatar')?.addEventListener('click', closeAvatarEditor);
+avatarEditor?.addEventListener('cancel', (event) => {
+  event.preventDefault();
+  closeAvatarEditor();
+});
+imagePicker?.addEventListener('change', () => {
+  URL.revokeObjectURL(previewUrl);
+  const file = imagePicker.files[0];
+  previewUrl = file ? URL.createObjectURL(file) : '';
+  const preview = document.querySelector('#avatar-preview');
+  preview.hidden = !file;
+  preview.src = previewUrl;
+});
+avatarForm?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  if (savingAvatar) return;
+  const feedback = document.querySelector('#avatar-save-status');
+  const name = document.querySelector('#avatar-name').value.trim();
+  const file = imagePicker.files[0];
+  if (!name || name.length > 80) {
+    feedback.textContent = 'Enter an Avatar name of 1–80 characters';
+    return;
+  }
+  if (!file || file.size > 5 * 1024 * 1024) {
+    feedback.textContent = 'Choose a JPEG or PNG of at most 5 MiB';
+    return;
+  }
+  if (!voicePicker.value) {
+    feedback.textContent = 'Choose an available supported local English voice';
+    return;
+  }
+  savingAvatar = true;
+  for (const control of avatarForm.elements) control.disabled = true;
+  feedback.textContent = 'Saving avatar…';
+  try {
+    const image = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result).split(',')[1]);
+      reader.onerror = () => reject(Error('Cannot read image; choose the file again'));
+      reader.readAsDataURL(file);
+    });
+    const saved = await post(
+      '/avatars',
+      {
+        session: sessionIdentity,
+        name,
+        voice: voicePicker.value,
+        image,
+      },
+      AbortSignal.timeout(360000),
+    );
+    document.querySelector('#avatar-result').textContent =
+      `Created ${saved.name}. Select it from Avatar when ready.`;
+    savingAvatar = false;
+    closeAvatarEditor();
+  } catch (error) {
+    feedback.textContent = String(error);
+  } finally {
+    savingAvatar = false;
+    for (const control of avatarForm.elements) control.disabled = false;
+  }
+});
 pairSelector?.addEventListener('change', async () => {
   if (selecting) return;
   selecting = true;
@@ -37,7 +118,7 @@ pairSelector?.addEventListener('change', async () => {
   notice = '';
   start.disabled = true;
   pairSelector.disabled = true;
-  document.querySelector('#pair-status').textContent = 'Switching pair…';
+  document.querySelector('#pair-status').textContent = 'Switching avatar…';
   try {
     await post('/select', {
       session: sessionIdentity,
@@ -500,9 +581,22 @@ setInterval(async () => {
     if (conversation) {
       document.querySelector('#pair-diagnostics').hidden = !status.diagnostics;
       const pair = status.pairs.find((item) => item.id === status.activePair);
-      if (!pairSelector.options.length) {
-        for (const item of status.pairs) pairSelector.add(new Option(item.name, item.id));
+      for (const item of status.pairs) {
+        if (![...pairSelector.options].some((option) => option.value === item.id)) {
+          pairSelector.add(new Option(item.name, item.id));
+        }
       }
+      if (voicePicker.options.length === 1) {
+        for (const voice of status.voices) {
+          const option = new Option(
+            voice.name + (voice.available ? '' : ' — unavailable'),
+            voice.id,
+          );
+          option.disabled = !voice.available;
+          voicePicker.add(option);
+        }
+      }
+      document.querySelector('#avatar-storage-error').textContent = status.avatarStorageError;
       if (!selecting) pairSelector.value = status.selectedPair;
       pairSelector.disabled =
         selecting ||
@@ -517,8 +611,8 @@ setInterval(async () => {
           ? `Preparing ${status.pairs.find((item) => item.id === status.selectedPair)?.name}…`
           : status.error || `Active: ${pair?.name || 'none'}${status.ready ? ' — Ready' : ''}`;
       conversation.textContent = pair
-        ? `Active pair: ${pair.name}. Synthetic speech.`
-        : 'Preparing pair';
+        ? `Active avatar: ${pair.name}. Synthetic speech.`
+        : 'Preparing avatar';
       if (sessionIdentity && status.session !== sessionIdentity) {
         epoch++;
         release();
@@ -531,7 +625,7 @@ setInterval(async () => {
         if (portrait.getAttribute('src') !== source) {
           portrait.classList.remove('loaded');
           portrait.src = source;
-          portrait.alt = `${displayPair.name.split(' / ')[0]} portrait`;
+          portrait.alt = `${displayPair.name} portrait`;
         }
       }
       const transcript = document.querySelector('#transcript');
@@ -548,7 +642,11 @@ setInterval(async () => {
           entry.className = 'exchange';
           for (const [role, text, kind] of [
             ['You', turn.question, 'question'],
-            ['Avatar', turn.answer, 'answer'],
+            [
+              status.avatars.find((item) => item.id === turn.pair)?.name || 'Avatar',
+              turn.answer,
+              'answer',
+            ],
           ]) {
             if (!text) continue;
             const message = document.createElement('div');

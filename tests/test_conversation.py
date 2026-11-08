@@ -58,7 +58,7 @@ class ConversationTests(unittest.TestCase):
         self.start_app("hopper-hazel")
         status = self.request("/status")
         self.assertEqual(status["activePair"], "hopper-hazel")
-        self.assertIn("Hazel", status["pairs"][1]["name"])
+        self.assertEqual("Grace", status["pairs"][1]["name"])
         self.ask()
         self.wait(lambda s: s["state"] == "idle")
         self.ask("How do we detect one?")
@@ -73,7 +73,7 @@ class ConversationTests(unittest.TestCase):
             timeout=30,
         )
         self.assertNotEqual(invalid.returncode, 0)
-        self.assertIn("Unknown pair", invalid.stderr)
+        self.assertIn("Unknown avatar", invalid.stderr)
 
     def stop_process(self) -> None:
         self.process.terminate()

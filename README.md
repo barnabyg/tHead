@@ -5,7 +5,7 @@ To start the conversational app, double-click `run.bat` in this folder, or run
 [conversation guide](docs/runtime/windows-conversation.md) for prerequisites and
 backend API key setup. On first use only, run `.\run.bat -InitializeBudget`.
 The launcher accepts the same options as `scripts/conversation.ps1`, for example
-`.\run.bat -Pair hopper-hazel`, and keeps errors visible if startup fails.
+`.\run.bat -Avatar hopper-hazel`, and keeps errors visible if startup fails.
 
 Native Windows talking-head feasibility work. Generate and play a six-second
 English clip using the [talking-head demonstration](docs/runtime/windows-demo.md)
@@ -105,3 +105,7 @@ internal parallel worker mode. GPU runs are serial because they share one GPU
 and memory/timing measurements.
 There is no distributable application package at this phase, so wheel building
 and deployment verification are inapplicable.
+
+Use **Create avatar** in the conversation screen to save a named local JPEG/PNG
+portrait with an available English voice. Saved avatars survive restarts. See
+[the avatar guide](docs/runtime/windows-avatars.md) for limits, storage and testing.

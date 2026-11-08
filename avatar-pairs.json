@@ -2,23 +2,23 @@
   "pairs": [
     {
       "id": "jfk-zira",
-      "name": "JFK / Zira (US English)",
-      "voice_lock": "speech-lock.json",
+      "name": "JFK",
       "portrait": {
         "filename": "portrait.jpg",
         "url": "https://upload.wikimedia.org/wikipedia/commons/c/c3/John_F._Kennedy%2C_White_House_color_photo_portrait.jpg",
         "sha256": "5990691f38bc2d0ebf29e1d49c0fe27357bac4b1b5959121ce7d26248b065d6f"
-      }
+      },
+      "voice": "zira"
     },
     {
       "id": "hopper-hazel",
-      "name": "Grace Hopper / Hazel (UK English)",
-      "voice_lock": "hazel-lock.json",
+      "name": "Grace",
       "portrait": {
         "filename": "hopper.jpg",
         "url": "https://upload.wikimedia.org/wikipedia/commons/5/55/Grace_Hopper.jpg",
         "sha256": "e1f57e98cf38076c0f9a058d74ffddf90f20453e436033784606b63c8ed2e49a"
-      }
+      },
+      "voice": "hazel"
     }
   ]
 }
