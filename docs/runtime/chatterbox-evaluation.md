@@ -229,3 +229,32 @@ The two-speaker repeated-condition #53 pack is delivered; explicit per-sample 1â
 human similarity/naturalness and defect judgements are pending. #54's browser/media latency, cancellation, recovery,
 reference lifecycle, RAM/VRAM and continuous resampling checks remain untested.
 Do not extrapolate these isolated whole-utterance CPU measurements to FlashHead.
+
+## Integration and adoption decision (#54)
+
+**No adoption at present. Integration evaluation is deferred, not passed or
+technically rejected.** Issue #54 explicitly requires #53 to close with a passing
+human quality verdict. The listening pack is available, but its similarity,
+naturalness, accent and per-sample defect scores are still pending. Successful
+generation and the single setup intelligibility confirmation do not satisfy that
+prerequisite. The retired upstream and 90 candidate dependency advisories also
+remain material adoption risks; no production security/licensing clearance exists.
+
+| Adoption requirement | Evidence/status |
+| --- | --- |
+| Native reproducibility | Pass; #52 closed with explicit user listening confirmation |
+| Two-speaker quality and reference preparation | Matrix generated; human scores unresolved (#53 remains open) |
+| Fresh FlashHead/browser baseline; cold and ten warmed turns per configuration | Not run: integration gate deferred |
+| CPU/GPU coexistence, stalls, peak RAM/VRAM and allocation release | Not measured; the quality matrix uses CPU in separate processes and is not a coexistence benchmark |
+| Browser first audible speech with a decoded moving frame; 3â€“5 s warm target | Not measured; isolated complete-WAV timing does not establish this |
+| Continuous mono 16 kHz PCM16 resampling, bounded queues and phrase endings | Not integrated or verified for Chatterbox |
+| Stop, reset, replacement, repeated voice switches, crashes/missing assets and recovery through browser/API | Not exercised for an experimental adapter; existing application tests remain separate |
+
+No experimental application voice, reference-storage lifecycle, avatar persistence
+change or adapter has been added. There is no experimental-app launch command
+to claim for this deferred stage. Manual integration verification is inapplicable
+until the gate permits that implementation; the #52/#53 audition commands are
+not substitutes. No new production implementation tickets are warranted on the
+current conditional evidence. If #53 later passes and closes, the next authorised
+stage is the bounded #54 prototype and its existing acceptance matrix, with shared-GPU
+measurements serialised and independent correctness checks parallelised safely.
