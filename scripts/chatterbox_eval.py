@@ -18,6 +18,8 @@ import wave
 from pathlib import Path
 from typing import Any
 
+# B404: fixed shell-free candidate commands only; review if commands become external.
+
 ROOT = Path(__file__).resolve().parents[1]
 
 

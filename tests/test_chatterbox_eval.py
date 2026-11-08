@@ -1,5 +1,7 @@
 """Evaluation CLI contract; no model downloads, native speech or network needed."""
 
+# B404/B603: bounded shell-free calls to the checked-in CLI using this interpreter.
+# Review these exceptions if executable/script/arguments become externally supplied.
 import subprocess  # nosec B404
 import sys
 import tempfile
