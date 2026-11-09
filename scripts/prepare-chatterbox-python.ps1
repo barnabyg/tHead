@@ -1,12 +1,12 @@
 #Requires -Version 7.0
 # Explicit, hash-verified Python acquisition for the isolated maintained profile.
-param([Parameter(Mandatory)][string]$State)
+param([Parameter(Mandatory)][string]$State, [switch]$ExtractOnly)
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
 $root = Split-Path $PSScriptRoot -Parent
 $lock = Get-Content (Join-Path $root 'chatterbox-maintained-lock.json') -Raw | ConvertFrom-Json
 $pin = $lock.python_distribution
-$State = [IO.Path]::GetFullPath($State)
+$State = [IO.Path]::TrimEndingDirectorySeparator([IO.Path]::GetFullPath($State))
 New-Item -ItemType Directory -Force $State | Out-Null
 $archive = Join-Path $State $pin.archive
 if (-not (Test-Path -LiteralPath $archive)) {
@@ -48,25 +48,66 @@ function Invoke-Bounded([string]$Program, [string[]]$Arguments) {
 
 $destination = Join-Path $State 'python-runtime'
 $python = Join-Path $State $pin.relative_executable
+
+function Remove-OwnedStage([string]$Path) {
+    $full = [IO.Path]::GetFullPath($Path)
+    $parent = [IO.Path]::GetFullPath((Split-Path $full -Parent))
+    $name = Split-Path $full -Leaf
+    if ($parent -cne $State -or $name -notmatch '^python-runtime\.staging-[a-f0-9]{32}$') {
+        throw 'Python cleanup destination escapes its selected state.'
+    }
+    if (-not (Test-Path -LiteralPath $full)) { return }
+    $item = Get-Item -LiteralPath $full -Force
+    if (-not $item.PSIsContainer -or ($item.Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+        throw 'Python staging must be a private directory; preserve it and choose a fresh state.'
+    }
+    $marker = Join-Path $full '.chatterbox-acquisition'
+    # Older/unrecognized directories may contain user data. Never remove them.
+    if (-not (Test-Path -LiteralPath $marker -PathType Leaf)) { return }
+    $markerItem = Get-Item -LiteralPath $marker -Force
+    if (($markerItem.Attributes -band [IO.FileAttributes]::ReparsePoint) -or
+        $markerItem.Length -gt 128 -or (Get-Content -LiteralPath $marker -Raw).Trim() -cne $pin.sha256) {
+        throw 'Unrecognized Python staging marker; preserve it and choose a fresh state.'
+    }
+    $links = Get-ChildItem -LiteralPath $full -Recurse -Force |
+        Where-Object { $_.Attributes -band [IO.FileAttributes]::ReparsePoint }
+    if ($links) { throw 'Python staging contains links; preserve it and choose a fresh state.' }
+    # Exact direct child of State, our marker, and no links: native scoped cleanup only.
+    Remove-Item -LiteralPath $full -Recurse -Force
+}
+
 if (-not (Test-Path -LiteralPath $python)) {
     if (Test-Path -LiteralPath $destination) {
         throw 'Python extraction is incomplete; preserve it and choose a fresh state.'
     }
-    $staging = Join-Path $State 'python-runtime.staging'
-    if (Test-Path -LiteralPath $staging) {
-        throw 'Python extraction was interrupted; preserve it and choose a fresh state.'
-    }
-    New-Item -ItemType Directory $staging | Out-Null
-    Invoke-Bounded tar @('-xzf', $archive, '-C', $staging) | Out-Null
-    # Directory moves must remain inside the explicitly selected task state.
-    $boundary = $State.TrimEnd([IO.Path]::DirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
-    foreach ($path in @($staging, $destination)) {
-        if (-not [IO.Path]::GetFullPath($path).StartsWith($boundary, [StringComparison]::OrdinalIgnoreCase)) {
-            throw 'Python extraction destination escapes its selected state.'
+    # The immutable archive is verified above before inspecting or replacing work.
+    # Preserve the old unmarked staging name; new task-owned stages can be reaped.
+    foreach ($abandoned in (Get-ChildItem -LiteralPath $State -Filter 'python-runtime.staging-*' -Force | Select-Object -First 32)) {
+        if ($abandoned.Name -match '^python-runtime\.staging-[a-f0-9]{32}$') {
+            Remove-OwnedStage $abandoned.FullName
         }
     }
-    Move-Item -LiteralPath $staging -Destination $destination
+    $staging = Join-Path $State ('python-runtime.staging-' + [Guid]::NewGuid().ToString('N'))
+    New-Item -ItemType Directory $staging | Out-Null
+    Set-Content -LiteralPath (Join-Path $staging '.chatterbox-acquisition') -Value $pin.sha256 -Encoding ascii
+    try {
+        Invoke-Bounded tar @('-xzf', $archive, '-C', $staging) | Out-Null
+        $relativePython = [IO.Path]::GetRelativePath($destination, $python)
+        if (-not (Test-Path -LiteralPath (Join-Path $staging $relativePython) -PathType Leaf)) {
+            throw 'Pinned Python archive is missing its expected executable.'
+        }
+        # Resolve/check both exact paths before moving within the explicitly selected State.
+        foreach ($path in @($staging, $destination)) {
+            if ([IO.Path]::GetFullPath((Split-Path $path -Parent)) -cne $State) {
+                throw 'Python extraction destination escapes its selected state.'
+            }
+        }
+        Move-Item -LiteralPath $staging -Destination $destination
+    } finally {
+        Remove-OwnedStage $staging
+    }
 }
+if ($ExtractOnly) { return }
 $probe = 'import json,platform,ssl,sys,pyexpat; expected=sys.argv[1]; actual=platform.python_version(); assert actual==expected, f"Python differs: {actual}, expected {expected}"; assert sys.platform=="win32" and sys.maxsize>2**32; print(json.dumps({"python":actual,"openssl":ssl.OPENSSL_VERSION,"expat":pyexpat.EXPAT_VERSION,"platform":platform.platform(),"architecture":platform.machine()}))'
 $result = Invoke-Bounded $python @('-I', '-W', 'error', '-c', $probe, $lock.python)
 $result.Trim() | Set-Content -LiteralPath (Join-Path $State 'python-runtime-result.json') -Encoding utf8

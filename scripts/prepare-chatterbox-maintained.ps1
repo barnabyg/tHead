@@ -1,6 +1,6 @@
 # Isolated maintenance candidate only; does not grant regular-use approval.
 # Invoke under prepare.run with a 3-hour process-tree limit.
-param([Parameter(Mandatory)][string]$State)
+param([Parameter(Mandatory)][string]$State, [switch]$SourcesOnly)
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
 $root = Split-Path $PSScriptRoot -Parent
@@ -9,13 +9,15 @@ $patch = Join-Path $root $lock.source_patch.file
 if ((Get-FileHash -LiteralPath $patch -Algorithm SHA256).Hash.ToLowerInvariant() -ne $lock.source_patch.sha256) {
     throw 'Maintained source patch differs from its recorded hash.'
 }
-$State = [IO.Path]::GetFullPath($State)
-$drive = [IO.DriveInfo]::new([IO.Path]::GetPathRoot($State))
-$memory = Get-CimInstance Win32_OperatingSystem
-if ($drive.AvailableFreeSpace -lt 20GB -or $memory.FreePhysicalMemory * 1KB -lt 8GB) {
-    throw 'Evaluation acquisition requires at least 20 GiB free disk and 8 GiB free RAM.'
+$State = [IO.Path]::TrimEndingDirectorySeparator([IO.Path]::GetFullPath($State))
+if (-not $SourcesOnly) {
+    $drive = [IO.DriveInfo]::new([IO.Path]::GetPathRoot($State))
+    $memory = Get-CimInstance Win32_OperatingSystem
+    if ($drive.AvailableFreeSpace -lt 20GB -or $memory.FreePhysicalMemory * 1KB -lt 8GB) {
+        throw 'Evaluation acquisition requires at least 20 GiB free disk and 8 GiB free RAM.'
+    }
+    Write-Output "Preflight: $($drive.AvailableFreeSpace) bytes free disk; $($memory.FreePhysicalMemory * 1KB) bytes free RAM; maintained CUDA candidate configuration."
 }
-Write-Output "Preflight: $($drive.AvailableFreeSpace) bytes free disk; $($memory.FreePhysicalMemory * 1KB) bytes free RAM; maintained CUDA candidate configuration."
 New-Item -ItemType Directory -Force $State | Out-Null
 $env:UV_CACHE_DIR = Join-Path $State 'uv-cache'
 $env:UV_PYTHON_INSTALL_DIR = Join-Path $State 'python'
@@ -51,11 +53,56 @@ function Invoke-Checked([string]$Program, [string[]]$Arguments) {
 
 function Prepare-Source([string]$Name, [string]$Url, [string]$Revision) {
     $destination = Join-Path $State $Name
+    if ($Revision -notmatch '^[a-f0-9]{40}$') { throw 'Source revision must be an exact pinned commit.' }
     if (-not (Test-Path -LiteralPath $destination)) {
         Invoke-Checked git @('init', $destination)
+    } else {
+        $item = Get-Item -LiteralPath $destination -Force
+        $metadata = Join-Path $destination '.git'
+        if (($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -or
+            -not $item.PSIsContainer) { throw "Source is not a private directory: $destination" }
+        if (-not (Test-Path -LiteralPath $metadata)) {
+            if (Get-ChildItem -LiteralPath $destination -Force) {
+                throw "Unrecognized source files; preserve them and choose a fresh state: $destination"
+            }
+            Invoke-Checked git @('init', $destination)
+        } else {
+            $gitItem = Get-Item -LiteralPath $metadata -Force
+            if (-not $gitItem.PSIsContainer -or
+                ($gitItem.Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+                throw "Source Git metadata must stay inside its state: $destination"
+            }
+        }
+    }
+    $top = & git -C $destination rev-parse --show-toplevel 2>$null
+    if ($LASTEXITCODE -ne 0) {
+        if (Get-ChildItem -LiteralPath $destination -Force | Where-Object Name -ne '.git') {
+            throw "Incomplete Git initialization has unrecognized files; preserve them: $destination"
+        }
+        Invoke-Checked git @('init', $destination)
+        $top = & git -C $destination rev-parse --show-toplevel
+    }
+    if ($LASTEXITCODE -ne 0 -or -not [IO.Path]::GetFullPath($top).Equals(
+            [IO.Path]::GetFullPath($destination), [StringComparison]::OrdinalIgnoreCase)) {
+        throw "Source worktree escapes its selected state: $destination"
+    }
+    $origin = @(& git -C $destination config --get-all remote.origin.url)
+    if ($origin.Count -eq 0) {
+        # An interrupted init may not yet have an origin. Only an empty worktree
+        # is ours to resume; never adopt an unrelated checkout or private files.
+        if (Get-ChildItem -LiteralPath $destination -Force | Where-Object Name -ne '.git') {
+            throw "Source origin is missing; preserve existing files: $destination"
+        }
         Invoke-Checked git @('-C', $destination, 'remote', 'add', 'origin', $Url)
+    } elseif ($origin.Count -ne 1 -or $origin[0] -cne $Url) {
+        throw "Source origin differs from its pin; preserve it: $destination"
+    }
+    $actual = & git -C $destination rev-parse --verify HEAD 2>$null
+    if ($LASTEXITCODE -ne 0) {
+        # Fetch/checkout may have been cancelled. A normal checkout (never force)
+        # protects any local files or index changes created before the interruption.
         Invoke-Checked git @('-C', $destination, '-c', 'http.lowSpeedLimit=1024', '-c', 'http.lowSpeedTime=120', 'fetch', '--depth=1', 'origin', $Revision)
-        Invoke-Checked git @('-C', $destination, '-c', 'core.autocrlf=false', 'checkout', '--detach', 'FETCH_HEAD')
+        Invoke-Checked git @('-C', $destination, '-c', 'core.autocrlf=false', 'checkout', '--detach', $Revision)
     }
     Invoke-Checked git @('-C', $destination, 'config', 'core.autocrlf', 'false')
     $actual = & git -C $destination rev-parse HEAD
@@ -80,6 +127,7 @@ function Prepare-Source([string]$Name, [string]$Url, [string]$Revision) {
 
 Prepare-Source 'source' $lock.upstream_url $lock.upstream_revision
 Prepare-Source 'perth' $lock.perth_url $lock.perth_revision
+if ($SourcesOnly) { return }
 $python = Join-Path $State 'venv/Scripts/python.exe'
 if (-not (Test-Path -LiteralPath $python)) {
     Invoke-Checked pwsh @('-NoProfile', '-File', (Join-Path $root 'scripts/prepare-chatterbox-python.ps1'), '-State', $State)

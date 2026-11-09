@@ -88,6 +88,11 @@ No `--inexact` allowance retains unwanted dependencies. An older state without a
 checkpoint needs one initial verification/preparation under the new command.
 Stop an application using the selected state before repairing its environment;
 run only one preparation per state.
+Retry resumes incomplete source acquisition from the exact pinned origin without
+overwriting local edits, and re-extracts verified Python archives in fresh marked
+staging while retaining legacy/unrecognized staging.
+The acquisition-only diagnostic switches `-SourcesOnly` (maintained preparation)
+and `-ExtractOnly` (Python preparation) stop before installation/runtime approval.
 
 The [official CUDA 13.0 Windows wheel index](https://download.pytorch.org/whl/cu130/torch/)
 provides the selected Torch wheel. CUDA 12.8 stops at Torch 2.11.0 on this platform
