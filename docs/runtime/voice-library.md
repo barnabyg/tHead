@@ -70,6 +70,13 @@ is damaged, the catalogue uses a safe unavailable display entry and explains tha
 the database must be preserved/restored. It does not silently invent a replacement
 voice identity or rewrite the corrupt record.
 
+Relative user-data paths are anchored when a store is opened, so model-loading
+changes to the process working directory cannot redirect subsequent reads/writes.
+If the database later disappears or becomes unreadable, the voice catalogue
+reports an actionable storage error while built-in voices remain available. Reads
+never create an empty replacement for a missing database. Restore the original
+database or a backup and reopen the application to retry.
+
 ## Test launch and short manual scenario
 
 Prerequisites: Windows 11, PowerShell 7, Python, uv 0.11.7, the repository's locked

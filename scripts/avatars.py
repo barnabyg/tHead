@@ -95,6 +95,7 @@ def decode_portrait(encoded: Any) -> bytes:
 
 class AvatarStore:
     def __init__(self, directory: Path, voices: VoiceStore | None = None) -> None:
+        directory = directory.resolve()
         self.path = directory / "avatars.sqlite3"
         self.voices = voices
         self.error = ""

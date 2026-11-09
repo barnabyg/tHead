@@ -84,6 +84,53 @@ class VoiceStorageTests(unittest.TestCase):
         finally:
             reopened.close()
 
+    def test_relative_user_data_stays_anchored_when_working_directory_changes(self) -> None:
+        previous = Path.cwd()
+        store: VoiceStore | None = None
+        try:
+            os.chdir(self.directory)
+            store = VoiceStore(Path("relative-voices"), MEDIA)
+            imported = store.import_audio("Anchored", "valid.wav", recording(), True)
+            store.mark_previewed(imported["id"], imported["sha256"])
+            saved = store.save(imported["id"])
+            reference = store.reference(saved["id"])
+            os.chdir(ROOT)
+            self.assertEqual(store.reference(saved["id"]), reference)
+            self.assertEqual(store.list()[0]["id"], saved["id"])
+            self.assertEqual(store.rename(saved["id"], "Still anchored")["name"], "Still anchored")
+        finally:
+            if store is not None:
+                store.close()
+            os.chdir(previous)
+
+    def test_catalogue_failure_isolated_and_missing_database_is_not_recreated(self) -> None:
+        imported = self.store.import_audio("Preserved", "valid.wav", recording(), True)
+        self.store.mark_previewed(imported["id"], imported["sha256"])
+        saved = self.store.save(imported["id"])
+        self.store.close()
+        original = self.directory / "avatars.sqlite3"
+        backup = self.directory / "preserved.sqlite3"
+        original.replace(backup)
+        try:
+            self.assertEqual(self.store.list(), [])
+            self.assertIn("preserve", self.store.error.lower())
+            self.assertFalse(original.exists())
+        finally:
+            original.unlink(missing_ok=True)
+            backup.replace(original)
+        reopened = VoiceStore(self.directory, MEDIA)
+        self.addCleanup(reopened.close)
+        self.assertEqual(reopened.list()[0]["id"], saved["id"])
+        self.assertTrue(reopened.read(saved["id"])["available"])
+        preserved = original.read_bytes()
+        try:
+            original.write_bytes(b"corrupt database fixture")
+            self.assertEqual(reopened.list(), [])
+            self.assertIn("restore", reopened.error.lower())
+            self.assertEqual(original.read_bytes(), b"corrupt database fixture")
+        finally:
+            original.write_bytes(preserved)
+
     def test_source_removal_restart_rename_and_idempotent_save(self) -> None:
         source = self.directory / "original.wav"
         source.write_bytes(recording())

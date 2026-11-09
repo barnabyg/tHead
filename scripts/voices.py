@@ -156,7 +156,7 @@ class AudioDecoder:
 
     def __init__(self, directory: Path | None = None) -> None:
         lock = json.loads((ROOT / "voice-media-lock.json").read_text(encoding="utf-8"))
-        self.directory = directory or RUNTIME / "media" / lock["directory"] / "bin"
+        self.directory = (directory or RUNTIME / "media" / lock["directory"] / "bin").resolve()
         self.hashes: dict[str, str] = lock["executables"]
         self.verified: dict[str, tuple[int, int]] = {}
 
@@ -314,6 +314,7 @@ class AudioDecoder:
 
 class VoiceStore:
     def __init__(self, directory: Path, media_directory: Path | None = None) -> None:
+        directory = directory.resolve()
         self.directory = directory
         self.path = directory / "avatars.sqlite3"
         self.decoder = AudioDecoder(media_directory)
@@ -334,7 +335,7 @@ class VoiceStore:
             )
 
     def initialize(self) -> None:
-        with self.connect(write=True) as connection:
+        with self.connect(write=True, create=True) as connection:
             connection.execute("""CREATE TABLE IF NOT EXISTS avatars (
                 id TEXT PRIMARY KEY, name TEXT NOT NULL, name_key TEXT UNIQUE NOT NULL,
                 voice TEXT NOT NULL, portrait BLOB NOT NULL)""")
@@ -369,12 +370,15 @@ class VoiceStore:
                 BEGIN SELECT RAISE(ABORT, 'Voice is used by an avatar'); END""")
 
     @contextmanager
-    def connect(self, *, write: bool = False) -> Iterator[sqlite3.Connection]:
+    def connect(self, *, write: bool = False, create: bool = False) -> Iterator[sqlite3.Connection]:
         if self.error:
             raise ValueError(self.error)
         connection: sqlite3.Connection | None = None
         try:
-            connection = sqlite3.connect(self.path, timeout=30)
+            # Only initialization may create a database. A moved/deleted database
+            # must never be silently replaced by an empty file during a read.
+            uri = self.path.as_uri() + ("?mode=rwc" if create else "?mode=rw")
+            connection = sqlite3.connect(uri, uri=True, timeout=30)
             connection.execute("PRAGMA secure_delete=ON")
             with connection:
                 if write:
@@ -751,10 +755,17 @@ class VoiceStore:
     def list(self) -> list[dict[str, Any]]:
         if self.error:
             return []
-        with self.connect() as connection:
-            records = connection.execute(
-                "SELECT rowid,id,name FROM voices ORDER BY name_key"
-            ).fetchall()
+        try:
+            with self.connect() as connection:
+                records = connection.execute(
+                    "SELECT rowid,id,name FROM voices ORDER BY name_key"
+                ).fetchall()
+        except ValueError as problem:
+            self.error = (
+                "Voice storage unavailable; preserve the database, restore it or a backup, "
+                f"and restart. Built-in voices remain available. ({problem})"
+            )
+            return []
         result = []
         for rowid, identity, name in records:
             if not isinstance(identity, str) or not isinstance(name, str):
