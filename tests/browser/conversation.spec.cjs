@@ -1265,7 +1265,13 @@ test('reset and Stop during loading retain choice, reject overlapping selection 
   await backToConversation(page);
   await ask.click();
   await expect(page.locator('#status')).toHaveText('Playback ended');
+  // Browser playback can finish before the backend reconciles its reservation.
+  // Capture the settled first-turn charge before testing that reset preserves it.
+  await expect
+    .poll(async () => (await (await request.get(`${info.url}/status`)).json()).budget.reserved_usd)
+    .toBe(0);
   const before = await (await request.get(`${info.url}/status`)).json();
+  expect(before.budget.estimated_usd).toBeGreaterThan(0);
   await page.getByLabel('Pair diagnostic', { exact: true }).selectOption('pair-delay');
   await expect(pair).toBeEnabled();
   await openSettings(page);
@@ -1287,6 +1293,7 @@ test('reset and Stop during loading retain choice, reject overlapping selection 
   const ready = await (await request.get(`${info.url}/status`)).json();
   expect(ready.session).not.toBe(before.session);
   expect(ready.budget.estimated_usd).toBe(before.budget.estimated_usd);
+  expect(ready.budget.reserved_usd).toBe(0);
   expect(ready.activePair).toBe('hopper-hazel');
   await backToConversation(page);
   await ask.click();
