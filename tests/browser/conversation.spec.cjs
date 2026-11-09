@@ -921,6 +921,91 @@ test.beforeEach(async ({ page }, info) => {
   await page.getByText('Session details', { exact: true }).click();
 });
 
+for (const custom of [false, true]) {
+  test(`default avatar saves ${custom ? 'a user avatar' : 'a built-in avatar'} for startup without switching the current conversation`, async ({
+    page,
+    request,
+  }, info) => {
+    const before = await (await request.get(`${info.url}/status`)).json();
+    let identity = 'hopper-hazel';
+    let name = 'Grace';
+    if (custom) {
+      const response = await request.post(`${info.url}/avatars`, {
+        data: {
+          session: before.session,
+          name: 'My default',
+          voice: 'hazel',
+          image: fs.readFileSync('tests/fixtures/portrait.jpg').toString('base64'),
+        },
+      });
+      expect(response.ok()).toBe(true);
+      identity = (await response.json()).id;
+      name = 'My default';
+    }
+    await openSettings(page);
+    const selector = page.getByLabel('Default avatar', { exact: true });
+    await expect(selector).toHaveValue('jfk-zira');
+    await expect(selector.locator(`option[value="${identity}"]`)).toHaveText(name);
+    await selector.selectOption(identity);
+    await expect(page.locator('#settings-status')).toContainText('app next starts');
+    await expect(page.getByLabel('Avatar', { exact: true })).toHaveValue('jfk-zira');
+    const saved = await (await request.get(`${info.url}/status`)).json();
+    expect(saved.activeAvatar).toBe(before.activeAvatar);
+    expect(saved.transcript).toEqual(before.transcript);
+    expect(saved.budget).toEqual(before.budget);
+    await page.reload();
+    await openSettings(page);
+    await expect(selector).toHaveValue(identity);
+    await stopFixture(info);
+    await startFixture(info);
+    await page.goto(info.url);
+    await expect(page.locator('#conversation')).toContainText(`Active avatar: ${name}`);
+    await openSettings(page);
+    await expect(selector).toHaveValue(identity);
+    await page.getByLabel('Avatar', { exact: true }).selectOption('jfk-zira');
+    await expect(page.locator('#pair-status')).toContainText('Active: JFK');
+    await expect(selector).toHaveValue(identity);
+    if (custom) {
+      const session = (await (await request.get(`${info.url}/status`)).json()).session;
+      const deleted = await request.post(`${info.url}/avatars/delete`, {
+        data: { session, id: identity, name },
+      });
+      expect(deleted.ok()).toBe(true);
+      await expect(selector).toHaveValue('jfk-zira');
+      await stopFixture(info);
+      await startFixture(info);
+      await page.goto(info.url);
+      await expect(page.locator('#conversation')).toContainText('Active avatar: JFK');
+    }
+  });
+}
+
+test('default avatar reports a failed save and restores the saved choice', async ({
+  page,
+  request,
+}, info) => {
+  const before = await (await request.get(`${info.url}/status`)).json();
+  const db = path.join(info.output, 'user-data', 'avatars.sqlite3');
+  execFileSync(
+    process.env.THEAD_TEST_PYTHON || 'python',
+    [
+      '-c',
+      'import sqlite3,sys;c=sqlite3.connect(sys.argv[1]);c.execute("CREATE TRIGGER reject_preference AFTER INSERT ON preferences BEGIN SELECT RAISE(ABORT, \'fixture write failure\'); END");c.commit();c.close()',
+      db,
+    ],
+    { timeout: 30_000 },
+  );
+  await openSettings(page);
+  const selector = page.getByLabel('Default avatar', { exact: true });
+  await selector.selectOption('hopper-hazel');
+  await expect(page.locator('#settings-status')).toContainText('storage unavailable');
+  await expect(selector).toHaveValue('jfk-zira');
+  await expect(selector).toBeEnabled();
+  const after = await (await request.get(`${info.url}/status`)).json();
+  expect(after.settings.defaultAvatar).toBe('jfk-zira');
+  expect(after.activeAvatar).toBe(before.activeAvatar);
+});
+
 test('Settings navigation preserves draft, transcript, context and budget with keyboard focus', async ({
   page,
   request,

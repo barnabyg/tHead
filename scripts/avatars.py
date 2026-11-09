@@ -16,7 +16,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
-from pairs import Avatar, configured_avatars, supported_voices
+from pairs import DEFAULT_PAIR, Avatar, configured_avatars, supported_voices
 from speech import Voice
 from voices import VoiceStore
 
@@ -106,6 +106,8 @@ class AvatarStore:
                 connection.execute("""CREATE TABLE IF NOT EXISTS avatars (
                     id TEXT PRIMARY KEY, name TEXT NOT NULL, name_key TEXT UNIQUE NOT NULL,
                     voice TEXT NOT NULL, portrait BLOB NOT NULL)""")
+                connection.execute("""CREATE TABLE IF NOT EXISTS preferences (
+                    key TEXT PRIMARY KEY, value TEXT NOT NULL)""")
         except (sqlite3.Error, OSError) as error:
             self.error = self.recovery(error)
 
@@ -155,6 +157,35 @@ class AvatarStore:
         if avatar is None:
             raise ValueError("Unknown avatar; select an available avatar")
         return avatar
+
+    def default_avatar(self) -> str:
+        if self.error:
+            return DEFAULT_PAIR
+        try:
+            with self.connect() as connection:
+                row = connection.execute(
+                    "SELECT value FROM preferences WHERE key = 'default_avatar'"
+                ).fetchone()
+            return str(row[0]) if row and row[0] in self.avatars() else DEFAULT_PAIR
+        except sqlite3.Error as error:
+            self.error = self.recovery(error)
+            return DEFAULT_PAIR
+
+    def set_default_avatar(self, identity: Any) -> None:
+        if not isinstance(identity, str):
+            raise ValueError("Choose an available default avatar")
+        self.get(identity)
+        if self.error:
+            raise ValueError(self.error)
+        try:
+            with self.connect() as connection:
+                connection.execute(
+                    "INSERT INTO preferences (key, value) VALUES ('default_avatar', ?) "
+                    "ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+                    (identity,),
+                )
+        except sqlite3.Error as error:
+            raise ValueError(self.recovery(error)) from error
 
     def portrait(self, identity: str) -> bytes:
         if self.error:
@@ -236,5 +267,8 @@ class AvatarStore:
                 )
                 if cursor.rowcount != 1:
                     raise ValueError("Avatar changed; reload Settings")
+                connection.execute(
+                    "DELETE FROM preferences WHERE key='default_avatar' AND value=?", (identity,)
+                )
         except sqlite3.Error as error:
             raise ValueError(self.recovery(error)) from error

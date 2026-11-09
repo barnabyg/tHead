@@ -216,6 +216,7 @@
     }
     #thinking-level,
     #model,
+    #default-avatar,
     #pair {
       width: 100%;
     }
@@ -597,6 +598,11 @@
           <button type="button" id="delete-avatar" hidden>Delete avatar</button>
           <p id="avatar-result" role="status"></p>
           <p id="avatar-storage-error" role="status"></p>
+          <label for="default-avatar">Default avatar</label>
+          <select id="default-avatar" disabled aria-describedby="default-avatar-help"></select>
+          <p id="default-avatar-help">
+            Used when the app starts. Changing this keeps the current conversation's avatar.
+          </p>
           <button type="button" id="open-voices">Voices</button>
           <label for="model">Model</label>
           <select id="model" disabled aria-describedby="model-availability"></select>

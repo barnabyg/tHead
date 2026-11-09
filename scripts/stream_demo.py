@@ -10,7 +10,7 @@ from pathlib import Path
 
 from avatars import AvatarStore, user_data_directory
 from demo import acquire
-from pairs import DEFAULT_PAIR, configured_pairs
+from pairs import configured_pairs
 from prepare import ROOT, RUNTIME, run
 
 
@@ -33,12 +33,14 @@ def main() -> None:
         "--avatar",
         "--pair",
         dest="pair",
-        default=os.environ.get("THEAD_AVATAR", os.environ.get("THEAD_PAIR", DEFAULT_PAIR)),
+        default=os.environ.get("THEAD_AVATAR", os.environ.get("THEAD_PAIR", "")),
     )
     args = parser.parse_args()
     if args.conversation:
         try:
-            AvatarStore(args.user_data or user_data_directory()).get(args.pair)
+            store = AvatarStore(args.user_data or user_data_directory())
+            args.pair = args.pair or store.default_avatar()
+            store.get(args.pair)
         except ValueError as error:
             parser.error(str(error))
     if not args.skip_preparation:

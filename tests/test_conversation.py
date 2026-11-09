@@ -401,6 +401,28 @@ class ConversationTests(unittest.TestCase):
         self.assertEqual(done["run"]["answer"], "The final words should be complete.")
         self.assertEqual(done["run"]["state"], "complete")
 
+    def test_default_avatar_restart_override_and_validation(self) -> None:
+        before = self.request("/status")
+        session = before["session"]
+        saved = self.request("/settings", {"session": session, "defaultAvatar": "hopper-hazel"})
+        self.assertEqual(saved["settings"]["defaultAvatar"], "hopper-hazel")
+        self.assertEqual(saved["activeAvatar"], "jfk-zira")
+        self.assertEqual(saved["transcript"], before["transcript"])
+        self.assertEqual(saved["budget"], before["budget"])
+        for identity in ("missing", None, 42, ["missing"]):
+            with self.assertRaises(urllib.error.HTTPError):
+                self.request("/settings", {"session": session, "defaultAvatar": identity})
+        with self.assertRaises(urllib.error.HTTPError):
+            self.request("/settings", {"session": "stale", "defaultAvatar": "jfk-zira"})
+        self.stop_process()
+        self.start_app()
+        self.assertEqual(self.request("/status")["activeAvatar"], "hopper-hazel")
+        self.stop_process()
+        self.start_app("jfk-zira")
+        status = self.request("/status")
+        self.assertEqual(status["activeAvatar"], "jfk-zira")
+        self.assertEqual(status["settings"]["defaultAvatar"], "hopper-hazel")
+
     def test_model_settings_preserve_context_and_capture_active_turn(self) -> None:
         status = self.request("/status")
         self.assertEqual(status["settings"]["model"], "gpt-6-luna")

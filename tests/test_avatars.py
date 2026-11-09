@@ -38,6 +38,38 @@ class AvatarStorageTests(unittest.TestCase):
             AvatarStore(self.directory).get(updated.id)
         self.assertEqual(reopened.portrait(other.id), self.image)
 
+    def test_default_persists_by_identity_and_deleted_default_falls_back(self) -> None:
+        self.assertEqual(self.store.default_avatar(), "jfk-zira")
+        self.store.set_default_avatar(self.avatar.id)
+        self.store.update(self.avatar.id, "Renamed", "hazel")
+        reopened = AvatarStore(self.directory)
+        self.assertEqual(reopened.default_avatar(), self.avatar.id)
+        reopened.delete(self.avatar.id, "Renamed")
+        self.assertEqual(AvatarStore(self.directory).default_avatar(), "jfk-zira")
+
+    def test_old_database_gains_preferences_without_changing_saved_avatars(self) -> None:
+        with closing(sqlite3.connect(self.store.path)) as connection, connection:
+            connection.execute("DROP TABLE preferences")
+        reopened = AvatarStore(self.directory)
+        self.assertEqual(reopened.default_avatar(), "jfk-zira")
+        self.assertEqual(reopened.portrait(self.avatar.id), self.image)
+        reopened.set_default_avatar("hopper-hazel")
+        self.assertEqual(AvatarStore(self.directory).default_avatar(), "hopper-hazel")
+
+    def test_invalid_or_failed_default_save_preserves_previous_preference(self) -> None:
+        self.store.set_default_avatar(self.avatar.id)
+        for identity in ("missing", None, 123, ["missing"]):
+            with self.assertRaises(ValueError):
+                self.store.set_default_avatar(identity)
+        with closing(sqlite3.connect(self.store.path)) as connection, connection:
+            connection.execute(
+                "CREATE TRIGGER reject_preference AFTER UPDATE ON preferences "
+                "BEGIN SELECT RAISE(ABORT, 'fixture disk failure'); END"
+            )
+        with self.assertRaisesRegex(ValueError, "storage unavailable"):
+            self.store.set_default_avatar("hopper-hazel")
+        self.assertEqual(AvatarStore(self.directory).default_avatar(), self.avatar.id)
+
     def test_relative_user_data_stays_anchored_when_working_directory_changes(self) -> None:
         previous = Path.cwd()
         try:
