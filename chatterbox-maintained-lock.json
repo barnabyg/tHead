@@ -103,5 +103,19 @@
     "metadata_source": "https://api.github.com/repos/astral-sh/python-build-standalone/releases/tags/20261026",
     "release_source": "https://www.python.org/downloads/release/python-31216/",
     "relative_executable": "python-runtime/python/python.exe"
-  }
+  },
+  "source_projects": [
+    {
+      "name": "chatterbox-tts",
+      "version": "0.1.7+thead.1",
+      "directory": "source",
+      "package": "chatterbox"
+    },
+    {
+      "name": "resemble-perth",
+      "version": "1.1.0",
+      "directory": "perth",
+      "package": "perth"
+    }
+  ]
 }

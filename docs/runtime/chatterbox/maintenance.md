@@ -77,6 +77,17 @@ changes or mismatched assets and preserves them for diagnosis. The new
 `requirements-maintained.lock` contains hashes for every acquired dependency;
 source builds use the already locked build backends without dependency resolution.
 
+Repeat preparation checks the complete installed distribution inventory against
+all locked wheels and the two pinned source projects, and compares installed
+Chatterbox/Perth package files with the verified source trees. A checkpoint binds
+that verification to both current lock files; it is insufficient by itself.
+Matching states skip sync/rebuild, while missing/extra/changed distributions,
+changed pins or altered source content require strict sync and re-verification.
+No `--inexact` allowance retains unwanted dependencies. An older state without a
+checkpoint needs one initial verification/preparation under the new command.
+Stop an application using the selected state before repairing its environment;
+run only one preparation per state.
+
 The [official CUDA 13.0 Windows wheel index](https://download.pytorch.org/whl/cu130/torch/)
 provides the selected Torch wheel. CUDA 12.8 stops at Torch 2.11.0 on this platform
 and cannot supply the advertised 2.13.0 fix for CVE-2025-3000. The official
@@ -272,6 +283,21 @@ verdict remains unchanged unless listening establishes a concrete regression.
    preserved by the public preparation command. Conclusion: interpreter
    acquisition is reproducible without a preinstalled Python 3.12; final native
    speech/FlashHead release verification must use the new pin.
+6. Hypothesis: avoiding source rebuilds for an exactly matching environment
+   removes needless cache mutation during normal startup. The previous command
+   strictly synced only wheel requirements, uninstalling both source projects,
+   then rebuilt them on every invocation. The root's 10:28 native launch emitted
+   a transient Windows cache-rename access denial; its cause is unknown. Change:
+   check lock fingerprints, every distribution/version and the installed source
+   package bytes, including Perth's checkpoint, before deciding to skip repair.
+   Measurement: a fresh isolated venv passes in 57.124 s using copied verified
+   caches; repeat preparation passes in 2.808 s without sync, build, reinstall or
+   warnings. Deliberately added extra distribution and altered installed-source
+   probes both trigger strict repair and return to the exact 83-package profile.
+   Conclusion: normal matching preparation is idempotent without leaving drift
+   unchecked. [Full observations and original warning](maintenance-attempts/idempotence-results.json)
+   retain the controlled interrupted test-state preparation and the separate
+   clean control. No warning filter or vulnerability exception was added.
 
 Native synthesis results and every failed compatibility attempt are retained in
 the accompanying maintenance evidence. Regular release additionally requires

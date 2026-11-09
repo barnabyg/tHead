@@ -87,13 +87,19 @@ if (-not (Test-Path -LiteralPath $python)) {
 }
 $version = & $python -I -c 'import platform; print(platform.python_version())'
 if ($LASTEXITCODE -ne 0 -or $version -ne $lock.python) { throw 'Candidate Python differs from its pin; choose a fresh --state directory.' }
-$installedTorch = & $python -I -c 'import importlib.util; import torch; print(torch.__version__)' 2>$null
+$installedTorch = & $python -I -c 'from importlib.metadata import version; print(version("torch"))' 2>$null
 if ($LASTEXITCODE -eq 0 -and $installedTorch -ne $lock.torch) {
     throw 'Existing PyTorch configuration differs; choose a fresh -State directory. No environment was changed.'
 }
-Invoke-Checked uv @('pip', 'sync', '--python', $python, '--require-hashes', (Join-Path $root 'docs/runtime/chatterbox/requirements-maintained.lock'))
-Invoke-Checked uv @('pip', 'install', '--python', $python, '--no-deps', '--no-build-isolation', (Join-Path $State 'source'), (Join-Path $State 'perth'))
+$environmentCheck = Join-Path $root 'scripts/chatterbox_environment.py'
+& $python -I $environmentCheck --state $State
+$needsRepair = $LASTEXITCODE -ne 0
+if ($needsRepair) {
+    Invoke-Checked uv @('pip', 'sync', '--python', $python, '--require-hashes', (Join-Path $root 'docs/runtime/chatterbox/requirements-maintained.lock'))
+    Invoke-Checked uv @('pip', 'install', '--python', $python, '--no-deps', '--no-build-isolation', (Join-Path $State 'source'), (Join-Path $State 'perth'))
+}
 Invoke-Checked uv @('pip', 'check', '--python', $python)
+if ($needsRepair) { Invoke-Checked $python @('-I', $environmentCheck, '--state', $State, '--record') }
 
 $model = Join-Path $State 'model'
 New-Item -ItemType Directory -Force $model | Out-Null
