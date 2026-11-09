@@ -481,11 +481,7 @@
     }
   ],
   "restart_pass": true,
-  "restart_onsets": [
-    2.231,
-    1.9643000000007451,
-    2.0146999999992548
-  ],
+  "restart_onsets": [2.231, 1.9643000000007451, 2.0146999999992548],
   "repair_checks": [
     "real UI repair preserved voice identity and both avatar assignments",
     "repaired voice produced real complete speech and moving media",
@@ -542,6 +538,14 @@
     {
       "file": ".runtime/voice-native-release/approved-profile-3.json",
       "sha256": "1571f8477b9b9a4512a2ed26434f865ef32a9d3e6c04f96b4fb8f72b0549254a"
+    },
+    {
+      "file": ".runtime/voice-native-release/cache-review.json",
+      "sha256": "d79fda06cb925bd4d74490c885ec7ebab108d9c3cf2c576619847d683779dc44"
+    },
+    {
+      "file": ".runtime/voice-native-release/cache-review-confirmation.json",
+      "sha256": "20ef01280a46cb4ab0e5e1aae41136cfa395dd43ee0d209e9cbafcd594651078"
     }
   ],
   "cold_engine_preparation_seconds": 25.923996400000018,
@@ -568,11 +572,7 @@
     "candidate_override": false,
     "independently_installed_runtime": true,
     "relative_cli_paths": true,
-    "onsets": [
-      2.3800999999996275,
-      1.965,
-      2.013700000000186
-    ]
+    "onsets": [2.3800999999996275, 1.965, 2.013700000000186]
   },
   "failed_validation_attempts": [
     {
@@ -584,6 +584,21 @@
       "attempt": "approved-profile-2.json",
       "cause": "Caller-relative paths became invalid when FlashHead changed cwd",
       "remediation": "Anchor all conversation/storage/runtime paths at public boundaries; public storage and native regular-profile checks passed"
+    },
+    {
+      "attempt": "cache-review.json",
+      "cause": "Test driver read the previous completed playback before the new run was accepted, producing a NaN onset",
+      "remediation": "Confirmation waits for a new run ID and its completion; cache eviction and unchanged worker PIDs also verified"
     }
-  ]
+  ],
+  "post_review_cache_check": {
+    "pass": true,
+    "scenario": "Warm voices A and B; delete inactive A; speak again with B through the normal native app",
+    "cache_sizes_before": [2, 2],
+    "cache_sizes_after": [1, 1],
+    "worker_pids_unchanged": true,
+    "pending_discards": 0,
+    "current_voice_onset_seconds": 2.713300000000745,
+    "shutdown": "Task server exited normally, no retained speech workers; device returned to 682 MiB desktop usage"
+  }
 }
