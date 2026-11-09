@@ -1056,7 +1056,11 @@ test('model settings validate exact identifiers and switch contextual turns with
 }, info) => {
   await openSettings(page);
   await expect(page.getByLabel('Model', { exact: true })).toHaveValue('gpt-6-luna');
-  await expect(page.locator('#model-availability')).toContainText('gpt-6.1-lunar is unavailable');
+  await expect(page.getByLabel('Model', { exact: true }).locator('option')).toHaveText([
+    'gpt-6.1-sol',
+    'gpt-6-luna',
+  ]);
+  await expect(page.locator('#model-availability')).toBeEmpty();
   const initial = await (await request.get(`${info.url}/status`)).json();
   for (const model of ['gpt-6.1-lunar', 'unknown']) {
     const rejected = await request.post(`${info.url}/settings`, {

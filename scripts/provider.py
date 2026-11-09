@@ -21,7 +21,6 @@ INPUT_BOUND = 8192
 # Official model identifiers verified 2026-11-08; see runtime documentation.
 MODEL_ERRORS = {
     "gpt-6.1-sol": "",
-    "gpt-6.1-lunar": "gpt-6.1-lunar is unavailable; choose an available model in Settings",
     "gpt-6-luna": "",
 }
 
