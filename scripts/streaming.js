@@ -45,11 +45,21 @@ document.querySelector('#settings-back')?.addEventListener('click', () => {
 });
 const modelSelector = document.querySelector('#model');
 const thinkingSelector = document.querySelector('#thinking-level');
+const defaultAvatarSelector = document.querySelector('#default-avatar');
 let savingSettings = false;
 let settingsRevision = 0;
 let modelCatalog = '';
 let thinkingCatalog = '';
-function renderSettings(settings) {
+function renderSettings(settings, avatars) {
+  if (avatars) {
+    const catalog = JSON.stringify(avatars);
+    if (defaultAvatarSelector.dataset.catalogue !== catalog) {
+      defaultAvatarSelector.replaceChildren(...avatars.map((a) => new Option(a.name, a.id)));
+      defaultAvatarSelector.dataset.catalogue = catalog;
+    }
+  }
+  defaultAvatarSelector.value = settings.defaultAvatar;
+  defaultAvatarSelector.disabled = false;
   const catalog = JSON.stringify([settings.models, settings.model]);
   if (catalog !== modelCatalog) {
     modelSelector.replaceChildren(
@@ -87,11 +97,12 @@ async function saveSettings(change) {
   settingsRevision++;
   modelSelector.disabled = true;
   thinkingSelector.disabled = true;
+  defaultAvatarSelector.disabled = true;
   const feedback = document.querySelector('#settings-status');
   feedback.textContent = 'Saving…';
   try {
     const saved = await post('/settings', { session: sessionIdentity, ...change });
-    renderSettings(saved.settings);
+    renderSettings(saved.settings, saved.avatars);
     feedback.textContent = `Saved. ${saved.settings.message || 'Applies to the next question.'}`;
   } catch (error) {
     feedback.textContent = String(error);
@@ -102,6 +113,9 @@ async function saveSettings(change) {
 modelSelector?.addEventListener('change', () => saveSettings({ model: modelSelector.value }));
 thinkingSelector?.addEventListener('change', () =>
   saveSettings({ thinkingLevel: thinkingSelector.value }),
+);
+defaultAvatarSelector?.addEventListener('change', () =>
+  saveSettings({ defaultAvatar: defaultAvatarSelector.value }),
 );
 const pairSelector = document.querySelector('#pair');
 const avatarEditor = document.querySelector('#avatar-editor');
@@ -740,7 +754,7 @@ setInterval(async () => {
     if (conversation) {
       window.renderVoiceLibrary?.(status, preparationTicket);
       if (status.settings && !savingSettings && configTicket === settingsRevision) {
-        renderSettings(status.settings);
+        renderSettings(status.settings, status.avatars);
       }
       document.querySelector('#pair-diagnostics').hidden = !status.diagnostics;
       const pair = status.pairs.find((item) => item.id === status.activePair);

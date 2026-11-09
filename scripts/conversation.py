@@ -128,7 +128,7 @@ class Conversation(Demonstration):
         fixture: bool = False,
         budget_path: Path | None = None,
         initialize_budget: bool = False,
-        pair: str = DEFAULT_PAIR,
+        pair: str = "",
         user_data: Path | None = None,
         avatar_store: AvatarStore | None = None,
         candidate_chatterbox: bool = False,
@@ -163,7 +163,7 @@ class Conversation(Demonstration):
         )
         self.avatars = avatar_store or AvatarStore(local_data, self.voice_store)
         self.voices = voice_catalogue(test_backend)
-        self.selected_pair = self.avatars.get(pair)
+        self.selected_pair = self.avatars.get(pair or self.avatars.default_avatar())
         self.active_pair = ""
         self.pair_sequence = 0
         self.pair_preparation_seconds = 0.0
@@ -224,7 +224,7 @@ class Conversation(Demonstration):
         with self.condition:
             if data.get("session") != self.identity:
                 raise ValueError("Stale session; reload before changing settings")
-            if set(data) - {"session", "model", "thinkingLevel"}:
+            if set(data) - {"session", "model", "thinkingLevel", "defaultAvatar"}:
                 raise ValueError("Unknown setting; reload Settings and retry")
             model = validate_model(data.get("model", self.provider.model))
             level = data.get("thinkingLevel", self.provider.thinking_level)
@@ -233,6 +233,9 @@ class Conversation(Demonstration):
                 level = MODEL_DEFAULTS[model]
                 message = f"Thinking level changed to {level}; the selected model requires it."
             validate_level(model, level)
+            if "defaultAvatar" in data:
+                self.avatars.set_default_avatar(data["defaultAvatar"])
+                message = "Default avatar saved; applies when the app next starts."
             self.provider = Provider(model, self.provider.fixture, level)
             self.settings_message = message
             return self.status()
@@ -241,6 +244,7 @@ class Conversation(Demonstration):
         return {
             "model": self.provider.model,
             "thinkingLevel": self.provider.thinking_level,
+            "defaultAvatar": self.avatars.default_avatar(),
             "message": self.settings_message,
             "models": [
                 {
@@ -844,7 +848,7 @@ def main() -> None:
         "--avatar",
         "--pair",
         dest="pair",
-        default=os.environ.get("THEAD_AVATAR", os.environ.get("THEAD_PAIR", DEFAULT_PAIR)),
+        default=os.environ.get("THEAD_AVATAR", os.environ.get("THEAD_PAIR", "")),
     )
     args = parser.parse_args()
     if args.candidate_chatterbox and not (

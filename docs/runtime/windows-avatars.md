@@ -55,6 +55,28 @@ name and voice. Replace the file and retry. Cancel or Escape closes the form
 without saving. Save is disabled while in progress; repeated submissions cannot
 create duplicate names.
 
+## Default avatar
+
+In **Settings**, choose **Default avatar** to save the avatar used on the next app
+start. Both built-in and user-created avatars are available. Saving confirms the
+change without switching the current avatar, clearing context or changing the
+budget. The existing **Avatar** dropdown still switches only the current session.
+An explicit `-Avatar` / `--avatar` / `--pair`, `THEAD_AVATAR` or `THEAD_PAIR` launch
+option takes precedence without overwriting the saved preference. Without a saved
+preference, or if its avatar is deleted, startup falls back to **JFK**.
+
+Manual check from `C:/docs/git/tHead`, using the prerequisites above:
+
+```powershell
+pwsh -NoProfile -File ./scripts/conversation.ps1 -FixtureProvider -InitializeBudget
+```
+
+Open Settings and set **Default avatar** to **Grace** or a saved avatar. Expect a
+saved confirmation while **Avatar** and the current conversation stay unchanged.
+Stop the launcher with Ctrl+C, then run the same command again: the chosen
+default should be active. Switching **Avatar** to JFK should keep **Default avatar**
+unchanged. Delete a user-created default and restart: JFK should be active.
+
 ## Edit and delete
 
 Select a user-created avatar in Settings and choose **Edit avatar**. The saved
