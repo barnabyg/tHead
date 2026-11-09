@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import io
 import json
+import os
 import shutil
 import subprocess  # nosec B404
 import tarfile
@@ -90,6 +91,83 @@ class SourceAcquisitionTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             self.assertEqual((source / "reference.txt").read_text(), "maintained\n")
             self.assertEqual(git(source, "rev-parse", "HEAD"), revision)
+            with (state / "preparation.lease").open("r+b"):
+                concurrent = command(
+                    "pwsh",
+                    "-NoProfile",
+                    "-File",
+                    str(scripts / "prepare-chatterbox-maintained.ps1"),
+                    "-State",
+                    str(state),
+                    "-SourcesOnly",
+                )
+            self.assertNotEqual(concurrent.returncode, 0)
+            self.assertIn("Another local voice preparation is active", concurrent.stderr)
+            owned_lock = source / ".git/config.lock"
+            owned_lock.write_bytes(b"task-owned interrupted Git configuration")
+            owner = command(
+                "pwsh",
+                "-NoProfile",
+                "-Command",
+                f"(Get-Process -Id {os.getpid()}).StartTime.ToUniversalTime().Ticks",
+            )
+            self.assertEqual(owner.returncode, 0, owner.stdout + owner.stderr)
+            record = {
+                "version": 1,
+                "source": "source",
+                "locks": ["config.lock"],
+                "owner_pid": os.getpid(),
+                "owner_started": int(owner.stdout.strip()),
+                "child_pid": 2147483646,
+                "child_started": 1,
+                "finished": False,
+            }
+            (state / "git-acquisition.json").write_text(json.dumps(record))
+            active = command(
+                "pwsh",
+                "-NoProfile",
+                "-File",
+                str(scripts / "prepare-chatterbox-maintained.ps1"),
+                "-State",
+                str(state),
+                "-SourcesOnly",
+            )
+            self.assertNotEqual(active.returncode, 0)
+            self.assertIn("recorded Git acquisition is still active", active.stderr)
+            self.assertEqual(owned_lock.read_bytes(), b"task-owned interrupted Git configuration")
+            record.update(owner_pid=2147483647, owner_started=1)
+            (state / "git-acquisition.json").write_text(json.dumps(record))
+            recovered = command(
+                "pwsh",
+                "-NoProfile",
+                "-File",
+                str(scripts / "prepare-chatterbox-maintained.ps1"),
+                "-State",
+                str(state),
+                "-SourcesOnly",
+            )
+            self.assertEqual(recovered.returncode, 0, recovered.stdout + recovered.stderr)
+            self.assertFalse(owned_lock.exists())
+            self.assertTrue(
+                any(
+                    path.read_bytes() == b"task-owned interrupted Git configuration"
+                    for path in (state / "git-lock-quarantine").rglob("*.lock")
+                )
+            )
+            owned_lock.write_bytes(b"unknown manual Git configuration")
+            unknown_lock = command(
+                "pwsh",
+                "-NoProfile",
+                "-File",
+                str(scripts / "prepare-chatterbox-maintained.ps1"),
+                "-State",
+                str(state),
+                "-SourcesOnly",
+            )
+            self.assertNotEqual(unknown_lock.returncode, 0)
+            self.assertIn("Unrecognized Git lock", unknown_lock.stderr)
+            self.assertEqual(owned_lock.read_bytes(), b"unknown manual Git configuration")
+            owned_lock.unlink()
             for interrupted_at in ("metadata", "init", "fetch"):
                 with self.subTest(interrupted_at=interrupted_at):
                     retry_state = root / interrupted_at

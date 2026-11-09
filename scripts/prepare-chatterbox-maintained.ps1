@@ -19,6 +19,20 @@ if (-not $SourcesOnly) {
     Write-Output "Preflight: $($drive.AvailableFreeSpace) bytes free disk; $($memory.FreePhysicalMemory * 1KB) bytes free RAM; maintained CUDA candidate configuration."
 }
 New-Item -ItemType Directory -Force $State | Out-Null
+$leasePath = Join-Path $State 'preparation.lease'
+if ((Get-Item -LiteralPath $State -Force).Attributes -band [IO.FileAttributes]::ReparsePoint) {
+    throw 'Preparation state must be a private directory, not a link.'
+}
+if ((Test-Path -LiteralPath $leasePath) -and
+    ((Get-Item -LiteralPath $leasePath -Force).Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+    throw 'Preparation lease must not be a link.'
+}
+try {
+    $lease = [IO.File]::Open($leasePath, [IO.FileMode]::OpenOrCreate, [IO.FileAccess]::ReadWrite, [IO.FileShare]::None)
+} catch [IO.IOException] {
+    throw 'Another local voice preparation is active. Wait or cancel it before retrying this state.'
+}
+try {
 $env:UV_CACHE_DIR = Join-Path $State 'uv-cache'
 $env:UV_PYTHON_INSTALL_DIR = Join-Path $State 'python'
 $env:UV_LINK_MODE = 'copy'
@@ -29,6 +43,110 @@ $env:SOURCE_DATE_EPOCH = '0'
 Remove-Item Env:PYTHONHOME -ErrorAction SilentlyContinue
 Remove-Item Env:PYTHONPATH -ErrorAction SilentlyContinue
 
+function Assert-StatePath([string]$Path) {
+    $full = [IO.Path]::GetFullPath($Path)
+    $boundary = $State.TrimEnd([IO.Path]::DirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
+    if (-not $full.StartsWith($boundary, [StringComparison]::OrdinalIgnoreCase)) {
+        throw 'Git recovery path escapes its selected state.'
+    }
+    $current = $State
+    foreach ($part in [IO.Path]::GetRelativePath($State, $full).Split([IO.Path]::DirectorySeparatorChar)) {
+        $current = Join-Path $current $part
+        if ((Test-Path -LiteralPath $current) -and
+            ((Get-Item -LiteralPath $current -Force).Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+            throw 'Git recovery paths must not contain links; preserve this state.'
+        }
+    }
+    return $full
+}
+
+$journal = Assert-StatePath (Join-Path $State 'git-acquisition.json')
+$allowedLocks = @('config.lock', 'index.lock', 'HEAD.lock', 'shallow.lock', 'FETCH_HEAD.lock', 'packed-refs.lock')
+
+function Git-LockPath([string]$Source, [string]$Name) {
+    if ($Source -notin @('source', 'perth') -or $Name -cnotin $allowedLocks) {
+        throw 'Unrecognized Git acquisition ownership; preserve this state.'
+    }
+    return Assert-StatePath (Join-Path $State "$Source/.git/$Name")
+}
+
+function Process-IsAlive([int]$Identity, [long]$Started) {
+    $owner = Get-Process -Id $Identity -ErrorAction SilentlyContinue
+    if (-not $owner) { return $false }
+    try { return $owner.StartTime.ToUniversalTime().Ticks -eq $Started }
+    catch [System.ComponentModel.Win32Exception] { return $true }
+}
+
+function Write-GitJournal($Record) {
+    $temporary = Assert-StatePath (Join-Path $State ('git-acquisition-' + [Guid]::NewGuid().ToString('N') + '.tmp'))
+    $Record | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath $temporary -Encoding utf8
+    $null = Assert-StatePath $journal
+    Move-Item -LiteralPath $temporary -Destination $journal -Force
+}
+
+function Recover-GitLocks {
+    if (-not (Test-Path -LiteralPath $journal)) { return }
+    if ((Get-Item -LiteralPath $journal -Force).Length -gt 16384) {
+        throw 'Unrecognized Git acquisition journal; preserve this state.'
+    }
+    $record = Get-Content -LiteralPath $journal -Raw | ConvertFrom-Json
+    foreach ($field in @('owner_pid', 'owner_started', 'child_pid', 'child_started')) {
+        if ($record.$field -isnot [int] -and $record.$field -isnot [long]) {
+            throw 'Unrecognized Git acquisition process identity; preserve this state.'
+        }
+    }
+    if ($record.version -ne 1 -or $record.source -notin @('source', 'perth') -or
+        $record.locks -isnot [Array] -or $record.locks.Count -gt $allowedLocks.Count -or
+        $record.finished -isnot [bool] -or
+        $record.owner_pid -gt [int]::MaxValue -or $record.child_pid -gt [int]::MaxValue -or
+        $record.owner_pid -le 0 -or $record.owner_started -le 0 -or
+        $record.child_pid -lt 0 -or $record.child_started -lt 0 -or
+        (($record.child_pid -eq 0) -ne ($record.child_started -eq 0))) {
+        throw 'Incomplete Git acquisition ownership; preserve this state and choose a fresh state.'
+    }
+    if ((-not $record.finished -and (Process-IsAlive $record.owner_pid $record.owner_started)) -or
+        ($record.child_pid -gt 0 -and (Process-IsAlive $record.child_pid $record.child_started))) {
+        throw 'The recorded Git acquisition is still active. Wait or cancel it before retrying.'
+    }
+    if ($record.child_pid -eq 0) {
+        # Cancellation can precede recording the child PID. Refuse recovery while
+        # any possible unrecorded Git child still exists; no active lock is moved.
+        foreach ($possible in (Get-Process -Name 'git*' -ErrorAction SilentlyContinue)) {
+            if ($possible.StartTime.ToUniversalTime().Ticks -ge $record.owner_started) {
+                throw 'Git acquisition startup was interrupted; wait for active Git processes before retrying.'
+            }
+        }
+    }
+    $quarantine = Assert-StatePath (Join-Path $State ('git-lock-quarantine/' + [Guid]::NewGuid().ToString('N')))
+    foreach ($name in $record.locks) {
+        $path = Git-LockPath $record.source $name
+        if (-not (Test-Path -LiteralPath $path)) { continue }
+        if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+            throw 'Recorded Git lock is not a regular file; preserve this state.'
+        }
+        try {
+            # Refuse a lock still held by any other writer. Keep bytes stable while renaming.
+            $lockHandle = [IO.File]::Open($path, [IO.FileMode]::Open, [IO.FileAccess]::ReadWrite, [IO.FileShare]::Delete)
+        } catch [IO.IOException] {
+            throw "Recorded Git lock is still in use; preserve it and retry after Git stops: $path"
+        }
+        try {
+            New-Item -ItemType Directory -Force $quarantine | Out-Null
+            $target = Assert-StatePath (Join-Path $quarantine ($record.source + '-' + $name))
+            $null = Assert-StatePath $path
+            Move-Item -LiteralPath $path -Destination $target
+            Write-Output "Quarantined task-owned interrupted Git lock: $target"
+        } finally { $lockHandle.Dispose() }
+    }
+    if (Test-Path -LiteralPath $quarantine) {
+        $target = Assert-StatePath (Join-Path $quarantine 'git-acquisition.json')
+        $null = Assert-StatePath $journal
+        Move-Item -LiteralPath $journal -Destination $target
+    } else { Remove-Item -LiteralPath $journal }
+}
+
+Recover-GitLocks
+
 function Invoke-Checked([string]$Program, [string[]]$Arguments) {
     $info = [Diagnostics.ProcessStartInfo]::new($Program)
     $info.UseShellExecute = $false
@@ -36,10 +154,37 @@ function Invoke-Checked([string]$Program, [string[]]$Arguments) {
     $info.RedirectStandardOutput = $true
     $info.RedirectStandardError = $true
     foreach ($argument in $Arguments) { $info.ArgumentList.Add($argument) }
+    $record = $null
+    if ($Program -eq 'git') {
+        $directory = $Arguments[1]
+        $source = Split-Path $directory -Leaf
+        $locks = @('config.lock')
+        if ($Arguments -contains 'fetch') { $locks = @('shallow.lock', 'FETCH_HEAD.lock', 'packed-refs.lock') }
+        elseif ($Arguments -contains 'checkout') { $locks = @('index.lock', 'HEAD.lock') }
+        elseif ($Arguments -contains 'apply') { $locks = @() }
+        elseif ($Arguments[0] -eq 'init') { $locks = @('config.lock', 'HEAD.lock') }
+        foreach ($name in $allowedLocks) {
+            $path = Git-LockPath $source $name
+            if (Test-Path -LiteralPath $path) {
+                throw "Unrecognized Git lock; preserve it, stop any manual Git operation, then retry or choose a fresh state: $path"
+            }
+        }
+        $record = [ordered]@{
+            version = 1; source = $source; locks = @($locks)
+            owner_pid = $PID; owner_started = [Diagnostics.Process]::GetCurrentProcess().StartTime.ToUniversalTime().Ticks
+            child_pid = 0; child_started = 0; finished = $false
+        }
+        Write-GitJournal $record
+    }
     $process = [Diagnostics.Process]::Start($info)
     $stdout = $process.StandardOutput.ReadToEndAsync()
     $stderr = $process.StandardError.ReadToEndAsync()
     try {
+        if ($null -ne $record) {
+            $record.child_pid = $process.Id
+            $record.child_started = $process.StartTime.ToUniversalTime().Ticks
+            Write-GitJournal $record
+        }
         if (-not $process.WaitForExit(3600000)) {
             $process.Kill($true)
             $process.WaitForExit()
@@ -48,7 +193,15 @@ function Invoke-Checked([string]$Program, [string[]]$Arguments) {
         [Console]::Out.Write($stdout.GetAwaiter().GetResult())
         [Console]::Error.Write($stderr.GetAwaiter().GetResult())
         if ($process.ExitCode -ne 0) { throw "$Program failed with exit code $($process.ExitCode)" }
-    } finally { $process.Dispose() }
+        if ($null -ne $record) { Remove-Item -LiteralPath $journal }
+    } finally {
+        if (-not $process.HasExited) { $process.Kill($true); $process.WaitForExit() }
+        if ($null -ne $record -and (Test-Path -LiteralPath $journal)) {
+            $record.finished = $true
+            Write-GitJournal $record
+        }
+        $process.Dispose()
+    }
 }
 
 function Prepare-Source([string]$Name, [string]$Url, [string]$Revision) {
@@ -169,3 +322,4 @@ foreach ($asset in $lock.model.files) {
     Move-Item -LiteralPath $partial -Destination $path
     Write-Output "Verified $($asset.name)."
 }
+} finally { $lease.Dispose() }
