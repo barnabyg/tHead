@@ -119,9 +119,7 @@ test('Stop abandons experimental PCM and replacement retains the reference', asy
   const old = (await status(request, info)).run.id;
   await page.getByRole('button', { name: 'Stop', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Ask', exact: true })).toBeEnabled();
-  await expect
-    .poll(async () => (await status(request, info)).experimental.worker_alive)
-    .toBe(true);
+  await expect.poll(async () => (await status(request, info)).experimental.worker_alive).toBe(true);
   expect((await request.get(`${info.url}/segment?run=${old}&index=0`)).status()).toBe(410);
   await page.getByRole('button', { name: 'Ask', exact: true }).click();
   await expect(page.locator('#status')).toHaveText('Playback ended');
