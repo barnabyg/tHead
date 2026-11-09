@@ -36,7 +36,7 @@ class SpeechPreparation:
                 "available": True,
                 "error": "",
                 "candidate": True,
-                "message": "Native release candidate; regular availability remains gated.",
+                "message": "Native diagnostic check; provider text is a no-cost fixture.",
             }
         if result["available"]:
             try:

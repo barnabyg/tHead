@@ -32,6 +32,15 @@ Remove the filter when PyTorch stops issuing it; review before distributed work.
 Secret scanning exempts only the 40-hex public commit values under the named
 `revision`/`upstream_revision` fields; no secret detector is disabled.
 
+The maintained speech release additionally identifies public SHA-256 metadata in
+the exact named runtime/media locks, native evidence, interpreter/component
+inventory and final licence inventory files. `chatterbox_release.py` contains
+three public artifact approval hashes; its exception accepts only values equal
+to those three current files' computed digests, under the Hex High Entropy String
+detector. This is public integrity metadata, not an advisory exemption. Re-review
+the named schemas and renew release evidence when changing a pin. No detector,
+credential field, advisory or directory-wide scan is excluded.
+
 Diffusers 0.42.1 emits its direct-dtype-cast warning for an **empty** list of
 modules requiring float32. The smoke command filters the exact empty-list
 messages for `CausalVideoAutoencoder` and `WanModelAudioProject` from

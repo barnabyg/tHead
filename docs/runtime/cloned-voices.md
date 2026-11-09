@@ -1,9 +1,10 @@
 # Local cloned voices
 
-The private voice library and normal-app cloning controls are implemented. Regular
-Chatterbox speech remains **unavailable** until the runtime maintenance, native
-recovery and end-to-end release gates pass (#57, #58, #62). A successful protocol
-fixture does not clear those gates. Zira/Hazel require no Chatterbox download.
+The private voice library and normal-app cloning controls support the approved
+native Windows / RTX 3090 CUDA profile after explicit optional preparation.
+[Release evidence](chatterbox-release.md) records the maintenance, recovery and
+native end-to-end gates. Changed runtime/dependency/source-patch digests remain
+unavailable until revalidated. Zira/Hazel require no Chatterbox download.
 
 ## One-command manual check
 
@@ -72,7 +73,7 @@ not become server paths. No server-path/URL import is accepted.
 
 ## Real native use
 
-For the isolated **native release candidate**, use the normal launcher path with
+For the isolated **native manual check**, use the normal launcher path with
 real local speech, real FlashHead media and free fixture provider text. From
 `C:/docs/git/tHead`, with Windows 11, PowerShell 7, Git, uv 0.11.7, the normal
 FlashHead prerequisites, an RTX 3090/CUDA-13-compatible driver, 20 GiB free disk
@@ -107,13 +108,13 @@ Zira/Hazel before changing an installed cloned-voice environment. Interrupted
 setup preserves the existing voice library and verified acquisition state.
 
 Use the [maintenance candidate guide](chatterbox/maintenance.md) for the isolated
-research runtime and short offline regression previews. This is an explicit
-preparation route, not permission to enable regular voices. The normal app shows
-the release blockers and refuses preview/selection with an unapproved engine;
+research runtime and short offline regression previews. The approved profile is
+available through regular startup. The normal app shows the release blockers and
+refuses preview/selection with an unapproved engine;
 it never falls back to CPU, SAPI, another model or a hosted service.
 
 The supported conversational candidate is native Windows/RTX 3090 CUDA only.
-CPU is unproven for conversation. Final RAM/VRAM admission, ten warmed turns,
-mixed interruption/crash recovery, clean normal-app preparation and concise human
-speech/lip-sync confirmation remain release requirements. Automated browser
+CPU is unproven for conversation. RAM/VRAM admission, ten warmed turns,
+mixed interruption/crash recovery, clean preparation and concise human
+speech/lip-sync confirmation are recorded in the release evidence. Automated browser
 onset measures digital audio plus decoded frames, not physical-speaker latency.

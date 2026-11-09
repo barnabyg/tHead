@@ -1,9 +1,10 @@
 # Chatterbox maintenance review (#57)
 
-Reviewed 9 November 2026. **Regular availability remains no-go.**
-The isolated remediated candidate is an experiment, not production clearance.
-`scripts/chatterbox_release.py` keeps normal enablement closed independently of
-editable JSON flags, successful imports, or fixture results.
+Reviewed 9 November 2026. The exact remediated profile is approved for optional
+native Windows / RTX 3090 use; see the [normal-app release evidence](../chatterbox-release.md).
+`scripts/chatterbox_release.py` binds approval to the runtime, dependency and
+source-patch digests. Any change fails closed pending renewed verification.
+Historical experimental profiles and earlier failed attempts retain their original status.
 
 ## Current installed environments and refreshed advisories
 

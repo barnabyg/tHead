@@ -118,5 +118,6 @@ security findings. Normal voices and saved avatar formats are unchanged.
 
 The [private cloned-voice library and cloning controls](docs/runtime/cloned-voices.md)
 add local recording import, preview/save, shared voice IDs, rename/delete and repair.
-Regular Chatterbox speech remains gated on the maintenance and native release
-checks. The guide includes a one-command isolated, no-cost manual fixture.
+Regular Chatterbox speech uses the audited, native-verified RTX 3090 CUDA profile
+after explicit optional preparation. Changed pins fail closed until revalidated.
+The guide includes one-command native and protocol-only no-cost manual checks.

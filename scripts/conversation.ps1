@@ -14,6 +14,9 @@ if ($TestBackend) {
     & python scripts/conversation.py @fixtureArgs
     exit $LASTEXITCODE
 }
+# Native Python must not inherit a development interpreter's standard-library home.
+Remove-Item Env:PYTHONHOME -ErrorAction SilentlyContinue
+Remove-Item Env:PYTHONPATH -ErrorAction SilentlyContinue
 $launchArgs = @('--conversation', '--port', "$Port")
 if ($Avatar) { $launchArgs += @('--avatar', $Avatar) }
 if ($NoBrowser) { $launchArgs += '--no-browser' }

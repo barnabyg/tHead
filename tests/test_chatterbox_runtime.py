@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 import subprocess  # nosec B404
 import sys
 import tempfile
@@ -17,6 +18,43 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class ChatterboxPreparationTests(unittest.TestCase):
+    def test_changed_pins_cannot_reuse_the_approved_release_profile(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            checkout = Path(temporary)
+            files = [
+                "scripts/chatterbox_release.py",
+                "chatterbox-maintained-lock.json",
+                "docs/runtime/chatterbox/requirements-maintained.lock",
+                "patches/chatterbox-maintained.patch",
+            ]
+            for name in files:
+                destination = checkout / name
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(ROOT / name, destination)
+
+            def readiness() -> dict[str, object]:
+                result = subprocess.run(  # nosec B603
+                    [
+                        sys.executable,
+                        "-I",
+                        "-c",
+                        "import json,runpy,sys;api=runpy.run_path(sys.argv[1]);"
+                        "print(json.dumps(api['release_readiness']()))",
+                        str(checkout / "scripts/chatterbox_release.py"),
+                    ],
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
+                    check=True,
+                )
+                return dict(json.loads(result.stdout))
+
+            self.assertTrue(readiness()["available"])
+            with (checkout / files[2]).open("a", encoding="utf-8") as changed:
+                changed.write("\n# unreviewed changed pins\n")
+            self.assertFalse(readiness()["available"])
+            self.assertIn("changed", str(readiness()["error"]))
+
     def test_empty_environment_cannot_be_recorded_as_prepared(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             state = Path(temporary)

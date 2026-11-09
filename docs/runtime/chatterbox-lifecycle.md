@@ -8,17 +8,17 @@ pipeline. Existing session cancellation still makes obsolete media return HTTP
 410 and prevents it becoming context for a replacement turn.
 
 The current source generates a whole phrase synchronously. It cannot interrupt a
-native model call. The lifecycle exposes `draining` while an obsolete operation
+native model call. Each adapter exposes `draining` while an obsolete operation
 finishes, then reuses the model. Each operation has a 60-second watchdog even when
 its caller has cancelled; initial model preparation has a 180-second response
-limit. Fatal errors close the process; a subsequent request prepares a fresh
-process with the same explicit device and reference. There is no retry loop,
-standby pool, CPU/SAPI substitution or provider/context reset. `failed` and
-`recovery_error` explain failure; `preparing` identifies a subsequent cold load.
+limit. Fatal errors close the affected process. The regular app's bounded
+`ChatterboxEngine` promotes its warmed standby and replenishes the failed slot;
+there is no CPU/SAPI substitution or provider/context reset. `failed` and
+`recovery_error` explain failure; `preparing` identifies a cold child load.
 
 ## Shared engine ownership
 
-Normal integration should own one `ChatterboxVoice` for the application lifetime,
+Normal integration owns one two-worker `ChatterboxEngine` for the application lifetime,
 including while Zira/Hazel are selected. Avatar changes must not close that shared
 engine. Call `set_reference(identity, canonical_path, sha256, cancelled=None)` only
 between turns. Paths come from the local voice library, never request JSON or a
@@ -65,23 +65,14 @@ change; its replacement checks that the selected worker survives.
 
 ## Release decision
 
-**Partial implementation; regular enablement remains blocked.** No native timing,
-new headroom, crash-onset or human listening result is supplied by these changes.
-Historical native CUDA worker reload took roughly 11 seconds and next speech
-roughly 14 seconds. This change avoids that reload for ordinary cancellation but
-cannot establish <=5-second replacement onset while obsolete synthesis drains.
-Crash recovery still requires cold model loading and therefore does not clear
-#58's <=5-second release criterion.
-
-Before #58 closes, use the remediated #57 runtime and the finished normal-app route
-to measure one cold start, ten warmed short/multi-phrase turns and at least ten
-mixed interruption/recovery cycles including crashes and reference switches.
-Record each cancellation, first PCM, browser digital onset with decoded moving
-frame, complete ending/stalls, RAM/VRAM and worker release. Serialize shared-GPU
-runs, retain failures, and distinguish digital onset from physical-speaker latency
-and human listening confirmation. The normal-app handoff must document its one
-preparation-and-launch command after those dependencies land. Do not present the
-synthetic command above as native acceptance evidence.
+The [normal-app release sequence](chatterbox-release.md) passed with the remediated
+runtime: ten warmed turns and twelve mixed recovery/switch cycles, all within
+5 seconds, with stale media inaccessible and no stalls. The measured pool used
+12,230 MiB peak device-wide VRAM, released its workers on shutdown and passed the
+concise human speech/lip-sync check. The native guide provides the single
+preparation-and-launch command. The synthetic command above remains a control
+check, not native acceptance evidence. Historical single-worker reloads of about
+14 seconds are retained as the baseline motivating the pool.
 
 ## Bounded two-worker recovery attempt
 
@@ -127,9 +118,7 @@ and crash/survivor promotion with one replacement. These are synthetic correctne
 checks. They provide neither native GPU timing nor physical-speaker evidence.
 Ruff, strict mypy and Bandit pass for the implementation and HTTP harness.
 
-Conclusion: bounded warm failover is implemented for integration. The earlier
-single-worker crash limitation is addressed architecturally by a warm survivor;
-#58 remains open until the normal/experimental integration is measured natively
-with the remediated pins, ten warmed turns, at least ten mixed cycles, combined
-RAM/VRAM peaks and complete resource release. No native acceptance is claimed in
-this commit. Existing human quality acceptance is preserved.
+Initial conclusion (before native measurement): bounded warm failover was ready
+for integration, with native timing/resource gates outstanding. The subsequent
+normal-app measurements linked above cleared those gates. Existing human quality
+acceptance was preserved and the concise remediated/native checks were accepted.
