@@ -66,7 +66,8 @@ def main() -> None:
             pool.submit(
                 run,
                 [str(ROOT / "node_modules/.bin/playwright.cmd"), "test"],
-                600,
+                # The bounded 100-turn case allows 900 s; include startup/teardown margin.
+                1200,
                 cancelled=cancelled,
             )
         )
@@ -85,7 +86,10 @@ def main() -> None:
             ]
             if os.environ.get("CI"):
                 tests.append("--failfast")
-            pending.append(pool.submit(run, tests, 180, cancelled=cancelled))
+            # The expanded conversation HTTP module measures about 116 s locally.
+            # Allow >3x that baseline plus cold/CI contention; other modules are much shorter.
+            timeout = 600 if module.name == "test_conversation.py" else 180
+            pending.append(pool.submit(run, tests, timeout, cancelled=cancelled))
         for future in as_completed(pending):
             try:
                 future.result()
