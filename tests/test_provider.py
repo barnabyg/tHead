@@ -47,6 +47,7 @@ class ProviderTests(unittest.TestCase):
                     self.assertEqual(request["reasoning"], {"effort": level})
                     self.assertEqual(request["input"], messages)
                     self.assertEqual(request["max_output_tokens"], 384)
+                    self.assertIn("within 240 output tokens", request["instructions"])
                     self.assertEqual(request["service_tier"], "default")
                     self.assertFalse(request["store"])
                     self.assertEqual(events[-1]["usage"]["output_tokens"], 25)
@@ -54,6 +55,29 @@ class ProviderTests(unittest.TestCase):
                         events[-1]["usage"]["output_tokens_details"]["reasoning_tokens"], 10
                     )
                     connection.close.assert_called_once()
+
+    def test_custom_limits_reach_wire_request(self) -> None:
+        response = Mock(status=200)
+        response.readline.return_value = b'data: {"type":"response.completed","response":{}}\n'
+        connection = Mock(sock=None)
+        connection.getresponse.return_value = response
+        provider = Provider(
+            max_output_tokens=1024, answer_token_target=800, input_token_limit=16384
+        )
+        with (
+            patch.dict(
+                "os.environ",
+                # Secret Keyword: public fake token; transport is mocked.
+                {"OPENAI_API_KEY": "fixture-only"},  # pragma: allowlist secret
+            ),
+            patch("provider.http.client.HTTPSConnection", return_value=connection),
+        ):
+            list(provider.stream([{"role": "user", "content": "Hello"}], threading.Event()))
+        request = json.loads(connection.request.call_args.kwargs["body"])
+        self.assertEqual(request["max_output_tokens"], 1024)
+        self.assertIn("within 800 output tokens", request["instructions"])
+        self.assertNotIn("240", request["instructions"])
+        self.assertNotIn("inputTokenLimit", request)
 
     def test_invalid_combination_rejects_before_network_dispatch(self) -> None:
         with patch("provider.http.client.HTTPSConnection") as transport:

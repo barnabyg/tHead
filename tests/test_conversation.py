@@ -535,6 +535,66 @@ class ConversationTests(unittest.TestCase):
         self.assertEqual(self.wait(lambda s: s["state"] == "idle")["run"]["state"], "complete")
         self.assertEqual(run["thinkingLevel"], "none")
 
+    def test_token_settings_capture_context_budget_and_validation(self) -> None:
+        status = self.request("/status")
+        identity = status["session"]
+        defaults = {"maxOutputTokens": 384, "answerTokenTarget": 240, "inputTokenLimit": 8192}
+        limits = {"maxOutputTokens": 1024, "answerTokenTarget": 800, "inputTokenLimit": 512}
+        for key, value in defaults.items():
+            self.assertEqual(status["settings"][key], value)
+        run = self.ask(fault="llm-connect")
+        changed = self.request("/settings", {"session": identity, **limits})
+        self.assertEqual(changed["run"]["tokenLimits"], defaults)
+        with closing(sqlite3.connect(Path(self.temporary.name) / "budget.sqlite3")) as database:
+            self.assertEqual(
+                database.execute("SELECT output_bound FROM requests").fetchone()[0], 384
+            )
+        self.wait(lambda s: s["state"] == "idle")
+        self.ask("Follow-up")
+        done = self.wait(lambda s: s["state"] == "idle")
+        self.assertEqual(done["run"]["tokenLimits"], limits)
+        self.assertLessEqual(done["run"]["inputBound"], 512)
+        self.assertEqual(done["contextOmitted"], 1)
+        event = next(e for e in done["run"]["events"] if e["event"] == "provider-request")
+        self.assertEqual(event["messages"], [{"role": "user", "content": "Follow-up"}])
+        self.assertEqual(event["configuration"]["max_output_tokens"], 1024)
+        self.assertIn("within 800 output tokens", event["instructions"])
+        with closing(sqlite3.connect(Path(self.temporary.name) / "budget.sqlite3")) as database:
+            self.assertEqual(
+                database.execute("SELECT MAX(output_bound) FROM requests").fetchone()[0], 1024
+            )
+        with self.assertRaises(urllib.error.HTTPError) as rejected:
+            self.ask("x" * 1200)
+        self.assertIn("input allowance", rejected.exception.read().decode())
+        for key, invalid_values in (
+            ("maxOutputTokens", (0, 15, 32769, 1.5, "1024", True, None, 799)),
+            ("answerTokenTarget", (0, 32769, 1.5, "800", True, None, 1025)),
+            ("inputTokenLimit", (0, 511, 131073, 1.5, "512", True, None)),
+        ):
+            for invalid in invalid_values:
+                with self.subTest(key=key, value=invalid):
+                    with self.assertRaises(urllib.error.HTTPError):
+                        self.request("/settings", {"session": identity, key: invalid})
+        with self.assertRaises(urllib.error.HTTPError):
+            self.request("/settings", {"session": "stale", **defaults})
+        # Invalid combined edits leave model and every limit unchanged.
+        with self.assertRaises(urllib.error.HTTPError):
+            self.request(
+                "/settings", {"session": identity, "model": "gpt-6.1-sol", "inputTokenLimit": 0}
+            )
+        self.assertEqual(self.request("/status")["model"], "gpt-6-luna")
+        switched = self.request("/settings", {"session": identity, "model": "gpt-6.1-sol"})
+        for key, value in limits.items():
+            self.assertEqual(switched["settings"][key], value)
+        self.request("/reset", {"session": identity})
+        for key, value in limits.items():
+            self.assertEqual(self.request("/status")["settings"][key], value)
+        self.assertEqual(run["tokenLimits"], defaults)
+        self.stop_process()
+        self.start_app()
+        for key, value in defaults.items():
+            self.assertEqual(self.request("/status")["settings"][key], value)
+
     def test_streamed_answer_and_progressive_speech(self) -> None:
         for question in ("", " \n", "x" * 1201):
             with self.assertRaises(urllib.error.HTTPError):

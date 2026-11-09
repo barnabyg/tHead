@@ -37,7 +37,7 @@ The default is `gpt-6-luna` with reasoning disabled. Official documentation chec
 7 November 2026: [model](https://developers.openai.com/api/docs/models/gpt-6-luna),
 [Responses streaming](https://developers.openai.com/api/docs/guides/streaming-responses).
 The app uses the fixed standard OpenAI HTTPS endpoint, stateless Responses
-(`store: false`), no tools, 384 maximum output tokens and instructions requesting
+(`store: false`), no tools, a default of 384 maximum output tokens and instructions requesting
 two to four concise English sentences. There are no automatic retries; another
 submission is a new request. Provider errors are redacted to actionable states.
 
@@ -137,8 +137,9 @@ New conversation assigns a fresh session identity and clears transcript/context
 while retaining the loaded model and selected pair. A server restart loses session context;
 a stale browser submission is rejected and the status refresh exposes the new session.
 
-Context retains the newest coherent exchanges that fit 8192 conservatively bounded
-input tokens, including current question, instructions and framing margins. The
+Context retains the newest coherent exchanges that fit the configured input allowance
+(8192 conservatively bounded tokens by default), including the current question,
+instructions and framing margins. The
 bound uses UTF-8 byte length plus 64 tokens per message and 256 global overhead,
 rather than assuming four characters per token. Oldest exchanges are dropped whole;
 the transcript remains visible and states how many exchanges were omitted. A
@@ -215,7 +216,7 @@ disabled level control. Validation never dispatches an unsupported combination.
 The official [Sol model](https://developers.openai.com/api/docs/models/gpt-6.1-sol),
 [Luna model](https://developers.openai.com/api/docs/models/gpt-6-luna) and
 [reasoning guide](https://developers.openai.com/api/docs/guides/reasoning)
-establish these mappings (checked 8 November 2026). The unchanged 384 output-token
+establish these mappings (checked 8 November 2026). The configured output-token
 cap includes reasoning and visible output. High effort may exhaust it without a
 visible answer: lower Thinking level and submit again after the actionable error.
 Reported reasoning tokens are shown as a subset of output, never added again to
@@ -229,3 +230,35 @@ only the next turn changes. Switch from Luna/none to Sol: expect medium and a
 visible explanation. In fixture diagnostics, Reject provider settings must show
 an actionable error; select None, adjust the level and ask a contextual follow-up
 without restarting. Real provider access, timing and answer quality remain manual.
+
+## Token limits
+
+Settings exposes three whole-number values, saved together with **Save token limits**:
+
+| Setting | Default | Allowed range | Effect |
+| --- | ---: | ---: | --- |
+| Maximum output tokens | 384 | 16–32768 | Responses `max_output_tokens` hard cap, including reasoning; also used for the pre-request cost reservation. |
+| Answer token target | 240 | 1–32768 | Prompt instruction requesting the answer finish within this many tokens; must not exceed maximum output tokens. |
+| Input token allowance | 8192 | 512–131072 | Conservative UTF-8-based allowance for the current question, instructions and history; whole older exchanges are omitted to fit. |
+
+Changes apply to future questions. A response in progress keeps its captured limits and
+reservation. Limits survive page reloads, model switches and New conversation, and reset
+to their defaults when the server restarts, matching the model/thinking settings. Invalid
+values leave all settings unchanged. A question that cannot fit the input allowance is
+rejected before reserving cost or calling the provider. The existing 4096-character answer,
+two-minute speech and three-minute provider safeguards still apply independently.
+
+Manual verification requires Python and PowerShell 7. From any directory, this single
+command launches the no-cost CPU fixture without downloads, credentials or a GPU:
+
+```powershell
+pwsh -NoProfile -Command "Set-Location C:/docs/git/tHead; ./run.bat -TestBackend -Port 8765"
+```
+
+Open [the local app](http://127.0.0.1:8765), then Settings. Check defaults of 384, 240 and
+8192. Save 1024, 800 and 512; reload and check the values remain. Try a target of 1025:
+expect an error and editable controls; correct it to 800 and save again. Ask a short
+question and a follow-up: Timing diagnostics should show `run.tokenLimits` with the saved
+values, `max_output_tokens: 1024` in the fixture provider-request event, and omitted older
+context. CPU fixture media is deliberately unplayable; check real answer length and
+speech using the normal launch command and an existing provider key/runtime.

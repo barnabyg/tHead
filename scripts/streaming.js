@@ -46,6 +46,14 @@ document.querySelector('#settings-back')?.addEventListener('click', () => {
 const modelSelector = document.querySelector('#model');
 const thinkingSelector = document.querySelector('#thinking-level');
 const defaultAvatarSelector = document.querySelector('#default-avatar');
+const tokenLimitsForm = document.querySelector('#token-limits');
+const tokenInputs = {
+  maxOutputTokens: document.querySelector('#max-output-tokens'),
+  answerTokenTarget: document.querySelector('#answer-token-target'),
+  inputTokenLimit: document.querySelector('#input-token-limit'),
+};
+const saveTokenLimits = document.querySelector('#save-token-limits');
+let tokenLimitsDirty = false;
 let savingSettings = false;
 let settingsRevision = 0;
 let modelCatalog = '';
@@ -86,6 +94,12 @@ function renderSettings(settings, avatars) {
   }
   if (levels.length) thinkingSelector.value = settings.thinkingLevel;
   thinkingSelector.disabled = !levels.length;
+  for (const [key, input] of Object.entries(tokenInputs)) {
+    if (!input) continue;
+    if (!tokenLimitsDirty) input.value = settings[key];
+    input.disabled = false;
+  }
+  if (saveTokenLimits) saveTokenLimits.disabled = false;
   document.querySelector('#model-availability').textContent = settings.models
     .filter((model) => !model.available)
     .map((model) => model.error)
@@ -98,18 +112,38 @@ async function saveSettings(change) {
   modelSelector.disabled = true;
   thinkingSelector.disabled = true;
   defaultAvatarSelector.disabled = true;
+  for (const input of Object.values(tokenInputs)) {
+    if (input) input.disabled = true;
+  }
+  if (saveTokenLimits) saveTokenLimits.disabled = true;
   const feedback = document.querySelector('#settings-status');
   feedback.textContent = 'Saving…';
   try {
     const saved = await post('/settings', { session: sessionIdentity, ...change });
+    if ('maxOutputTokens' in change) tokenLimitsDirty = false;
     renderSettings(saved.settings, saved.avatars);
     feedback.textContent = `Saved. ${saved.settings.message || 'Applies to the next question.'}`;
   } catch (error) {
     feedback.textContent = String(error);
   } finally {
     savingSettings = false;
+    for (const input of Object.values(tokenInputs)) {
+      if (input) input.disabled = false;
+    }
+    if (saveTokenLimits) saveTokenLimits.disabled = false;
   }
 }
+tokenLimitsForm?.addEventListener('input', () => {
+  tokenLimitsDirty = true;
+});
+tokenLimitsForm?.addEventListener('submit', (event) => {
+  event.preventDefault();
+  saveSettings(
+    Object.fromEntries(
+      Object.entries(tokenInputs).map(([key, input]) => [key, input.valueAsNumber]),
+    ),
+  );
+});
 modelSelector?.addEventListener('change', () => saveSettings({ model: modelSelector.value }));
 thinkingSelector?.addEventListener('change', () =>
   saveSettings({ thinkingLevel: thinkingSelector.value }),
