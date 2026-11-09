@@ -62,6 +62,14 @@ remain listed as unavailable; explicit Repair replaces reference bytes after a n
 preview while preserving voice identity, name and avatar assignments. Healthy
 records remain usable. Back up the whole database before moving user data.
 
+Readiness verifies both the saved metadata schema and the actual canonical WAV,
+including matching identity/name, engine/provenance, hashes, duration, sample rate
+and channel count. Malformed records stay stored and appear unavailable; they do
+not prevent healthy records from being listed. If an identity/name column itself
+is damaged, the catalogue uses a safe unavailable display entry and explains that
+the database must be preserved/restored. It does not silently invent a replacement
+voice identity or rewrite the corrupt record.
+
 ## Test launch and short manual scenario
 
 Prerequisites: Windows 11, PowerShell 7, Python, uv 0.11.7, the repository's locked

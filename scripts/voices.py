@@ -6,7 +6,9 @@ import hashlib
 import importlib
 import io
 import json
+import math
 import os
+import re
 import shutil
 import sqlite3
 import subprocess  # nosec B404
@@ -63,6 +65,90 @@ def lock_lease(stream: BinaryIO) -> None:
     else:
         locking = importlib.import_module("fcntl")
         locking.flock(stream.fileno(), locking.LOCK_EX | locking.LOCK_NB)
+
+
+def record_metadata(identity: str, name: Any, encoded: Any) -> dict[str, Any]:
+    error = "Voice metadata is corrupt or unsupported; repair this voice or restore a backup"
+    try:
+        metadata = json.loads(encoded)
+        if (
+            not re.fullmatch(r"(?:voice|import)-[a-f0-9]{32}", identity)
+            or not isinstance(metadata, dict)
+            or validated_name(name) != name
+            or metadata.get("id") != identity
+            or metadata.get("name") != name
+            or metadata.get("engine") != ENGINE
+            or metadata.get("permission") != "owner-or-authorised"
+            or type(metadata.get("sample_rate")) is not int
+            or metadata["sample_rate"] != SAMPLE_RATE
+            or type(metadata.get("channels")) is not int
+            or metadata["channels"] != 1
+        ):
+            raise ValueError(error)
+        for key in ("sha256", "source_sha256"):
+            if not isinstance(metadata.get(key), str) or not re.fullmatch(
+                r"[a-f0-9]{64}", metadata[key]
+            ):
+                raise ValueError(error)
+        for key in ("duration", "created"):
+            number = metadata.get(key)
+            if (
+                isinstance(number, bool)
+                or not isinstance(number, (float, int))
+                or not math.isfinite(number)
+                or number <= 0
+            ):
+                raise ValueError(error)
+        if not 5 < metadata["duration"] <= MAX_SECONDS:
+            raise ValueError(error)
+        # Expose the supported schema only, preserving all original bytes in storage.
+        return {
+            key: metadata[key]
+            for key in (
+                "id",
+                "name",
+                "engine",
+                "permission",
+                "sha256",
+                "source_sha256",
+                "sample_rate",
+                "channels",
+                "duration",
+                "created",
+            )
+        }
+    except (ValueError, TypeError, KeyError, OverflowError) as problem:
+        raise ValueError(error) from problem
+
+
+def validated_reference(metadata: dict[str, Any], audio: Any) -> bytes:
+    error = "Voice reference changed or corrupt; repair this voice"
+    if (
+        not isinstance(audio, bytes)
+        or not 44 < len(audio) <= MAX_SAMPLES * 2 + 44
+        or hashlib.sha256(audio).hexdigest() != metadata["sha256"]
+    ):
+        raise ValueError(error)
+    try:
+        with wave.open(io.BytesIO(audio), "rb") as reference:
+            samples = reference.getnframes()
+            if (
+                (
+                    reference.getnchannels(),
+                    reference.getframerate(),
+                    reference.getsampwidth(),
+                    reference.getcomptype(),
+                )
+                != (1, SAMPLE_RATE, 2, "NONE")
+                or not 5 * SAMPLE_RATE < samples <= MAX_SAMPLES
+                or abs(samples / SAMPLE_RATE - metadata["duration"]) > 1 / SAMPLE_RATE
+                or len(reference.readframes(MAX_SAMPLES + 1)) != samples * 2
+                or len(audio) != samples * 2 + 44
+            ):
+                raise ValueError(error)
+    except (wave.Error, EOFError) as problem:
+        raise ValueError(error) from problem
+    return audio
 
 
 class AudioDecoder:
@@ -477,38 +563,36 @@ class VoiceStore:
     def candidate(self, identity: str) -> dict[str, Any]:
         with self.connect() as connection:
             row = connection.execute(
-                "SELECT metadata,previewed,saved_id FROM voice_imports WHERE id=? AND expires>=?",
+                "SELECT metadata,previewed,saved_id,name FROM voice_imports "
+                "WHERE id=? AND expires>=?",
                 (identity, time.time()),
             ).fetchone()
         if not row:
             raise ValueError("Voice import expired or cancelled; choose the recording again")
         if row[2]:
             return self.read(str(row[2]))
-        return {**json.loads(row[0]), "previewed": bool(row[1]), "available": True, "error": ""}
+        metadata = record_metadata(identity, row[3], row[0])
+        return {**metadata, "previewed": bool(row[1]), "available": True, "error": ""}
 
     def reference(self, identity: str) -> bytes:
+        if not isinstance(identity, str):
+            raise ValueError("Voice identity is corrupt; restore the voice database from a backup")
         with self.connect() as connection:
             if identity.startswith("import-"):
                 row = connection.execute(
-                    "SELECT metadata,audio FROM voice_imports "
+                    "SELECT metadata,audio,name FROM voice_imports "
                     "WHERE id=? AND expires>=? AND saved_id IS NULL",
                     (identity, time.time()),
                 ).fetchone()
             else:
                 row = connection.execute(
-                    "SELECT metadata,audio FROM voices WHERE id=?", (identity,)
+                    "SELECT metadata,audio,name FROM voices WHERE id=?", (identity,)
                 ).fetchone()
         if not row or not isinstance(row[1], bytes):
             raise ValueError(
                 "Voice reference unavailable; choose the recording again or repair this voice"
             )
-        try:
-            expected = json.loads(row[0])["sha256"]
-        except (KeyError, ValueError, TypeError) as error:
-            raise ValueError("Voice metadata is corrupt; repair this voice") from error
-        if hashlib.sha256(row[1]).hexdigest() != expected:
-            raise ValueError("Voice reference changed or corrupt; repair this voice")
-        return bytes(row[1])
+        return validated_reference(record_metadata(identity, row[2], row[0]), row[1])
 
     def mark_previewed(self, identity: str, sha256: str) -> dict[str, Any]:
         self.reference(identity)
@@ -528,7 +612,7 @@ class VoiceStore:
     def save(self, identity: str, name: Any = None) -> dict[str, Any]:
         with self.connect(write=True) as connection:
             row = connection.execute(
-                "SELECT metadata,audio,previewed,saved_id FROM voice_imports "
+                "SELECT metadata,audio,previewed,saved_id,name FROM voice_imports "
                 "WHERE id=? AND expires>=?",
                 (identity, time.time()),
             ).fetchone()
@@ -539,7 +623,7 @@ class VoiceStore:
             else:
                 if not row[2]:
                     raise ValueError("Preview the synthetic voice before saving")
-                metadata = json.loads(row[0])
+                metadata = record_metadata(identity, row[4], row[0])
                 name = validated_name(metadata["name"] if name is None else name)
                 if connection.execute(
                     "SELECT 1 FROM voices WHERE name_key=?", (name.casefold(),)
@@ -548,13 +632,7 @@ class VoiceStore:
                 saved_id = "voice-" + uuid.uuid4().hex
                 metadata["id"] = saved_id
                 metadata["name"] = name
-                if (
-                    not isinstance(row[1], bytes)
-                    or hashlib.sha256(row[1]).hexdigest() != metadata["sha256"]
-                ):
-                    raise ValueError(
-                        "Voice reference changed; import and preview the recording again"
-                    )
+                validated_reference(metadata, row[1])
                 connection.execute(
                     "INSERT INTO voices VALUES (?,?,?,?,?)",
                     (saved_id, name, name.casefold(), json.dumps(metadata), row[1]),
@@ -573,7 +651,7 @@ class VoiceStore:
         with self.connect(write=True) as connection:
             saved = connection.execute("SELECT name FROM voices WHERE id=?", (identity,)).fetchone()
             candidate = connection.execute(
-                "SELECT metadata,audio,previewed,saved_id FROM voice_imports "
+                "SELECT metadata,audio,previewed,saved_id,name FROM voice_imports "
                 "WHERE id=? AND expires>=?",
                 (candidate_id, time.time()),
             ).fetchone()
@@ -587,16 +665,9 @@ class VoiceStore:
             else:
                 if not candidate[2]:
                     raise ValueError("Preview the synthetic voice before repairing")
-                metadata = json.loads(candidate[0])
-                audio = candidate[1]
-                if (
-                    not isinstance(audio, bytes)
-                    or hashlib.sha256(audio).hexdigest() != metadata["sha256"]
-                ):
-                    raise ValueError(
-                        "Voice reference changed; import and preview the recording again"
-                    )
-                metadata.update(id=identity, name=saved[0])
+                metadata = record_metadata(candidate_id, candidate[4], candidate[0])
+                audio = validated_reference(metadata, candidate[1])
+                metadata.update(id=identity, name=validated_name(saved[0]))
                 connection.execute(
                     "UPDATE voices SET metadata=?,audio=? WHERE id=?",
                     (json.dumps(metadata), audio, identity),
@@ -608,26 +679,32 @@ class VoiceStore:
         return self.read(identity)
 
     def read(self, identity: str) -> dict[str, Any]:
+        if not isinstance(identity, str):
+            raise ValueError(
+                "Voice identity is corrupt; preserve the database and restore a backup"
+            )
         with self.connect() as connection:
             row = connection.execute(
-                "SELECT name,metadata FROM voices WHERE id=?", (identity,)
+                "SELECT name,metadata,audio FROM voices WHERE id=?", (identity,)
             ).fetchone()
         if not row:
             raise ValueError("Saved voice not found; reload Voices")
         error = ""
-        metadata: dict[str, Any] = {"id": identity, "name": row[0], "engine": ENGINE}
+        name = row[0] if isinstance(row[0], str) else "Unavailable saved voice"
+        metadata: dict[str, Any] = {"id": identity, "name": name, "engine": ENGINE}
         try:
-            metadata.update(json.loads(row[1]))
-            self.reference(identity)
+            checked = record_metadata(identity, row[0], row[1])
+            validated_reference(checked, row[2])
+            metadata.update(checked)
         except (ValueError, TypeError) as problem:
             error = str(problem)
-        return {**metadata, "id": identity, "name": row[0], "available": not error, "error": error}
+        return {**metadata, "id": identity, "name": name, "available": not error, "error": error}
 
     def rename(self, identity: str, name: Any) -> dict[str, Any]:
         name = validated_name(name)
         with self.connect(write=True) as connection:
             row = connection.execute(
-                "SELECT metadata FROM voices WHERE id=?", (identity,)
+                "SELECT metadata,name FROM voices WHERE id=?", (identity,)
             ).fetchone()
             if not row:
                 raise ValueError("Saved voice not found; reload Voices")
@@ -635,7 +712,7 @@ class VoiceStore:
                 "SELECT 1 FROM voices WHERE name_key=? AND id<>?", (name.casefold(), identity)
             ).fetchone():
                 raise ValueError("A voice with this name already exists; choose another name")
-            metadata = json.loads(row[0])
+            metadata = record_metadata(identity, row[1], row[0])
             metadata["name"] = name
             connection.execute(
                 "UPDATE voices SET name=?,name_key=?,metadata=? WHERE id=?",
@@ -675,7 +752,35 @@ class VoiceStore:
         if self.error:
             return []
         with self.connect() as connection:
-            identities = [
-                row[0] for row in connection.execute("SELECT id FROM voices ORDER BY name_key")
-            ]
-        return [self.read(identity) for identity in identities]
+            records = connection.execute(
+                "SELECT rowid,id,name FROM voices ORDER BY name_key"
+            ).fetchall()
+        result = []
+        for rowid, identity, name in records:
+            if not isinstance(identity, str) or not isinstance(name, str):
+                result.append(
+                    {
+                        "id": "unavailable-record-" + str(rowid),
+                        "name": name
+                        if isinstance(name, str)
+                        else "Unavailable saved voice " + str(rowid),
+                        "engine": ENGINE,
+                        "available": False,
+                        "error": "Saved voice identity/name is corrupt; "
+                        "preserve the database and restore a backup",
+                    }
+                )
+            else:
+                try:
+                    result.append(self.read(identity))
+                except ValueError as problem:
+                    result.append(
+                        {
+                            "id": identity,
+                            "name": name,
+                            "engine": ENGINE,
+                            "available": False,
+                            "error": str(problem),
+                        }
+                    )
+        return result

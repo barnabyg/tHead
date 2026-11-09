@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import hashlib
 import io
+import json
 import os
 import sqlite3
 import subprocess  # nosec B404
@@ -13,6 +15,7 @@ import unittest
 import wave
 from contextlib import closing
 from pathlib import Path
+from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -244,6 +247,64 @@ class VoiceStorageTests(unittest.TestCase):
         corrected = self.store.save(second["id"], "Corrected")
         self.assertEqual(corrected["name"], "Corrected")
         self.assertNotEqual(corrected["id"], saved["id"])
+
+    def test_corrupt_metadata_is_unavailable_without_hiding_healthy_voices(self) -> None:
+        for name in ("Healthy", "Damaged"):
+            imported = self.store.import_audio(name, "valid.wav", recording(), True)
+            self.store.mark_previewed(imported["id"], imported["sha256"])
+            saved = self.store.save(imported["id"])
+        damaged_id = saved["id"]
+        canonical = self.store.reference(damaged_id)
+        mutations: tuple[dict[str, Any], ...] = (
+            {"engine": []},
+            {"duration": 5},
+            {"duration": 11},
+            {"sample_rate": 16000},
+            {"channels": 2},
+            {"permission": False},
+            {"created": float("nan")},
+            {"source_sha256": "changed"},
+            {"id": "voice-wrong"},
+            {"name": "Different"},
+        )
+        for mutation in mutations:
+            with self.subTest(mutation=mutation):
+                metadata = {**saved, **mutation}
+                with (
+                    closing(sqlite3.connect(self.directory / "avatars.sqlite3")) as connection,
+                    connection,
+                ):
+                    connection.execute(
+                        "UPDATE voices SET metadata=?,audio=? WHERE id=?",
+                        (json.dumps(metadata), canonical, damaged_id),
+                    )
+                catalogue = self.store.list()
+                self.assertEqual(len(catalogue), 2)
+                self.assertTrue(next(v for v in catalogue if v["name"] == "Healthy")["available"])
+                self.assertFalse(self.store.read(damaged_id)["available"])
+        metadata = {**saved, "sha256": hashlib.sha256(b"not a WAV").hexdigest()}
+        with closing(sqlite3.connect(self.directory / "avatars.sqlite3")) as connection, connection:
+            connection.execute(
+                "UPDATE voices SET metadata=?,audio=? WHERE id=?",
+                (json.dumps(metadata), b"not a WAV", damaged_id),
+            )
+        self.assertFalse(self.store.read(damaged_id)["available"])
+        with closing(sqlite3.connect(self.directory / "avatars.sqlite3")) as connection, connection:
+            connection.execute(
+                "INSERT INTO voices VALUES (?,?,?,?,?)",
+                (None, "Missing identity", "missing", "{}", b""),
+            )
+            connection.execute(
+                "INSERT INTO voices VALUES (?,?,?,?,?)",
+                (b"bad-id", b"bad-name", "binary", "{}", b""),
+            )
+        catalogue = self.store.list()
+        self.assertEqual(len(catalogue), 4)
+        self.assertIsInstance(json.dumps(catalogue), str)
+        self.assertTrue(
+            all(isinstance(v["id"], str) and isinstance(v["name"], str) for v in catalogue)
+        )
+        self.assertEqual(sum(bool(v["available"]) for v in catalogue), 1)
 
 
 if __name__ == "__main__":
