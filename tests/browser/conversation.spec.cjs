@@ -294,6 +294,66 @@ test('voice preparation rejects duplicate pending starts and clears request erro
   );
 });
 
+for (const action of ['start', 'cancel']) {
+  test(`voice preparation ignores a status poll sampled before ${action}`, async ({ page }) => {
+    const backend = await preparationStatus(page, {
+      state: action === 'start' ? 'idle' : 'preparing',
+      available: false,
+      eligible: true,
+      error: action === 'start' ? 'Local voice engine is not prepared.' : '',
+    });
+    await expect(page.locator('#voice-readiness')).toContainText(
+      action === 'start' ? 'not prepared' : 'Preparing local voices',
+    );
+    let sampled;
+    let release;
+    const snapshot = new Promise((resolve) => {
+      sampled = resolve;
+    });
+    const gate = new Promise((resolve) => {
+      release = resolve;
+    });
+    await page.route(
+      '**/status',
+      async (route) => {
+        const response = await route.fetch();
+        const status = await response.json();
+        status.voiceLibrary.readiness = backend.readiness;
+        sampled();
+        await gate;
+        await route.fulfill({ json: status });
+      },
+      { times: 1 },
+    );
+    await snapshot;
+    // Keep subsequent polls from concealing a regression caused by this stale reply.
+    await page.route('**/status', (route) => route.abort());
+    await page.route('**/voices/prepare/cancel', async (route) => {
+      backend.readiness = { state: 'cancelled', available: false, eligible: true, error: '' };
+      await route.fulfill({ json: backend.readiness });
+    });
+    await page
+      .locator(action === 'start' ? '#prepare-voices' : '#cancel-voice-preparation')
+      .click();
+    const expected = action === 'start' ? 'Preparing local voices' : 'Preparation cancelled';
+    await expect(page.locator('#voice-readiness')).toContainText(expected);
+    const staleResponse = page.waitForResponse('**/status');
+    release();
+    await (await staleResponse).finished();
+    await expect(page.locator('#voice-readiness')).toContainText(expected);
+    await expect(page.locator('#clone-voice')).toBeDisabled();
+    if (action === 'start') {
+      await expect(page.locator('#prepare-voices')).toBeDisabled();
+      await expect(page.locator('#cancel-voice-preparation')).toBeVisible();
+    } else {
+      await expect(
+        page.getByRole('button', { name: 'Retry voice preparation', exact: true }),
+      ).toBeEnabled();
+      await expect(page.locator('#cancel-voice-preparation')).toBeHidden();
+    }
+  });
+}
+
 for (const [state, error] of [
   ['idle', 'Local cloned voices require the verified RTX 3090 CUDA configuration.'],
   ['ready', 'Local GPU runtime unavailable. Prepare the normal app and retry.'],

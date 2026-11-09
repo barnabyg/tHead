@@ -25,6 +25,8 @@ let preparationStartVersion = 0;
 let preparationAttempted = false;
 let preparationActionError = '';
 let preparationCancelling = false;
+// Polls sampled before or during a preparation command must not replace its result.
+window.voicePreparationRevision = 0;
 
 function updateVoicePreparation(readiness) {
   if (JSON.stringify(readiness) !== JSON.stringify(voiceReadiness)) {
@@ -187,6 +189,7 @@ document.querySelector('#prepare-voices').addEventListener('click', async () => 
   preparationAttempted = true;
   preparationActionError = '';
   preparationStartVersion = voiceReadinessVersion;
+  window.voicePreparationRevision++;
   const version = voiceReadinessVersion;
   document.querySelector('#voice-result').textContent = '';
   renderVoicePreparation();
@@ -197,6 +200,7 @@ document.querySelector('#prepare-voices').addEventListener('click', async () => 
   } catch (error) {
     if (version === voiceReadinessVersion) preparationActionError = String(error);
   } finally {
+    window.voicePreparationRevision++;
     preparationStarting = false;
     renderVoicePreparation();
   }
@@ -205,6 +209,7 @@ document.querySelector('#cancel-voice-preparation').addEventListener('click', as
   if (preparationCancelling || voiceReadiness?.state !== 'preparing') return;
   preparationCancelling = true;
   preparationActionError = '';
+  window.voicePreparationRevision++;
   const version = voiceReadinessVersion;
   renderVoicePreparation();
   try {
@@ -216,6 +221,7 @@ document.querySelector('#cancel-voice-preparation').addEventListener('click', as
       preparationActionError = String(error);
     }
   } finally {
+    window.voicePreparationRevision++;
     renderVoicePreparation();
   }
 });
@@ -319,11 +325,11 @@ cloneForm.addEventListener('submit', async (event) => {
   }
 });
 
-window.renderVoiceLibrary = (status) => {
+window.renderVoiceLibrary = (status, preparationRevision) => {
   if (!status.voiceLibrary) return;
   const library = status.voiceLibrary;
   const readiness = library.readiness;
-  updateVoicePreparation(readiness);
+  if (preparationRevision === window.voicePreparationRevision) updateVoicePreparation(readiness);
   if (voiceOperation && voiceSession !== status.session && !voiceSaving) cancelVoiceOperation();
   if (voiceOperation && library.operation === voiceOperation && !voiceSaving) {
     if (library.state === 'failed' || library.state === 'cancelled') {
