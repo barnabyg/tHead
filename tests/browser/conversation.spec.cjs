@@ -53,6 +53,18 @@ async function openSettings(page) {
   }
 }
 
+async function settledStatus(request, url) {
+  let status;
+  // Playback can end before reservation settlement and the final transcript save.
+  await expect
+    .poll(async () => {
+      status = await (await request.get(`${url}/status`)).json();
+      return status.state === 'idle' && status.budget.reserved_usd === 0;
+    })
+    .toBe(true);
+  return status;
+}
+
 test('clone preview saves one private reusable voice without changing avatar, context or budget', async ({
   page,
   request,
@@ -1265,12 +1277,7 @@ test('reset and Stop during loading retain choice, reject overlapping selection 
   await backToConversation(page);
   await ask.click();
   await expect(page.locator('#status')).toHaveText('Playback ended');
-  // Browser playback can finish before the backend reconciles its reservation.
-  // Capture the settled first-turn charge before testing that reset preserves it.
-  await expect
-    .poll(async () => (await (await request.get(`${info.url}/status`)).json()).budget.reserved_usd)
-    .toBe(0);
-  const before = await (await request.get(`${info.url}/status`)).json();
+  const before = await settledStatus(request, info.url);
   expect(before.budget.estimated_usd).toBeGreaterThan(0);
   await page.getByLabel('Pair diagnostic', { exact: true }).selectOption('pair-delay');
   await expect(pair).toBeEnabled();
@@ -1322,7 +1329,8 @@ for (const fault of [
     await backToConversation(page);
     await ask.click();
     await expect(page.locator('#status')).toHaveText('Playback ended');
-    const before = await (await request.get(`${info.url}/status`)).json();
+    const before = await settledStatus(request, info.url);
+    expect(before.budget.estimated_usd).toBeGreaterThan(0);
     await page.getByLabel('Pair diagnostic', { exact: true }).selectOption(fault);
     await expect(pair).toBeEnabled();
     await openSettings(page);
