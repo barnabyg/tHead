@@ -217,7 +217,12 @@ class VoiceLibrary:
             self.cancelled.set()
             self.audio = b""
             if self.candidate_id and self.state != "saved":
-                self.store.cancel(self.candidate_id)
+                try:
+                    self.store.cancel(self.candidate_id)
+                except ValueError as error:
+                    # Failed storage remains reported; cancellation/resource release still finish.
+                    # The dead session lease lets a repaired store reap the abandoned candidate.
+                    self.error = str(error)
             self.candidate_id = ""
             self.state = "cancelling" if self.preview_running else "cancelled"
 

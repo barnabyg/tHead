@@ -133,6 +133,12 @@ class Conversation(Demonstration):
         candidate_chatterbox: bool = False,
         chatterbox_state: Path | None = None,
     ) -> None:
+        # FlashHead changes the process working directory while loading its source.
+        # Capture every caller-supplied path before the background model owner starts.
+        inputs, directory = inputs.resolve(), directory.resolve()
+        user_data = user_data.resolve() if user_data else None
+        budget_path = budget_path.resolve() if budget_path else None
+        chatterbox_state = chatterbox_state.resolve() if chatterbox_state else None
         local_data = user_data or (
             directory / "user-data" if test_backend else user_data_directory()
         )
