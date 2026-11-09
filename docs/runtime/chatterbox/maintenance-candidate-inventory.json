@@ -2850,1138 +2850,950 @@
     {
       "file": "torch/_C.cp312-win_amd64.pyd",
       "bytes": 9728,
-      "sha256": "db9f2abec32ffb898f352fe812e42e8d7087d11a64e316b7ee2be65594807eb8",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "db9f2abec32ffb898f352fe812e42e8d7087d11a64e316b7ee2be65594807eb8"
     },
     {
       "file": "torch/lib/c10.dll",
       "bytes": 1113600,
-      "sha256": "26b61165644efa03b76602944232de93485a8bb1d63fce90f4288f1b5beb9209",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "26b61165644efa03b76602944232de93485a8bb1d63fce90f4288f1b5beb9209"
     },
     {
       "file": "torch/lib/c10_cuda.dll",
       "bytes": 611328,
-      "sha256": "0456e225d660608716d5620b510c4bcd003d9b838bb2ffd6229100ace65edca9",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "0456e225d660608716d5620b510c4bcd003d9b838bb2ffd6229100ace65edca9"
     },
     {
       "file": "torch/lib/caffe2_nvrtc.dll",
       "bytes": 54272,
-      "sha256": "df71c3834b64867294dac549fc63e9e61a4fd8eff77ec192c5b903fb33eb4f40",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "df71c3834b64867294dac549fc63e9e61a4fd8eff77ec192c5b903fb33eb4f40"
     },
     {
       "file": "torch/lib/cublas64_13.dll",
       "bytes": 50288240,
-      "sha256": "5d083083cdd613577496791dd96d00fe3a78c955684b53ca46a8ffa3e0b1e170",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "5d083083cdd613577496791dd96d00fe3a78c955684b53ca46a8ffa3e0b1e170"
     },
     {
       "file": "torch/lib/cublasLt64_13.dll",
       "bytes": 477896816,
-      "sha256": "e1c26671801ecd435baf97c6e9cfe28196cf55005c2039356b48030b09ce5dd5",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "e1c26671801ecd435baf97c6e9cfe28196cf55005c2039356b48030b09ce5dd5"
     },
     {
       "file": "torch/lib/cudart64_13.dll",
       "bytes": 470640,
-      "sha256": "58c509047f9dd1879cf82c6d5375a95c02c7bd295ae6c8362c745c936e2afc31",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "58c509047f9dd1879cf82c6d5375a95c02c7bd295ae6c8362c745c936e2afc31"
     },
     {
       "file": "torch/lib/cudnn64_9.dll",
       "bytes": 267888,
-      "sha256": "506be0b0f0b0f8856c9b2171a859097fa383d7f28243ebff3859d8502acb0e95",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "506be0b0f0b0f8856c9b2171a859097fa383d7f28243ebff3859d8502acb0e95"
     },
     {
       "file": "torch/lib/cudnn_adv64_9.dll",
       "bytes": 106547312,
-      "sha256": "f311722e33217d08b3704c81631e607b2c3fc22b5adfe7b0949dec865eda6e8c",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "f311722e33217d08b3704c81631e607b2c3fc22b5adfe7b0949dec865eda6e8c"
     },
     {
       "file": "torch/lib/cudnn_cnn64_9.dll",
       "bytes": 1532528,
-      "sha256": "8a5318ff6d7caa8506821f2069e6d25fc11f9a4cb27a75a00ba0ce3d4bea7eb8",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "8a5318ff6d7caa8506821f2069e6d25fc11f9a4cb27a75a00ba0ce3d4bea7eb8"
     },
     {
       "file": "torch/lib/cudnn_engines_precompiled64_9.dll",
       "bytes": 221832304,
-      "sha256": "62c784a31cf3655b8ec9ba42ec2c13cf97ba0be17c551a6e62e6787d6f6ca81c",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "62c784a31cf3655b8ec9ba42ec2c13cf97ba0be17c551a6e62e6787d6f6ca81c"
     },
     {
       "file": "torch/lib/cudnn_engines_runtime_compiled64_9.dll",
       "bytes": 31745136,
-      "sha256": "7aca3dcef5506660956d2332d1e0cf3b0c4fc114e8dcf147cd7e8575ead02c4f",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "7aca3dcef5506660956d2332d1e0cf3b0c4fc114e8dcf147cd7e8575ead02c4f"
     },
     {
       "file": "torch/lib/cudnn_engines_tensor_ir64_9.dll",
       "bytes": 155248,
-      "sha256": "5e62dd3d01f96315b20e3d940525964f44be669610478850f1dbe174bbe30cc0",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "5e62dd3d01f96315b20e3d940525964f44be669610478850f1dbe174bbe30cc0"
     },
     {
       "file": "torch/lib/cudnn_ext64_9.dll",
       "bytes": 130160,
-      "sha256": "05e8da5cdc9761711fd5d36736dd4884ffa704ef3047d7d13404a817e2a64a63",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "05e8da5cdc9761711fd5d36736dd4884ffa704ef3047d7d13404a817e2a64a63"
     },
     {
       "file": "torch/lib/cudnn_graph64_9.dll",
       "bytes": 110908016,
-      "sha256": "5153eaeae1133c1eed80492b2489d2487b045c87985e3d5ee3855ea57745f1f9",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "5153eaeae1133c1eed80492b2489d2487b045c87985e3d5ee3855ea57745f1f9"
     },
     {
       "file": "torch/lib/cudnn_heuristic64_9.dll",
       "bytes": 58741360,
-      "sha256": "b74f827fc6b78e7a31463759e03c69fe0ea273f496531373a73f153b8858ddea",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "b74f827fc6b78e7a31463759e03c69fe0ea273f496531373a73f153b8858ddea"
     },
     {
       "file": "torch/lib/cudnn_ops64_9.dll",
       "bytes": 36770416,
-      "sha256": "dc4bb901ddb9aab204f98ccd7cdf9556b3af20e4305c710d4d10a88fa3d7ff61",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "dc4bb901ddb9aab204f98ccd7cdf9556b3af20e4305c710d4d10a88fa3d7ff61"
     },
     {
       "file": "torch/lib/cufft64_12.dll",
       "bytes": 284331040,
-      "sha256": "611ba7e40dfab64b9b5bd35f4ad3593e00a8e93785fbf53160d9398aacd5ac14",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "611ba7e40dfab64b9b5bd35f4ad3593e00a8e93785fbf53160d9398aacd5ac14"
     },
     {
       "file": "torch/lib/cufftw64_12.dll",
       "bytes": 201264,
-      "sha256": "59e3b4cfb3e82481ebd773f3a58bf4f64966d1657ccc6b8f72b33c42fcda6079",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "59e3b4cfb3e82481ebd773f3a58bf4f64966d1657ccc6b8f72b33c42fcda6079"
     },
     {
       "file": "torch/lib/cupti64_2025.3.0.dll",
       "bytes": 2067488,
-      "sha256": "2015295ce64f2b6f36ee8a0b9c91cb365ded4bd7173c63da36f75caad1d464ee",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "2015295ce64f2b6f36ee8a0b9c91cb365ded4bd7173c63da36f75caad1d464ee"
     },
     {
       "file": "torch/lib/curand64_10.dll",
       "bytes": 58863672,
-      "sha256": "da51792dc1b4768ea8207a21f5a2e05226263ae399b310cfd9bc7efb481b5530",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "da51792dc1b4768ea8207a21f5a2e05226263ae399b310cfd9bc7efb481b5530"
     },
     {
       "file": "torch/lib/cusolver64_12.dll",
       "bytes": 126421024,
-      "sha256": "bf27332ad47b6e86e3c3c8b24d7a3005d823ffd1ee1cadbe6642f6c1ea48fd8f",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "bf27332ad47b6e86e3c3c8b24d7a3005d823ffd1ee1cadbe6642f6c1ea48fd8f"
     },
     {
       "file": "torch/lib/cusolverMg64_12.dll",
       "bytes": 95365152,
-      "sha256": "a92dc614fdb5cf48272e26819092a5d012bb4b3d477f9e78bbaaf4290e343b14",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "a92dc614fdb5cf48272e26819092a5d012bb4b3d477f9e78bbaaf4290e343b14"
     },
     {
       "file": "torch/lib/cusparse64_12.dll",
       "bytes": 150326304,
-      "sha256": "a155d5bfd5bff68305557be21486470b9949cf6a45a3acda80b27e1670e671e2",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "a155d5bfd5bff68305557be21486470b9949cf6a45a3acda80b27e1670e671e2"
     },
     {
       "file": "torch/lib/libiomp5md.dll",
       "bytes": 1617536,
-      "sha256": "de6d18b2dec5811f7932950282a4c8218c5f287db04ff320dcbaa74733d6fcce",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "de6d18b2dec5811f7932950282a4c8218c5f287db04ff320dcbaa74733d6fcce"
     },
     {
       "file": "torch/lib/libiompstubs5md.dll",
       "bytes": 44160,
-      "sha256": "c477314c1b489c75455b9738452760cd275a254822762079e001e27f79eb25cb",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "c477314c1b489c75455b9738452760cd275a254822762079e001e27f79eb25cb"
     },
     {
       "file": "torch/lib/nvJitLink_130_0.dll",
       "bytes": 88218656,
-      "sha256": "b6c247de22ee23ef60d0148bd3a3343164891cd9f2e9946bf23fc459d12c5222",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "b6c247de22ee23ef60d0148bd3a3343164891cd9f2e9946bf23fc459d12c5222"
     },
     {
       "file": "torch/lib/nvperf_host.dll",
       "bytes": 27764256,
-      "sha256": "8530cc52b673a0cee8e84ded28c041b16622ae566d4b9d15ffbc275bc8695afc",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "8530cc52b673a0cee8e84ded28c041b16622ae566d4b9d15ffbc275bc8695afc"
     },
     {
       "file": "torch/lib/nvrtc-builtins64_130.dll",
       "bytes": 4471328,
-      "sha256": "65813a86fbe8fe9ab6adff04275c7e9be9d4ca67fccdb868bb18a4f497155a6b",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "65813a86fbe8fe9ab6adff04275c7e9be9d4ca67fccdb868bb18a4f497155a6b"
     },
     {
       "file": "torch/lib/nvrtc64_130_0.alt.dll",
       "bytes": 91028512,
-      "sha256": "f0e9688b032feac4f05fbf327493252dda0ad77a527ecb543af91e2b1b337d31",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "f0e9688b032feac4f05fbf327493252dda0ad77a527ecb543af91e2b1b337d31"
     },
     {
       "file": "torch/lib/nvrtc64_130_0.dll",
       "bytes": 90961440,
-      "sha256": "37d2195bcdc5db37a838a8eb4f286f502ea94d82319bb7de68751ad672f4ad6d",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "37d2195bcdc5db37a838a8eb4f286f502ea94d82319bb7de68751ad672f4ad6d"
     },
     {
       "file": "torch/lib/nvToolsExt64_1.dll",
       "bytes": 48128,
-      "sha256": "0fe54f1b80ad3e44da2a3d9f0956e7c3903029d6319689ce1c4068f7a20932f3",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "0fe54f1b80ad3e44da2a3d9f0956e7c3903029d6319689ce1c4068f7a20932f3"
     },
     {
       "file": "torch/lib/shm.dll",
       "bytes": 15360,
-      "sha256": "b7b6eb9bde3fc73512df138d6fbbd7e13961be19f2f9843ecddd71b155b76730",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "b7b6eb9bde3fc73512df138d6fbbd7e13961be19f2f9843ecddd71b155b76730"
     },
     {
       "file": "torch/lib/torch.dll",
       "bytes": 9728,
-      "sha256": "d1da071cc02ec858ba11323bee25647c2e60b1b7d6128dd2488bfc02cade5593",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "d1da071cc02ec858ba11323bee25647c2e60b1b7d6128dd2488bfc02cade5593"
     },
     {
       "file": "torch/lib/torch_cpu.dll",
       "bytes": 306006528,
-      "sha256": "735772fe386fc02162838f2d2a7957001071805ae5462333d2eba8a022653725",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "735772fe386fc02162838f2d2a7957001071805ae5462333d2eba8a022653725"
     },
     {
       "file": "torch/lib/torch_cuda.dll",
       "bytes": 422658048,
-      "sha256": "e4096e44c32ddd1e60ee523ea6bc6f0b08901348f29fc2f6ee4950d0b6a7aa58",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "e4096e44c32ddd1e60ee523ea6bc6f0b08901348f29fc2f6ee4950d0b6a7aa58"
     },
     {
       "file": "torch/lib/torch_global_deps.dll",
       "bytes": 9728,
-      "sha256": "fc43240003e8ab680a230490e5c3eee3cbf751990fb16fbb10529ce07d2df11a",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "fc43240003e8ab680a230490e5c3eee3cbf751990fb16fbb10529ce07d2df11a"
     },
     {
       "file": "torch/lib/torch_python.dll",
       "bytes": 20719104,
-      "sha256": "9e0a7a6da663b1311d7774cf1cd4e0af7a7ad2cda013706d125a76b2d49dea9f",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "9e0a7a6da663b1311d7774cf1cd4e0af7a7ad2cda013706d125a76b2d49dea9f"
     },
     {
       "file": "torch/lib/uv.dll",
       "bytes": 195072,
-      "sha256": "fa569e682fc5fb7a8eb94c6829af9f30a569748dbbc6bce39735d48bc960bcf8",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "fa569e682fc5fb7a8eb94c6829af9f30a569748dbbc6bce39735d48bc960bcf8"
     },
     {
       "file": "torch/lib/zlibwapi.dll",
       "bytes": 89088,
-      "sha256": "1f047faec08d9a35c304fb4a7cf13853589359a8f7cbfdd48c5d5807712dcf05",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "1f047faec08d9a35c304fb4a7cf13853589359a8f7cbfdd48c5d5807712dcf05"
     },
     {
       "file": "torchaudio/lib/libtorchaudio.pyd",
       "bytes": 199168,
-      "sha256": "087459e04798f6758a3bfa68877aa194c8f31ade82e93837d3f978369782cdda",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "087459e04798f6758a3bfa68877aa194c8f31ade82e93837d3f978369782cdda"
     },
     {
       "file": "torchaudio/lib/_torchaudio.pyd",
       "bytes": 31232,
-      "sha256": "ec4b89c121c5c12e407b730c8eb0b1778eee092ce710e99ca2e144d7d3d8cee3",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "ec4b89c121c5c12e407b730c8eb0b1778eee092ce710e99ca2e144d7d3d8cee3"
     },
     {
       "file": "numpy/core/_multiarray_tests.cp312-win_amd64.pyd",
       "bytes": 66048,
-      "sha256": "d9017d99e0b6cad2f02462420793551fe9e6b836f3a800228caaeed144a32b75",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "d9017d99e0b6cad2f02462420793551fe9e6b836f3a800228caaeed144a32b75"
     },
     {
       "file": "numpy/core/_multiarray_umath.cp312-win_amd64.pyd",
       "bytes": 2842624,
-      "sha256": "5d4f44389d1b4e9aa62af63b716a0d4266dbb56fefa9bf27831f85b695994da5",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "5d4f44389d1b4e9aa62af63b716a0d4266dbb56fefa9bf27831f85b695994da5"
     },
     {
       "file": "numpy/core/_operand_flag_tests.cp312-win_amd64.pyd",
       "bytes": 11264,
-      "sha256": "6b2a6d51c423411bae8fecc5e739d2251abb7f82521125c68a1734e58c7ad92d",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "6b2a6d51c423411bae8fecc5e739d2251abb7f82521125c68a1734e58c7ad92d"
     },
     {
       "file": "numpy/core/_rational_tests.cp312-win_amd64.pyd",
       "bytes": 40448,
-      "sha256": "2bb8e20ef34acdb42105daaf1fb4246493f46d49b84d614ab6fefbd4e4e428ad",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "2bb8e20ef34acdb42105daaf1fb4246493f46d49b84d614ab6fefbd4e4e428ad"
     },
     {
       "file": "numpy/core/_simd.cp312-win_amd64.pyd",
       "bytes": 2236928,
-      "sha256": "9d7bfef85379008c0c28469eea756ee3d1a52983801b76d35f80e91317cb5431",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "9d7bfef85379008c0c28469eea756ee3d1a52983801b76d35f80e91317cb5431"
     },
     {
       "file": "numpy/core/_struct_ufunc_tests.cp312-win_amd64.pyd",
       "bytes": 13824,
-      "sha256": "310d34efdd848e7e0e1165c8c67914c0d3f066a5dbae7c91a27cba41e05ca53a",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "310d34efdd848e7e0e1165c8c67914c0d3f066a5dbae7c91a27cba41e05ca53a"
     },
     {
       "file": "numpy/core/_umath_tests.cp312-win_amd64.pyd",
       "bytes": 32768,
-      "sha256": "8407002ff967c7e7e514388a6fc1cbd51b375586ef774030361094f8b357d216",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "8407002ff967c7e7e514388a6fc1cbd51b375586ef774030361094f8b357d216"
     },
     {
       "file": "numpy/fft/_pocketfft_internal.cp312-win_amd64.pyd",
       "bytes": 110080,
-      "sha256": "f0a4df58721cb85ca35f5f3b8c47538c53d57bbcca4fc5c07a6c06ac4c5ef421",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "f0a4df58721cb85ca35f5f3b8c47538c53d57bbcca4fc5c07a6c06ac4c5ef421"
     },
     {
       "file": "numpy/linalg/lapack_lite.cp312-win_amd64.pyd",
       "bytes": 17920,
-      "sha256": "4a4db19ed6cb68529fe3ed22cbbdbd90b30b6dc1ebb2817d19bba65759c173c0",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "4a4db19ed6cb68529fe3ed22cbbdbd90b30b6dc1ebb2817d19bba65759c173c0"
     },
     {
       "file": "numpy/linalg/_umath_linalg.cp312-win_amd64.pyd",
       "bytes": 106496,
-      "sha256": "7652e82c6c53249b911dde9822b71a7ecbecbc699c79475862e779a51d7f1d0f",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "7652e82c6c53249b911dde9822b71a7ecbecbc699c79475862e779a51d7f1d0f"
     },
     {
       "file": "numpy/random/bit_generator.cp312-win_amd64.pyd",
       "bytes": 160768,
-      "sha256": "d335d1443e324a7a89582cc3e85bd850198eb3133c3dd38c7f55c6f609b0cfd8",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "d335d1443e324a7a89582cc3e85bd850198eb3133c3dd38c7f55c6f609b0cfd8"
     },
     {
       "file": "numpy/random/mtrand.cp312-win_amd64.pyd",
       "bytes": 582656,
-      "sha256": "2df309f3cc66116966484fcc466cef200aff8d2a4c8ea482d3530b5cccb89394",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "2df309f3cc66116966484fcc466cef200aff8d2a4c8ea482d3530b5cccb89394"
     },
     {
       "file": "numpy/random/_bounded_integers.cp312-win_amd64.pyd",
       "bytes": 231936,
-      "sha256": "0c19ec0b3129f12df51982aace8478f8274a5b0d6a2206be1d0e1ee0227c36a4",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "0c19ec0b3129f12df51982aace8478f8274a5b0d6a2206be1d0e1ee0227c36a4"
     },
     {
       "file": "numpy/random/_common.cp312-win_amd64.pyd",
       "bytes": 166400,
-      "sha256": "774bf3e20e2b1ca9797deb1daccb88a776a70c8555a501454d8d900a14585134",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "774bf3e20e2b1ca9797deb1daccb88a776a70c8555a501454d8d900a14585134"
     },
     {
       "file": "numpy/random/_generator.cp312-win_amd64.pyd",
       "bytes": 689152,
-      "sha256": "8979528423faffa32d4d6edddc0b3591b8fd465c7549263267c4b249e2f1d03b",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "8979528423faffa32d4d6edddc0b3591b8fd465c7549263267c4b249e2f1d03b"
     },
     {
       "file": "numpy/random/_mt19937.cp312-win_amd64.pyd",
       "bytes": 75776,
-      "sha256": "592238b7a62fb033724cfd745be6036700f584d6c4ee8baf83cb77788320aa49",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "592238b7a62fb033724cfd745be6036700f584d6c4ee8baf83cb77788320aa49"
     },
     {
       "file": "numpy/random/_pcg64.cp312-win_amd64.pyd",
       "bytes": 81920,
-      "sha256": "d9a1618ba4515eb6c41dcac7b99400d07e22cd56ad4f3ba94cb84dd231cf73a8",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "d9a1618ba4515eb6c41dcac7b99400d07e22cd56ad4f3ba94cb84dd231cf73a8"
     },
     {
       "file": "numpy/random/_philox.cp312-win_amd64.pyd",
       "bytes": 68608,
-      "sha256": "34363add569504b32533fa65b6933feb2ba2bcf0fe10be47c55fbdad2e223df8",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "34363add569504b32533fa65b6933feb2ba2bcf0fe10be47c55fbdad2e223df8"
     },
     {
       "file": "numpy/random/_sfc64.cp312-win_amd64.pyd",
       "bytes": 50688,
-      "sha256": "a241dfd9d3abaeff3028ba98bd8c573d4f8c7d2990119634b4a280fc3fd33de9",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "a241dfd9d3abaeff3028ba98bd8c573d4f8c7d2990119634b4a280fc3fd33de9"
     },
     {
       "file": "scipy/_cyutility.cp312-win_amd64.pyd",
       "bytes": 186368,
-      "sha256": "1990a1fbef9f2f75556db35b81d7180c903fc54db3f8fd08c14ac2cbc805c61b",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "1990a1fbef9f2f75556db35b81d7180c903fc54db3f8fd08c14ac2cbc805c61b"
     },
     {
       "file": "scipy/cluster/_hierarchy.cp312-win_amd64.pyd",
       "bytes": 245760,
-      "sha256": "d0f3ecaf076a4dd76f565fea77a48902c52c0017f801ebcca9559bd8bbb41f13",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "d0f3ecaf076a4dd76f565fea77a48902c52c0017f801ebcca9559bd8bbb41f13"
     },
     {
       "file": "scipy/cluster/_optimal_leaf_ordering.cp312-win_amd64.pyd",
       "bytes": 173056,
-      "sha256": "b04f540816f40caf0516c1487cae2eca92cec792145f96a4bd38bbce5d2f597f",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "b04f540816f40caf0516c1487cae2eca92cec792145f96a4bd38bbce5d2f597f"
     },
     {
       "file": "scipy/cluster/_vq.cp312-win_amd64.pyd",
       "bytes": 110080,
-      "sha256": "3dfe9c54f9b339d73c884907616d8dc63bed2bea49256c443fb81f0d49769013",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "3dfe9c54f9b339d73c884907616d8dc63bed2bea49256c443fb81f0d49769013"
     },
     {
       "file": "scipy/fftpack/convolve.cp312-win_amd64.pyd",
       "bytes": 124928,
-      "sha256": "b3c2881a63d1676579f4f398ec68d08f30cc108fcb595a1b91feb41a75d2994c",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "b3c2881a63d1676579f4f398ec68d08f30cc108fcb595a1b91feb41a75d2994c"
     },
     {
       "file": "scipy/integrate/_dop.cp312-win_amd64.pyd",
       "bytes": 95232,
-      "sha256": "cf340c300760f60abf1f734e30869a4caf5e975d5355d177a009bfefc55fb156",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "cf340c300760f60abf1f734e30869a4caf5e975d5355d177a009bfefc55fb156"
     },
     {
       "file": "scipy/integrate/_odepack.cp312-win_amd64.pyd",
       "bytes": 228352,
-      "sha256": "b87d527753a64e761ea8de0ea98da5f9fb37d4749905e07841c75e7f355c8c96",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "b87d527753a64e761ea8de0ea98da5f9fb37d4749905e07841c75e7f355c8c96"
     },
     {
       "file": "scipy/integrate/_quadpack.cp312-win_amd64.pyd",
       "bytes": 143360,
-      "sha256": "cb28ae63f88e3ecf211bf8f5f27323a9295f30aaa0ff1bfbeb7d62bf434329c2",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "cb28ae63f88e3ecf211bf8f5f27323a9295f30aaa0ff1bfbeb7d62bf434329c2"
     },
     {
       "file": "scipy/integrate/_test_multivariate.cp312-win_amd64.pyd",
       "bytes": 17920,
-      "sha256": "9f13805d7933823250c360616d9af4c3bd7732088373dcff43ae5e29009b4749",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "9f13805d7933823250c360616d9af4c3bd7732088373dcff43ae5e29009b4749"
     },
     {
       "file": "scipy/integrate/_vode.cp312-win_amd64.pyd",
       "bytes": 278528,
-      "sha256": "9455a7ae1a8e85a8008a4fcd6e4460b583bea0cd0860253f6309e2806a020814",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "9455a7ae1a8e85a8008a4fcd6e4460b583bea0cd0860253f6309e2806a020814"
     },
     {
       "file": "scipy/interpolate/_dfitpack.cp312-win_amd64.pyd",
       "bytes": 675328,
-      "sha256": "351b13a45d45b01736350911ba9aa10ba4ea236a4b33875da70f01df89347288",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "351b13a45d45b01736350911ba9aa10ba4ea236a4b33875da70f01df89347288"
     },
     {
       "file": "scipy/interpolate/_dierckx.cp312-win_amd64.pyd",
       "bytes": 1016832,
-      "sha256": "36e8ab8e5aa64f735c68e380e3d17b3f8fef9c7d871a658d3915f0b7cbe16a0a",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "36e8ab8e5aa64f735c68e380e3d17b3f8fef9c7d871a658d3915f0b7cbe16a0a"
     },
     {
       "file": "scipy/interpolate/_fitpack.cp312-win_amd64.pyd",
       "bytes": 420864,
-      "sha256": "e017d57aa95ac206befa452fbf1b8e35aff05f6a22205fcec96804e8911f1c95",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "e017d57aa95ac206befa452fbf1b8e35aff05f6a22205fcec96804e8911f1c95"
     },
     {
       "file": "scipy/interpolate/_interpnd.cp312-win_amd64.pyd",
       "bytes": 228864,
-      "sha256": "d7a4ad815dfa5f533354b825783a26b320d2f167f1e142f36d15aa36137ba0bb",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "d7a4ad815dfa5f533354b825783a26b320d2f167f1e142f36d15aa36137ba0bb"
     },
     {
       "file": "scipy/interpolate/_ppoly.cp312-win_amd64.pyd",
       "bytes": 231424,
-      "sha256": "cdac95584e8dd9056ba64b38a13f50feacdacfb5c0a0a38c2e90175646092391",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "cdac95584e8dd9056ba64b38a13f50feacdacfb5c0a0a38c2e90175646092391"
     },
     {
       "file": "scipy/interpolate/_rbfinterp_pythran.cp312-win_amd64.pyd",
       "bytes": 1165312,
-      "sha256": "bfefea84ca4f6adf1a5de7d113360d30e643e0a2b94a99beaa8ed0bf6e3536c5",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "bfefea84ca4f6adf1a5de7d113360d30e643e0a2b94a99beaa8ed0bf6e3536c5"
     },
     {
       "file": "scipy/interpolate/_rgi_cython.cp312-win_amd64.pyd",
       "bytes": 122880,
-      "sha256": "c3e7e6243a3b7a64aedc4291852bad2e3fc64caa51e611ce866ce68e2991cb2f",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "c3e7e6243a3b7a64aedc4291852bad2e3fc64caa51e611ce866ce68e2991cb2f"
     },
     {
       "file": "scipy/linalg/cython_blas.cp312-win_amd64.pyd",
       "bytes": 119296,
-      "sha256": "7cb7d97da1cdcdbce9af4adb83638ee5185a857918c5e0b7e1696e527c3c0d81",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "7cb7d97da1cdcdbce9af4adb83638ee5185a857918c5e0b7e1696e527c3c0d81"
     },
     {
       "file": "scipy/linalg/cython_lapack.cp312-win_amd64.pyd",
       "bytes": 199168,
-      "sha256": "84cc424fa42d3a2c1abaaf20107930c327f585599ca47fa4540d4f9a9f5d53a4",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "84cc424fa42d3a2c1abaaf20107930c327f585599ca47fa4540d4f9a9f5d53a4"
     },
     {
       "file": "scipy/linalg/_batched_linalg.cp312-win_amd64.pyd",
       "bytes": 1057792,
-      "sha256": "c6df23588eba47a89edeed4474974d6ea816060d7749a2821a564a857d79a255",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "c6df23588eba47a89edeed4474974d6ea816060d7749a2821a564a857d79a255"
     },
     {
       "file": "scipy/linalg/_cythonized_array_utils.cp312-win_amd64.pyd",
       "bytes": 312832,
-      "sha256": "5a88e80730755f2577ac1826ccc567b4a524fe2b30052f99c87311f755c8f74e",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "5a88e80730755f2577ac1826ccc567b4a524fe2b30052f99c87311f755c8f74e"
     },
     {
       "file": "scipy/linalg/_decomp_interpolative.cp312-win_amd64.pyd",
       "bytes": 749056,
-      "sha256": "3600e8ec1622c6977125638fee701558609dc2d372dbc118a66becbee20c1db1",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "3600e8ec1622c6977125638fee701558609dc2d372dbc118a66becbee20c1db1"
     },
     {
       "file": "scipy/linalg/_decomp_lu_cython.cp312-win_amd64.pyd",
       "bytes": 120832,
-      "sha256": "3005373a7d19051fc61d451f140bf961e0caaf2f95ea0fb442908c57345bc1a0",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "3005373a7d19051fc61d451f140bf961e0caaf2f95ea0fb442908c57345bc1a0"
     },
     {
       "file": "scipy/linalg/_decomp_update.cp312-win_amd64.pyd",
       "bytes": 282624,
-      "sha256": "10b7ee93b4a18bef35182b844eb54457ceaad866ef9aa76d6fc1e4b9fc71b59d",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "10b7ee93b4a18bef35182b844eb54457ceaad866ef9aa76d6fc1e4b9fc71b59d"
     },
     {
       "file": "scipy/linalg/_fblas.cp312-win_amd64.pyd",
       "bytes": 737792,
-      "sha256": "3c6e3904bdfb3849a94db9e21863b5ce98516d7df41764afb8c27bde7c387e34",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "3c6e3904bdfb3849a94db9e21863b5ce98516d7df41764afb8c27bde7c387e34"
     },
     {
       "file": "scipy/linalg/_flapack.cp312-win_amd64.pyd",
       "bytes": 2273280,
-      "sha256": "0de0eb87b20daaeb54f26abf23d54a02215cbdc19c8245aadb3fa86e96804328",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "0de0eb87b20daaeb54f26abf23d54a02215cbdc19c8245aadb3fa86e96804328"
     },
     {
       "file": "scipy/linalg/_linalg_pythran.cp312-win_amd64.pyd",
       "bytes": 1061888,
-      "sha256": "cdf6e618ef2ad73ae92e843600a70d4c87078561ebb4375f26402958b8f714e1",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "cdf6e618ef2ad73ae92e843600a70d4c87078561ebb4375f26402958b8f714e1"
     },
     {
       "file": "scipy/linalg/_matfuncs_expm.cp312-win_amd64.pyd",
       "bytes": 229376,
-      "sha256": "65e2c40301818e461f81d35b4cd7a282c9502d9beb0599d4b6a330826a3309bd",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "65e2c40301818e461f81d35b4cd7a282c9502d9beb0599d4b6a330826a3309bd"
     },
     {
       "file": "scipy/linalg/_matfuncs_schur_sqrtm.cp312-win_amd64.pyd",
       "bytes": 211456,
-      "sha256": "a30c2700d337cee784c08d4ea7fff536ab3b881b3f535c0b0b68babde2e5c4f0",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "a30c2700d337cee784c08d4ea7fff536ab3b881b3f535c0b0b68babde2e5c4f0"
     },
     {
       "file": "scipy/linalg/_matfuncs_sqrtm_triu.cp312-win_amd64.pyd",
       "bytes": 103424,
-      "sha256": "539fd829f3f86f20f78838a3d2080c61292c6d0fbd748036751c04b8eb464478",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "539fd829f3f86f20f78838a3d2080c61292c6d0fbd748036751c04b8eb464478"
     },
     {
       "file": "scipy/linalg/_solve_toeplitz.cp312-win_amd64.pyd",
       "bytes": 122880,
-      "sha256": "ab6049fe4ae0ae781e6562d78fee3e9c1715cf3dd4686428fedbaaf99c4dab4f",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "ab6049fe4ae0ae781e6562d78fee3e9c1715cf3dd4686428fedbaaf99c4dab4f"
     },
     {
       "file": "scipy/ndimage/_ctest.cp312-win_amd64.pyd",
       "bytes": 16896,
-      "sha256": "5209e5ad9816fdf85c3cfba74d9cda7a51e27a3340484f2b5eaac47a61026833",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "5209e5ad9816fdf85c3cfba74d9cda7a51e27a3340484f2b5eaac47a61026833"
     },
     {
       "file": "scipy/ndimage/_cytest.cp312-win_amd64.pyd",
       "bytes": 71168,
-      "sha256": "3cea1263ad1fb73157c4a8b6ad2dc91786e2014159d87bb4f522397f6d2fb674",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "3cea1263ad1fb73157c4a8b6ad2dc91786e2014159d87bb4f522397f6d2fb674"
     },
     {
       "file": "scipy/ndimage/_nd_image.cp312-win_amd64.pyd",
       "bytes": 177664,
-      "sha256": "7a5bfe894a43b761f2042f2a35c1e799aaa964b60e33b1acc55bf8062636f191",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "7a5bfe894a43b761f2042f2a35c1e799aaa964b60e33b1acc55bf8062636f191"
     },
     {
       "file": "scipy/ndimage/_ni_label.cp312-win_amd64.pyd",
       "bytes": 205312,
-      "sha256": "b7dd341165d5ca1960ff96b1d6600822cdd50614f1328537d9311e219ae38d12",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "b7dd341165d5ca1960ff96b1d6600822cdd50614f1328537d9311e219ae38d12"
     },
     {
       "file": "scipy/ndimage/_rank_filter_1d.cp312-win_amd64.pyd",
       "bytes": 124416,
-      "sha256": "eb419d67ee29fa9615f01d288b43b8c0288da67043aa494b481c93b24d92b9d9",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "eb419d67ee29fa9615f01d288b43b8c0288da67043aa494b481c93b24d92b9d9"
     },
     {
       "file": "scipy/odr/__odrpack.cp312-win_amd64.pyd",
       "bytes": 689152,
-      "sha256": "9a83361de5e9a5c41958efba5fadd498ea797eba8bd7e958440fa5191ed01923",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "9a83361de5e9a5c41958efba5fadd498ea797eba8bd7e958440fa5191ed01923"
     },
     {
       "file": "scipy/optimize/_bglu_dense.cp312-win_amd64.pyd",
       "bytes": 173568,
-      "sha256": "3168df9f9c5a3ba0ef428c1c5ca13a6fced1a164b4d31cc4d71aca1baf58f50f",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "3168df9f9c5a3ba0ef428c1c5ca13a6fced1a164b4d31cc4d71aca1baf58f50f"
     },
     {
       "file": "scipy/optimize/_direct.cp312-win_amd64.pyd",
       "bytes": 70656,
-      "sha256": "6ea9f33c61aa3009eb557db94bc80c74b8b25947553a9950bf4ef1e4c4cc372e",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "6ea9f33c61aa3009eb557db94bc80c74b8b25947553a9950bf4ef1e4c4cc372e"
     },
     {
       "file": "scipy/optimize/_group_columns.cp312-win_amd64.pyd",
       "bytes": 1033216,
-      "sha256": "a3ee6c6801009f84b3aa8a980c83a0b1983d33fcf944144cda3cda691ecca43b",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "a3ee6c6801009f84b3aa8a980c83a0b1983d33fcf944144cda3cda691ecca43b"
     },
     {
       "file": "scipy/optimize/_lbfgsb.cp312-win_amd64.pyd",
       "bytes": 171520,
-      "sha256": "9d087101aadc47b4ac09332433edcc3be64de36a135acc7c728f079c3af9ebea",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "9d087101aadc47b4ac09332433edcc3be64de36a135acc7c728f079c3af9ebea"
     },
     {
       "file": "scipy/optimize/_lsap.cp312-win_amd64.pyd",
       "bytes": 177664,
-      "sha256": "f8ff7561bd1ea3027c809fc804c8b1316376e589d12aef3a1ebcb2a6d2c3d18d",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "f8ff7561bd1ea3027c809fc804c8b1316376e589d12aef3a1ebcb2a6d2c3d18d"
     },
     {
       "file": "scipy/optimize/_minpack.cp312-win_amd64.pyd",
       "bytes": 124928,
-      "sha256": "95b27adf583cb4c0d660141adba5d179b9df4a42474b2ff230d598673794fab4",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "95b27adf583cb4c0d660141adba5d179b9df4a42474b2ff230d598673794fab4"
     },
     {
       "file": "scipy/optimize/_moduleTNC.cp312-win_amd64.pyd",
       "bytes": 145920,
-      "sha256": "0e57c01521068abf89c818e42693ffb20612ff9319d6942d490c4fd6a48873e2",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "0e57c01521068abf89c818e42693ffb20612ff9319d6942d490c4fd6a48873e2"
     },
     {
       "file": "scipy/optimize/_pava_pybind.cp312-win_amd64.pyd",
       "bytes": 317952,
-      "sha256": "03cfa01ef5ed5829057e629497cc052e83eb9729a95a244e6fdbea66eb8dadd0",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "03cfa01ef5ed5829057e629497cc052e83eb9729a95a244e6fdbea66eb8dadd0"
     },
     {
       "file": "scipy/optimize/_slsqplib.cp312-win_amd64.pyd",
       "bytes": 172544,
-      "sha256": "0174a3e1849cb4312b17fa6d6fe55de618a02c94ec9f7d9b12199270c6faac75",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "0174a3e1849cb4312b17fa6d6fe55de618a02c94ec9f7d9b12199270c6faac75"
     },
     {
       "file": "scipy/optimize/_zeros.cp312-win_amd64.pyd",
       "bytes": 23040,
-      "sha256": "001213b4192a7427197626c5a7ac86d9e2c1fd7512be56a495cb192a66bbd4ed",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "001213b4192a7427197626c5a7ac86d9e2c1fd7512be56a495cb192a66bbd4ed"
     },
     {
       "file": "scipy/signal/_max_len_seq_inner.cp312-win_amd64.pyd",
       "bytes": 1006592,
-      "sha256": "687669b40d0da549bf08e6313ca075cab60a4467e0d7ad2cf72ce48d696e14a9",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "687669b40d0da549bf08e6313ca075cab60a4467e0d7ad2cf72ce48d696e14a9"
     },
     {
       "file": "scipy/signal/_peak_finding_utils.cp312-win_amd64.pyd",
       "bytes": 148480,
-      "sha256": "8a7a0344794f64468036af28767f601c9b42421c44dbea271e885bd752e92f97",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "8a7a0344794f64468036af28767f601c9b42421c44dbea271e885bd752e92f97"
     },
     {
       "file": "scipy/signal/_sigtools.cp312-win_amd64.pyd",
       "bytes": 126976,
-      "sha256": "6a28e8ab89bfbf6d1ad7a53aadad4f21407b82553f1cc46adc1994f51a84afcd",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "6a28e8ab89bfbf6d1ad7a53aadad4f21407b82553f1cc46adc1994f51a84afcd"
     },
     {
       "file": "scipy/signal/_sosfilt.cp312-win_amd64.pyd",
       "bytes": 106496,
-      "sha256": "e83c7db9488406099a1e6727de2f85eeb4aea67ab00e1a9a998513a5ad067c55",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "e83c7db9488406099a1e6727de2f85eeb4aea67ab00e1a9a998513a5ad067c55"
     },
     {
       "file": "scipy/signal/_spline.cp312-win_amd64.pyd",
       "bytes": 63488,
-      "sha256": "ed3e2c3b7dcaf74539455d432c0200d2f72698d6190671301c83e8e067d716e6",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "ed3e2c3b7dcaf74539455d432c0200d2f72698d6190671301c83e8e067d716e6"
     },
     {
       "file": "scipy/signal/_upfirdn_apply.cp312-win_amd64.pyd",
       "bytes": 199680,
-      "sha256": "6e630a041fe96ede5c855705b1d56f1a0aa4e35fbc717bca9d19c003fb3ade39",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "6e630a041fe96ede5c855705b1d56f1a0aa4e35fbc717bca9d19c003fb3ade39"
     },
     {
       "file": "scipy/sparse/_csparsetools.cp312-win_amd64.pyd",
       "bytes": 483840,
-      "sha256": "356e21967b04d9d9c97fdd602be3e6b94f208511d6b86fe2caf5464ea87bddd8",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "356e21967b04d9d9c97fdd602be3e6b94f208511d6b86fe2caf5464ea87bddd8"
     },
     {
       "file": "scipy/sparse/_sparsetools.cp312-win_amd64.pyd",
       "bytes": 4114944,
-      "sha256": "1d507be93679e2a8dc12c2b64a3a59a074c140460ab5ba8d40a7b5bdf36202fb",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "1d507be93679e2a8dc12c2b64a3a59a074c140460ab5ba8d40a7b5bdf36202fb"
     },
     {
       "file": "scipy/spatial/_ckdtree.cp312-win_amd64.pyd",
       "bytes": 1523200,
-      "sha256": "8894f6d534e6d514926a8272eb3a1088c02502a921e1cd890390865097ed4813",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "8894f6d534e6d514926a8272eb3a1088c02502a921e1cd890390865097ed4813"
     },
     {
       "file": "scipy/spatial/_distance_pybind.cp312-win_amd64.pyd",
       "bytes": 1382912,
-      "sha256": "d42a4996f4aa38699d8f148571a5360704801f3c0525fae4489f6d040a283b51",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "d42a4996f4aa38699d8f148571a5360704801f3c0525fae4489f6d040a283b51"
     },
     {
       "file": "scipy/spatial/_distance_wrap.cp312-win_amd64.pyd",
       "bytes": 107008,
-      "sha256": "4f46b39f8da613b30e99174ce294069e8f14f86df38e6bb2a0c0d5481d92dfbe",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "4f46b39f8da613b30e99174ce294069e8f14f86df38e6bb2a0c0d5481d92dfbe"
     },
     {
       "file": "scipy/spatial/_hausdorff.cp312-win_amd64.pyd",
       "bytes": 95744,
-      "sha256": "f2cd4ab4bdd825a5672a83df4f0b71fd80cf19954373c692a1e4916622bb14a9",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "f2cd4ab4bdd825a5672a83df4f0b71fd80cf19954373c692a1e4916622bb14a9"
     },
     {
       "file": "scipy/spatial/_qhull.cp312-win_amd64.pyd",
       "bytes": 846336,
-      "sha256": "28f1c8b17398c7066e30ea40c6b035e47ef65039c503eb635307d0337144e333",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "28f1c8b17398c7066e30ea40c6b035e47ef65039c503eb635307d0337144e333"
     },
     {
       "file": "scipy/spatial/_voronoi.cp312-win_amd64.pyd",
       "bytes": 85504,
-      "sha256": "5609f28d114b61cf12e1613da4c9072ed5ebbe400d65d38f17c79d8d9b835c1a",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "5609f28d114b61cf12e1613da4c9072ed5ebbe400d65d38f17c79d8d9b835c1a"
     },
     {
       "file": "scipy/special/cython_special.cp312-win_amd64.pyd",
       "bytes": 2196480,
-      "sha256": "7708b736984c88478ae991d5a71c649fd93b50f868f793b455b141cd1f2c0976",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "7708b736984c88478ae991d5a71c649fd93b50f868f793b455b141cd1f2c0976"
     },
     {
       "file": "scipy/special/_comb.cp312-win_amd64.pyd",
       "bytes": 46080,
-      "sha256": "82ada506eca2932774300cc9012eadf31875da5ba1ad8cd6e096621ac881d16a",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "82ada506eca2932774300cc9012eadf31875da5ba1ad8cd6e096621ac881d16a"
     },
     {
       "file": "scipy/special/_ellip_harm_2.cp312-win_amd64.pyd",
       "bytes": 139264,
-      "sha256": "d543824c8e47d5c0ab9097d590425845099b6cbae5e293630375d36ce8e286e0",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "d543824c8e47d5c0ab9097d590425845099b6cbae5e293630375d36ce8e286e0"
     },
     {
       "file": "scipy/special/_gufuncs.cp312-win_amd64.pyd",
       "bytes": 1515008,
-      "sha256": "2ba405a2ecd205798bedc38cde6245eceff1555939d3405c71a5c773a4a76caa",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "2ba405a2ecd205798bedc38cde6245eceff1555939d3405c71a5c773a4a76caa"
     },
     {
       "file": "scipy/special/_specfun.cp312-win_amd64.pyd",
       "bytes": 294400,
-      "sha256": "92f64cc95773ea0b05c570004ab74d85415e513949536f874a4d7b214ad40794",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "92f64cc95773ea0b05c570004ab74d85415e513949536f874a4d7b214ad40794"
     },
     {
       "file": "scipy/special/_special_ufuncs.cp312-win_amd64.pyd",
       "bytes": 2292224,
-      "sha256": "b8ab31cc0efdc8edb2b54051344d36eeddbf45b326a462f20666e33369e626a5",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "b8ab31cc0efdc8edb2b54051344d36eeddbf45b326a462f20666e33369e626a5"
     },
     {
       "file": "scipy/special/_test_internal.cp312-win_amd64.pyd",
       "bytes": 93696,
-      "sha256": "ba136bee38b3fca732cf2dc50649f3535a32670f13c6966cef2b3d8cf0ee59c9",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "ba136bee38b3fca732cf2dc50649f3535a32670f13c6966cef2b3d8cf0ee59c9"
     },
     {
       "file": "scipy/special/_ufuncs.cp312-win_amd64.pyd",
       "bytes": 1398784,
-      "sha256": "6eca0912fdbc826e8779e604c08f19cdffbb6d6b60f1b198ad31cdc99e58d339",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "6eca0912fdbc826e8779e604c08f19cdffbb6d6b60f1b198ad31cdc99e58d339"
     },
     {
       "file": "scipy/special/_ufuncs_cxx.cp312-win_amd64.pyd",
       "bytes": 2404864,
-      "sha256": "f89da2936994df638b028977e664f50aad6a48a999d18ae5f7bf519d5b5a2479",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "f89da2936994df638b028977e664f50aad6a48a999d18ae5f7bf519d5b5a2479"
     },
     {
       "file": "scipy/stats/_ansari_swilk_statistics.cp312-win_amd64.pyd",
       "bytes": 107008,
-      "sha256": "145cfe092095639cf1dbaa516f999dbb04bbd05a997858563bcce8b9c84bd37e",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "145cfe092095639cf1dbaa516f999dbb04bbd05a997858563bcce8b9c84bd37e"
     },
     {
       "file": "scipy/stats/_biasedurn.cp312-win_amd64.pyd",
       "bytes": 349696,
-      "sha256": "ebfdf10213b9d76455807f767d614b9d5dbbe1d2070cda62a69df6156959e934",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "ebfdf10213b9d76455807f767d614b9d5dbbe1d2070cda62a69df6156959e934"
     },
     {
       "file": "scipy/stats/_qmc_cy.cp312-win_amd64.pyd",
       "bytes": 278528,
-      "sha256": "1cf44a4b588797fd7d60bbdd51cdd9edde76bdc792d6179e6f69cb42490c308e",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "1cf44a4b588797fd7d60bbdd51cdd9edde76bdc792d6179e6f69cb42490c308e"
     },
     {
       "file": "scipy/stats/_qmvnt_cy.cp312-win_amd64.pyd",
       "bytes": 128000,
-      "sha256": "555de14acbde9924146c2b20e8ddabdbcb86e88591d7a3cc6a4b3b34310150c0",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "555de14acbde9924146c2b20e8ddabdbcb86e88591d7a3cc6a4b3b34310150c0"
     },
     {
       "file": "scipy/stats/_sobol.cp312-win_amd64.pyd",
       "bytes": 192512,
-      "sha256": "eb481e44503e8b1720102539a6d6b93fcc8bbc63e570851dc5a6a08ca3cf0287",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "eb481e44503e8b1720102539a6d6b93fcc8bbc63e570851dc5a6a08ca3cf0287"
     },
     {
       "file": "scipy/stats/_stats.cp312-win_amd64.pyd",
       "bytes": 484352,
-      "sha256": "d32a2011e311b1e269ec5277c14c1e6e8a88a973c9915f8cdea739e362074bd0",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "d32a2011e311b1e269ec5277c14c1e6e8a88a973c9915f8cdea739e362074bd0"
     },
     {
       "file": "scipy/stats/_stats_pythran.cp312-win_amd64.pyd",
       "bytes": 1107968,
-      "sha256": "60a27e71341812d0ffa05cbb3b35167b5429d9db90ac28063f1abdf76dfe028a",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "60a27e71341812d0ffa05cbb3b35167b5429d9db90ac28063f1abdf76dfe028a"
     },
     {
       "file": "scipy/_lib/messagestream.cp312-win_amd64.pyd",
       "bytes": 60416,
-      "sha256": "b4679bc7cc58c3dd7cb29689ae96ab295fff3412b1724baa7d2b7c6cf86f6c15",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "b4679bc7cc58c3dd7cb29689ae96ab295fff3412b1724baa7d2b7c6cf86f6c15"
     },
     {
       "file": "scipy/_lib/_ccallback_c.cp312-win_amd64.pyd",
       "bytes": 105472,
-      "sha256": "509d2e681897f4253263c063ad8a2aa0c2459b85ce3d86754b401d42ab26dc9a",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "509d2e681897f4253263c063ad8a2aa0c2459b85ce3d86754b401d42ab26dc9a"
     },
     {
       "file": "scipy/_lib/_fpumode.cp312-win_amd64.pyd",
       "bytes": 15872,
-      "sha256": "f00f7a238a65d40eb6939bac18ef8c407dd345cf26c7e83bb0a185ab03756814",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "f00f7a238a65d40eb6939bac18ef8c407dd345cf26c7e83bb0a185ab03756814"
     },
     {
       "file": "scipy/_lib/_test_ccallback.cp312-win_amd64.pyd",
       "bytes": 52224,
-      "sha256": "57431ca6b0015ec5534f8f8419216cd76f06191a271ddbf5e750d595eaf82ff2",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "57431ca6b0015ec5534f8f8419216cd76f06191a271ddbf5e750d595eaf82ff2"
     },
     {
       "file": "scipy/_lib/_test_deprecation_call.cp312-win_amd64.pyd",
       "bytes": 33792,
-      "sha256": "20f122cd55541a794a8c49308eb545a83a86a01d6a049a1ce9b66d2ba5e76286",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "20f122cd55541a794a8c49308eb545a83a86a01d6a049a1ce9b66d2ba5e76286"
     },
     {
       "file": "scipy/_lib/_test_deprecation_def.cp312-win_amd64.pyd",
       "bytes": 24576,
-      "sha256": "118091bc00e030f12f820975ec605dbec71ee7a101cd594c6aec658d6d733487",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "118091bc00e030f12f820975ec605dbec71ee7a101cd594c6aec658d6d733487"
     },
     {
       "file": "scipy/_lib/_uarray/_uarray.cp312-win_amd64.pyd",
       "bytes": 235008,
-      "sha256": "2fa9cd0fca336b35fca629e2ceedde50fdeed9d6d6ea3575a2bc4889222bc2d6",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "2fa9cd0fca336b35fca629e2ceedde50fdeed9d6d6ea3575a2bc4889222bc2d6"
     },
     {
       "file": "scipy/stats/_levy_stable/levyst.cp312-win_amd64.pyd",
       "bytes": 51200,
-      "sha256": "2de6bcecfee01e58636c7b081810c25aac7d8d05933111e90afdd8b2c4a07b4f",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "2de6bcecfee01e58636c7b081810c25aac7d8d05933111e90afdd8b2c4a07b4f"
     },
     {
       "file": "scipy/stats/_rcont/rcont.cp312-win_amd64.pyd",
       "bytes": 109568,
-      "sha256": "3f757ef287d8171155cd0557b13ad1e8c9b3f05cc3885b3aaceb9dbdc4a0ef15",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "3f757ef287d8171155cd0557b13ad1e8c9b3f05cc3885b3aaceb9dbdc4a0ef15"
     },
     {
       "file": "scipy/stats/_unuran/unuran_wrapper.cp312-win_amd64.pyd",
       "bytes": 1262080,
-      "sha256": "db29ada784cfe6f9539aa2bf93aa42f489cdad011b55591dfa503f42cf269ab8",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "db29ada784cfe6f9539aa2bf93aa42f489cdad011b55591dfa503f42cf269ab8"
     },
     {
       "file": "scipy/spatial/transform/_rigid_transform_cy.cp312-win_amd64.pyd",
       "bytes": 242688,
-      "sha256": "8de630dfc038d90734a7f027bceb530bcd4cd41f713ca1a06ecade83511041ad",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "8de630dfc038d90734a7f027bceb530bcd4cd41f713ca1a06ecade83511041ad"
     },
     {
       "file": "scipy/spatial/transform/_rotation_cy.cp312-win_amd64.pyd",
       "bytes": 557568,
-      "sha256": "4f68115dad53da6a532a54d81e334931f14455e523a3fe78caf1523f1fead01e",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "4f68115dad53da6a532a54d81e334931f14455e523a3fe78caf1523f1fead01e"
     },
     {
       "file": "scipy/sparse/csgraph/_flow.cp312-win_amd64.pyd",
       "bytes": 168960,
-      "sha256": "e512929f71f152921590077ea3f6cb2598fbe68a0d5cea0f328da738d1cac7ce",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "e512929f71f152921590077ea3f6cb2598fbe68a0d5cea0f328da738d1cac7ce"
     },
     {
       "file": "scipy/sparse/csgraph/_matching.cp312-win_amd64.pyd",
       "bytes": 175104,
-      "sha256": "d6c4fd5d1c7c31efaea8fdf5f72e887de90beb8f6b33b2f1afec79abe60436ef",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "d6c4fd5d1c7c31efaea8fdf5f72e887de90beb8f6b33b2f1afec79abe60436ef"
     },
     {
       "file": "scipy/sparse/csgraph/_min_spanning_tree.cp312-win_amd64.pyd",
       "bytes": 104448,
-      "sha256": "5e116133bf8cebf1de481cb2dcad3e1c4eaa1483b2c09e8ebf061cd30e988fe9",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "5e116133bf8cebf1de481cb2dcad3e1c4eaa1483b2c09e8ebf061cd30e988fe9"
     },
     {
       "file": "scipy/sparse/csgraph/_reordering.cp312-win_amd64.pyd",
       "bytes": 150528,
-      "sha256": "4e3333df00b90c717c37b1a3ebe14d8c99bce8826b2b8b3c98f53b2dd8240b79",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "4e3333df00b90c717c37b1a3ebe14d8c99bce8826b2b8b3c98f53b2dd8240b79"
     },
     {
       "file": "scipy/sparse/csgraph/_shortest_path.cp312-win_amd64.pyd",
       "bytes": 544256,
-      "sha256": "d2d2817f778f160420ab56ff9f727321795bb8dcce2276fe9af43dcd51cceda2",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "d2d2817f778f160420ab56ff9f727321795bb8dcce2276fe9af43dcd51cceda2"
     },
     {
       "file": "scipy/sparse/csgraph/_tools.cp312-win_amd64.pyd",
       "bytes": 155136,
-      "sha256": "bbe80ea9f718dc39cc4b18654371c6e924fafaf74c8cba588ba2723ce30ae9cd",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "bbe80ea9f718dc39cc4b18654371c6e924fafaf74c8cba588ba2723ce30ae9cd"
     },
     {
       "file": "scipy/sparse/csgraph/_traversal.cp312-win_amd64.pyd",
       "bytes": 344576,
-      "sha256": "1817674c68d6db6f67b7b0343cae803fb789b9410d13db53b3d6b64a1ced6715",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "1817674c68d6db6f67b7b0343cae803fb789b9410d13db53b3d6b64a1ced6715"
     },
     {
       "file": "scipy/sparse/linalg/_propack.cp312-win_amd64.pyd",
       "bytes": 288768,
-      "sha256": "7f8f73cc897677ef5825214f3a26d56f266c55efa45fdeceb0c733a1956db096",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "7f8f73cc897677ef5825214f3a26d56f266c55efa45fdeceb0c733a1956db096"
     },
     {
       "file": "scipy/sparse/linalg/_dsolve/_superlu.cp312-win_amd64.pyd",
       "bytes": 542208,
-      "sha256": "075d7ab28c49252f4ee5980ce9ae5ca804c6859649f650405813ff8649368e17",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "075d7ab28c49252f4ee5980ce9ae5ca804c6859649f650405813ff8649368e17"
     },
     {
       "file": "scipy/sparse/linalg/_eigen/arpack/_arpacklib.cp312-win_amd64.pyd",
       "bytes": 339968,
-      "sha256": "f532cab33e8ee89eef19e8a3e2bd31485487c4b172beaf52446f2bd2af3b110c",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "f532cab33e8ee89eef19e8a3e2bd31485487c4b172beaf52446f2bd2af3b110c"
     },
     {
       "file": "scipy/optimize/cython_optimize/_zeros.cp312-win_amd64.pyd",
       "bytes": 78848,
-      "sha256": "40cc706e7eec0865e3892e0b669cd99728c4b886f31c46f43085d5d21143753a",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "40cc706e7eec0865e3892e0b669cd99728c4b886f31c46f43085d5d21143753a"
     },
     {
       "file": "scipy/optimize/_highspy/_core.cp312-win_amd64.pyd",
       "bytes": 6443520,
-      "sha256": "99d5c437bca5ee91c8785721fe69b235b6b348cff9c27a7436501f4cc419baad",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "99d5c437bca5ee91c8785721fe69b235b6b348cff9c27a7436501f4cc419baad"
     },
     {
       "file": "scipy/optimize/_highspy/_highs_options.cp312-win_amd64.pyd",
       "bytes": 1278464,
-      "sha256": "98acb3f762673688fc402e893d3313d267733135f0e1c07ef508cbcdb4b2ad8f",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "98acb3f762673688fc402e893d3313d267733135f0e1c07ef508cbcdb4b2ad8f"
     },
     {
       "file": "scipy/optimize/_lsq/givens_elimination.cp312-win_amd64.pyd",
       "bytes": 70656,
-      "sha256": "22553b97f9e3c32f5fbbc1b8b9c5c4a4e0251f441366472844a824f01ae63021",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "22553b97f9e3c32f5fbbc1b8b9c5c4a4e0251f441366472844a824f01ae63021"
     },
     {
       "file": "scipy/optimize/_trlib/_trlib.cp312-win_amd64.pyd",
       "bytes": 206848,
-      "sha256": "ec5edbbfa97f3dc4a1f2e155bcf350ca6b25ad238e486ba72da2fef46ea42ff1",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "ec5edbbfa97f3dc4a1f2e155bcf350ca6b25ad238e486ba72da2fef46ea42ff1"
     },
     {
       "file": "scipy/io/matlab/_mio5_utils.cp312-win_amd64.pyd",
       "bytes": 178176,
-      "sha256": "ab0536b6d57881314284cc17a90479dbade9441434643b9fd649b6ddaedea637",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "ab0536b6d57881314284cc17a90479dbade9441434643b9fd649b6ddaedea637"
     },
     {
       "file": "scipy/io/matlab/_mio_utils.cp312-win_amd64.pyd",
       "bytes": 52736,
-      "sha256": "0ec808b641fafaab37322e9835d067ee51a59c739d8836b4106fdc4d8a40469c",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "0ec808b641fafaab37322e9835d067ee51a59c739d8836b4106fdc4d8a40469c"
     },
     {
       "file": "scipy/io/matlab/_streams.cp312-win_amd64.pyd",
       "bytes": 105984,
-      "sha256": "9ff3b4b033ae5440170646ade943197f45ed07c6224f943419388e3e54b6bc4a",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "9ff3b4b033ae5440170646ade943197f45ed07c6224f943419388e3e54b6bc4a"
     },
     {
       "file": "scipy/io/_fast_matrix_market/_fmm_core.cp312-win_amd64.pyd",
       "bytes": 2846208,
-      "sha256": "3918a898ade2c78d93ddd302f1447a4442e5bef7d63107b73655d4d64aa8e814",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "3918a898ade2c78d93ddd302f1447a4442e5bef7d63107b73655d4d64aa8e814"
     },
     {
       "file": "scipy/fft/_pocketfft/pypocketfft.cp312-win_amd64.pyd",
       "bytes": 1097216,
-      "sha256": "dd089b853dd1382b4ce73a138076efa8dda9391efa6090ee31fe607e2bdee313",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "dd089b853dd1382b4ce73a138076efa8dda9391efa6090ee31fe607e2bdee313"
     },
     {
       "file": "_soundfile_data/libsndfile_x64.dll",
       "bytes": 2364416,
-      "sha256": "22518c16f9d13eda5ae5adf999c4740d7d16cc2d6b178b36dd4ac2f759a38559",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "22518c16f9d13eda5ae5adf999c4740d7d16cc2d6b178b36dd4ac2f759a38559"
     },
     {
       "file": "soxr/soxr_ext.pyd",
       "bytes": 354304,
-      "sha256": "17850a2a3af1c7f317a13ab5065711e9e40ac3a92ca17fefb6e4bda58b7ad908",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "17850a2a3af1c7f317a13ab5065711e9e40ac3a92ca17fefb6e4bda58b7ad908"
     },
     {
       "file": "llvmlite/binding/llvmlite.dll",
       "bytes": 120369664,
-      "sha256": "a3500f4ffd7c4b47ec785c5964af7ed01fb95dd125c0d7efcdb680920821da6f",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "a3500f4ffd7c4b47ec785c5964af7ed01fb95dd125c0d7efcdb680920821da6f"
     },
     {
       "file": "numba/mviewbuf.cp312-win_amd64.pyd",
       "bytes": 14848,
-      "sha256": "8804d711ee3da92a037f6b7c0a270cc8acf3e40f7c88fef339af8269ec53be79",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "8804d711ee3da92a037f6b7c0a270cc8acf3e40f7c88fef339af8269ec53be79"
     },
     {
       "file": "numba/_devicearray.cp312-win_amd64.pyd",
       "bytes": 12288,
-      "sha256": "82177de965dce158cc2a51889546b55f9b6b863191b11596c55b795eb8ab2271",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "82177de965dce158cc2a51889546b55f9b6b863191b11596c55b795eb8ab2271"
     },
     {
       "file": "numba/_dispatcher.cp312-win_amd64.pyd",
       "bytes": 41472,
-      "sha256": "8ba51b83b2a8e84fec7f9b0a193634e6abcb3f20d3832ab9d4226848ddd2bcec",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "8ba51b83b2a8e84fec7f9b0a193634e6abcb3f20d3832ab9d4226848ddd2bcec"
     },
     {
       "file": "numba/_dynfunc.cp312-win_amd64.pyd",
       "bytes": 16896,
-      "sha256": "ae62e32560d17cc00b15dfefde43cbec02f679dc3e38b0e1e25dfe94f2174885",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "ae62e32560d17cc00b15dfefde43cbec02f679dc3e38b0e1e25dfe94f2174885"
     },
     {
       "file": "numba/_helperlib.cp312-win_amd64.pyd",
       "bytes": 203776,
-      "sha256": "2ac658f841a7ddcc64a64681fee58cb36344d0abaefbf2e73973c9faafe552b9",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "2ac658f841a7ddcc64a64681fee58cb36344d0abaefbf2e73973c9faafe552b9"
     },
     {
       "file": "numba/np/ufunc/omppool.cp312-win_amd64.pyd",
       "bytes": 36352,
-      "sha256": "6a623b7ecf5cfb362890a19c5e7b834c3e830030fcb82c0c71e382cb603ee27d",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "6a623b7ecf5cfb362890a19c5e7b834c3e830030fcb82c0c71e382cb603ee27d"
     },
     {
       "file": "numba/np/ufunc/tbbpool.cp312-win_amd64.pyd",
       "bytes": 46592,
-      "sha256": "307a170a3b9f392d56f62f8183d342aa0994eaa63d8a19714757cb815d1c055f",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "307a170a3b9f392d56f62f8183d342aa0994eaa63d8a19714757cb815d1c055f"
     },
     {
       "file": "numba/np/ufunc/workqueue.cp312-win_amd64.pyd",
       "bytes": 38400,
-      "sha256": "3359c82c12b6912086887423a44777b9b4ff53288772014964cf456e6b9c6aae",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "3359c82c12b6912086887423a44777b9b4ff53288772014964cf456e6b9c6aae"
     },
     {
       "file": "numba/np/ufunc/_internal.cp312-win_amd64.pyd",
       "bytes": 23552,
-      "sha256": "c3ce2d31f1422132127c581acfca4217fa90af54e9fe5b5b919844ff67aa7510",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "c3ce2d31f1422132127c581acfca4217fa90af54e9fe5b5b919844ff67aa7510"
     },
     {
       "file": "numba/np/ufunc/_num_threads.cp312-win_amd64.pyd",
       "bytes": 10752,
-      "sha256": "cce0d5511a5149ce31253f3c3b68397ac9a8ea27262e66fc93dd0df0ae0f3c8d",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "cce0d5511a5149ce31253f3c3b68397ac9a8ea27262e66fc93dd0df0ae0f3c8d"
     },
     {
       "file": "numba/experimental/jitclass/_box.cp312-win_amd64.pyd",
       "bytes": 12800,
-      "sha256": "c0e6a6fe53e0fb5b8ea782f7a2202ad409d9d7fa469042703571f6a7b1404a59",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "c0e6a6fe53e0fb5b8ea782f7a2202ad409d9d7fa469042703571f6a7b1404a59"
     },
     {
       "file": "numba/cuda/cudadrv/_extras.cp312-win_amd64.pyd",
       "bytes": 10752,
-      "sha256": "74d5756b2fd1b9f26ec41da69b17d0b0551100bf009382ca182ca90d63dfd9e8",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "74d5756b2fd1b9f26ec41da69b17d0b0551100bf009382ca182ca90d63dfd9e8"
     },
     {
       "file": "numba/core/runtime/_nrt_python.cp312-win_amd64.pyd",
       "bytes": 25088,
-      "sha256": "5a044e0895626101b1724f751bedb27555fe698a848fb54a911dc180f2cb0b88",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "5a044e0895626101b1724f751bedb27555fe698a848fb54a911dc180f2cb0b88"
     },
     {
       "file": "numba/core/typeconv/_typeconv.cp312-win_amd64.pyd",
       "bytes": 20480,
-      "sha256": "c2e48c185e1c0e0a5be75ddbc142fb0bf7ad445be4d8467750236b4ec21ae965",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "c2e48c185e1c0e0a5be75ddbc142fb0bf7ad445be4d8467750236b4ec21ae965"
     },
     {
       "file": "tokenizers/tokenizers.pyd",
       "bytes": 7860736,
-      "sha256": "cef9accc734aed0f2095ba7c073a48f90cb2f6dfd50e02b22f9f7d75727aadd9",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "cef9accc734aed0f2095ba7c073a48f90cb2f6dfd50e02b22f9f7d75727aadd9"
     },
     {
       "file": "safetensors/_safetensors_rust.pyd",
       "bytes": 734720,
-      "sha256": "80a2b3f7658854ade855c5fb6192ee38fe2c7fbfd38d1c7c1f4d2c44f67125e4",
-      "licence_clearance": "Pending review of wheel licence/third-party notices; package metadata does not clear every bundled binary."
+      "sha256": "80a2b3f7658854ade855c5fb6192ee38fe2c7fbfd38d1c7c1f4d2c44f67125e4"
     }
   ],
   "models_and_sources": "Exact immutable revisions, SHA256 model assets and source patch in chatterbox-maintained-lock.json",
-  "licence_clearance": "incomplete; no acceptance invented"
+  "licence_clearance": "Current route directly acquires upstream wheels and preserves all bundled notices; no runtime binaries redistributed by tHead. See maintenance.md for exact obligations.",
+  "current_python_pin": "3.12.16; separate acquisition/venv evidence in maintenance-python-security.json. This inventory and the initial native previews describe the historical 3.12.10 candidate."
 }

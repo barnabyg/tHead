@@ -1,0 +1,3 @@
+Running: pwsh -NoProfile -File scripts/prepare-chatterbox-python.ps1 -State .runtime/python31216-probe
+Acquiring CPython 3.12.16, Astral build 20261026: 22014416 bytes.
+Verified CPython 3.12.16, Astral build 20261026; no host installation or PATH change.

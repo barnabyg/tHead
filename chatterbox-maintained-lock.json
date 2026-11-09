@@ -3,7 +3,7 @@
   "upstream_revision": "ab55923c27757c90cfcc407baa57dc25a7d25217",
   "perth_url": "https://github.com/resemble-ai/Perth.git",
   "perth_revision": "ff1c8ac55a976971245cdd53c18d6131ca00d993",
-  "python": "3.12.10",
+  "python": "3.12.16",
   "torch": "2.14.1+cu130",
   "cuda": "13.0",
   "model": {
@@ -91,5 +91,17 @@
         "sha256": "bb2eaebe5c794fa1de9762502c7bccdcae8a9d3b0433f8194ce804a2c964889d"
       }
     ]
+  },
+  "python_distribution": {
+    "provider": "astral-sh/python-build-standalone",
+    "build": "20261026",
+    "platform": "x86_64-pc-windows-msvc",
+    "archive": "cpython-3.12.16-20261026-windows.tar.gz",
+    "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261026/cpython-3.12.16%2B20261026-x86_64-pc-windows-msvc-install_only_stripped.tar.gz",
+    "bytes": 22014416,
+    "sha256": "1f2ab53880fc67ea323398c6388e05af28addc99a8e389209f08a51fdff4b149",
+    "metadata_source": "https://api.github.com/repos/astral-sh/python-build-standalone/releases/tags/20261026",
+    "release_source": "https://www.python.org/downloads/release/python-31216/",
+    "relative_executable": "python-runtime/python/python.exe"
   }
 }

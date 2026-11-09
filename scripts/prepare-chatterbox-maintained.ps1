@@ -82,7 +82,8 @@ Prepare-Source 'source' $lock.upstream_url $lock.upstream_revision
 Prepare-Source 'perth' $lock.perth_url $lock.perth_revision
 $python = Join-Path $State 'venv/Scripts/python.exe'
 if (-not (Test-Path -LiteralPath $python)) {
-    Invoke-Checked uv @('venv', '--python', $lock.python, (Join-Path $State 'venv'))
+    Invoke-Checked pwsh @('-NoProfile', '-File', (Join-Path $root 'scripts/prepare-chatterbox-python.ps1'), '-State', $State)
+    Invoke-Checked uv @('venv', '--no-python-downloads', '--python', (Join-Path $State $lock.python_distribution.relative_executable), (Join-Path $State 'venv'))
 }
 $version = & $python -I -c 'import platform; print(platform.python_version())'
 if ($LASTEXITCODE -ne 0 -or $version -ne $lock.python) { throw 'Candidate Python differs from its pin; choose a fresh --state directory.' }

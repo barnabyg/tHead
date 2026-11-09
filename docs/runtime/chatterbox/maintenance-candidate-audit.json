@@ -492,6 +492,6 @@
   ],
   "unresolved_advisory_records": 0,
   "source_projects": "Chatterbox0.1.7+thead.1 and Perth1.1.0 reviewed separately by immutable source revision; not silently treated as PyPI no-advisory results.",
-  "native_binary_licence_clearance": "Incomplete",
-  "release_decision": "no-go pending native, licence and accountable update-owner evidence"
+  "native_binary_licence_clearance": "Upstream wheel notices retained during direct acquisition to the user PC; tHead does not bundle or republish these binaries. Future bundle redistribution requires the listed licence obligations.",
+  "release_decision": "no-go pending final current-interpreter native release evidence"
 }

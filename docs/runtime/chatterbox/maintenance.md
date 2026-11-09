@@ -56,19 +56,22 @@ generic audioread backend discovery without suppressing that diagnostic.
 The original CPU/CUDA
 environments and working FlashHead source, wheels and assets are untouched.
 
-The repository maintainer must explicitly accept responsibility for this source
-profile before regular release. **No accountable maintenance/security acceptance
-has been invented.** Proposed operating process: review upstream/archive/fork
+The maintainers of `barnabyg/tHead` own this patch series and its dependency/model
+pins as part of maintaining the application. Review upstream/archive/fork
 changes and advisories monthly and before every release; triage newly published
 critical advisories immediately; create a separate updated state/lock; rerun
 strict imports, the concise two-reference preview, offline synthesis,
 FlashHead compatibility and release recovery sequence; then review notices and
 the enablement decision. Never mutate an installed working environment in place.
+Any future risk exception must name the exact advisory/version, technical
+mitigation, review condition and accountable acceptance. The current updated
+package profile has no advisory exceptions and needs no separate ownership
+permission step.
 
 ## Reproducible candidate
 
 `chatterbox-maintained-lock.json` pins upstream/Perth/model revisions, exact model
-sizes/SHA-256, Python 3.12.10, CUDA 13.0, Torch 2.14.1+cu130, and the local source
+sizes/SHA-256, Python 3.12.16, CUDA 13.0, Torch 2.14.1+cu130, and the local source
 patch plus its expected changed-file hashes. Preparation rejects any other source
 changes or mismatched assets and preserves them for diagnosis. The new
 `requirements-maintained.lock` contains hashes for every acquired dependency;
@@ -89,12 +92,40 @@ source projects reviewed separately, not silently counted as no-advisory PyPI
 packages. There are 83 installed distributions in total.
 [Candidate inventory](maintenance-candidate-inventory.json) records package
 licence declarations, 222 licence/notice files and 189 native binary hashes.
-These are inventory results, not final clearance of every bundled binary.
+The current delivery keeps those upstream notices in the acquired environment;
+it does not redistribute a runtime bundle.
 
-Python 3.12.10 is currently a declared installed-host prerequisite. Its version is
-checked, but an independently hash-pinned Python distribution acquisition and a
-current interpreter security review remain release work. The Python advisory
-feed also does not audit the NVIDIA driver, CUDA DLLs, model weights or Windows.
+The current interpreter is independently acquired from Astral's immutable
+`20261026` Python-build-standalone release. Preparation verifies the 22,014,416-byte
+Windows x86-64 archive's SHA-256 before extraction or execution, preserves the
+Python licence files, and builds the venv with that exact executable. There is
+no system installation, PATH mutation or silent use of an installed Python.
+`uv 0.11.7` predates this release, so acquisition uses the explicit pinned archive
+rather than its older embedded download manifest.
+
+[Interpreter security evidence](maintenance-python-security.json) records the
+actual CPython 3.12.16 / OpenSSL 3.5.9 / Expat 2.9.0 probe and successful fresh
+venv creation. The [Python security release](https://www.python.org/downloads/release/python-31216/)
+includes the compromised-CA, Expat, archive-filter, Windows mimetypes and temporary
+directory fixes missing from the old 3.12.10 installer. The current OpenSSL
+advisory page lists fixes through 3.5.9. The same `cp312` wheel ABI is retained;
+final native inference/release checks with this new interpreter are still
+required. The original two preview measurements below used 3.12.10 and are
+preserved as historical observations. Existing states with that interpreter fail
+the new exact-version check; choose a fresh state rather than upgrading it in place.
+
+Python package advisory queries do not audit the NVIDIA driver, all native DLLs,
+model weights or Windows. The maintenance cycle checks the relevant upstream
+release/security sources in addition to the package feed; zero package advisories
+alone is never the whole security assessment.
+
+[Native component review](maintenance-native-security.json) checks the current
+NVIDIA primary bulletin index against the actual candidate tree. The November
+2026 nvJPEG advisory and January 2026 Nsight advisories affect components absent
+from this inference profile; no vulnerable library is merely called unreachable
+because synthesis is offline. The installed cuDNN DLL version is 9.24.0.43, and
+the measured host driver is 621.14. Component/profile changes trigger another
+review; the review does not claim absence of unknown vulnerabilities.
 
 ## Licences and notices
 
@@ -102,7 +133,10 @@ Source/model/recording and binary obligations are distinct:
 
 - Chatterbox and Perth declare MIT. Retain their copyright/licence notices and
   record local modifications. Attributed Apache/BSD/MIT source derivatives need
-  their own notices; the top-level MIT declaration does not replace them.
+  their own notices; the top-level MIT declaration does not replace them. The
+  distributed patch's Chatterbox copyright/licence is retained at
+  `third_party/Chatterbox-LICENSE`, alongside `third_party/Perth-LICENSE` for the
+  pinned watermark source. Downloaded sources retain all their original notices.
 - The [exact Nano model metadata](maintenance-model-metadata.json) declares MIT
   and an ungated public model. Retain the model card/revision and applicable
   notices when distributing weights; do not infer that all dependencies are MIT.
@@ -110,22 +144,38 @@ Source/model/recording and binary obligations are distinct:
   [ATTRIBUTION.md](ATTRIBUTION.md), the source attribution and change description.
   Personal imports require the user's ownership/permission record and are never
   committed or included in diagnostic logs.
-- soxr is LGPL-2.1-or-later; SoundFile wheels include libsndfile and its licences.
-  Retain notices and the relevant LGPL source/relinking obligations for any
-  intended redistribution. The removed pykakasi package was GPL-3.0-or-later.
+- [soxr](https://python-soxr.readthedocs.io/en/latest/#credit-and-license) is
+  LGPL-2.1-or-later; [SoundFile](https://python-soundfile.readthedocs.io/en/latest/)
+  is BSD-3-Clause and its wheel includes LGPL libsndfile. Their wheel-provided
+  COPYING/licence files remain installed. Local use does not require publishing
+  the application's source or a new source offer. If tHead later distributes
+  these libraries' binaries, preserve their notices and LGPL terms, provide the
+  corresponding source or permitted source offer, and preserve the user's
+  ability to replace/relink the library as required by the chosen arrangement.
+  That future binary-bundling change is separate from the current direct-upstream
+  acquisition route. The removed pykakasi package was GPL-3.0-or-later.
 - Torch's BSD declaration does not license all bundled CUDA/cuDNN/numerical DLLs.
-  Review the exact wheel's third-party notices and applicable NVIDIA redistribution
-  terms before bundling. NumPy/SciPy wheels similarly contain separate numerical
+  The [CUDA](https://docs.nvidia.com/cuda/eula/index.html) and
+  [cuDNN](https://docs.nvidia.com/deeplearning/cudnn/backend/latest/reference/eula.html)
+  agreements permit installation/use subject to their terms and separately limit
+  redistribution to identified redistributable components and conditions. The
+  current preparation acquires the official wheel directly on the user's PC;
+  tHead does not republish the CUDA/cuDNN DLLs. Future bundling must check that
+  specific component list, retain the notices and comply with the distribution
+  conditions. NumPy/SciPy wheels similarly contain separate numerical
   library notices. `maintenance-candidate-inventory.json` identifies installed
-  binaries and their notice files; intended-distribution clearance is still open.
+  binaries and their notice files. Python's PSF and incorporated-library licences
+  are retained with the independently acquired interpreter.
 
-The application currently acquires these artifacts explicitly instead of shipping
-them in its repository. That does not waive their conditions or grant blanket
-redistribution clearance. No new legal/security exception was added.
+The repository distributes a reviewed patch, acquisition code and licensed
+reference excerpts, while acquisition preserves upstream runtime licence files.
+No concrete unmet licence obligation has been identified for this current route;
+this is not a blanket authorisation to redistribute a future runtime bundle.
+No new legal/security exception or separate licence approval step was added.
 
 ## Preparation, application launch and concise native preview
 
-Prerequisites: Windows 11, PowerShell 7, Git, uv 0.11.7, installed CPython 3.12.10,
+Prerequisites: Windows 11, PowerShell 7, Git, uv 0.11.7,
 RTX 3090 with a CUDA-13-compatible NVIDIA driver, 20 GiB free disk, 8 GiB free RAM
 and 8 GiB free VRAM. Allow explicit network access to official package/source/model
 hosts during preparation. This research command does not invoke an LLM or a paid
@@ -206,15 +256,26 @@ speech with a decoded moving frame, preserving offline inference and old voices.
 
 These are standalone fresh-process timings, not warmed browser onsets. First-use
 conditioning/JIT work affects the Peter observation. Both outputs are
-`generated_unreviewed`: no new human quality or physical-speaker verdict is
-claimed. [Raw attempts and two short synthetic WAVs](maintenance-attempts/)
+`generated_unreviewed` in their machine-generated reports. The user subsequently
+confirmed both short previews acceptable in the tHead chat on 9 November 2026;
+the historical accepted quality verdict remains valid. This is a human quality
+check, not a physical-speaker latency measurement or a new broad sample gate.
+[Raw attempts and two short synthetic WAVs](maintenance-attempts/)
 retain failures alongside successful results. The accepted historical quality
 verdict remains unchanged unless listening establishes a concrete regression.
 
+5. Hypothesis: the supported current 3.12 security patch can be acquired without
+   changing the model or wheel ABI. Change: pin Astral's immutable Python 3.12.16
+   Windows archive, verify size/hash before execution, and use that exact Python
+   for a fresh venv. Measurement: independent acquisition and strict native
+   version/OpenSSL/Expat probes pass; a corrupt cached archive is rejected and
+   preserved by the public preparation command. Conclusion: interpreter
+   acquisition is reproducible without a preinstalled Python 3.12; final native
+   speech/FlashHead release verification must use the new pin.
+
 Native synthesis results and every failed compatibility attempt are retained in
 the accompanying maintenance evidence. Regular release additionally requires
-accountable update/security acceptance, interpreter and native-binary/licence
-review, clean-checkout reproduction of the delivered commit, complete native
+clean-checkout reproduction of the delivered commit with the current interpreter, complete native
 Stop/reset/crash/reference-switch measurements alongside FlashHead, and one
 concise human listening/synchronisation confirmation. Until those pass, the
 decision remains **no-go**. Browser digital onset must be reported separately

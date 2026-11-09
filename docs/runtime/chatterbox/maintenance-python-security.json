@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "reviewed_on": "2026-11-09",
+  "selected_version": "3.12.16",
+  "distribution": {
+    "provider": "astral-sh/python-build-standalone",
+    "build": "20261026",
+    "platform": "x86_64-pc-windows-msvc",
+    "archive": "cpython-3.12.16-20261026-windows.tar.gz",
+    "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261026/cpython-3.12.16%2B20261026-x86_64-pc-windows-msvc-install_only_stripped.tar.gz",
+    "bytes": 22014416,
+    "sha256": "1f2ab53880fc67ea323398c6388e05af28addc99a8e389209f08a51fdff4b149",
+    "metadata_source": "https://api.github.com/repos/astral-sh/python-build-standalone/releases/tags/20261026",
+    "release_source": "https://www.python.org/downloads/release/python-31216/",
+    "relative_executable": "python-runtime/python/python.exe"
+  },
+  "native_probe": {
+    "python": "3.12.16",
+    "openssl": "OpenSSL 3.5.9 29 Sep 2026",
+    "expat": "expat_2.9.0",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "architecture": "AMD64"
+  },
+  "fresh_independent_archive_acquisition": "passed",
+  "fresh_venv_creation": "passed without system install or PATH mutation",
+  "same_abi": "CPython cp312 Windows x86_64; the existing hashed inference wheels remain ABI-compatible, with final native synthesis validation still required.",
+  "primary_security_sources": [
+    "https://www.python.org/downloads/release/python-31216/",
+    "https://docs.python.org/3.12/whatsnew/changelog.html",
+    "https://openssl-library.org/news/vulnerabilities/index.html",
+    "https://github.com/astral-sh/python-build-standalone/releases/tag/20261026"
+  ],
+  "review": [
+    {
+      "component": "CPython",
+      "baseline": "3.12.10",
+      "selected": "3.12.16",
+      "finding": "3.12.10 predates security releases 3.12.11-3.12.16. Python 3.12.16 is the current security release in this supported branch; Python.org no longer ships Windows installers for it.",
+      "remediation": "Acquire immutable Astral 20261026 build, verify size/SHA256 before extracting/executing, use its exact interpreter for the isolated venv.",
+      "fixed_security_content": [
+        "CVE-2026-115557: distrust compromised eMudhra intermediate CA keys",
+        "CVE-2026-77214/CVE-2026-102633: bundled Expat 2.9.0",
+        "CVE-2024-3220: Windows mimetypes knownfiles behavior",
+        "CVE-2026-114583: tar_filter rejects links replacing destination",
+        "CVE-2026-12345: TemporaryDirectory cleanup race",
+        "http.cookiejar negative-version domain matching; email header refolding"
+      ],
+      "exception": null
+    },
+    {
+      "component": "OpenSSL",
+      "selected": "OpenSSL 3.5.9 29 Sep 2026",
+      "finding": "Official current advisory page lists latest 3.5 fixes in 3.5.9 (29 September 2026); selected interpreter reports that version.",
+      "remediation": "Retain exact interpreter archive pin; refresh primary OpenSSL and CPython security sources before release/version updates.",
+      "exception": null
+    },
+    {
+      "component": "Expat",
+      "selected": "expat_2.9.0",
+      "finding": "The selected binary reports 2.9.0, matching CPython 3.12.16 security release notes.",
+      "remediation": "Retain exact interpreter archive pin; follow CPython security updates.",
+      "exception": null
+    }
+  ],
+  "exceptions_added": [],
+  "limits": [
+    "Not a proof of absence of unknown vulnerabilities.",
+    "Full native speech/FlashHead measurements with this updated interpreter remain required; original standalone previews used 3.12.10."
+  ],
+  "full_candidate_preparation": {
+    "python": "3.12.16",
+    "installed_distributions": 83,
+    "package_compatibility_check": "passed",
+    "source_acquisition": "fresh immutable Git fetches and hash-verified local patch",
+    "cache_scope": "Verified wheel/model caches copied into a fresh state; explicitly not the final independent-cache clean-checkout result.",
+    "native_synthesis": "Not run in this follow-up; root performs integrated GPU measurements."
+  }
+}
