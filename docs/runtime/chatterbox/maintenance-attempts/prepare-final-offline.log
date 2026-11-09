@@ -1,0 +1,20 @@
+Running: pwsh -NoProfile -File scripts/prepare-chatterbox-maintained.ps1 -State C:\docs\git\tHead\.runtime\issue57-worktree\.runtime\maintained
+Preflight: 730283847680 bytes free disk; 91087593472 bytes free RAM; maintained CUDA candidate configuration.
+Using Python 3.12.10 environment at: .runtime\maintained\venv
+Resolved 81 packages in 33ms
+Uninstalled 2 packages in 29ms
+ - chatterbox-tts==0.1.7+thead.1 (from file:///C:/docs/git/tHead/.runtime/issue57-worktree/.runtime/maintained/source)
+ - resemble-perth==1.1.0 (from file:///C:/docs/git/tHead/.runtime/issue57-worktree/.runtime/maintained/perth)
+Using Python 3.12.10 environment at: .runtime\maintained\venv
+Resolved 2 packages in 2ms
+   Building chatterbox-tts @ file:///C:/docs/git/tHead/.runtime/issue57-worktree/.runtime/maintained/source
+   Building resemble-perth @ file:///C:/docs/git/tHead/.runtime/issue57-worktree/.runtime/maintained/perth
+      Built chatterbox-tts @ file:///C:/docs/git/tHead/.runtime/issue57-worktree/.runtime/maintained/source
+      Built resemble-perth @ file:///C:/docs/git/tHead/.runtime/issue57-worktree/.runtime/maintained/perth
+Prepared 2 packages in 1.04s
+Installed 2 packages in 101ms
+ + chatterbox-tts==0.1.7+thead.1 (from file:///C:/docs/git/tHead/.runtime/issue57-worktree/.runtime/maintained/source)
+ + resemble-perth==1.1.0 (from file:///C:/docs/git/tHead/.runtime/issue57-worktree/.runtime/maintained/perth)
+Using Python 3.12.10 environment at: .runtime\maintained\venv
+Checked 83 packages in 5ms
+All installed packages are compatible

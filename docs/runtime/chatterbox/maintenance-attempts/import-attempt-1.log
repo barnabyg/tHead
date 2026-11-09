@@ -1,0 +1,2 @@
+Running: C:\docs\git\tHead\.runtime\issue57-worktree\.runtime\maintained\venv\Scripts\python.exe -I -W error -c import torch, torchaudio; from chatterbox.tts_turbo import ChatterboxTurboTTS; print(torch.__version__,torch.version.cuda,torchaudio.__version__,torch.cuda.is_available())
+2.14.1+cu130 13.0 2.11.1+cpu True

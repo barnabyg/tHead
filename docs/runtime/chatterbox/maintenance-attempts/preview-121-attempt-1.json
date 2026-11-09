@@ -1,0 +1,32 @@
+{
+  "status": "generated_unreviewed",
+  "source_revision": "ab55923c27757c90cfcc407baa57dc25a7d25217",
+  "model_revision": "71ccd1d0081b430592cea481f4307e764e07bc64",
+  "reference_sha256": "a48388b2eee73d6d2db5e15b88a4761a40af7518714862b65f40ff73bd18d8e6",
+  "text": "Hello. This is a local voice preview. The final words should sound clear and complete.",
+  "seed": 17,
+  "device": "cuda",
+  "threads": 8,
+  "network_policy": "offline environment flags and Python socket audit hook",
+  "streaming": false,
+  "conditioning_diagnostics": [],
+  "gpu": "NVIDIA GeForce RTX 3090",
+  "vram_before_bytes": {
+    "free": 24465375232,
+    "total": 25769279488
+  },
+  "import_seconds": 7.583380099999886,
+  "ready_seconds": 11.522392099999706,
+  "conditioning_seconds": 1.6876337999997304,
+  "synthesis_seconds": 1.124978700000156,
+  "first_pcm_seconds": 14.335010799999964,
+  "sample_rate": 24000,
+  "channels": 1,
+  "duration_seconds": 5.44,
+  "real_time_factor": 0.2067975551470875,
+  "output_sha256": "e3c5a564f3d731bfd2b13e73171021915784c607eab09e0765096d103e44e0ea",
+  "watermark": "upstream PerthImplicitWatermarker, unmodified",
+  "peak_allocated_bytes": 2300248576,
+  "peak_reserved_bytes": 2361393152,
+  "total_seconds": 14.344547000000148
+}

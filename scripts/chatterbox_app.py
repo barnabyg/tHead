@@ -162,7 +162,7 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=RUNTIME / "chatterbox-integration")
     parser.add_argument("--inputs", type=Path, default=RUNTIME / "demo-inputs")
     parser.add_argument("--state", type=Path)
-    parser.add_argument("--configuration", choices=("cpu", "cuda"), default="cpu")
+    parser.add_argument("--configuration", choices=("cpu", "cuda", "maintained"), default="cpu")
     parser.add_argument("--avatar", default="")
     parser.add_argument("--test-backend", action="store_true")
     parser.add_argument("--open-browser", action="store_true")
@@ -177,7 +177,11 @@ def main() -> None:
         args.output / "evaluation"
         if args.test_backend
         else RUNTIME
-        / ("chatterbox-eval-gpu" if args.configuration == "cuda" else "chatterbox-eval")
+        / {
+            "cpu": "chatterbox-eval",
+            "cuda": "chatterbox-eval-gpu",
+            "maintained": "chatterbox-maintained",
+        }[args.configuration]
     )
     app = ExperimentalConversation(
         inputs, args.output, state, args.test_backend, args.avatar, args.configuration

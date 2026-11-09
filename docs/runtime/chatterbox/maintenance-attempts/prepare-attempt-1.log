@@ -1,0 +1,12 @@
+Running: pwsh -NoProfile -File scripts/prepare-chatterbox-maintained.ps1 -State C:\docs\git\tHead\.runtime\issue57-worktree\.runtime\maintained
+Preflight: 737877458944 bytes free disk; 91828781056 bytes free RAM; maintained CUDA candidate configuration.
+Exception: C:\docs\git\tHead\.runtime\issue57-worktree\scripts\prepare-chatterbox-maintained.ps1:42
+Line |
+  42 |  … de -ne 0) { throw "$Program failed with exit code $($process.ExitCode …
+     |                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | git failed with exit code 128
+Traceback (most recent call last):
+  File "<stdin>", line 5, in <module>
+  File "C:\docs\git\tHead\.runtime\issue57-worktree\scripts\prepare.py", line 57, in run
+    raise subprocess.CalledProcessError(code, command)
+subprocess.CalledProcessError: Command '['pwsh', '-NoProfile', '-File', 'scripts/prepare-chatterbox-maintained.ps1', '-State', 'C:\\docs\\git\\tHead\\.runtime\\issue57-worktree\\.runtime\\maintained']' returned non-zero exit status 1.

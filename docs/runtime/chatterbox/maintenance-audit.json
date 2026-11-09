@@ -1,0 +1,2032 @@
+{
+  "schema_version": 1,
+  "reviewed_on": "2026-11-09",
+  "review_scope": "Actual installed CPU/CUDA evaluation distributions; current public PyPI/OSV advisory metadata. Base torch2.6.0 queried for both official local wheel variants; no audit exclusions.",
+  "package_versions_queried": 110,
+  "affected_packages": [
+    {
+      "package": "diffusers",
+      "version": "0.29.0",
+      "source": "https://pypi.org/pypi/diffusers/0.29.0/json",
+      "advisory_record_count": 5,
+      "advisories": [
+        {
+          "id": "GHSA-7wx4-6vff-v64p",
+          "aliases": [
+            "CVE-2026-45804",
+            "PYSEC-2026-2446"
+          ],
+          "feed_record_ids": [
+            "GHSA-7wx4-6vff-v64p",
+            "PYSEC-2026-2446"
+          ],
+          "title": "Diffusers: TOCTOU Trust Remote Code Bypass",
+          "affected_installed_version": "0.29.0",
+          "feed_fixed_versions": [
+            "0.38.0"
+          ],
+          "source_references": [
+            "https://github.com/huggingface/diffusers/security/advisories/GHSA-7wx4-6vff-v64p",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-45804",
+            "https://github.com/huggingface/diffusers/issues/13446",
+            "https://github.com/huggingface/diffusers/pull/13448",
+            "https://github.com/huggingface/diffusers/commit/a37f6f8394ac2a7ee8360c3abea811efe54512b1",
+            "https://github.com/huggingface/diffusers/releases/tag/v0.38.0",
+            "https://github.com/pypa/advisory-database/tree/main/vulns/diffusers/PYSEC-2026-2446.yaml"
+          ],
+          "applicability": "The candidate imports Diffusers attention/activation classes. No DiffusionPipeline entry point is used by Nano, but complete reachability has not been proved; upgrade instead of accepting the vulnerable pin.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 0.38.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-98h9-4798-4q5v",
+          "aliases": [
+            "CVE-2026-44513",
+            "PYSEC-2026-40"
+          ],
+          "feed_record_ids": [
+            "GHSA-98h9-4798-4q5v",
+            "PYSEC-2026-40"
+          ],
+          "title": "Diffusers has a `trust_remote_code` bypass via `custom_pipeline` and local custom components",
+          "affected_installed_version": "0.29.0",
+          "feed_fixed_versions": [
+            "0.38.0"
+          ],
+          "source_references": [
+            "https://github.com/huggingface/diffusers/security/advisories/GHSA-98h9-4798-4q5v",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-44513",
+            "https://github.com/huggingface/diffusers/issues/13446",
+            "https://github.com/huggingface/diffusers/pull/13448",
+            "https://github.com/huggingface/diffusers/commit/a37f6f8394ac2a7ee8360c3abea811efe54512b1",
+            "https://github.com/huggingface/diffusers/releases/tag/v0.38.0",
+            "https://github.com/pypa/advisory-database/tree/main/vulns/diffusers/PYSEC-2026-40.yaml"
+          ],
+          "applicability": "The candidate imports Diffusers attention/activation classes. No DiffusionPipeline entry point is used by Nano, but complete reachability has not been proved; upgrade instead of accepting the vulnerable pin.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 0.38.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-j7w6-vpvq-j3gm",
+          "aliases": [
+            "CVE-2026-44827",
+            "PYSEC-2026-41"
+          ],
+          "feed_record_ids": [
+            "PYSEC-2026-41"
+          ],
+          "title": "Diffusers has a `trust_remote_code` bypass via `custom_pipeline` and local custom components",
+          "affected_installed_version": "0.29.0",
+          "feed_fixed_versions": [
+            "0.38.0"
+          ],
+          "source_references": [
+            "https://github.com/huggingface/diffusers/security/advisories/GHSA-j7w6-vpvq-j3gm",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-44827",
+            "https://github.com/huggingface/diffusers/pull/13448",
+            "https://github.com/huggingface/diffusers/commit/a37f6f8394ac2a7ee8360c3abea811efe54512b1",
+            "https://github.com/huggingface/diffusers/releases/tag/v0.38.0",
+            "https://github.com/pypa/advisory-database/tree/main/vulns/diffusers/PYSEC-2026-41.yaml"
+          ],
+          "applicability": "The candidate imports Diffusers attention/activation classes. No DiffusionPipeline entry point is used by Nano, but complete reachability has not been proved; upgrade instead of accepting the vulnerable pin.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 0.38.0.",
+          "exception_acceptance": null
+        }
+      ]
+    },
+    {
+      "package": "gradio",
+      "version": "6.8.0",
+      "source": "https://pypi.org/pypi/gradio/6.8.0/json",
+      "advisory_record_count": 6,
+      "advisories": [
+        {
+          "id": "GHSA-6655-8ph2-63j3",
+          "aliases": [
+            "CVE-2026-10783",
+            "PYSEC-2026-211"
+          ],
+          "feed_record_ids": [
+            "PYSEC-2026-211",
+            "GHSA-6655-8ph2-63j3"
+          ],
+          "title": "Gradio: Audio cache key ignores metadata when saving numpy audio outputs",
+          "affected_installed_version": "6.8.0",
+          "feed_fixed_versions": [
+            "6.15.1"
+          ],
+          "source_references": [
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-10783",
+            "https://github.com/gradio-app/gradio/issues/13395",
+            "https://github.com/gradio-app/gradio/pull/13394",
+            "https://github.com/gradio-app/gradio/commit/1c609af6918b20d0b4347b9f41b04569d6adca24",
+            "https://github.com/pypa/advisory-database/tree/main/vulns/gradio/PYSEC-2026-211.yaml",
+            "https://vuldb.com/cve/CVE-2026-10783",
+            "https://vuldb.com/submit/831451",
+            "https://vuldb.com/vuln/368140",
+            "https://vuldb.com/vuln/368140/cti"
+          ],
+          "applicability": "No Gradio server is started by the existing adapter, but the vulnerable installed package is not accepted. Remove the serving/UI dependency from the new English-only profile.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Remove from the new profile; do not merely exclude from audit.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-7hp7-4p35-3cx2",
+          "aliases": [
+            "CVE-2026-48545",
+            "PYSEC-2026-2178"
+          ],
+          "feed_record_ids": [
+            "GHSA-7hp7-4p35-3cx2",
+            "PYSEC-2026-2178"
+          ],
+          "title": "Gradio contains a cookie injection vulnerability",
+          "affected_installed_version": "6.8.0",
+          "feed_fixed_versions": [
+            "6.15.0"
+          ],
+          "source_references": [
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-48545",
+            "https://github.com/gradio-app/gradio/issues/13369",
+            "https://github.com/gradio-app/gradio/pull/13384",
+            "https://github.com/gradio-app/gradio/commit/feb7237d01f359d2ad4ee42d00344e61692b3b39",
+            "https://github.com/gradio-app/gradio/releases/tag/gradio@6.15.0",
+            "https://www.vulncheck.com/advisories/gradio-cookie-injection-via-shared-pro"
+          ],
+          "applicability": "No Gradio server is started by the existing adapter, but the vulnerable installed package is not accepted. Remove the serving/UI dependency from the new English-only profile.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Remove from the new profile; do not merely exclude from audit.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-j36p-7w88-g82j",
+          "aliases": [
+            "CVE-2026-49119",
+            "PYSEC-2026-2179"
+          ],
+          "feed_record_ids": [
+            "PYSEC-2026-2179",
+            "GHSA-j36p-7w88-g82j"
+          ],
+          "title": " Gradio FileExplorer preprocess path traversal allows files outside root_dir to reach callbacks",
+          "affected_installed_version": "6.8.0",
+          "feed_fixed_versions": [
+            "6.16.0"
+          ],
+          "source_references": [
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-49119",
+            "https://github.com/gradio-app/gradio/pull/13437",
+            "https://github.com/gradio-app/gradio/commit/97d541f3d5fd05b2587a69ecc94b68fe5d2d7004",
+            "https://github.com/gradio-app/gradio/releases/tag/gradio%406.16.0",
+            "https://github.com/pypa/advisory-database/tree/main/vulns/gradio/PYSEC-2026-2179.yaml",
+            "https://www.vulncheck.com/advisories/gradio-path-traversal-via-fileexplorer-preprocess"
+          ],
+          "applicability": "No Gradio server is started by the existing adapter, but the vulnerable installed package is not accepted. Remove the serving/UI dependency from the new English-only profile.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Remove from the new profile; do not merely exclude from audit.",
+          "exception_acceptance": null
+        }
+      ]
+    },
+    {
+      "package": "pillow",
+      "version": "12.3.0",
+      "source": "https://pypi.org/pypi/pillow/12.3.0/json",
+      "advisory_record_count": 55,
+      "advisories": [
+        {
+          "id": "GHSA-p4wg-p73j-c528",
+          "aliases": [
+            "CVE-2026-112895"
+          ],
+          "feed_record_ids": [
+            "GHSA-p4wg-p73j-c528"
+          ],
+          "title": "Pillow: Unbounded recursion parsing a PDF page tree or trailer chain (incomplete fix for CVE-2026-42310)",
+          "affected_installed_version": "12.3.0",
+          "feed_fixed_versions": [
+            "13.0.0"
+          ],
+          "source_references": [
+            "https://github.com/python-pillow/Pillow/security/advisories/GHSA-p4wg-p73j-c528",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-112895",
+            "https://github.com/python-pillow/Pillow/commit/e2ae7eacad6de68c37eb28b633a97bebacf2c5bf",
+            "https://github.com/python-pillow/Pillow/releases/tag/13.0.0"
+          ],
+          "applicability": "Chatterbox speech does not decode portraits in this environment. Imports can still make image code available; upgrade instead of claiming every affected path is unreachable.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 13.0.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-65qm-jvmh-6pqg",
+          "aliases": [
+            "CVE-2026-112400"
+          ],
+          "feed_record_ids": [
+            "GHSA-65qm-jvmh-6pqg"
+          ],
+          "title": "Pillow: GIF seek keeps rejected size after DecompressionBombError, allowing DoS",
+          "affected_installed_version": "12.3.0",
+          "feed_fixed_versions": [
+            "13.0.0"
+          ],
+          "source_references": [
+            "https://github.com/python-pillow/Pillow/security/advisories/GHSA-65qm-jvmh-6pqg",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-112400",
+            "https://github.com/python-pillow/Pillow/commit/6faed707cfb760a4cbd726ddc8406f576cf35bf7",
+            "https://github.com/python-pillow/Pillow/releases/tag/13.0.0"
+          ],
+          "applicability": "Chatterbox speech does not decode portraits in this environment. Imports can still make image code available; upgrade instead of claiming every affected path is unreachable.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 13.0.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-58r4-6rv3-gfh8",
+          "aliases": [
+            "CVE-2026-112397",
+            "PYSEC-2026-4329"
+          ],
+          "feed_record_ids": [
+            "GHSA-58r4-6rv3-gfh8",
+            "PYSEC-2026-4329"
+          ],
+          "title": "Pillow: Out-of-bounds access in _imagingmorph on a zero-width image",
+          "affected_installed_version": "12.3.0",
+          "feed_fixed_versions": [
+            "13.0.0"
+          ],
+          "source_references": [
+            "https://github.com/python-pillow/Pillow/security/advisories/GHSA-58r4-6rv3-gfh8",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-112397",
+            "https://github.com/python-pillow/Pillow/commit/18f7c0dfee93063c51db6ed0ca8c4da2999dcb64",
+            "https://github.com/python-pillow/Pillow/releases/tag/13.0.0"
+          ],
+          "applicability": "Chatterbox speech does not decode portraits in this environment. Imports can still make image code available; upgrade instead of claiming every affected path is unreachable.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 13.0.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-pchr-8j38-3x4p",
+          "aliases": [
+            "CVE-2026-112896",
+            "PYSEC-2026-4334"
+          ],
+          "feed_record_ids": [
+            "GHSA-pchr-8j38-3x4p",
+            "PYSEC-2026-4334"
+          ],
+          "title": "Pillow: TIFF encoder ColorMap plane-size mismatch causes a heap out-of-bounds read",
+          "affected_installed_version": "12.3.0",
+          "feed_fixed_versions": [
+            "13.0.0"
+          ],
+          "source_references": [
+            "https://github.com/python-pillow/Pillow/security/advisories/GHSA-pchr-8j38-3x4p",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-112896",
+            "https://github.com/python-pillow/Pillow/commit/d03dc3c587a9b0bdc9e4304d70d59a635a87b742",
+            "https://github.com/python-pillow/Pillow/releases/tag/13.0.0"
+          ],
+          "applicability": "Chatterbox speech does not decode portraits in this environment. Imports can still make image code available; upgrade instead of claiming every affected path is unreachable.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 13.0.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-q45j-58j2-45rg",
+          "aliases": [
+            "CVE-2026-112897"
+          ],
+          "feed_record_ids": [
+            "GHSA-q45j-58j2-45rg"
+          ],
+          "title": "Pillow: TiffDecode returns uninitialized memory as pixels for short JPEG strips",
+          "affected_installed_version": "12.3.0",
+          "feed_fixed_versions": [
+            "13.0.0"
+          ],
+          "source_references": [
+            "https://github.com/python-pillow/Pillow/security/advisories/GHSA-q45j-58j2-45rg",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-112897",
+            "https://github.com/python-pillow/Pillow/commit/1d4773e6cea0c4a2814e6d4cdc099bbcf56da6ce",
+            "https://github.com/python-pillow/Pillow/releases/tag/13.0.0"
+          ],
+          "applicability": "Chatterbox speech does not decode portraits in this environment. Imports can still make image code available; upgrade instead of claiming every affected path is unreachable.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 13.0.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-462x-pgg6-55fp",
+          "aliases": [
+            "CVE-2026-112395"
+          ],
+          "feed_record_ids": [
+            "GHSA-462x-pgg6-55fp"
+          ],
+          "title": "Pillow tiled-TIFF decoder reads past tile buffer in copy4 (Unpack.c:1290)",
+          "affected_installed_version": "12.3.0",
+          "feed_fixed_versions": [
+            "13.0.0"
+          ],
+          "source_references": [
+            "https://github.com/python-pillow/Pillow/security/advisories/GHSA-462x-pgg6-55fp",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-112395",
+            "https://github.com/python-pillow/Pillow/commit/76869efdbbf2ad7dccd7536520fb61b7a00ab61e",
+            "https://github.com/python-pillow/Pillow/releases/tag/13.0.0"
+          ],
+          "applicability": "Chatterbox speech does not decode portraits in this environment. Imports can still make image code available; upgrade instead of claiming every affected path is unreachable.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 13.0.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-c6hw-5grf-ff96",
+          "aliases": [
+            "CVE-2026-112404"
+          ],
+          "feed_record_ids": [
+            "GHSA-c6hw-5grf-ff96"
+          ],
+          "title": "Pillow: OOB read in TiffDecode.c tile and RGBA paths leaks heap memory into pixels",
+          "affected_installed_version": "12.3.0",
+          "feed_fixed_versions": [
+            "13.0.0"
+          ],
+          "source_references": [
+            "https://github.com/python-pillow/Pillow/security/advisories/GHSA-c6hw-5grf-ff96",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-112404",
+            "https://github.com/python-pillow/Pillow/commit/1d4773e6cea0c4a2814e6d4cdc099bbcf56da6ce",
+            "https://github.com/python-pillow/Pillow/releases/tag/13.0.0"
+          ],
+          "applicability": "Chatterbox speech does not decode portraits in this environment. Imports can still make image code available; upgrade instead of claiming every affected path is unreachable.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 13.0.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-vx6w-vv9f-6gvg",
+          "aliases": [
+            "CVE-2026-112899"
+          ],
+          "feed_record_ids": [
+            "GHSA-vx6w-vv9f-6gvg"
+          ],
+          "title": "Pillow: EPS load(scale) lets Ghostscript render past the decompression bomb limit",
+          "affected_installed_version": "12.3.0",
+          "feed_fixed_versions": [
+            "13.0.0"
+          ],
+          "source_references": [
+            "https://github.com/python-pillow/Pillow/security/advisories/GHSA-vx6w-vv9f-6gvg",
+            "https://github.com/python-pillow/Pillow/commit/3e8cc105588d1dfe062fcada0b6058c1b5f14b65",
+            "https://github.com/python-pillow/Pillow/releases/tag/13.0.0"
+          ],
+          "applicability": "Chatterbox speech does not decode portraits in this environment. Imports can still make image code available; upgrade instead of claiming every affected path is unreachable.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 13.0.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-7mwm-ghpf-9vrm",
+          "aliases": [
+            "CVE-2026-112402",
+            "PYSEC-2026-4331"
+          ],
+          "feed_record_ids": [
+            "GHSA-7mwm-ghpf-9vrm",
+            "PYSEC-2026-4331"
+          ],
+          "title": "Pillow: Double free in ImagingScaleAffine on calloc failure via Image.transform",
+          "affected_installed_version": "12.3.0",
+          "feed_fixed_versions": [
+            "13.0.0"
+          ],
+          "source_references": [
+            "https://github.com/python-pillow/Pillow/security/advisories/GHSA-7mwm-ghpf-9vrm",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-112402",
+            "https://github.com/python-pillow/Pillow/commit/aafa6c75f7cdabb9f409a8aac7c780bea31d08d9",
+            "https://github.com/python-pillow/Pillow/releases/tag/13.0.0"
+          ],
+          "applicability": "Chatterbox speech does not decode portraits in this environment. Imports can still make image code available; upgrade instead of claiming every affected path is unreachable.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 13.0.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-w889-685w-c8fh",
+          "aliases": [
+            "CVE-2026-112900"
+          ],
+          "feed_record_ids": [
+            "GHSA-w889-685w-c8fh"
+          ],
+          "title": "Pillow: Argument Injection in Ghostscript call, potentially leading into RCE",
+          "affected_installed_version": "12.3.0",
+          "feed_fixed_versions": [
+            "13.0.0"
+          ],
+          "source_references": [
+            "https://github.com/python-pillow/Pillow/security/advisories/GHSA-w889-685w-c8fh",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-112900",
+            "https://github.com/python-pillow/Pillow/commit/a2c363141da31a265dd536c945677db4b64f3ec9",
+            "https://github.com/python-pillow/Pillow/releases/tag/13.0.0"
+          ],
+          "applicability": "Chatterbox speech does not decode portraits in this environment. Imports can still make image code available; upgrade instead of claiming every affected path is unreachable.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 13.0.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-j4m9-6w36-pw47",
+          "aliases": [
+            "CVE-2026-112893"
+          ],
+          "feed_record_ids": [
+            "GHSA-j4m9-6w36-pw47"
+          ],
+          "title": "Pillow: Invalid free in FreeType glyph rendering when a stroker is active",
+          "affected_installed_version": "12.3.0",
+          "feed_fixed_versions": [
+            "13.0.0"
+          ],
+          "source_references": [
+            "https://github.com/python-pillow/Pillow/security/advisories/GHSA-j4m9-6w36-pw47",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-112893",
+            "https://github.com/python-pillow/Pillow/commit/a7416de7f3a43128179d2cf68df3240ea8dafe13",
+            "https://github.com/python-pillow/Pillow/releases/tag/13.0.0"
+          ],
+          "applicability": "Chatterbox speech does not decode portraits in this environment. Imports can still make image code available; upgrade instead of claiming every affected path is unreachable.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 13.0.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-27h8-gf7j-v5hc",
+          "aliases": [
+            "CVE-2026-112392",
+            "PYSEC-2026-4326"
+          ],
+          "feed_record_ids": [
+            "GHSA-27h8-gf7j-v5hc",
+            "PYSEC-2026-4326"
+          ],
+          "title": "Pillow: NULL dereference in ImagingExpand via rank filters on zero-size images",
+          "affected_installed_version": "12.3.0",
+          "feed_fixed_versions": [
+            "13.0.0"
+          ],
+          "source_references": [
+            "https://github.com/python-pillow/Pillow/security/advisories/GHSA-27h8-gf7j-v5hc",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-112392",
+            "https://github.com/python-pillow/Pillow/commit/443e3130a8c11594fd0e296afad497e11e678961",
+            "https://github.com/python-pillow/Pillow/releases/tag/13.0.0"
+          ],
+          "applicability": "Chatterbox speech does not decode portraits in this environment. Imports can still make image code available; upgrade instead of claiming every affected path is unreachable.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 13.0.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-fc9g-5qg7-mf45",
+          "aliases": [
+            "CVE-2026-112891"
+          ],
+          "feed_record_ids": [
+            "GHSA-fc9g-5qg7-mf45"
+          ],
+          "title": "Pillow: Quadratic GIF comment copying during save",
+          "affected_installed_version": "12.3.0",
+          "feed_fixed_versions": [
+            "13.0.0"
+          ],
+          "source_references": [
+            "https://github.com/python-pillow/Pillow/security/advisories/GHSA-fc9g-5qg7-mf45",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-112891",
+            "https://github.com/python-pillow/Pillow/commit/68a3fe957d8a4d552e8c69d96066d749f0614c7e",
+            "https://github.com/python-pillow/Pillow/releases/tag/13.0.0"
+          ],
+          "applicability": "Chatterbox speech does not decode portraits in this environment. Imports can still make image code available; upgrade instead of claiming every affected path is unreachable.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 13.0.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-cp9v-662q-vvx9",
+          "aliases": [
+            "CVE-2026-112405",
+            "PYSEC-2026-4333"
+          ],
+          "feed_record_ids": [
+            "GHSA-cp9v-662q-vvx9",
+            "PYSEC-2026-4333"
+          ],
+          "title": "Pillow: NULL pointer dereference in Image.merge via an unvalidated band 0",
+          "affected_installed_version": "12.3.0",
+          "feed_fixed_versions": [
+            "13.0.0"
+          ],
+          "source_references": [
+            "https://github.com/python-pillow/Pillow/security/advisories/GHSA-cp9v-662q-vvx9",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-112405",
+            "https://github.com/python-pillow/Pillow/commit/b6ee66e8b2c2c0932bdf65f963268d9f2927ef86",
+            "https://github.com/python-pillow/Pillow/releases/tag/13.0.0"
+          ],
+          "applicability": "Chatterbox speech does not decode portraits in this environment. Imports can still make image code available; upgrade instead of claiming every affected path is unreachable.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 13.0.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-22hg-r758-rrw9",
+          "aliases": [
+            "CVE-2026-112390"
+          ],
+          "feed_record_ids": [
+            "GHSA-22hg-r758-rrw9"
+          ],
+          "title": "Pillow: Infinite loop in MIC n_frames when the embedded TIFF",
+          "affected_installed_version": "12.3.0",
+          "feed_fixed_versions": [
+            "13.0.0"
+          ],
+          "source_references": [
+            "https://github.com/python-pillow/Pillow/security/advisories/GHSA-22hg-r758-rrw9",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-112390",
+            "https://github.com/python-pillow/Pillow/commit/26cb3ed061173b817b9ee4b6f507cb0e1e293218",
+            "https://github.com/python-pillow/Pillow/releases/tag/13.0.0"
+          ],
+          "applicability": "Chatterbox speech does not decode portraits in this environment. Imports can still make image code available; upgrade instead of claiming every affected path is unreachable.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 13.0.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-74r2-7ff9-mjj2",
+          "aliases": [
+            "CVE-2026-112401"
+          ],
+          "feed_record_ids": [
+            "GHSA-74r2-7ff9-mjj2"
+          ],
+          "title": "Pillow: Quadratic GIF comment concatenation allows DoS in Image.open()",
+          "affected_installed_version": "12.3.0",
+          "feed_fixed_versions": [
+            "13.0.0"
+          ],
+          "source_references": [
+            "https://github.com/python-pillow/Pillow/security/advisories/GHSA-74r2-7ff9-mjj2",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-112401",
+            "https://github.com/python-pillow/Pillow/commit/68a3fe957d8a4d552e8c69d96066d749f0614c7e",
+            "https://github.com/python-pillow/Pillow/releases/tag/13.0.0"
+          ],
+          "applicability": "Chatterbox speech does not decode portraits in this environment. Imports can still make image code available; upgrade instead of claiming every affected path is unreachable.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 13.0.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-xgh8-jp6q-p5x8",
+          "aliases": [
+            "CVE-2026-112901",
+            "PYSEC-2026-4335"
+          ],
+          "feed_record_ids": [
+            "GHSA-xgh8-jp6q-p5x8",
+            "PYSEC-2026-4335"
+          ],
+          "title": "Pillow: ReDoS in XbmImagePlugin: 512-byte file stalls Image.open() for minutes",
+          "affected_installed_version": "12.3.0",
+          "feed_fixed_versions": [
+            "13.0.0"
+          ],
+          "source_references": [
+            "https://github.com/python-pillow/Pillow/security/advisories/GHSA-xgh8-jp6q-p5x8",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-112901",
+            "https://github.com/python-pillow/Pillow/commit/2852a3e3d568997ddec745fc800991f138878f4b",
+            "https://github.com/python-pillow/Pillow/releases/tag/13.0.0"
+          ],
+          "applicability": "Chatterbox speech does not decode portraits in this environment. Imports can still make image code available; upgrade instead of claiming every affected path is unreachable.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 13.0.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-254f-3936-288h",
+          "aliases": [
+            "CVE-2026-112391"
+          ],
+          "feed_record_ids": [
+            "GHSA-254f-3936-288h"
+          ],
+          "title": "Pillow: PdfParser can recurse without limit in get_value() and linearize_page_tree()",
+          "affected_installed_version": "12.3.0",
+          "feed_fixed_versions": [
+            "13.0.0"
+          ],
+          "source_references": [
+            "https://github.com/python-pillow/Pillow/security/advisories/GHSA-254f-3936-288h",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-112391",
+            "https://github.com/python-pillow/Pillow/commit/94cb11c44ff7345414da17ebfea1598a529ad9cd",
+            "https://github.com/python-pillow/Pillow/releases/tag/13.0.0"
+          ],
+          "applicability": "Chatterbox speech does not decode portraits in this environment. Imports can still make image code available; upgrade instead of claiming every affected path is unreachable.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 13.0.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-jg86-v3jv-hrpm",
+          "aliases": [
+            "CVE-2026-112894"
+          ],
+          "feed_record_ids": [
+            "GHSA-jg86-v3jv-hrpm"
+          ],
+          "title": "Pillow: Quadratic-time DoS in PDF save_all (PdfParser.next_object_id)",
+          "affected_installed_version": "12.3.0",
+          "feed_fixed_versions": [
+            "13.0.0"
+          ],
+          "source_references": [
+            "https://github.com/python-pillow/Pillow/security/advisories/GHSA-jg86-v3jv-hrpm",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-112894",
+            "https://github.com/python-pillow/Pillow/commit/f6a852555f1a1bdff7781abf25f1a3b8bd6ce6cb",
+            "https://github.com/python-pillow/Pillow/releases/tag/13.0.0"
+          ],
+          "applicability": "Chatterbox speech does not decode portraits in this environment. Imports can still make image code available; upgrade instead of claiming every affected path is unreachable.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 13.0.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-f2g6-542v-9j58",
+          "aliases": [
+            "CVE-2026-112406"
+          ],
+          "feed_record_ids": [
+            "GHSA-f2g6-542v-9j58"
+          ],
+          "title": "Pillow: Infinite loop in PdfParser.rewrite_pages on page tree Parent cycle",
+          "affected_installed_version": "12.3.0",
+          "feed_fixed_versions": [
+            "13.0.0"
+          ],
+          "source_references": [
+            "https://github.com/python-pillow/Pillow/security/advisories/GHSA-f2g6-542v-9j58",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-112406",
+            "https://github.com/python-pillow/Pillow/commit/b3ebf20c694f2f12537a629c30229a1d5a53f777",
+            "https://github.com/python-pillow/Pillow/releases/tag/13.0.0"
+          ],
+          "applicability": "Chatterbox speech does not decode portraits in this environment. Imports can still make image code available; upgrade instead of claiming every affected path is unreachable.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 13.0.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-5xm2-6676-qcp9",
+          "aliases": [
+            "CVE-2026-112399"
+          ],
+          "feed_record_ids": [
+            "GHSA-5xm2-6676-qcp9"
+          ],
+          "title": "Pillow: APNG background disposal allocates full canvas before decompression bomb check",
+          "affected_installed_version": "12.3.0",
+          "feed_fixed_versions": [
+            "13.0.0"
+          ],
+          "source_references": [
+            "https://github.com/python-pillow/Pillow/security/advisories/GHSA-5xm2-6676-qcp9",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-112399",
+            "https://github.com/python-pillow/Pillow/commit/f1acfc54c53502948d0d14121872061df931db48",
+            "https://github.com/python-pillow/Pillow/releases/tag/13.0.0"
+          ],
+          "applicability": "Chatterbox speech does not decode portraits in this environment. Imports can still make image code available; upgrade instead of claiming every affected path is unreachable.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 13.0.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-gg2r-wvfm-q9rx",
+          "aliases": [
+            "CVE-2026-112892"
+          ],
+          "feed_record_ids": [
+            "GHSA-gg2r-wvfm-q9rx"
+          ],
+          "title": "Pillow: MSP RLE decoder expands a tiny file into unbounded memory",
+          "affected_installed_version": "12.3.0",
+          "feed_fixed_versions": [
+            "13.0.0"
+          ],
+          "source_references": [
+            "https://github.com/python-pillow/Pillow/security/advisories/GHSA-gg2r-wvfm-q9rx",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-112892",
+            "https://github.com/python-pillow/Pillow/commit/5dcb630b9798efd91929cb873d677aeee6ed0bb3",
+            "https://github.com/python-pillow/Pillow/releases/tag/13.0.0"
+          ],
+          "applicability": "Chatterbox speech does not decode portraits in this environment. Imports can still make image code available; upgrade instead of claiming every affected path is unreachable.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 13.0.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-332p-7hrc-92wf",
+          "aliases": [
+            "CVE-2026-112393"
+          ],
+          "feed_record_ids": [
+            "GHSA-332p-7hrc-92wf"
+          ],
+          "title": "Pillow: Heap buffer overflow in _tiffWriteProc when saving TIFF to BytesIO",
+          "affected_installed_version": "12.3.0",
+          "feed_fixed_versions": [
+            "13.0.0"
+          ],
+          "source_references": [
+            "https://github.com/python-pillow/Pillow/security/advisories/GHSA-332p-7hrc-92wf",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-112393",
+            "https://github.com/python-pillow/Pillow/commit/11582e5ffbdceb973d5ee593f3105af5a9852b40",
+            "https://github.com/python-pillow/Pillow/releases/tag/13.0.0"
+          ],
+          "applicability": "Chatterbox speech does not decode portraits in this environment. Imports can still make image code available; upgrade instead of claiming every affected path is unreachable.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 13.0.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-4rr5-89j8-mwwm",
+          "aliases": [
+            "CVE-2026-112396",
+            "PYSEC-2026-4328"
+          ],
+          "feed_record_ids": [
+            "GHSA-4rr5-89j8-mwwm",
+            "PYSEC-2026-4328"
+          ],
+          "title": "Pillow: Heap use-after-free when encoding TIFF to an in-memory buffer",
+          "affected_installed_version": "12.3.0",
+          "feed_fixed_versions": [
+            "13.0.0"
+          ],
+          "source_references": [
+            "https://github.com/python-pillow/Pillow/security/advisories/GHSA-4rr5-89j8-mwwm",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-112396",
+            "https://github.com/python-pillow/Pillow/commit/dc95da20207827a062cfbf551ee9f6031465a8bb",
+            "https://github.com/python-pillow/Pillow/releases/tag/13.0.0"
+          ],
+          "applicability": "Chatterbox speech does not decode portraits in this environment. Imports can still make image code available; upgrade instead of claiming every affected path is unreachable.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 13.0.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-24rc-8hj2-v98c",
+          "aliases": [
+            "CVE-2026-96638"
+          ],
+          "feed_record_ids": [
+            "GHSA-24rc-8hj2-v98c"
+          ],
+          "title": "Pillow: BMP RLE decoder memory-amplification DoS via unbounded delta escape / absolute mode",
+          "affected_installed_version": "12.3.0",
+          "feed_fixed_versions": [
+            "13.0.0"
+          ],
+          "source_references": [
+            "https://github.com/python-pillow/Pillow/security/advisories/GHSA-24rc-8hj2-v98c",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-96638",
+            "https://github.com/python-pillow/Pillow/pull/10015",
+            "https://github.com/python-pillow/Pillow/commit/e7794835e323ff2691d9b3a974cade1a44301b9a",
+            "https://github.com/python-pillow/Pillow/releases/tag/13.0.0"
+          ],
+          "applicability": "Chatterbox speech does not decode portraits in this environment. Imports can still make image code available; upgrade instead of claiming every affected path is unreachable.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 13.0.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-4rm8-3hmm-39fg",
+          "aliases": [
+            "CVE-2026-96641",
+            "PYSEC-2026-4340"
+          ],
+          "feed_record_ids": [
+            "GHSA-4rm8-3hmm-39fg",
+            "PYSEC-2026-4340"
+          ],
+          "title": "Pillow: Reachable undefined behavior in native integer operations, potentially leading to denial of service or logic integrity compromise",
+          "affected_installed_version": "12.3.0",
+          "feed_fixed_versions": [
+            "13.0.0"
+          ],
+          "source_references": [
+            "https://github.com/python-pillow/Pillow/security/advisories/GHSA-4rm8-3hmm-39fg",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-96641",
+            "https://github.com/python-pillow/Pillow/pull/10010",
+            "https://github.com/python-pillow/Pillow/commit/80de4be9e38d3a6148dd4d8491eb80cd12b760a4",
+            "https://github.com/python-pillow/Pillow/releases/tag/13.0.0"
+          ],
+          "applicability": "Chatterbox speech does not decode portraits in this environment. Imports can still make image code available; upgrade instead of claiming every affected path is unreachable.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 13.0.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-mrfp-p49p-3hf2",
+          "aliases": [
+            "CVE-2026-96640"
+          ],
+          "feed_record_ids": [
+            "GHSA-mrfp-p49p-3hf2"
+          ],
+          "title": "Pillow PDF append accepts malformed shared page-tree DAG causing resource exhaustion",
+          "affected_installed_version": "12.3.0",
+          "feed_fixed_versions": [
+            "13.0.0"
+          ],
+          "source_references": [
+            "https://github.com/python-pillow/Pillow/security/advisories/GHSA-mrfp-p49p-3hf2",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-96640",
+            "https://github.com/python-pillow/Pillow/pull/10093",
+            "https://github.com/python-pillow/Pillow/commit/6f0e7ee1f9c2fe227906f8a4b926e6622b702bc7",
+            "https://github.com/python-pillow/Pillow/releases/tag/13.0.0"
+          ],
+          "applicability": "Chatterbox speech does not decode portraits in this environment. Imports can still make image code available; upgrade instead of claiming every affected path is unreachable.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 13.0.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-3j72-p6qg-6xp7",
+          "aliases": [
+            "CVE-2026-96642",
+            "PYSEC-2026-4341"
+          ],
+          "feed_record_ids": [
+            "GHSA-3j72-p6qg-6xp7",
+            "PYSEC-2026-4341"
+          ],
+          "title": "Pillow: TarIO negative size field causes infinite CPU-spin loop",
+          "affected_installed_version": "12.3.0",
+          "feed_fixed_versions": [
+            "13.0.0"
+          ],
+          "source_references": [
+            "https://github.com/python-pillow/Pillow/security/advisories/GHSA-3j72-p6qg-6xp7",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-96642",
+            "https://github.com/python-pillow/Pillow/pull/10012",
+            "https://github.com/python-pillow/Pillow/commit/19b695fdcc5eddc37374e2b1645fc4185edaf71d",
+            "https://github.com/python-pillow/Pillow/releases/tag/13.0.0"
+          ],
+          "applicability": "Chatterbox speech does not decode portraits in this environment. Imports can still make image code available; upgrade instead of claiming every affected path is unreachable.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 13.0.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-v9pv-5gc8-w2m6",
+          "aliases": [
+            "CVE-2026-96639",
+            "PYSEC-2026-4339"
+          ],
+          "feed_record_ids": [
+            "GHSA-v9pv-5gc8-w2m6",
+            "PYSEC-2026-4339"
+          ],
+          "title": "Pillow multi-frame loaders can reuse stale native image storage after mode transitions",
+          "affected_installed_version": "12.3.0",
+          "feed_fixed_versions": [
+            "13.0.0"
+          ],
+          "source_references": [
+            "https://github.com/python-pillow/Pillow/security/advisories/GHSA-v9pv-5gc8-w2m6",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-96639",
+            "https://github.com/python-pillow/Pillow/pull/10105",
+            "https://github.com/python-pillow/Pillow/commit/78d97d994579aef81aafe123773d525f40f2522a",
+            "https://github.com/python-pillow/Pillow/releases/tag/13.0.0"
+          ],
+          "applicability": "Chatterbox speech does not decode portraits in this environment. Imports can still make image code available; upgrade instead of claiming every affected path is unreachable.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 13.0.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-g4qv-2jxx-769h",
+          "aliases": [
+            "CVE-2026-96643",
+            "PYSEC-2026-4342"
+          ],
+          "feed_record_ids": [
+            "GHSA-g4qv-2jxx-769h",
+            "PYSEC-2026-4342"
+          ],
+          "title": "Pillow: PNG eXIf chunk makes EXIF parsing run in quadratic time",
+          "affected_installed_version": "12.3.0",
+          "feed_fixed_versions": [
+            "13.0.0"
+          ],
+          "source_references": [
+            "https://github.com/python-pillow/Pillow/security/advisories/GHSA-g4qv-2jxx-769h",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-96643",
+            "https://github.com/python-pillow/Pillow/pull/10073",
+            "https://github.com/python-pillow/Pillow/commit/806e38381c781f32bbd22f4cd026678acd40fd6c",
+            "https://github.com/python-pillow/Pillow/releases/tag/13.0.0"
+          ],
+          "applicability": "Chatterbox speech does not decode portraits in this environment. Imports can still make image code available; upgrade instead of claiming every affected path is unreachable.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 13.0.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-g842-9rc4-69pw",
+          "aliases": [
+            "CVE-2026-96637",
+            "PYSEC-2026-4338"
+          ],
+          "feed_record_ids": [
+            "GHSA-g842-9rc4-69pw",
+            "PYSEC-2026-4338"
+          ],
+          "title": "Pillow: Decompression bomb check bypass in SpiderImagePlugin.seek() leads to unbounded allocation DoS",
+          "affected_installed_version": "12.3.0",
+          "feed_fixed_versions": [
+            "13.0.0"
+          ],
+          "source_references": [
+            "https://github.com/python-pillow/Pillow/security/advisories/GHSA-g842-9rc4-69pw",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-96637",
+            "https://github.com/python-pillow/Pillow/pull/10076",
+            "https://github.com/python-pillow/Pillow/commit/7cb0e02389d8aac2a60896a490f572db0b07b841",
+            "https://github.com/python-pillow/Pillow/releases/tag/13.0.0"
+          ],
+          "applicability": "Chatterbox speech does not decode portraits in this environment. Imports can still make image code available; upgrade instead of claiming every affected path is unreachable.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 13.0.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-9v9v-9qvf-h2hj",
+          "aliases": [
+            "CVE-2026-96644",
+            "PYSEC-2026-4343"
+          ],
+          "feed_record_ids": [
+            "GHSA-9v9v-9qvf-h2hj",
+            "PYSEC-2026-4343"
+          ],
+          "title": "Pillow: Heap over-read in WMF/EMF rendering via 16-bit dimension truncation (Windows builds)",
+          "affected_installed_version": "12.3.0",
+          "feed_fixed_versions": [
+            "13.0.0"
+          ],
+          "source_references": [
+            "https://github.com/python-pillow/Pillow/security/advisories/GHSA-9v9v-9qvf-h2hj",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-96644",
+            "https://github.com/python-pillow/Pillow/pull/10120",
+            "https://github.com/python-pillow/Pillow/commit/4cf46bee338304c5c8968fd7f132ba0d40c428b7",
+            "https://github.com/python-pillow/Pillow/releases/tag/13.0.0"
+          ],
+          "applicability": "Chatterbox speech does not decode portraits in this environment. Imports can still make image code available; upgrade instead of claiming every affected path is unreachable.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 13.0.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-g7cr-3p24-7wf7",
+          "aliases": [
+            "CVE-2026-96778"
+          ],
+          "feed_record_ids": [
+            "GHSA-g7cr-3p24-7wf7"
+          ],
+          "title": "Pillow: Heap buffer overflow writing JPEG comment after ICC profile fills buffer",
+          "affected_installed_version": "12.3.0",
+          "feed_fixed_versions": [
+            "13.0.0"
+          ],
+          "source_references": [
+            "https://github.com/python-pillow/Pillow/security/advisories/GHSA-g7cr-3p24-7wf7",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-96778",
+            "https://github.com/python-pillow/Pillow/pull/10124",
+            "https://github.com/python-pillow/Pillow/commit/02561b8dc6117d5670d4b469fecdd02c70854f9b",
+            "https://github.com/python-pillow/Pillow/releases/tag/13.0.0"
+          ],
+          "applicability": "Chatterbox speech does not decode portraits in this environment. Imports can still make image code available; upgrade instead of claiming every affected path is unreachable.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 13.0.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-p8hx-v2p6-rp84",
+          "aliases": [
+            "CVE-2026-96636",
+            "PYSEC-2026-4337"
+          ],
+          "feed_record_ids": [
+            "GHSA-p8hx-v2p6-rp84",
+            "PYSEC-2026-4337"
+          ],
+          "title": "Pillow: Decompression-bomb protection bypass via multi-frame seek() in MPO and DCX (MpoImageFile.seek / DcxImageFile.seek)",
+          "affected_installed_version": "12.3.0",
+          "feed_fixed_versions": [
+            "13.0.0"
+          ],
+          "source_references": [
+            "https://github.com/python-pillow/Pillow/security/advisories/GHSA-p8hx-v2p6-rp84",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-96636",
+            "https://github.com/python-pillow/Pillow/pull/10011",
+            "https://github.com/python-pillow/Pillow/commit/f1acfc54c53502948d0d14121872061df931db48",
+            "https://github.com/python-pillow/Pillow/releases/tag/13.0.0"
+          ],
+          "applicability": "Chatterbox speech does not decode portraits in this environment. Imports can still make image code available; upgrade instead of claiming every affected path is unreachable.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 13.0.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-78g4-xqwv-q3g8",
+          "aliases": [],
+          "feed_record_ids": [
+            "GHSA-78g4-xqwv-q3g8"
+          ],
+          "title": "Pillow: Bundled libopenjp2 2.5.4 in all wheels since 11.1.0 carries OSV-2025-219 heap-buffer-overflow write reachable from Image.open().load()",
+          "affected_installed_version": "12.3.0",
+          "feed_fixed_versions": [
+            "13.0.0"
+          ],
+          "source_references": [
+            "https://github.com/python-pillow/Pillow/security/advisories/GHSA-78g4-xqwv-q3g8",
+            "https://github.com/python-pillow/Pillow/commit/5f8114c8096b181fae493543cd3837d9f9a971cc",
+            "https://github.com/python-pillow/Pillow/commit/d3470c327840f4c216a1610f30e7091dfd0b97c0",
+            "https://github.com/uclouvain/openjpeg/commit/91d08b11a72764f6d199f32fa0c1b1abd4edc2ad",
+            "https://github.com/python-pillow/Pillow/releases/tag/13.0.0",
+            "https://osv.dev/vulnerability/OSV-2025-219"
+          ],
+          "applicability": "Chatterbox speech does not decode portraits in this environment. Imports can still make image code available; upgrade instead of claiming every affected path is unreachable.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 13.0.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-654x-cwwv-5j9c",
+          "aliases": [
+            "CVE-2026-114501",
+            "PYSEC-2026-4336"
+          ],
+          "feed_record_ids": [
+            "GHSA-654x-cwwv-5j9c",
+            "PYSEC-2026-4336"
+          ],
+          "title": "Pillow: Arrow export leaks stale heap memory when PILLOW_ALIGNMENT > 1",
+          "affected_installed_version": "12.3.0",
+          "feed_fixed_versions": [
+            "13.0.0"
+          ],
+          "source_references": [
+            "https://github.com/python-pillow/Pillow/security/advisories/GHSA-654x-cwwv-5j9c",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-114501",
+            "https://github.com/python-pillow/Pillow/pull/10172",
+            "https://github.com/python-pillow/Pillow/commit/19f64946eb247b973dd4560be7dea3bf979d2e6a",
+            "https://github.com/python-pillow/Pillow/releases/tag/13.0.0"
+          ],
+          "applicability": "Chatterbox speech does not decode portraits in this environment. Imports can still make image code available; upgrade instead of claiming every affected path is unreachable.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 13.0.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-5x8w-8jj5-q52h",
+          "aliases": [
+            "CVE-2026-112398",
+            "PYSEC-2026-4330"
+          ],
+          "feed_record_ids": [
+            "GHSA-5x8w-8jj5-q52h",
+            "PYSEC-2026-4330"
+          ],
+          "title": "Pillow: Heap buffer overflow in FlashPix (FPX) JPEG decoding leads to code execution",
+          "affected_installed_version": "12.3.0",
+          "feed_fixed_versions": [
+            "13.0.0"
+          ],
+          "source_references": [
+            "https://github.com/python-pillow/Pillow/security/advisories/GHSA-5x8w-8jj5-q52h",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-112398",
+            "https://github.com/python-pillow/Pillow/commit/242a059aedc1935097d9aa1dc3f099750467ba75",
+            "https://github.com/python-pillow/Pillow/releases/tag/13.0.0"
+          ],
+          "applicability": "Chatterbox speech does not decode portraits in this environment. Imports can still make image code available; upgrade instead of claiming every affected path is unreachable.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 13.0.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-4558-3h8r-v8xp",
+          "aliases": [
+            "CVE-2026-112394",
+            "PYSEC-2026-4327"
+          ],
+          "feed_record_ids": [
+            "PYSEC-2026-4327"
+          ],
+          "title": "Pillow: P;2L and P;4L decoders may read 1 to 3 bytes past the passed buffer size",
+          "affected_installed_version": "12.3.0",
+          "feed_fixed_versions": [
+            "13.0.0"
+          ],
+          "source_references": [
+            "https://github.com/python-pillow/Pillow/security/advisories/GHSA-4558-3h8r-v8xp",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-112394",
+            "https://github.com/python-pillow/Pillow/pull/9723",
+            "https://github.com/python-pillow/Pillow/commit/392ee6f0d19a4adb766a63e9a99f3c28193b8d31",
+            "https://github.com/python-pillow/Pillow/releases/tag/13.0.0"
+          ],
+          "applicability": "Chatterbox speech does not decode portraits in this environment. Imports can still make image code available; upgrade instead of claiming every affected path is unreachable.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 13.0.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-8g5g-8vmr-9782",
+          "aliases": [
+            "CVE-2026-112403",
+            "PYSEC-2026-4332"
+          ],
+          "feed_record_ids": [
+            "PYSEC-2026-4332"
+          ],
+          "title": "Pillow: Heap buffer overflow in ImagingJpegDecode",
+          "affected_installed_version": "12.3.0",
+          "feed_fixed_versions": [
+            "13.0.0"
+          ],
+          "source_references": [
+            "https://github.com/python-pillow/Pillow/security/advisories/GHSA-8g5g-8vmr-9782",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-112403",
+            "https://github.com/python-pillow/Pillow/commit/242a059aedc1935097d9aa1dc3f099750467ba75",
+            "https://github.com/python-pillow/Pillow/releases/tag/13.0.0"
+          ],
+          "applicability": "Chatterbox speech does not decode portraits in this environment. Imports can still make image code available; upgrade instead of claiming every affected path is unreachable.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 13.0.0.",
+          "exception_acceptance": null
+        }
+      ]
+    },
+    {
+      "package": "starlette",
+      "version": "0.52.1",
+      "source": "https://pypi.org/pypi/starlette/0.52.1/json",
+      "advisory_record_count": 10,
+      "advisories": [
+        {
+          "id": "GHSA-86qp-5c8j-p5mr",
+          "aliases": [
+            "CVE-2026-48710",
+            "PYSEC-2026-161",
+            "X41-2026-002"
+          ],
+          "feed_record_ids": [
+            "PYSEC-2026-161",
+            "GHSA-86qp-5c8j-p5mr"
+          ],
+          "title": "Starlette has missing Host header validation that poisons request.url.path, bypassing path-based security checks",
+          "affected_installed_version": "0.52.1",
+          "feed_fixed_versions": [
+            "1.0.1"
+          ],
+          "source_references": [
+            "https://github.com/Kludex/starlette/security/advisories/GHSA-86qp-5c8j-p5mr",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-48710",
+            "https://github.com/Kludex/starlette/commit/764dab0dcfb9033d75442d7a359645c9f94648c6",
+            "https://www.x41-dsec.de/lab/advisories/x41-2026-002-starlette",
+            "https://www.secwest.net/starlette",
+            "https://www.cve.org/CVERecord?id=CVE-2026-48710",
+            "https://security.access.redhat.com/data/csaf/v2/vex/2026/cve-2026-48710.json",
+            "https://ostif.org/disclosing-the-badhost-vulnerability-in-starlette",
+            "https://github.com/pypa/advisory-database/tree/main/vulns/starlette/PYSEC-2026-161.yaml",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2481742",
+            "https://badhost.org",
+            "https://access.redhat.com/security/cve/CVE-2026-48710",
+            "https://access.redhat.com/errata/RHSA-2026:60520",
+            "https://access.redhat.com/errata/RHSA-2026:51357",
+            "https://access.redhat.com/errata/RHSA-2026:44696",
+            "https://access.redhat.com/errata/RHSA-2026:43038",
+            "https://access.redhat.com/errata/RHSA-2026:37275",
+            "https://access.redhat.com/errata/RHSA-2026:34532",
+            "https://access.redhat.com/errata/RHSA-2026:34526",
+            "https://access.redhat.com/errata/RHSA-2026:34456",
+            "https://access.redhat.com/errata/RHSA-2026:30089",
+            "https://access.redhat.com/errata/RHSA-2026:30088",
+            "https://access.redhat.com/errata/RHSA-2026:26226",
+            "https://access.redhat.com/errata/RHSA-2026:24866",
+            "https://access.redhat.com/errata/RHSA-2026:23346",
+            "https://access.redhat.com/errata/RHSA-2026:22993",
+            "https://access.redhat.com/errata/RHSA-2026:22992"
+          ],
+          "applicability": "The adapter uses Python HTTPServer rather than Starlette. This does not clear an installed vulnerable package; remove the unused Gradio/FastAPI/Starlette dependency graph.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Remove from the new profile; do not merely exclude from audit.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-wqp7-x3pw-xc5r",
+          "aliases": [
+            "CVE-2026-48818",
+            "PYSEC-2026-2281"
+          ],
+          "feed_record_ids": [
+            "GHSA-wqp7-x3pw-xc5r",
+            "PYSEC-2026-2281"
+          ],
+          "title": "Starlette: SSRF and NTLM credential theft via UNC paths in StaticFiles on Windows",
+          "affected_installed_version": "0.52.1",
+          "feed_fixed_versions": [
+            "1.1.0"
+          ],
+          "source_references": [
+            "https://github.com/Kludex/starlette/security/advisories/GHSA-wqp7-x3pw-xc5r"
+          ],
+          "applicability": "The adapter uses Python HTTPServer rather than Starlette. This does not clear an installed vulnerable package; remove the unused Gradio/FastAPI/Starlette dependency graph.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Remove from the new profile; do not merely exclude from audit.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-x746-7m8f-x49c",
+          "aliases": [
+            "CVE-2026-48817",
+            "PYSEC-2026-2280"
+          ],
+          "feed_record_ids": [
+            "GHSA-x746-7m8f-x49c",
+            "PYSEC-2026-2280"
+          ],
+          "title": "Starlette: Arbitrary HTTP method dispatched to `HTTPEndpoint` attributes via `getattr`",
+          "affected_installed_version": "0.52.1",
+          "feed_fixed_versions": [
+            "1.1.0"
+          ],
+          "source_references": [
+            "https://github.com/Kludex/starlette/security/advisories/GHSA-x746-7m8f-x49c",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-48817",
+            "https://github.com/Kludex/starlette/releases/tag/1.1.0"
+          ],
+          "applicability": "The adapter uses Python HTTPServer rather than Starlette. This does not clear an installed vulnerable package; remove the unused Gradio/FastAPI/Starlette dependency graph.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Remove from the new profile; do not merely exclude from audit.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-82w8-qh3p-5jfq",
+          "aliases": [
+            "CVE-2026-54283",
+            "PYSEC-2026-249"
+          ],
+          "feed_record_ids": [
+            "GHSA-82w8-qh3p-5jfq",
+            "PYSEC-2026-249"
+          ],
+          "title": "Starlette: request.form() limits silently ignored for application/x-www-form-urlencoded enable DoS",
+          "affected_installed_version": "0.52.1",
+          "feed_fixed_versions": [
+            "1.3.1"
+          ],
+          "source_references": [
+            "https://github.com/Kludex/starlette/security/advisories/GHSA-82w8-qh3p-5jfq"
+          ],
+          "applicability": "The adapter uses Python HTTPServer rather than Starlette. This does not clear an installed vulnerable package; remove the unused Gradio/FastAPI/Starlette dependency graph.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Remove from the new profile; do not merely exclude from audit.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-jp82-jpqv-5vv3",
+          "aliases": [
+            "CVE-2026-54282",
+            "PYSEC-2026-248"
+          ],
+          "feed_record_ids": [
+            "GHSA-jp82-jpqv-5vv3",
+            "PYSEC-2026-248"
+          ],
+          "title": "Starlette: Unvalidated request path concatenated into authority poisons request.url.hostname",
+          "affected_installed_version": "0.52.1",
+          "feed_fixed_versions": [
+            "1.3.0"
+          ],
+          "source_references": [
+            "https://github.com/Kludex/starlette/security/advisories/GHSA-jp82-jpqv-5vv3",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-54282",
+            "https://github.com/pypa/advisory-database/tree/main/vulns/starlette/PYSEC-2026-248.yaml"
+          ],
+          "applicability": "The adapter uses Python HTTPServer rather than Starlette. This does not clear an installed vulnerable package; remove the unused Gradio/FastAPI/Starlette dependency graph.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Remove from the new profile; do not merely exclude from audit.",
+          "exception_acceptance": null
+        }
+      ]
+    },
+    {
+      "package": "torch",
+      "version": "2.6.0",
+      "source": "https://pypi.org/pypi/torch/2.6.0/json",
+      "advisory_record_count": 25,
+      "advisories": [
+        {
+          "id": "GHSA-3749-ghw9-m3mg",
+          "aliases": [
+            "BIT-pytorch-2025-2953",
+            "CVE-2025-2953",
+            "PYSEC-2025-191"
+          ],
+          "feed_record_ids": [
+            "GHSA-3749-ghw9-m3mg",
+            "PYSEC-2025-191"
+          ],
+          "title": "PyTorch susceptible to local Denial of Service",
+          "affected_installed_version": "2.6.0",
+          "feed_fixed_versions": [
+            "2.7.1-rc1"
+          ],
+          "source_references": [
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-2953",
+            "https://github.com/pytorch/pytorch/issues/149274",
+            "https://github.com/pytorch/pytorch/issues/149274#issue-2923122269",
+            "https://github.com/pypa/advisory-database/tree/main/vulns/torch/PYSEC-2025-191.yaml",
+            "https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models",
+            "https://vuldb.com/?ctiid.302006",
+            "https://vuldb.com/?id.302006",
+            "https://vuldb.com/?submit.521279"
+          ],
+          "applicability": "PyTorch is executed for inference and Perth loads its pinned checkpoint. Arbitrary models/compiled programs are not accepted; per-operator reachability is unresolved until patched pins are tested. Do not mark this safe on offline operation alone.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 2.7.1-rc1.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-887c-mr87-cxwp",
+          "aliases": [
+            "BIT-pytorch-2025-3730",
+            "CVE-2025-3730",
+            "PYSEC-2026-1970"
+          ],
+          "feed_record_ids": [
+            "GHSA-887c-mr87-cxwp",
+            "PYSEC-2026-1970"
+          ],
+          "title": "PyTorch Improper Resource Shutdown or Release vulnerability",
+          "affected_installed_version": "2.6.0",
+          "feed_fixed_versions": [
+            "2.8.0"
+          ],
+          "source_references": [
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-3730",
+            "https://github.com/pytorch/pytorch/issues/150835",
+            "https://github.com/pytorch/pytorch/pull/150981",
+            "https://github.com/pytorch/pytorch/commit/01f226bfb8f2c343f5c614a6bbf685d91160f3af",
+            "https://github.com/timocafe/tewart-pytorch/commit/46fc5d8e360127361211cb237d5f9eef0223e567",
+            "https://vuldb.com/?ctiid.305076",
+            "https://vuldb.com/?id.305076",
+            "https://vuldb.com/?submit.553645"
+          ],
+          "applicability": "PyTorch is executed for inference and Perth loads its pinned checkpoint. Arbitrary models/compiled programs are not accepted; per-operator reachability is unresolved until patched pins are tested. Do not mark this safe on offline operation alone.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 2.8.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "PYSEC-2025-205",
+          "aliases": [
+            "BIT-pytorch-2025-55553",
+            "CVE-2025-55553"
+          ],
+          "feed_record_ids": [
+            "PYSEC-2025-205"
+          ],
+          "title": "See the linked advisory for technical details.",
+          "affected_installed_version": "2.6.0",
+          "feed_fixed_versions": [
+            "2.7.1"
+          ],
+          "source_references": [
+            "https://gist.github.com/shaoyuyoung/0e7d2a586297ae9c8ed14d8706749efc"
+          ],
+          "applicability": "PyTorch is executed for inference and Perth loads its pinned checkpoint. Arbitrary models/compiled programs are not accepted; per-operator reachability is unresolved until patched pins are tested. Do not mark this safe on offline operation alone.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 2.7.1.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "PYSEC-2025-206",
+          "aliases": [
+            "BIT-pytorch-2025-55554",
+            "CVE-2025-55554"
+          ],
+          "feed_record_ids": [
+            "PYSEC-2025-206"
+          ],
+          "title": "See the linked advisory for technical details.",
+          "affected_installed_version": "2.6.0",
+          "feed_fixed_versions": [
+            "2.9.0"
+          ],
+          "source_references": [
+            "https://gist.github.com/shaoyuyoung/0e7d2a586297ae9c8ed14d8706749efc"
+          ],
+          "applicability": "PyTorch is executed for inference and Perth loads its pinned checkpoint. Arbitrary models/compiled programs are not accepted; per-operator reachability is unresolved until patched pins are tested. Do not mark this safe on offline operation alone.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 2.9.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "PYSEC-2025-200",
+          "aliases": [
+            "BIT-pytorch-2025-46150",
+            "CVE-2025-46150"
+          ],
+          "feed_record_ids": [
+            "PYSEC-2025-200"
+          ],
+          "title": "See the linked advisory for technical details.",
+          "affected_installed_version": "2.6.0",
+          "feed_fixed_versions": [
+            "2.7.0"
+          ],
+          "source_references": [
+            "https://gist.github.com/shaoyuyoung/4bcefba4004f8271e64b5185c95a248a"
+          ],
+          "applicability": "PyTorch is executed for inference and Perth loads its pinned checkpoint. Arbitrary models/compiled programs are not accepted; per-operator reachability is unresolved until patched pins are tested. Do not mark this safe on offline operation alone.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 2.7.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "PYSEC-2025-207",
+          "aliases": [
+            "BIT-pytorch-2025-55557",
+            "CVE-2025-55557"
+          ],
+          "feed_record_ids": [
+            "PYSEC-2025-207"
+          ],
+          "title": "See the linked advisory for technical details.",
+          "affected_installed_version": "2.6.0",
+          "feed_fixed_versions": [
+            "2.7.1"
+          ],
+          "source_references": [
+            "https://gist.github.com/shaoyuyoung/0e7d2a586297ae9c8ed14d8706749efc"
+          ],
+          "applicability": "PyTorch is executed for inference and Perth loads its pinned checkpoint. Arbitrary models/compiled programs are not accepted; per-operator reachability is unresolved until patched pins are tested. Do not mark this safe on offline operation alone.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 2.7.1.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "PYSEC-2025-201",
+          "aliases": [
+            "BIT-pytorch-2025-46152",
+            "CVE-2025-46152"
+          ],
+          "feed_record_ids": [
+            "PYSEC-2025-201"
+          ],
+          "title": "See the linked advisory for technical details.",
+          "affected_installed_version": "2.6.0",
+          "feed_fixed_versions": [
+            "2.7.0"
+          ],
+          "source_references": [
+            "https://gist.github.com/shaoyuyoung/4bcefba4004f8271e64b5185c95a248a"
+          ],
+          "applicability": "PyTorch is executed for inference and Perth loads its pinned checkpoint. Arbitrary models/compiled programs are not accepted; per-operator reachability is unresolved until patched pins are tested. Do not mark this safe on offline operation alone.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 2.7.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "PYSEC-2025-204",
+          "aliases": [
+            "BIT-pytorch-2025-55552",
+            "CVE-2025-55552"
+          ],
+          "feed_record_ids": [
+            "PYSEC-2025-204"
+          ],
+          "title": "See the linked advisory for technical details.",
+          "affected_installed_version": "2.6.0",
+          "feed_fixed_versions": [
+            "2.9.0"
+          ],
+          "source_references": [
+            "https://gist.github.com/shaoyuyoung/0e7d2a586297ae9c8ed14d8706749efc"
+          ],
+          "applicability": "PyTorch is executed for inference and Perth loads its pinned checkpoint. Arbitrary models/compiled programs are not accepted; per-operator reachability is unresolved until patched pins are tested. Do not mark this safe on offline operation alone.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 2.9.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "PYSEC-2026-139",
+          "aliases": [
+            "BIT-pytorch-2026-4538",
+            "CVE-2026-4538"
+          ],
+          "feed_record_ids": [
+            "PYSEC-2026-139"
+          ],
+          "title": "See the linked advisory for technical details.",
+          "affected_installed_version": "2.6.0",
+          "feed_fixed_versions": [],
+          "source_references": [
+            "https://github.com/pytorch/pytorch/",
+            "https://vuldb.com/?id.352326",
+            "https://vuldb.com/?submit.774681"
+          ],
+          "applicability": "PyTorch is executed for inference and Perth loads its pinned checkpoint. Arbitrary models/compiled programs are not accepted; per-operator reachability is unresolved until patched pins are tested. Do not mark this safe on offline operation alone.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. The feed does not identify a fixed version; verify the selected version against the full current affected range.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "PYSEC-2025-209",
+          "aliases": [
+            "BIT-pytorch-2025-55560",
+            "CVE-2025-55560"
+          ],
+          "feed_record_ids": [
+            "PYSEC-2025-209"
+          ],
+          "title": "See the linked advisory for technical details.",
+          "affected_installed_version": "2.6.0",
+          "feed_fixed_versions": [
+            "2.7.1"
+          ],
+          "source_references": [
+            "https://gist.github.com/shaoyuyoung/0e7d2a586297ae9c8ed14d8706749efc"
+          ],
+          "applicability": "PyTorch is executed for inference and Perth loads its pinned checkpoint. Arbitrary models/compiled programs are not accepted; per-operator reachability is unresolved until patched pins are tested. Do not mark this safe on offline operation alone.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 2.7.1.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "PYSEC-2025-208",
+          "aliases": [
+            "BIT-pytorch-2025-55558",
+            "CVE-2025-55558"
+          ],
+          "feed_record_ids": [
+            "PYSEC-2025-208"
+          ],
+          "title": "See the linked advisory for technical details.",
+          "affected_installed_version": "2.6.0",
+          "feed_fixed_versions": [
+            "2.7.1"
+          ],
+          "source_references": [
+            "https://gist.github.com/shaoyuyoung/0e7d2a586297ae9c8ed14d8706749efc"
+          ],
+          "applicability": "PyTorch is executed for inference and Perth loads its pinned checkpoint. Arbitrary models/compiled programs are not accepted; per-operator reachability is unresolved until patched pins are tested. Do not mark this safe on offline operation alone.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 2.7.1.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "PYSEC-2025-199",
+          "aliases": [
+            "BIT-pytorch-2025-46149",
+            "CVE-2025-46149"
+          ],
+          "feed_record_ids": [
+            "PYSEC-2025-199"
+          ],
+          "title": "See the linked advisory for technical details.",
+          "affected_installed_version": "2.6.0",
+          "feed_fixed_versions": [
+            "2.7.0"
+          ],
+          "source_references": [
+            "https://gist.github.com/shaoyuyoung/4bcefba4004f8271e64b5185c95a248a"
+          ],
+          "applicability": "PyTorch is executed for inference and Perth loads its pinned checkpoint. Arbitrary models/compiled programs are not accepted; per-operator reachability is unresolved until patched pins are tested. Do not mark this safe on offline operation alone.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 2.7.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "PYSEC-2025-202",
+          "aliases": [
+            "BIT-pytorch-2025-46153",
+            "CVE-2025-46153"
+          ],
+          "feed_record_ids": [
+            "PYSEC-2025-202"
+          ],
+          "title": "See the linked advisory for technical details.",
+          "affected_installed_version": "2.6.0",
+          "feed_fixed_versions": [
+            "2.7.0"
+          ],
+          "source_references": [
+            "https://github.com/pytorch/pytorch/compare/v2.6.0...v2.7.0",
+            "https://gist.github.com/shaoyuyoung/4bcefba4004f8271e64b5185c95a248a",
+            "https://gist.github.com/shaoyuyoung/e636f2e7a306105b7e96809e2b85c28a"
+          ],
+          "applicability": "PyTorch is executed for inference and Perth loads its pinned checkpoint. Arbitrary models/compiled programs are not accepted; per-operator reachability is unresolved until patched pins are tested. Do not mark this safe on offline operation alone.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 2.7.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "PYSEC-2025-198",
+          "aliases": [
+            "BIT-pytorch-2025-46148",
+            "CVE-2025-46148"
+          ],
+          "feed_record_ids": [
+            "PYSEC-2025-198"
+          ],
+          "title": "See the linked advisory for technical details.",
+          "affected_installed_version": "2.6.0",
+          "feed_fixed_versions": [
+            "2.7.0"
+          ],
+          "source_references": [
+            "https://gist.github.com/shaoyuyoung/4bcefba4004f8271e64b5185c95a248a",
+            "https://gist.github.com/shaoyuyoung/65a587a579dfdff887b9b35bb79b9093"
+          ],
+          "applicability": "PyTorch is executed for inference and Perth loads its pinned checkpoint. Arbitrary models/compiled programs are not accepted; per-operator reachability is unresolved until patched pins are tested. Do not mark this safe on offline operation alone.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 2.7.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "PYSEC-2025-203",
+          "aliases": [
+            "BIT-pytorch-2025-55551",
+            "CVE-2025-55551"
+          ],
+          "feed_record_ids": [
+            "PYSEC-2025-203"
+          ],
+          "title": "See the linked advisory for technical details.",
+          "affected_installed_version": "2.6.0",
+          "feed_fixed_versions": [
+            "2.9.0"
+          ],
+          "source_references": [
+            "https://gist.github.com/shaoyuyoung/0e7d2a586297ae9c8ed14d8706749efc"
+          ],
+          "applicability": "PyTorch is executed for inference and Perth loads its pinned checkpoint. Arbitrary models/compiled programs are not accepted; per-operator reachability is unresolved until patched pins are tested. Do not mark this safe on offline operation alone.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 2.9.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-c678-jfcj-6jmf",
+          "aliases": [
+            "BIT-pytorch-2025-2148",
+            "CVE-2025-2148",
+            "PYSEC-2025-189"
+          ],
+          "feed_record_ids": [
+            "GHSA-c678-jfcj-6jmf"
+          ],
+          "title": "PyTorch Tuple Handler is Vulnerable to Memory Corruption through Manipulation of None Argument",
+          "affected_installed_version": "2.6.0",
+          "feed_fixed_versions": [],
+          "source_references": [
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-2148",
+            "https://github.com/pytorch/pytorch/issues/147722",
+            "https://github.com/pypa/advisory-database/tree/main/vulns/torch/PYSEC-2025-189.yaml",
+            "https://github.com/pytorch/pytorch/blob/b0a67c7495bb11ecb23e556058db059ba48354af/torch/autograd/profiler.py#L990",
+            "https://vuldb.com/?ctiid.299059",
+            "https://vuldb.com/?id.299059",
+            "https://vuldb.com/?submit.505959"
+          ],
+          "applicability": "PyTorch is executed for inference and Perth loads its pinned checkpoint. Arbitrary models/compiled programs are not accepted; per-operator reachability is unresolved until patched pins are tested. Do not mark this safe on offline operation alone.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. The feed does not identify a fixed version; verify the selected version against the full current affected range.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-x3gm-94wq-g975",
+          "aliases": [
+            "BIT-pytorch-2025-2149",
+            "CVE-2025-2149",
+            "PYSEC-2025-190"
+          ],
+          "feed_record_ids": [
+            "GHSA-x3gm-94wq-g975"
+          ],
+          "title": "PyTorch: Manipulation of the argument scale/zero_point leads to improper initialization via Quantized Sigmoid Module",
+          "affected_installed_version": "2.6.0",
+          "feed_fixed_versions": [],
+          "source_references": [
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-2149",
+            "https://github.com/pytorch/pytorch/issues/147818",
+            "https://github.com/pytorch/pytorch/issues/147818#issue-2877301660",
+            "https://github.com/pypa/advisory-database/tree/main/vulns/torch/PYSEC-2025-190.yaml",
+            "https://vuldb.com/?ctiid.299060",
+            "https://vuldb.com/?id.299060",
+            "https://vuldb.com/?submit.506563"
+          ],
+          "applicability": "PyTorch is executed for inference and Perth loads its pinned checkpoint. Arbitrary models/compiled programs are not accepted; per-operator reachability is unresolved until patched pins are tested. Do not mark this safe on offline operation alone.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. The feed does not identify a fixed version; verify the selected version against the full current affected range.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-f4hp-rmr7-r7v8",
+          "aliases": [
+            "BIT-pytorch-2025-2998",
+            "CVE-2025-2998",
+            "PYSEC-2025-192"
+          ],
+          "feed_record_ids": [
+            "GHSA-f4hp-rmr7-r7v8"
+          ],
+          "title": "PyTorch is Vulnerable to Memory Consumption through pad_packed_sequence Function",
+          "affected_installed_version": "2.6.0",
+          "feed_fixed_versions": [],
+          "source_references": [
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-2998",
+            "https://github.com/pytorch/pytorch/issues/149622",
+            "https://github.com/pytorch/pytorch/issues/149622#issue-2935495265",
+            "https://github.com/pytorch/pytorch/commit/494518046816d29099b7d056a74ffa5c244fdcdd",
+            "https://github.com/pypa/advisory-database/tree/main/vulns/torch/PYSEC-2025-192.yaml",
+            "https://vuldb.com/?ctiid.302047",
+            "https://vuldb.com/?id.302047",
+            "https://vuldb.com/?submit.524151"
+          ],
+          "applicability": "PyTorch is executed for inference and Perth loads its pinned checkpoint. Arbitrary models/compiled programs are not accepted; per-operator reachability is unresolved until patched pins are tested. Do not mark this safe on offline operation alone.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. The feed does not identify a fixed version; verify the selected version against the full current affected range.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-vgrw-7cvw-pwgx",
+          "aliases": [
+            "BIT-pytorch-2025-2999",
+            "CVE-2025-2999",
+            "PYSEC-2025-193"
+          ],
+          "feed_record_ids": [
+            "GHSA-vgrw-7cvw-pwgx"
+          ],
+          "title": "PyTorch is vulnerable to memory corruption through its unpack_sequence function",
+          "affected_installed_version": "2.6.0",
+          "feed_fixed_versions": [
+            "2.9.1"
+          ],
+          "source_references": [
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-2999",
+            "https://github.com/pytorch/pytorch/issues/149622",
+            "https://github.com/pytorch/pytorch/issues/149622#issue-2935495265",
+            "https://github.com/pytorch/pytorch/commit/494518046816d29099b7d056a74ffa5c244fdcdd",
+            "https://github.com/pypa/advisory-database/tree/main/vulns/torch/PYSEC-2025-193.yaml",
+            "https://vuldb.com/?ctiid.302048",
+            "https://vuldb.com/?id.302048",
+            "https://vuldb.com/?submit.524198"
+          ],
+          "applicability": "PyTorch is executed for inference and Perth loads its pinned checkpoint. Arbitrary models/compiled programs are not accepted; per-operator reachability is unresolved until patched pins are tested. Do not mark this safe on offline operation alone.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 2.9.1.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-rrmf-rvhw-rf47",
+          "aliases": [
+            "BIT-pytorch-2025-3000",
+            "CVE-2025-3000",
+            "PYSEC-2025-194"
+          ],
+          "feed_record_ids": [
+            "GHSA-rrmf-rvhw-rf47"
+          ],
+          "title": "PyTorch is vulnerable to memory corruption through its torch.jit.script function",
+          "affected_installed_version": "2.6.0",
+          "feed_fixed_versions": [
+            "2.13.0"
+          ],
+          "source_references": [
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-3000",
+            "https://github.com/pytorch/pytorch/issues/149623",
+            "https://github.com/pytorch/pytorch/issues/149623#issue-2935703015",
+            "https://github.com/pytorch/pytorch/commit/b90c94991cdf8b87c8f7439f79518e0ef2c4ca4f",
+            "https://github.com/pypa/advisory-database/tree/main/vulns/torch/PYSEC-2025-194.yaml",
+            "https://vuldb.com/?ctiid.302049",
+            "https://vuldb.com/?id.302049",
+            "https://vuldb.com/?submit.524197"
+          ],
+          "applicability": "PyTorch is executed for inference and Perth loads its pinned checkpoint. Arbitrary models/compiled programs are not accepted; per-operator reachability is unresolved until patched pins are tested. Do not mark this safe on offline operation alone.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 2.13.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-qfhq-4f3w-5fph",
+          "aliases": [
+            "BIT-pytorch-2025-3001",
+            "CVE-2025-3001",
+            "PYSEC-2025-195"
+          ],
+          "feed_record_ids": [
+            "GHSA-qfhq-4f3w-5fph"
+          ],
+          "title": "PyTorch is vulnerable to memory corruption through its torch.lstm_cell function",
+          "affected_installed_version": "2.6.0",
+          "feed_fixed_versions": [
+            "2.10.0"
+          ],
+          "source_references": [
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-3001",
+            "https://github.com/pytorch/pytorch/issues/149626",
+            "https://github.com/pytorch/pytorch/issues/149626#issue-2935860995",
+            "https://github.com/pytorch/pytorch/commit/999d94b5ede5f4ec111ba7dd144129e2c2725b03",
+            "https://github.com/pypa/advisory-database/tree/main/vulns/torch/PYSEC-2025-195.yaml",
+            "https://vuldb.com/?ctiid.302050",
+            "https://vuldb.com/?id.302050",
+            "https://vuldb.com/?submit.524212"
+          ],
+          "applicability": "PyTorch is executed for inference and Perth loads its pinned checkpoint. Arbitrary models/compiled programs are not accepted; per-operator reachability is unresolved until patched pins are tested. Do not mark this safe on offline operation alone.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 2.10.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-63cw-57p8-fm3p",
+          "aliases": [
+            "BIT-pytorch-2026-24747",
+            "CVE-2026-24747",
+            "PYSEC-2026-1856",
+            "PYSEC-2026-2286"
+          ],
+          "feed_record_ids": [
+            "PYSEC-2026-2286",
+            "GHSA-63cw-57p8-fm3p"
+          ],
+          "title": "PyTorch Vulnerable to Remote Code Execution via Untrusted Checkpoint Files",
+          "affected_installed_version": "2.6.0",
+          "feed_fixed_versions": [
+            "2.10.0"
+          ],
+          "source_references": [
+            "https://github.com/pytorch/pytorch/security/advisories/GHSA-63cw-57p8-fm3p",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-24747",
+            "https://github.com/pytorch/pytorch/issues/163105",
+            "https://access.redhat.com/errata/RHSA-2026:24977",
+            "https://access.redhat.com/security/cve/CVE-2026-24747",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2433612",
+            "https://github.com/advisories/GHSA-63cw-57p8-fm3p",
+            "https://github.com/pypa/advisory-database/tree/main/vulns/pytorch/PYSEC-2026-1856.yaml",
+            "https://github.com/pypa/advisory-database/tree/main/vulns/torch/PYSEC-2026-2286.yaml",
+            "https://github.com/pytorch/pytorch/163122/commit/954dc5183ee9205cbe79876ad05dd2d9ae752139",
+            "https://github.com/pytorch/pytorch/releases/tag/v2.10.0",
+            "https://pypi.org/project/pytorch",
+            "https://security.access.redhat.com/data/csaf/v2/vex/2026/cve-2026-24747.json"
+          ],
+          "applicability": "PyTorch is executed for inference and Perth loads its pinned checkpoint. Arbitrary models/compiled programs are not accepted; per-operator reachability is unresolved until patched pins are tested. Do not mark this safe on offline operation alone.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 2.10.0.",
+          "exception_acceptance": null
+        }
+      ]
+    },
+    {
+      "package": "transformers",
+      "version": "5.2.0",
+      "source": "https://pypi.org/pypi/transformers/5.2.0/json",
+      "advisory_record_count": 8,
+      "advisories": [
+        {
+          "id": "GHSA-29pf-2h5f-8g72",
+          "aliases": [
+            "CVE-2026-4372",
+            "PYSEC-2026-2289"
+          ],
+          "feed_record_ids": [
+            "GHSA-29pf-2h5f-8g72",
+            "PYSEC-2026-2289"
+          ],
+          "title": "HuggingFace transformers vulnerable to remote code execution",
+          "affected_installed_version": "5.2.0",
+          "feed_fixed_versions": [
+            "5.3.0"
+          ],
+          "source_references": [
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-4372",
+            "https://github.com/huggingface/transformers/commit/a7f8e7ff37d87d1a1a0c8cf607971c607741452f",
+            "https://huntr.com/bounties/1f693a6e-6836-4b8b-a0bd-ca036fba8884"
+          ],
+          "applicability": "Nano constructs T3/Llama and loads its tokenizer from verified local files. This narrows model-loading exposure but is not per-advisory acceptance; upgrade and retain offline restrictions.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 5.3.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-fgcw-684q-jj6r",
+          "aliases": [
+            "CVE-2026-5241",
+            "PYSEC-2026-2290"
+          ],
+          "feed_record_ids": [
+            "PYSEC-2026-2290",
+            "GHSA-fgcw-684q-jj6r"
+          ],
+          "title": "huggingface/transformers: Arbitrary Code Execution During Model Initialization in the LightGlue Model Loading Path",
+          "affected_installed_version": "5.2.0",
+          "feed_fixed_versions": [
+            "5.5.0"
+          ],
+          "source_references": [
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-5241",
+            "https://github.com/huggingface/transformers/commit/676559d5022b74aaa0cee1cee0842b7f27c5320e",
+            "https://access.redhat.com/errata/RHSA-2026:34456",
+            "https://access.redhat.com/errata/RHSA-2026:37275",
+            "https://access.redhat.com/errata/RHSA-2026:42644",
+            "https://access.redhat.com/security/cve/CVE-2026-5241",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2484384",
+            "https://github.com/pypa/advisory-database/tree/main/vulns/transformers/PYSEC-2026-2290.yaml",
+            "https://huntr.com/bounties/ceb3ce1a-4c45-497a-b25e-cb9a7685e619",
+            "https://security.access.redhat.com/data/csaf/v2/vex/2026/cve-2026-5241.json"
+          ],
+          "applicability": "Nano constructs T3/Llama and loads its tokenizer from verified local files. This narrows model-loading exposure but is not per-advisory acceptance; upgrade and retain offline restrictions.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 5.5.0.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-x9r9-c232-4q39",
+          "aliases": [
+            "CVE-2026-80047",
+            "PYSEC-2026-4174"
+          ],
+          "feed_record_ids": [
+            "GHSA-x9r9-c232-4q39",
+            "PYSEC-2026-4174"
+          ],
+          "title": "Hugging Face Transformers downloads custom generation code before trust consent",
+          "affected_installed_version": "5.2.0",
+          "feed_fixed_versions": [],
+          "source_references": [
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-80047",
+            "https://github.com/huggingface/transformers/pull/48620",
+            "https://github.com/huggingface/transformers/commit/cbc1651a032b923da7f4b44b3d0e6f68e6ba6b55",
+            "https://kb.cert.org/vuls/id/456290",
+            "https://www.kb.cert.org/vuls/id/456290"
+          ],
+          "applicability": "Nano constructs T3/Llama and loads its tokenizer from verified local files. This narrows model-loading exposure but is not per-advisory acceptance; upgrade and retain offline restrictions.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. The feed does not identify a fixed version; verify the selected version against the full current affected range.",
+          "exception_acceptance": null
+        },
+        {
+          "id": "GHSA-xrqw-3rrv-vx5w",
+          "aliases": [
+            "CVE-2026-9856",
+            "PYSEC-2026-3929"
+          ],
+          "feed_record_ids": [
+            "GHSA-xrqw-3rrv-vx5w",
+            "PYSEC-2026-3929"
+          ],
+          "title": "Transformers save_pretrained path traversal allows arbitrary file writes through chat template names",
+          "affected_installed_version": "5.2.0",
+          "feed_fixed_versions": [
+            "5.10.0"
+          ],
+          "source_references": [
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-9856",
+            "https://github.com/huggingface/transformers/pull/46191",
+            "https://github.com/huggingface/transformers/commit/eaaaf8494dd5386634ae37d1d122212fdc315be5",
+            "https://huntr.com/bounties/362824d5-fe18-40e8-a6cf-62277f97a170"
+          ],
+          "applicability": "Nano constructs T3/Llama and loads its tokenizer from verified local files. This narrows model-loading exposure but is not per-advisory acceptance; upgrade and retain offline restrictions.",
+          "reachability_verdict": "not accepted; no complete unreachable-code proof",
+          "remediation": "Upgrade in an independently pinned environment and rerun advisory, import, synthesis and release checks. Minimum feed fixes: 5.10.0.",
+          "exception_acceptance": null
+        }
+      ]
+    }
+  ],
+  "advisory_record_count": 109,
+  "unique_advisory_count": 76,
+  "decision": "no-go",
+  "acceptances": [],
+  "limitations": [
+    "A Python advisory feed does not audit bundled CUDA/native DLLs, NVIDIA drivers, model weights, or the Windows OS.",
+    "No claim that vulnerable code is safe solely because synthesis is offline.",
+    "No regular enablement until a separately patched candidate and all native/security/licence/update-owner gates pass."
+  ]
+}

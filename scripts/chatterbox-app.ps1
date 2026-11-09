@@ -1,16 +1,22 @@
 #Requires -Version 7.0
 param([switch]$NoBrowser, [switch]$SkipPreparation, [switch]$TestBackend,
       [string]$Avatar = '', [int]$Port = 8767,
-      [ValidateSet('cpu','cuda')][string]$Configuration = 'cpu',
+      [ValidateSet('cpu','cuda','maintained')][string]$Configuration = 'cpu',
       [string]$State = '',
       [string]$Output = '.runtime/chatterbox-integration')
 $ErrorActionPreference = 'Stop'
 Set-Location (Split-Path $PSScriptRoot -Parent)
-if (-not $State) { $State = if ($Configuration -eq 'cuda') { '.runtime/chatterbox-eval-gpu' } else { '.runtime/chatterbox-eval' } }
+if (-not $State) {
+    $State = @{ cpu = '.runtime/chatterbox-eval'; cuda = '.runtime/chatterbox-eval-gpu'; maintained = '.runtime/chatterbox-maintained' }[$Configuration]
+}
 $State = [IO.Path]::GetFullPath($State)
 $Output = [IO.Path]::GetFullPath($Output)
 if (-not $TestBackend -and -not $SkipPreparation) {
-    & uv run --locked python -c "import sys; sys.path.insert(0,'scripts'); from prepare import run; run(['pwsh','-NoProfile','-File','scripts/prepare-chatterbox.ps1','-State',sys.argv[1],'-Configuration',sys.argv[2]],10800)" $State $Configuration
+    if ($Configuration -eq 'maintained') {
+        & uv run --locked python -c "import sys; sys.path.insert(0,'scripts'); from prepare import run; run(['pwsh','-NoProfile','-File','scripts/prepare-chatterbox-maintained.ps1','-State',sys.argv[1]],10800)" $State
+    } else {
+        & uv run --locked python -c "import sys; sys.path.insert(0,'scripts'); from prepare import run; run(['pwsh','-NoProfile','-File','scripts/prepare-chatterbox.ps1','-State',sys.argv[1],'-Configuration',sys.argv[2]],10800)" $State $Configuration
+    }
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
 $runtimePython = if ($TestBackend) { Join-Path (Get-Location) '.venv/Scripts/python.exe' } else { Join-Path (Get-Location) '.runtime/venv/Scripts/python.exe' }

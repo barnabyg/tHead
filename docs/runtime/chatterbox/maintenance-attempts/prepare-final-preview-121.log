@@ -1,0 +1,37 @@
+Running: pwsh -NoProfile -File scripts/prepare-chatterbox-maintained.ps1 -State C:\docs\git\tHead\.runtime\issue57-worktree\.runtime\maintained
+Preflight: 730364190720 bytes free disk; 90339581952 bytes free RAM; maintained CUDA candidate configuration.
+Using Python 3.12.10 environment at: .runtime\maintained\venv
+Resolved 81 packages in 250ms
+Uninstalled 2 packages in 26ms
+ - chatterbox-tts==0.1.7+thead.1 (from file:///C:/docs/git/tHead/.runtime/issue57-worktree/.runtime/maintained/source)
+ - resemble-perth==1.1.0 (from file:///C:/docs/git/tHead/.runtime/issue57-worktree/.runtime/maintained/perth)
+Using Python 3.12.10 environment at: .runtime\maintained\venv
+Resolved 2 packages in 1ms
+   Building chatterbox-tts @ file:///C:/docs/git/tHead/.runtime/issue57-worktree/.runtime/maintained/source
+   Building resemble-perth @ file:///C:/docs/git/tHead/.runtime/issue57-worktree/.runtime/maintained/perth
+      Built chatterbox-tts @ file:///C:/docs/git/tHead/.runtime/issue57-worktree/.runtime/maintained/source
+      Built resemble-perth @ file:///C:/docs/git/tHead/.runtime/issue57-worktree/.runtime/maintained/perth
+Prepared 2 packages in 1.07s
+Installed 2 packages in 86ms
+ + chatterbox-tts==0.1.7+thead.1 (from file:///C:/docs/git/tHead/.runtime/issue57-worktree/.runtime/maintained/source)
+ + resemble-perth==1.1.0 (from file:///C:/docs/git/tHead/.runtime/issue57-worktree/.runtime/maintained/perth)
+Using Python 3.12.10 environment at: .runtime\maintained\venv
+Checked 83 packages in 5ms
+All installed packages are compatible
+Running: C:\docs\git\tHead\.venv\Scripts\python.exe scripts/chatterbox_eval.py --configuration maintained --state .runtime/maintained --reference docs/runtime/chatterbox/reference-121-10s.wav --text Hello. This is a local voice preview. The final words should sound clear and complete. --output .runtime/maintained/preview-121-attempt-1
+Running: C:\docs\git\tHead\.runtime\issue57-worktree\.runtime\maintained\venv\Scripts\python.exe -I -W error C:\docs\git\tHead\.runtime\issue57-worktree\scripts\chatterbox_eval.py --worker --reference C:\docs\git\tHead\.runtime\issue57-worktree\docs\runtime\chatterbox\reference-121-10s.wav --text Hello. This is a local voice preview. The final words should sound clear and complete. --state C:\docs\git\tHead\.runtime\issue57-worktree\.runtime\maintained --output C:\docs\git\tHead\.runtime\issue57-worktree\.runtime\maintained\preview-121-attempt-1 --seed 17 --device cuda --configuration maintained
+
+  0%|          | 0/1000 [00:00<?, ?it/s]
+  2%|1         | 16/1000 [00:00<00:06, 155.48it/s]
+  3%|3         | 33/1000 [00:00<00:06, 158.75it/s]
+  5%|5         | 51/1000 [00:00<00:05, 166.79it/s]
+  7%|6         | 69/1000 [00:00<00:05, 170.76it/s]
+  9%|8         | 87/1000 [00:00<00:05, 172.53it/s]
+ 10%|#         | 105/1000 [00:00<00:05, 173.65it/s]
+ 12%|#2        | 123/1000 [00:00<00:05, 174.90it/s]
+ 13%|#3        | 132/1000 [00:00<00:05, 170.13it/s]
+S3 Token -> Mel Inference...
+
+  0%|          | 0/2 [00:00<?, ?it/s]
+100%|##########| 2/2 [00:00<00:00, 26.88it/s]
+Audition WAV and evidence: C:\docs\git\tHead\.runtime\issue57-worktree\.runtime\maintained\preview-121-attempt-1

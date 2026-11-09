@@ -1,7 +1,8 @@
 #Requires -Version 7.0
 param([Parameter(Mandatory)][ValidatePattern('^[a-z0-9-]{1,50}$')][string]$Label,
       [Parameter(Mandatory)][ValidateSet('jfk-zira','chatterbox-nano-1089','chatterbox-nano-121')][string]$Avatar,
-      [ValidateSet("cpu","cuda")][string]$Configuration = "cpu",
+      [ValidateSet("cpu","cuda","maintained")][string]$Configuration = "cpu",
+      [string]$State = '',
       [ValidateRange(1024,65535)][int]$Port = 8767,
       [switch]$ProbesOnly, [switch]$Probes, [switch]$KeepOpen, [switch]$Prepare)
 $ErrorActionPreference = 'Stop'
@@ -19,6 +20,7 @@ $gpuBefore = & nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits
 $launch = @('-NoProfile','-File','scripts/chatterbox-app.ps1','-NoBrowser','-Port',"$Port",
             '-Output',".runtime/chatterbox-integration-$Label",'-Avatar',$Avatar,'-Configuration',$Configuration)
 if (-not $Prepare) { $launch += '-SkipPreparation' }
+if ($State) { $launch += @('-State', [IO.Path]::GetFullPath($State)) }
 $app = Start-Process pwsh -ArgumentList $launch -WindowStyle Hidden -PassThru -RedirectStandardOutput "$prefix-app.out.log" -RedirectStandardError "$prefix-app.err.log"
 $app.Id | Set-Content "$prefix-launcher.pid"
 $measure = @('scripts/chatterbox-benchmark.cjs',"$prefix.json",$Avatar)
