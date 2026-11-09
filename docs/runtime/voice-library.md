@@ -35,10 +35,16 @@ speakers, noise or clone quality; the synthetic preview is the quality check.
   encoded MP3/AAC container padding alone is not counted as spoken content.
 
 Only four pending imports are allowed. Temporary imports are separate from saved
-voices and expire after one hour. Cancel removes the candidate immediately;
-decoder temporary files are removed on success/failure/cancel. Directories left by
-a terminated application are removed on a subsequent import/start once ten minutes
-old, beyond the total bounded decoder lifetime. SQLite reuses freed pages and
+voices and expire after one hour. Each application session holds a lazy local OS
+lock and marks its candidates with an opaque owner identity. A new startup/import
+immediately removes candidates whose owner process has died; another live app's
+locked imports remain intact. Graceful shutdown closes the store, removes its
+pending candidates and releases its lease. Cancel removes a candidate immediately;
+decoder temporary files are removed on success/failure/cancel. Owner-scoped orphan
+directories are removed with their dead session. Legacy directories without an
+owner marker are removed after ten minutes, beyond the total bounded decoder
+lifetime. Saved voice records and idempotent-save receipts survive this cleanup.
+SQLite reuses freed pages and
 zeros deleted record content (`secure_delete`); deletion is not a claim of forensic
 erasure from disks or backups.
 

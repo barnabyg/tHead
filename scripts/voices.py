@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import hashlib
+import importlib
 import io
 import json
+import os
 import shutil
 import sqlite3
 import subprocess  # nosec B404
@@ -16,7 +18,7 @@ import wave
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any
+from typing import Any, BinaryIO
 
 from prepare import ROOT, RUNTIME
 
@@ -51,6 +53,16 @@ def validated_name(value: Any) -> str:
 def check_cancelled(cancelled: threading.Event | None) -> None:
     if cancelled is not None and cancelled.is_set():
         raise InterruptedError("Voice import cancelled")
+
+
+def lock_lease(stream: BinaryIO) -> None:
+    stream.seek(0)
+    if os.name == "nt":
+        locking = importlib.import_module("msvcrt")
+        locking.locking(stream.fileno(), locking.LK_NBLCK, 1)
+    else:
+        locking = importlib.import_module("fcntl")
+        locking.flock(stream.fileno(), locking.LOCK_EX | locking.LOCK_NB)
 
 
 class AudioDecoder:
@@ -220,6 +232,10 @@ class VoiceStore:
         self.path = directory / "avatars.sqlite3"
         self.decoder = AudioDecoder(media_directory)
         self.temporary = directory / "voice-imports"
+        self.owner = uuid.uuid4().hex
+        self.lease: BinaryIO | None = None
+        self.guard = threading.RLock()
+        self.closed = False
         self.error = ""
         try:
             directory.mkdir(parents=True, exist_ok=True)
@@ -242,8 +258,13 @@ class VoiceStore:
             connection.execute("""CREATE TABLE IF NOT EXISTS voice_imports (
                 id TEXT PRIMARY KEY, name TEXT NOT NULL, metadata TEXT NOT NULL,
                 audio BLOB, previewed INTEGER NOT NULL DEFAULT 0,
-                saved_id TEXT, expires REAL NOT NULL)""")
-            connection.execute("DELETE FROM voice_imports WHERE expires < ?", (time.time(),))
+                saved_id TEXT, expires REAL NOT NULL, owner TEXT NOT NULL DEFAULT '')""")
+            columns = {row[1] for row in connection.execute("PRAGMA table_info(voice_imports)")}
+            if "owner" not in columns:
+                connection.execute(
+                    "ALTER TABLE voice_imports ADD COLUMN owner TEXT NOT NULL DEFAULT ''"
+                )
+            self.prune_imports(connection)
             # Defend against concurrent avatar assignment/deletion in the shared DB.
             # Existing avatar columns and built-in voice identities remain unchanged.
             for statement in (
@@ -293,6 +314,98 @@ class VoiceStore:
             ):
                 shutil.rmtree(path)
 
+    def ensure_owner(self) -> None:
+        if self.closed:
+            raise ValueError("Voice library is closed; restart the application")
+        if self.lease is not None:
+            return
+        directory = self.temporary / "leases"
+        directory.mkdir(parents=True, exist_ok=True)
+        path = directory / (self.owner + ".lock")
+        stream = path.open("x+b")
+        try:
+            stream.write(b"0")
+            stream.flush()
+            lock_lease(stream)
+        except BaseException:
+            stream.close()
+            path.unlink(missing_ok=True)
+            raise
+        self.lease = stream
+
+    def prune_imports(self, connection: sqlite3.Connection) -> None:
+        connection.execute("DELETE FROM voice_imports WHERE expires < ?", (time.time(),))
+        # Ownerless candidates predate leases and cannot belong to a current session.
+        # Preserve saved receipts and every released saved voice record.
+        connection.execute("DELETE FROM voice_imports WHERE owner='' AND saved_id IS NULL")
+        owners = {
+            row[0]
+            for row in connection.execute(
+                "SELECT DISTINCT owner FROM voice_imports WHERE saved_id IS NULL"
+            )
+        }
+        owners.update(path.stem for path in (self.temporary / "leases").glob("*.lock"))
+        for owner in owners:
+            if owner == self.owner:
+                continue
+            if (
+                not isinstance(owner, str)
+                or len(owner) != 32
+                or any(c not in "0123456789abcdef" for c in owner)
+            ):
+                connection.execute(
+                    "DELETE FROM voice_imports WHERE owner=? AND saved_id IS NULL", (owner,)
+                )
+                continue
+            path = self.temporary / "leases" / (owner + ".lock")
+            stream: BinaryIO | None = None
+            try:
+                try:
+                    stream = path.open("r+b")
+                    lock_lease(stream)
+                except FileNotFoundError:
+                    pass
+                except OSError:
+                    # A held OS lock proves another session is alive. Unknown I/O
+                    # failures are conservative: never delete another live import.
+                    continue
+                connection.execute(
+                    "DELETE FROM voice_imports WHERE owner=? AND saved_id IS NULL", (owner,)
+                )
+                for temporary in self.temporary.glob("import-" + owner + "-*"):
+                    if (
+                        not temporary.is_symlink()
+                        and temporary.is_dir()
+                        and temporary.resolve().parent == self.temporary.resolve()
+                    ):
+                        shutil.rmtree(temporary)
+            finally:
+                if stream is not None:
+                    stream.close()
+            try:
+                path.unlink(missing_ok=True)
+            except OSError:
+                pass  # Another cleaner may have opened the released lease; retry next time.
+
+    def close(self) -> None:
+        with self.guard:
+            self.closed = True
+            stream, self.lease = self.lease, None
+            if stream is None:
+                return
+            try:
+                with self.connect(write=True) as connection:
+                    connection.execute(
+                        "DELETE FROM voice_imports WHERE owner=? AND saved_id IS NULL",
+                        (self.owner,),
+                    )
+            finally:
+                stream.close()
+                try:
+                    (self.temporary / "leases" / (self.owner + ".lock")).unlink(missing_ok=True)
+                except OSError:
+                    pass  # A concurrent cleaner may still hold the file; reap it next startup.
+
     def import_audio(
         self,
         name: Any,
@@ -311,20 +424,23 @@ class VoiceStore:
         check_cancelled(cancelled)
         self.cleanup_temporary()
         identity = "import-" + uuid.uuid4().hex
-        with self.connect(write=True) as connection:
-            connection.execute("DELETE FROM voice_imports WHERE expires < ?", (time.time(),))
+        with self.guard, self.connect(write=True) as connection:
+            self.ensure_owner()
+            self.prune_imports(connection)
             count = connection.execute(
                 "SELECT COUNT(*) FROM voice_imports WHERE saved_id IS NULL"
             ).fetchone()[0]
             if count >= MAX_CANDIDATES:
                 raise ValueError("Finish or cancel another voice import before starting a new one")
             connection.execute(
-                "INSERT INTO voice_imports (id,name,metadata,expires) VALUES (?,?,?,?)",
-                (identity, name, "{}", time.time() + IMPORT_LIFETIME),
+                "INSERT INTO voice_imports (id,name,metadata,expires,owner) VALUES (?,?,?,?,?)",
+                (identity, name, "{}", time.time() + IMPORT_LIFETIME, self.owner),
             )
         try:
             self.temporary.mkdir(exist_ok=True)
-            with tempfile.TemporaryDirectory(prefix="import-", dir=self.temporary) as temporary:
+            with tempfile.TemporaryDirectory(
+                prefix="import-" + self.owner + "-", dir=self.temporary
+            ) as temporary:
                 audio = self.decoder.decode(raw, filename, Path(temporary), cancelled)
             check_cancelled(cancelled)
         except BaseException:
@@ -345,7 +461,9 @@ class VoiceStore:
             "created": time.time(),
         }
         try:
-            with self.connect(write=True) as connection:
+            with self.guard, self.connect(write=True) as connection:
+                if self.closed:
+                    raise InterruptedError("Voice library closed during import")
                 check_cancelled(cancelled)
                 connection.execute(
                     "UPDATE voice_imports SET metadata=?,audio=? WHERE id=?",

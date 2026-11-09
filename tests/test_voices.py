@@ -42,6 +42,44 @@ class VoiceStorageTests(unittest.TestCase):
         self.addCleanup(temporary.cleanup)
         self.directory = Path(temporary.name)
         self.store = VoiceStore(self.directory, MEDIA)
+        self.addCleanup(self.store.close)
+
+    def test_crashed_owner_is_reaped_without_cancelling_a_live_import(self) -> None:
+        live = self.store.import_audio("Live import", "valid.wav", recording(), True)
+        live_reference = self.store.reference(live["id"])
+        source = self.directory / "crash-fixture.wav"
+        source.write_bytes(recording())
+        code = (
+            "import os,sys; from pathlib import Path; "
+            "sys.path.insert(0,sys.argv[1]); from voices import VoiceStore; "
+            "store=VoiceStore(Path(sys.argv[2]),Path(sys.argv[3])); "
+            "raw=Path(sys.argv[4]).read_bytes(); "
+            "[store.import_audio('Abandoned '+str(n),'fixture.wav',raw,True) for n in range(3)]; "
+            "os._exit(0)"
+        )
+        # The separate process dies without calling close: the OS must release its lease.
+        subprocess.run(  # nosec B603
+            [
+                sys.executable,
+                "-I",
+                "-c",
+                code,
+                str(ROOT / "scripts"),
+                str(self.directory),
+                str(MEDIA),
+                str(source),
+            ],
+            check=True,
+            timeout=180,
+        )
+        reopened = VoiceStore(self.directory, MEDIA)
+        try:
+            replacement = reopened.import_audio("After crash", "valid.wav", recording(), True)
+            self.assertTrue(replacement["available"])
+            self.assertEqual(self.store.reference(live["id"]), live_reference)
+            self.assertTrue(self.store.candidate(live["id"])["available"])
+        finally:
+            reopened.close()
 
     def test_source_removal_restart_rename_and_idempotent_save(self) -> None:
         source = self.directory / "original.wav"
@@ -63,6 +101,7 @@ class VoiceStorageTests(unittest.TestCase):
         saved = self.store.save(imported["id"])
         self.assertEqual(self.store.save(imported["id"]), saved)
         reopened = VoiceStore(self.directory, MEDIA)
+        self.addCleanup(reopened.close)
         renamed = reopened.rename(saved["id"], "Renamed")
         self.assertEqual(renamed["id"], saved["id"])
         self.assertEqual(reopened.reference(saved["id"]), canonical)
@@ -123,7 +162,7 @@ class VoiceStorageTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "permission"):
             self.store.import_audio("Reference", "valid.wav", recording(), False)
         self.assertEqual(self.store.list(), [])
-        self.assertEqual(list((self.directory / "voice-imports").iterdir()), [])
+        self.assertEqual(list((self.directory / "voice-imports").glob("import-*")), [])
 
     def test_cancel_and_bounded_pending_imports(self) -> None:
         cancelled = threading.Event()
@@ -175,6 +214,7 @@ class VoiceStorageTests(unittest.TestCase):
                 )
             connection.execute("UPDATE voices SET audio=? WHERE id=?", (b"corrupt", saved["id"]))
         reopened = VoiceStore(self.directory, MEDIA)
+        self.addCleanup(reopened.close)
         self.assertFalse(reopened.read(saved["id"])["available"])
         with self.assertRaisesRegex(ValueError, "First avatar.*Second avatar"):
             reopened.delete(saved["id"], "Shared voice")
