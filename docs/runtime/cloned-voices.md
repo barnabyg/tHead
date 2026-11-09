@@ -64,6 +64,11 @@ container and decoding, with finite 180-second operation limits. Recommend quiet
 10–20-second English single-speaker speech. Format checks cannot establish
 permission, speaker count, recording cleanliness or clone quality.
 
+Audio-tool preparation downloads the pinned FFmpeg archive from the publisher's
+[versioned GitHub release](https://github.com/GyanD/codexffmpeg/releases/tag/9.0.2).
+The archive checksum and executable checksums remain mandatory. This mirror
+avoids repeated HTTP 503 responses from the publisher's package host.
+
 Uploads, decoding, reference conditioning and previews stay on this PC. Cloning
 does not send recordings to a provider, enter transcripts, charge the budget or
 write source audio into logs/tracked configuration. Temporary candidates expire;
