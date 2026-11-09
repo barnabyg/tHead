@@ -178,10 +178,7 @@ context and price reservation. Restarting uses `THEAD_MODEL`, otherwise the comp
 not write environment variables or persist across restarts. Unknown startup models
 remain blocked by validation/pricing; choose an available model to recover.
 
-Checked on 8 November 2026 using the backend account's free model metadata API:
-`gpt-6.1-sol` is available; the requested `gpt-6.1-lunar` returns HTTP 404 and
-is shown disabled with an explanation. It has no verified pricing or reasoning
-mapping. `gpt-6-luna` is the separate legacy selection, not an alias for Lunar.
+Settings lists `gpt-6.1-sol` and `gpt-6-luna`, with Luna selected by default.
 The app never silently falls back. Other accounts may lack Sol access; a redacted
 provider error asks you to check model access or select another available model.
 
@@ -197,8 +194,9 @@ preparation-and-launch command `./run.bat` with the prerequisites above (first u
 adds `-InitializeBudget`). Open Settings, choose Sol, return and ask a question,
 then a contextual follow-up. Verify Sol on both turns in Session details. During
 a response choose legacy Luna; the current turn must retain Sol and the next use
-Luna. Lunar must be visibly unavailable. Account access, real-provider output,
-GPU speech and lip sync require this manual check; automated fixtures cost nothing.
+Luna. Settings must show only Sol and Luna, with no unavailable-model warning.
+Account access, real-provider output, GPU speech and lip sync require this manual
+check; automated fixtures cost nothing.
 
 ## Thinking level
 

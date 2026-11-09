@@ -426,6 +426,12 @@ class ConversationTests(unittest.TestCase):
     def test_model_settings_preserve_context_and_capture_active_turn(self) -> None:
         status = self.request("/status")
         self.assertEqual(status["settings"]["model"], "gpt-6-luna")
+        self.assertEqual(
+            [model["id"] for model in status["settings"]["models"]],
+            ["gpt-6.1-sol", "gpt-6-luna"],
+        )
+        self.assertTrue(all(model["available"] for model in status["settings"]["models"]))
+        self.assertFalse(any(model["error"] for model in status["settings"]["models"]))
         run = self.ask(fault="llm-connect")
         changed = self.request("/settings", {"session": status["session"], "model": "gpt-6.1-sol"})
         self.assertEqual(changed["model"], "gpt-6.1-sol")
