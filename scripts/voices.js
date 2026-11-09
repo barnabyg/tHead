@@ -18,6 +18,83 @@ let voicePreviewed = false;
 let voiceAudioKey = '';
 let repairVoice = '';
 let savedVoiceCatalogue = '';
+let voiceReadiness = null;
+let voiceReadinessVersion = 0;
+let preparationStarting = false;
+let preparationStartVersion = 0;
+let preparationAttempted = false;
+let preparationActionError = '';
+let preparationCancelling = false;
+
+function updateVoicePreparation(readiness) {
+  if (JSON.stringify(readiness) !== JSON.stringify(voiceReadiness)) {
+    voiceReadinessVersion++;
+    preparationActionError = '';
+  }
+  voiceReadiness = readiness;
+  if (readiness.state === 'preparing') preparationAttempted = true;
+  else preparationCancelling = false;
+  renderVoicePreparation();
+}
+
+function renderVoicePreparation() {
+  const readiness = voiceReadiness;
+  if (!readiness) return;
+  const prepare = document.querySelector('#prepare-voices');
+  const cancel = document.querySelector('#cancel-voice-preparation');
+  const clone = document.querySelector('#clone-voice');
+  const status = document.querySelector('#voice-readiness');
+  const focused = document.activeElement;
+  const starting = preparationStarting && voiceReadinessVersion === preparationStartVersion;
+  const preparing = readiness.state === 'preparing';
+  const failed = readiness.state === 'failed';
+  const cancelled = readiness.state === 'cancelled';
+  const ready = readiness.available && !starting && !preparing && !failed && !cancelled;
+  let message;
+  if (starting) {
+    message = 'Starting local voice preparation…';
+  } else if (preparing) {
+    message = preparationCancelling
+      ? 'Cancelling local voice preparation…'
+      : 'Preparing local voices. Downloads and checks may take several minutes.';
+  } else if (failed) {
+    message = `Local voice preparation failed. ${readiness.error || 'Retry preparation.'}`;
+  } else if (cancelled) {
+    message = 'Preparation cancelled. Retry to resume verified downloads.';
+  } else if (ready) {
+    message =
+      preparationAttempted && readiness.state === 'ready'
+        ? 'Setup complete — ready to clone voices.'
+        : 'Ready to clone voices.';
+  } else {
+    message =
+      readiness.error || 'Local voice engine is not available. Prepare local voices to continue.';
+  }
+  if (preparationActionError) message = `${message} ${preparationActionError}`;
+  prepare.textContent = starting
+    ? 'Starting local voices…'
+    : preparing
+      ? 'Preparing local voices…'
+      : failed || cancelled || preparationActionError
+        ? 'Retry voice preparation'
+        : 'Prepare local voices';
+  prepare.hidden = !!ready;
+  prepare.disabled = preparationStarting || preparing || !readiness.eligible;
+  cancel.hidden = !preparing;
+  cancel.disabled = preparationCancelling;
+  clone.disabled = !ready;
+  if (status.textContent !== message) status.textContent = message;
+  // Keep focus on a useful control when preparation disables or hides its trigger.
+  if (
+    [prepare, cancel, status].includes(focused) &&
+    (focused === status || focused.disabled || focused.hidden)
+  ) {
+    if (!cancel.hidden && !cancel.disabled) cancel.focus();
+    else if (ready) clone.focus();
+    else if (!prepare.disabled) prepare.focus();
+    else status.focus();
+  }
+}
 
 function stopVoiceAudio() {
   cloneAudio.pause();
@@ -104,17 +181,43 @@ document.querySelector('#stop').addEventListener('click', async () => {
   }
 });
 document.querySelector('#prepare-voices').addEventListener('click', async () => {
+  if (preparationStarting || !voiceReadiness?.eligible || voiceReadiness.state === 'preparing')
+    return;
+  preparationStarting = true;
+  preparationAttempted = true;
+  preparationActionError = '';
+  preparationStartVersion = voiceReadinessVersion;
+  const version = voiceReadinessVersion;
+  document.querySelector('#voice-result').textContent = '';
+  renderVoicePreparation();
   try {
-    await post('/voices/prepare', { session: sessionIdentity });
-    document.querySelector('#voice-result').textContent = 'Preparation requested.';
+    const readiness = await post('/voices/prepare', { session: sessionIdentity });
+    // A status poll may already have observed a newer outcome than this reply.
+    if (version === voiceReadinessVersion) updateVoicePreparation(readiness);
   } catch (error) {
-    document.querySelector('#voice-result').textContent = String(error);
+    if (version === voiceReadinessVersion) preparationActionError = String(error);
+  } finally {
+    preparationStarting = false;
+    renderVoicePreparation();
   }
 });
 document.querySelector('#cancel-voice-preparation').addEventListener('click', async () => {
-  await post('/voices/prepare/cancel', { session: sessionIdentity }).catch((error) => {
-    document.querySelector('#voice-result').textContent = String(error);
-  });
+  if (preparationCancelling || voiceReadiness?.state !== 'preparing') return;
+  preparationCancelling = true;
+  preparationActionError = '';
+  const version = voiceReadinessVersion;
+  renderVoicePreparation();
+  try {
+    const readiness = await post('/voices/prepare/cancel', { session: sessionIdentity });
+    if (version === voiceReadinessVersion) updateVoicePreparation(readiness);
+  } catch (error) {
+    if (version === voiceReadinessVersion) {
+      preparationCancelling = false;
+      preparationActionError = String(error);
+    }
+  } finally {
+    renderVoicePreparation();
+  }
 });
 
 clonePreview.addEventListener('click', async () => {
@@ -220,10 +323,7 @@ window.renderVoiceLibrary = (status) => {
   if (!status.voiceLibrary) return;
   const library = status.voiceLibrary;
   const readiness = library.readiness;
-  document.querySelector('#prepare-voices').disabled = readiness.state === 'preparing';
-  document.querySelector('#cancel-voice-preparation').hidden = readiness.state !== 'preparing';
-  document.querySelector('#voice-readiness').textContent =
-    readiness.error || readiness.message || 'Local engine ready. Preview speech is synthetic.';
+  updateVoicePreparation(readiness);
   if (voiceOperation && voiceSession !== status.session && !voiceSaving) cancelVoiceOperation();
   if (voiceOperation && library.operation === voiceOperation && !voiceSaving) {
     if (library.state === 'failed' || library.state === 'cancelled') {

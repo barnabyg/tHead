@@ -106,11 +106,35 @@ speech through the normal provider/conversation path. All other questions retain
 the existing fixture answers. Diagnostic worker crashes use the session-bound
 `/voices/diagnostic` API; no crash control is added to the ordinary UI.
 
-Voices → Prepare local voices / retry starts an explicit bounded setup job when
-the runtime is eligible; progress, failure, retry and Cancel preparation are
-visible. Zira/Hazel remain usable while optional preparation runs. Select
+Voices → **Prepare local voices** starts an explicit bounded setup job when
+the runtime is eligible. **Preparing local voices** keeps **Cancel preparation**
+visible and prevents duplicate starts. **Setup complete — ready to clone voices**
+appears only after the backend reports the engine available; **Clone voice** then
+becomes usable. Returning with an installed, available engine shows **Ready to
+clone voices** without starting downloads. Failure and cancellation keep an
+explicit outcome and **Retry voice preparation** action. Device/runtime blockers
+remain visible and prevent cloning. Zira/Hazel remain usable while optional
+preparation runs. Select
 Zira/Hazel before changing an installed cloned-voice environment. Interrupted
 setup preserves the existing voice library and verified acquisition state.
+
+### Preparation status manual check
+
+Use the native prerequisites above. From **C:/docs/git/tHead**, use initially
+absent isolated directories for the first run:
+
+```powershell
+pwsh -NoProfile -File ./scripts/conversation.ps1 -FixtureProvider -Diagnostics -InitializeBudget -UserData "$env:TEMP/tHead-preparation-ui-data" -ChatterboxState "$env:TEMP/tHead-preparation-ui-engine" -Port 8771
+```
+
+Open Settings → Voices. Expect setup to be required and Clone voice disabled.
+Start preparation, cancel once, then retry and allow setup to finish. Expect
+the explicit completion message, an enabled Clone voice action and no stale
+request, cancellation or error message. Navigate away/back, reload, and restart
+with the same command: readiness should remain clear without another setup
+attempt. An unavailable device/runtime should show its blocker and leave
+Zira/Hazel and existing avatars intact. This check uses real optional downloads
+and GPU setup; browser tests substitute deterministic preparation API responses.
 
 Use the [maintenance candidate guide](chatterbox/maintenance.md) for the isolated
 research runtime and short offline regression previews. The approved profile is
