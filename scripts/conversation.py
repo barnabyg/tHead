@@ -375,10 +375,22 @@ class Conversation(Demonstration):
             with self.condition:
                 if not self.pair_selectable():
                     raise ValueError("Stop and wait before deleting a voice")
+                removed = self.voice_store.read(str(data.get("id", "")))
                 self.voice_store.delete(str(data.get("id", "")), data.get("name"))
-            if self.clone_saved_reference and self.clone_saved_reference["id"] == data.get("id"):
-                self.clone_saved_reference = None
-                self.release_preview()
+                self.state = "voice-maintenance"
+            try:
+                with self.clone_lock:
+                    if self.clone_saved_reference and self.clone_saved_reference["id"] == data.get(
+                        "id"
+                    ):
+                        self.clone_saved_reference = None
+                        self.release_preview()
+                    elif self.cloned_engine and isinstance(removed.get("sha256"), str):
+                        self.cloned_engine.discard_conditioning(removed["sha256"], self.shutdown)
+            finally:
+                with self.condition:
+                    self.state = "idle"
+                    self.condition.notify_all()
             return {"ok": True}
         raise ValueError("Unknown voice action")
 

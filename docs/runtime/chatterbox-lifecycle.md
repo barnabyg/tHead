@@ -119,6 +119,15 @@ faults to the active worker. Metadata reports `ready_workers`, `worker_count`,
 The SpeechVoice protocol describes metadata as a readable property so both mutable
 adapter metadata and computed pool status satisfy strict typing.
 
+Deleting a saved voice also discards its unused conditioning from both workers
+without unloading the current voice or its models. A hash shared by the active
+voice stays available. The application briefly marks voice maintenance while
+sending bounded discard commands outside its control/status locks. Obsolete
+workers apply pending discards after draining and before becoming ready. Pending
+entries cover only hashes present or in flight in the two bounded worker caches
+and disappear after acknowledgement. Per-worker cache sizes and process IDs in
+speech-engine status support no-cost HTTP regression checks of release and reuse.
+
 Measurement: the new HTTP fixture module first failed because the pool did not
 exist. After implementation, the real fixture-worker IPC tests passed Stop/late
 PCM isolation, promotion without waiting for a four-second obsolete synthesis,

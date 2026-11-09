@@ -360,6 +360,7 @@ class ChatterboxVoice:
                     self.close()
                     raise
                 self.metadata.update(conditioning_cache_size=result["conditioning_cache_size"])
+                self.metadata["conditioning_hashes"] = result["conditioning_hashes"]
             self.identity, self.reference_path, self.reference_sha256 = (
                 identity,
                 reference,
@@ -367,6 +368,19 @@ class ChatterboxVoice:
             )
             self.turn_cancelled = None
             self.metadata.update(reference_id=identity, reference_sha256=reference_hash)
+
+    def discard_conditioning(self, digest: str, cancelled: threading.Event | None = None) -> None:
+        with self.operation_lock:
+            if self.process is None or self.process.poll() is not None:
+                self.metadata.update(conditioning_cache_size=0, conditioning_hashes=[])
+                return
+            if self.turn_cancelled is not None and not self.turn_cancelled.is_set():
+                raise RuntimeError("Stop the active turn before discarding conditioning")
+            result = self.request("discard", cancelled or threading.Event(), discard_sha256=digest)
+            self.metadata.update(
+                conditioning_cache_size=result["conditioning_cache_size"],
+                conditioning_hashes=result["conditioning_hashes"],
+            )
 
     def close(self) -> None:
         # May be called by shutdown while reply() is polling; do not wait on operation_lock.

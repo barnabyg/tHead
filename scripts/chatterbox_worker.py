@@ -100,6 +100,7 @@ def main() -> None:
             "reference_sha256": digest,
             "epoch": args.epoch,
             "conditioning_cache_size": len(conditionings),
+            "conditioning_hashes": list(conditionings),
             "worker_pid": os.getpid(),
             "sample_rate": 16000,
             "source_rate": 24000,
@@ -134,6 +135,24 @@ def main() -> None:
             if fault in ("missing-reference", "missing-model"):
                 raise ValueError(f"Experimental {fault}; restore the pinned asset and retry")
             begun = time.perf_counter()
+            if operation == "discard":
+                removed = request["discard_sha256"]
+                if (
+                    not isinstance(removed, str)
+                    or len(removed) != 64
+                    or any(character not in "0123456789abcdef" for character in removed)
+                ):
+                    raise ValueError("Expected a conditioning SHA-256")
+                if removed != digest:
+                    conditionings.pop(removed, None)
+                send(
+                    {
+                        **envelope,
+                        "conditioning_cache_size": len(conditionings),
+                        "conditioning_hashes": list(conditionings),
+                    }
+                )
+                continue
             if operation == "reference":
                 path = Path(request["reference_file"])
                 candidate_digest = request["reference_sha256"]
@@ -160,7 +179,13 @@ def main() -> None:
                     conditionings.popitem(last=False)
                 reference_id, reference, digest = request["reference_id"], path, candidate_digest
                 turn_id, resampler = "", None
-                send({**envelope, "conditioning_cache_size": len(conditionings)})
+                send(
+                    {
+                        **envelope,
+                        "conditioning_cache_size": len(conditionings),
+                        "conditioning_hashes": list(conditionings),
+                    }
+                )
                 continue
             if operation == "begin":
                 validate_reference(reference, digest)

@@ -57,6 +57,7 @@ class ChatterboxEngine:
         self.error = ""
         self.capacity: dict[str, int] = {}
         self.next_fault = ""
+        self.pending_discards: dict[str, set[int]] = {}
         pool_id = uuid.uuid4().hex
         self.slots = []
         for index in range(2):
@@ -156,6 +157,11 @@ class ChatterboxEngine:
                     for slot in self.slots
                 ),
                 "ready_workers": ready_workers,
+                "conditioning_cache_sizes": [
+                    slot.voice.metadata.get("conditioning_cache_size", 0) for slot in self.slots
+                ],
+                "worker_pids": [slot.voice.metadata.get("worker_pid") for slot in self.slots],
+                "pending_conditioning_discards": len(self.pending_discards),
                 "replenishing": bool(self.replenisher and self.replenisher.is_alive()),
                 "recovery_error": self.error,
                 "capacity": dict(self.capacity),
@@ -191,9 +197,78 @@ class ChatterboxEngine:
         if voice.process is None or voice.process.poll() is not None:
             self.check_capacity()
         voice.prepare(cancelled)
+        while True:
+            self.apply_discards(index, cancelled)
+            with self.lock:
+                if any(
+                    index in indices and digest != voice.reference_sha256
+                    for digest, indices in self.pending_discards.items()
+                ):
+                    continue
+                slot.version = version
+                slot.state = "ready" if self.version == version else "stale"
+                return
+
+    def apply_discards(self, index: int, cancelled: threading.Event) -> None:
+        voice = self.slots[index].voice
+        while True:
+            with self.lock:
+                pending = [
+                    digest
+                    for digest, indices in self.pending_discards.items()
+                    if index in indices and digest != voice.reference_sha256
+                ]
+            if not pending:
+                return
+            for digest in pending:
+                voice.discard_conditioning(digest, cancelled)
+                with self.lock:
+                    indices = self.pending_discards.get(digest)
+                    if indices is not None:
+                        indices.discard(index)
+                        if not indices:
+                            del self.pending_discards[digest]
+
+    def discard_conditioning(self, digest: str, cancelled: threading.Event | None = None) -> None:
+        cancellation = cancelled or self.shutdown
         with self.lock:
-            slot.version = version
-            slot.state = "ready" if self.version == version else "stale"
+            if self.shutdown.is_set():
+                raise RuntimeError("Speech engine is closed")
+            if digest == self.reference[2]:
+                return
+            if self.turn is not None:
+                if self.turn_cancelled is None or not self.turn_cancelled.is_set():
+                    raise RuntimeError("Stop the active turn before discarding conditioning")
+                self.abandon(self.turn)
+            indices = {
+                index
+                for index, slot in enumerate(self.slots)
+                if digest in slot.voice.metadata.get("conditioning_hashes", [])
+                or slot.voice.reference_sha256 == digest
+                or slot.voice.pending
+                and slot.voice.pending.get("reference_sha256") == digest
+            }
+            if not indices:
+                return
+            self.pending_discards.setdefault(digest, set()).update(indices)
+            idle = [index for index in indices if self.ready(index)]
+            for index in idle:
+                self.slots[index].state = "maintenance"
+        for index in idle:
+            try:
+                self.apply_discards(index, cancellation)
+            except Exception:
+                with self.lock:
+                    self.slots[index].state = "failed"
+                    for remaining in idle:
+                        if self.slots[remaining].state == "maintenance":
+                            self.slots[remaining].state = "stale"
+                    self.schedule_replenishment()
+                raise
+            with self.lock:
+                self.slots[index].state = "ready"
+        with self.lock:
+            self.promote()
 
     def prepare(self, cancelled: threading.Event) -> None:
         with self.lock:
@@ -352,6 +427,8 @@ class ChatterboxEngine:
             if reference[0] == self.reference[0] and reference[2] == self.reference[2]:
                 return
             self.reference, self.version = reference, self.version + 1
+            # A newly selected saved reference can legitimately share a formerly deleted hash.
+            self.pending_discards.pop(reference[2], None)
             indices = [index for index, slot in enumerate(self.slots) if slot.state == "ready"]
             for index in indices:
                 self.slots[index].state = "recovering"

@@ -277,6 +277,68 @@ class ConversationTests(unittest.TestCase):
         self.assertEqual(len([v for v in reopened["voices"] if v.get("editable")]), 2)
         self.assertEqual(len([a for a in reopened["avatars"] if a["voice"] == first["id"]]), 2)
 
+    def test_deleting_previous_voice_releases_both_caches_and_preserves_current_warm_voice(
+        self,
+    ) -> None:
+        self.check_deleted_conditioning("121")
+
+    def test_deleting_voice_keeps_identical_audio_used_by_current_voice_warm(self) -> None:
+        self.check_deleted_conditioning("1089")
+
+    def test_deleting_voice_invalidates_draining_worker_before_it_becomes_ready(self) -> None:
+        self.check_deleted_conditioning("121", interrupt_previous=True)
+
+    def check_deleted_conditioning(
+        self, reference: str, *, interrupt_previous: bool = False
+    ) -> None:
+        session = self.request("/status")["session"]
+        first = self.clone_voice("Previous reader")
+        second = self.clone_voice("Current reader", reference)
+        image = base64.b64encode((ROOT / "tests/fixtures/portrait.jpg").read_bytes()).decode()
+        avatars = [
+            self.request(
+                "/avatars", {"session": session, "name": name, "voice": voice["id"], "image": image}
+            )
+            for name, voice in (("Previous avatar", first), ("Current avatar", second))
+        ]
+        for avatar in avatars:
+            self.request("/select", {"session": session, "avatar": avatar["id"]})
+            self.wait(lambda status: status["ready"])
+            if interrupt_previous and avatar == avatars[0]:
+                self.request("/voices/diagnostic", {"session": session, "fault": "delay"})
+            self.ask()
+            if interrupt_previous and avatar == avatars[0]:
+                complete = self.wait(
+                    lambda status: status["speechEngine"]["lifecycle_state"] == "synthesising"
+                )
+            else:
+                complete = self.wait(lambda status: status["state"] == "idle")
+                self.assertEqual(complete["run"]["state"], "complete")
+            self.request("/stop", {"run": complete["run"]["id"]})
+            self.wait(lambda status: status["state"] == "idle")
+        before = self.request("/status")["speechEngine"]
+        if interrupt_previous:
+            self.assertEqual(before["ready_workers"], 1)
+        self.request(
+            "/avatars/update", {"session": session, "id": avatars[0]["id"], "voice": "zira"}
+        )
+        self.request("/voices/delete", {"session": session, **first})
+        after = self.wait(lambda status: status["speechEngine"]["ready_workers"] == 2)[
+            "speechEngine"
+        ]
+        self.assertEqual(after["conditioning_cache_sizes"], [1, 1])
+        self.assertEqual(after["worker_pids"], before["worker_pids"])
+        self.assertEqual(after["ready_workers"], 2)
+        self.assertEqual(after["pending_conditioning_discards"], 0)
+        self.assertEqual(after["reference_id"], second["id"])
+        self.ask()
+        complete = self.wait(lambda status: status["state"] == "idle")
+        metrics = next(
+            event for event in complete["run"]["events"] if event["event"] == "tts-segment"
+        )
+        self.assertEqual(metrics["engine_metrics"]["reference_id"], second["id"])
+        self.assertEqual(complete["run"]["state"], "complete")
+
     def test_cancel_before_upload_finishes_rejects_late_import_and_shutdown_releases_socket(
         self,
     ) -> None:
