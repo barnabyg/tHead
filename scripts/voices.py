@@ -484,11 +484,14 @@ class VoiceStore:
             if stream is None:
                 return
             try:
-                with self.connect(write=True) as connection:
-                    connection.execute(
-                        "DELETE FROM voice_imports WHERE owner=? AND saved_id IS NULL",
-                        (self.owner,),
-                    )
+                if not self.error:
+                    with self.connect(write=True) as connection:
+                        connection.execute(
+                            "DELETE FROM voice_imports WHERE owner=? AND saved_id IS NULL",
+                            (self.owner,),
+                        )
+                # A known storage fault is already reported. Release the OS lease
+                # even when DB cleanup must wait for repair and startup reaping.
             finally:
                 stream.close()
                 try:

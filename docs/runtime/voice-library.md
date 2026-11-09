@@ -76,6 +76,8 @@ If the database later disappears or becomes unreadable, the voice catalogue
 reports an actionable storage error while built-in voices remain available. Reads
 never create an empty replacement for a missing database. Restore the original
 database or a backup and reopen the application to retry.
+Shutdown still releases the session lease after a known storage failure; pending
+imports are reaped when the repaired database is reopened.
 
 ## Test launch and short manual scenario
 

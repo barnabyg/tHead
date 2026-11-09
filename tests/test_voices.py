@@ -131,6 +131,24 @@ class VoiceStorageTests(unittest.TestCase):
         finally:
             original.write_bytes(preserved)
 
+    def test_close_after_known_storage_failure_releases_pending_session(self) -> None:
+        imported = self.store.import_audio("Pending", "valid.wav", recording(), True)
+        original = self.directory / "avatars.sqlite3"
+        preserved = original.read_bytes()
+        try:
+            original.write_bytes(b"late storage failure fixture")
+            self.assertEqual(self.store.list(), [])
+            self.assertTrue(self.store.error)
+            self.store.close()
+        finally:
+            original.write_bytes(preserved)
+        reopened = VoiceStore(self.directory, MEDIA)
+        self.addCleanup(reopened.close)
+        with self.assertRaisesRegex(ValueError, "cancelled"):
+            reopened.candidate(imported["id"])
+        replacement = reopened.import_audio("After repair", "valid.wav", recording(), True)
+        self.assertTrue(replacement["available"])
+
     def test_source_removal_restart_rename_and_idempotent_save(self) -> None:
         source = self.directory / "original.wav"
         source.write_bytes(recording())
