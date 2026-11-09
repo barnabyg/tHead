@@ -85,6 +85,10 @@ class ChatterboxEngine:
         torch = importlib.import_module("torch")
         if not torch.cuda.is_available():
             raise ValueError("Warm speech failover requires CUDA; no CPU fallback")
+        if torch.cuda.get_device_name(0) != "NVIDIA GeForce RTX 3090":
+            raise ValueError(
+                "Conversational cloned voices require the verified RTX 3090 configuration"
+            )
         free_vram, total_vram = torch.cuda.mem_get_info()
         free_ram = int(psutil.virtual_memory().available)
         self.capacity = {
