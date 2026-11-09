@@ -93,9 +93,14 @@ overwriting local edits, and re-extracts verified Python archives in fresh marke
 staging while retaining legacy/unrecognized staging.
 The acquisition-only diagnostic switches `-SourcesOnly` (maintained preparation)
 and `-ExtractOnly` (Python preparation) stop before installation/runtime approval.
-Preparation takes an exclusive state lease and records Git process identities;
-Retry quarantines only recorded locks after their owners have stopped, preserving
-their bytes under `git-lock-quarantine` and leaving manual/unknown locks untouched.
+Preparation takes an exclusive state lease and records Git process identities.
+The journal lists possible lock names, so a stopped process or available file
+handle does not establish ownership of a later file at that path. Retry resumes
+interrupted source acquisition when no Git lock remains. If a lock exists, it
+preserves both the lock and journal and gives an actionable fresh `-State`
+instruction; it does not automatically move an ambiguous lock. This conservative
+limit also applies to an interrupted acquisition that left its own lock, because
+the journal has no verified identity/content record for that file.
 
 The [official CUDA 13.0 Windows wheel index](https://download.pytorch.org/whl/cu130/torch/)
 provides the selected Torch wheel. CUDA 12.8 stops at Torch 2.11.0 on this platform

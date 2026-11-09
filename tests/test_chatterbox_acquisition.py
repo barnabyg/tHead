@@ -32,6 +32,58 @@ def git(directory: Path, *arguments: str) -> str:
 
 
 class SourceAcquisitionTests(unittest.TestCase):
+    def test_stale_journal_does_not_claim_a_later_manual_lock(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            scripts = root / "scripts"
+            scripts.mkdir()
+            script = scripts / "prepare-chatterbox-maintained.ps1"
+            shutil.copyfile(ROOT / "scripts/prepare-chatterbox-maintained.ps1", script)
+            patch = root / "fixture.patch"
+            patch.write_bytes(b"")
+            (root / "chatterbox-maintained-lock.json").write_text(
+                json.dumps(
+                    {
+                        "source_patch": {
+                            "file": patch.name,
+                            "sha256": hashlib.sha256(b"").hexdigest(),
+                        }
+                    }
+                )
+            )
+            state = root / "state"
+            metadata = state / "source/.git"
+            metadata.mkdir(parents=True)
+            journal = state / "git-acquisition.json"
+            journal.write_text(
+                json.dumps(
+                    {
+                        "version": 1,
+                        "source": "source",
+                        "locks": ["config.lock"],
+                        "owner_pid": 2147483647,
+                        "owner_started": 1,
+                        "child_pid": 2147483646,
+                        "child_started": 1,
+                        "finished": False,
+                    }
+                )
+            )
+            recorded = journal.read_bytes()
+            # A later manual Git operation can reuse the potential lock name.
+            manual = metadata / "config.lock"
+            manual.write_bytes(b"manual configuration created after failed acquisition\n")
+            result = command(
+                "pwsh", "-NoProfile", "-File", str(script), "-State", str(state), "-SourcesOnly"
+            )
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("Git lock ownership is ambiguous", result.stderr)
+            self.assertEqual(
+                manual.read_bytes(), b"manual configuration created after failed acquisition\n"
+            )
+            self.assertEqual(journal.read_bytes(), recorded)
+            self.assertFalse((state / "git-lock-quarantine").exists())
+
     def test_retry_finishes_interrupted_source_acquisition(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
@@ -103,8 +155,8 @@ class SourceAcquisitionTests(unittest.TestCase):
                 )
             self.assertNotEqual(concurrent.returncode, 0)
             self.assertIn("Another local voice preparation is active", concurrent.stderr)
-            owned_lock = source / ".git/config.lock"
-            owned_lock.write_bytes(b"task-owned interrupted Git configuration")
+            git_lock = source / ".git/config.lock"
+            git_lock.write_bytes(b"interrupted Git configuration")
             owner = command(
                 "pwsh",
                 "-NoProfile",
@@ -134,7 +186,7 @@ class SourceAcquisitionTests(unittest.TestCase):
             )
             self.assertNotEqual(active.returncode, 0)
             self.assertIn("recorded Git acquisition is still active", active.stderr)
-            self.assertEqual(owned_lock.read_bytes(), b"task-owned interrupted Git configuration")
+            self.assertEqual(git_lock.read_bytes(), b"interrupted Git configuration")
             record.update(owner_pid=2147483647, owner_started=1)
             (state / "git-acquisition.json").write_text(json.dumps(record))
             recovered = command(
@@ -146,15 +198,15 @@ class SourceAcquisitionTests(unittest.TestCase):
                 str(state),
                 "-SourcesOnly",
             )
-            self.assertEqual(recovered.returncode, 0, recovered.stdout + recovered.stderr)
-            self.assertFalse(owned_lock.exists())
-            self.assertTrue(
-                any(
-                    path.read_bytes() == b"task-owned interrupted Git configuration"
-                    for path in (state / "git-lock-quarantine").rglob("*.lock")
-                )
-            )
-            owned_lock.write_bytes(b"unknown manual Git configuration")
+            self.assertNotEqual(recovered.returncode, 0)
+            self.assertIn("Git lock ownership is ambiguous", recovered.stderr)
+            self.assertEqual(git_lock.read_bytes(), b"interrupted Git configuration")
+            self.assertFalse((state / "git-lock-quarantine").exists())
+            # Remove only this test's synthetic journal/lock before exercising
+            # a separate unjournaled manual lock; production preserves both.
+            git_lock.unlink()
+            (state / "git-acquisition.json").unlink()
+            git_lock.write_bytes(b"unknown manual Git configuration")
             unknown_lock = command(
                 "pwsh",
                 "-NoProfile",
@@ -166,8 +218,8 @@ class SourceAcquisitionTests(unittest.TestCase):
             )
             self.assertNotEqual(unknown_lock.returncode, 0)
             self.assertIn("Unrecognized Git lock", unknown_lock.stderr)
-            self.assertEqual(owned_lock.read_bytes(), b"unknown manual Git configuration")
-            owned_lock.unlink()
+            self.assertEqual(git_lock.read_bytes(), b"unknown manual Git configuration")
+            git_lock.unlink()
             for interrupted_at in ("metadata", "init", "fetch"):
                 with self.subTest(interrupted_at=interrupted_at):
                     retry_state = root / interrupted_at

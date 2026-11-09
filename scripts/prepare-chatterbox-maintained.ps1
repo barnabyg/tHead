@@ -65,7 +65,7 @@ $allowedLocks = @('config.lock', 'index.lock', 'HEAD.lock', 'shallow.lock', 'FET
 
 function Git-LockPath([string]$Source, [string]$Name) {
     if ($Source -notin @('source', 'perth') -or $Name -cnotin $allowedLocks) {
-        throw 'Unrecognized Git acquisition ownership; preserve this state.'
+        throw 'Unrecognized Git acquisition lock name; preserve this state.'
     }
     return Assert-StatePath (Join-Path $State "$Source/.git/$Name")
 }
@@ -84,7 +84,7 @@ function Write-GitJournal($Record) {
     Move-Item -LiteralPath $temporary -Destination $journal -Force
 }
 
-function Recover-GitLocks {
+function Resume-GitAcquisition {
     if (-not (Test-Path -LiteralPath $journal)) { return }
     if ((Get-Item -LiteralPath $journal -Force).Length -gt 16384) {
         throw 'Unrecognized Git acquisition journal; preserve this state.'
@@ -102,7 +102,7 @@ function Recover-GitLocks {
         $record.owner_pid -le 0 -or $record.owner_started -le 0 -or
         $record.child_pid -lt 0 -or $record.child_started -lt 0 -or
         (($record.child_pid -eq 0) -ne ($record.child_started -eq 0))) {
-        throw 'Incomplete Git acquisition ownership; preserve this state and choose a fresh state.'
+        throw 'Incomplete Git acquisition journal; preserve this state and choose a fresh state.'
     }
     if ((-not $record.finished -and (Process-IsAlive $record.owner_pid $record.owner_started)) -or
         ($record.child_pid -gt 0 -and (Process-IsAlive $record.child_pid $record.child_started))) {
@@ -117,35 +117,19 @@ function Recover-GitLocks {
             }
         }
     }
-    $quarantine = Assert-StatePath (Join-Path $State ('git-lock-quarantine/' + [Guid]::NewGuid().ToString('N')))
     foreach ($name in $record.locks) {
         $path = Git-LockPath $record.source $name
         if (-not (Test-Path -LiteralPath $path)) { continue }
-        if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
-            throw 'Recorded Git lock is not a regular file; preserve this state.'
-        }
-        try {
-            # Refuse a lock still held by any other writer. Keep bytes stable while renaming.
-            $lockHandle = [IO.File]::Open($path, [IO.FileMode]::Open, [IO.FileAccess]::ReadWrite, [IO.FileShare]::Delete)
-        } catch [IO.IOException] {
-            throw "Recorded Git lock is still in use; preserve it and retry after Git stops: $path"
-        }
-        try {
-            New-Item -ItemType Directory -Force $quarantine | Out-Null
-            $target = Assert-StatePath (Join-Path $quarantine ($record.source + '-' + $name))
-            $null = Assert-StatePath $path
-            Move-Item -LiteralPath $path -Destination $target
-            Write-Output "Quarantined task-owned interrupted Git lock: $target"
-        } finally { $lockHandle.Dispose() }
+        # The journal records possible names before Git starts, not an identity
+        # of a lock actually created by that child. A later manual operation can
+        # reuse the same path after both recorded processes exit. Inactivity or
+        # an available file handle cannot establish ownership, so preserve it.
+        throw "Git lock ownership is ambiguous; preserve the lock and journal and choose a fresh -State directory: $path"
     }
-    if (Test-Path -LiteralPath $quarantine) {
-        $target = Assert-StatePath (Join-Path $quarantine 'git-acquisition.json')
-        $null = Assert-StatePath $journal
-        Move-Item -LiteralPath $journal -Destination $target
-    } else { Remove-Item -LiteralPath $journal }
+    Remove-Item -LiteralPath $journal
 }
 
-Recover-GitLocks
+Resume-GitAcquisition
 
 function Invoke-Checked([string]$Program, [string[]]$Arguments) {
     $info = [Diagnostics.ProcessStartInfo]::new($Program)
