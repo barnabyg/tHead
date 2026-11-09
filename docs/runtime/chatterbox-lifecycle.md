@@ -122,7 +122,9 @@ adapter metadata and computed pool status satisfy strict typing.
 Deleting a saved voice also discards its unused conditioning from both workers
 without unloading the current voice or its models. A hash shared by the active
 voice stays available. The application briefly marks voice maintenance while
-sending bounded discard commands outside its control/status locks. Obsolete
+sending bounded discard commands outside its control/status locks. If damaged
+metadata has lost the deleted reference's hash, it drops inactive cached/in-flight
+conditioning instead, retaining the current voice's hash and warm models. Obsolete
 workers apply pending discards after draining and before becoming ready. Pending
 entries cover only hashes present or in flight in the two bounded worker caches
 and disappear after acknowledgement. Per-worker cache sizes and process IDs in

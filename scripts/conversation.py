@@ -385,8 +385,13 @@ class Conversation(Demonstration):
                     ):
                         self.clone_saved_reference = None
                         self.release_preview()
-                    elif self.cloned_engine and isinstance(removed.get("sha256"), str):
-                        self.cloned_engine.discard_conditioning(removed["sha256"], self.shutdown)
+                    elif self.cloned_engine:
+                        if isinstance(removed.get("sha256"), str):
+                            self.cloned_engine.discard_conditioning(
+                                removed["sha256"], self.shutdown
+                            )
+                        else:
+                            self.cloned_engine.discard_inactive_conditioning(self.shutdown)
             finally:
                 with self.condition:
                     self.state = "idle"

@@ -3,6 +3,7 @@
 import base64
 import json
 import socket
+import sqlite3
 import subprocess  # nosec B404
 import sys
 import tempfile
@@ -11,6 +12,7 @@ import unittest
 import urllib.error
 import urllib.request
 import uuid
+from contextlib import closing
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
@@ -288,8 +290,13 @@ class ConversationTests(unittest.TestCase):
     def test_deleting_voice_invalidates_draining_worker_before_it_becomes_ready(self) -> None:
         self.check_deleted_conditioning("121", interrupt_previous=True)
 
+    def test_deleting_corrupt_inactive_voice_releases_cache_without_unloading_current_voice(
+        self,
+    ) -> None:
+        self.check_deleted_conditioning("121", corrupt_previous=True)
+
     def check_deleted_conditioning(
-        self, reference: str, *, interrupt_previous: bool = False
+        self, reference: str, *, interrupt_previous: bool = False, corrupt_previous: bool = False
     ) -> None:
         session = self.request("/status")["session"]
         first = self.clone_voice("Previous reader")
@@ -322,6 +329,18 @@ class ConversationTests(unittest.TestCase):
         self.request(
             "/avatars/update", {"session": session, "id": avatars[0]["id"], "voice": "zira"}
         )
+        if corrupt_previous:
+            # Simulate persisted-record damage; all behavior is observed through HTTP.
+            with closing(
+                sqlite3.connect(Path(self.temporary.name) / "user-data/avatars.sqlite3")
+            ) as storage:
+                with storage:
+                    storage.execute("UPDATE voices SET metadata='{}' WHERE id=?", (first["id"],))
+            damaged = next(
+                voice for voice in self.request("/status")["voices"] if voice["id"] == first["id"]
+            )
+            self.assertFalse(damaged["available"])
+            self.assertNotIn("sha256", damaged)
         self.request("/voices/delete", {"session": session, **first})
         after = self.wait(lambda status: status["speechEngine"]["ready_workers"] == 2)[
             "speechEngine"

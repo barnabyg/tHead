@@ -229,6 +229,18 @@ class ChatterboxEngine:
                         if not indices:
                             del self.pending_discards[digest]
 
+    def discard_inactive_conditioning(self, cancelled: threading.Event | None = None) -> None:
+        with self.lock:
+            digests = set(self.pending_discards)
+            for slot in self.slots:
+                digests.update(slot.voice.metadata.get("conditioning_hashes", []))
+                digests.add(slot.voice.reference_sha256)
+                if slot.voice.pending:
+                    digests.add(slot.voice.pending["reference_sha256"])
+            digests.discard(self.reference[2])
+        for digest in digests:
+            self.discard_conditioning(digest, cancelled)
+
     def discard_conditioning(self, digest: str, cancelled: threading.Event | None = None) -> None:
         cancellation = cancelled or self.shutdown
         with self.lock:
