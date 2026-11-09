@@ -458,12 +458,18 @@ class ChatterboxEngine:
             if self.turn_cancelled:
                 self.turn_cancelled.set()
         paths = [path for slot in self.slots for path in (slot.path, slot.path.with_suffix(".tmp"))]
+
+        def release_invalidations() -> None:
+            with self.lock:
+                self.pending_discards.clear()
+
         cleanup(
             *(
                 (f"speech worker {index}", slot.voice.close)
                 for index, slot in enumerate(self.slots)
             ),
             ("speech replenisher", lambda: join_worker(self.replenisher, 240)),
+            ("conditioning bookkeeping", release_invalidations),
             *(
                 ("speech snapshot", lambda path=path: path.unlink(missing_ok=True))
                 for path in paths
