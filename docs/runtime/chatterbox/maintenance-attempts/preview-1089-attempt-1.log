@@ -1,0 +1,31 @@
+Running: C:\docs\git\tHead\.venv\Scripts\python.exe scripts/chatterbox_eval.py --configuration maintained --state .runtime/maintained --reference docs/runtime/chatterbox/reference-1089-10s.wav --text Hello. This is a local voice preview. The final words should sound clear and complete. --output .runtime/maintained/preview-1089-attempt-1
+Running: C:\docs\git\tHead\.runtime\issue57-worktree\.runtime\maintained\venv\Scripts\python.exe -I -W error C:\docs\git\tHead\.runtime\issue57-worktree\scripts\chatterbox_eval.py --worker --reference C:\docs\git\tHead\.runtime\issue57-worktree\docs\runtime\chatterbox\reference-1089-10s.wav --text Hello. This is a local voice preview. The final words should sound clear and complete. --state C:\docs\git\tHead\.runtime\issue57-worktree\.runtime\maintained --output C:\docs\git\tHead\.runtime\issue57-worktree\.runtime\maintained\preview-1089-attempt-1 --seed 17 --device cuda --configuration maintained
+Traceback (most recent call last):
+  File "C:\docs\git\tHead\.runtime\issue57-worktree\scripts\chatterbox_eval.py", line 321, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "C:\docs\git\tHead\.runtime\issue57-worktree\scripts\chatterbox_eval.py", line 267, in main
+    synthesize(args, lock)
+  File "C:\docs\git\tHead\.runtime\issue57-worktree\scripts\chatterbox_eval.py", line 124, in synthesize
+    model.prepare_conditionals(str(args.reference), exaggeration=0.0, norm_loudness=True)
+  File "C:\docs\git\tHead\.runtime\issue57-worktree\.runtime\maintained\venv\Lib\site-packages\chatterbox\tts_turbo.py", line 243, in prepare_conditionals
+    s3gen_ref_wav, _sr = librosa.load(wav_fpath, sr=S3GEN_SR)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\docs\git\tHead\.runtime\issue57-worktree\.runtime\maintained\venv\Lib\site-packages\librosa\core\audio.py", line 170, in load
+    if isinstance(path, tuple(audioread.available_backends())):
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\docs\git\tHead\.runtime\issue57-worktree\.runtime\maintained\venv\Lib\site-packages\audioread\__init__.py", line 79, in available_backends
+    from . import rawread
+  File "C:\docs\git\tHead\.runtime\issue57-worktree\.runtime\maintained\venv\Lib\site-packages\audioread\rawread.py", line 16, in <module>
+    import aifc
+  File "C:\Users\Bob\AppData\Local\Programs\Python\Python312\Lib\aifc.py", line 144, in <module>
+    warnings._deprecated(__name__, remove=(3, 13))
+  File "C:\Users\Bob\AppData\Local\Programs\Python\Python312\Lib\warnings.py", line 532, in _deprecated
+    warn(msg, DeprecationWarning, stacklevel=3)
+DeprecationWarning: 'aifc' is deprecated and slated for removal in Python 3.13
+Command '['C:\\docs\\git\\tHead\\.runtime\\issue57-worktree\\.runtime\\maintained\\venv\\Scripts\\python.exe', '-I', '-W', 'error', 'C:\\docs\\git\\tHead\\.runtime\\issue57-worktree\\scripts\\chatterbox_eval.py', '--worker', '--reference', 'C:\\docs\\git\\tHead\\.runtime\\issue57-worktree\\docs\\runtime\\chatterbox\\reference-1089-10s.wav', '--text', 'Hello. This is a local voice preview. The final words should sound clear and complete.', '--state', 'C:\\docs\\git\\tHead\\.runtime\\issue57-worktree\\.runtime\\maintained', '--output', 'C:\\docs\\git\\tHead\\.runtime\\issue57-worktree\\.runtime\\maintained\\preview-1089-attempt-1', '--seed', '17', '--device', 'cuda', '--configuration', 'maintained']' returned non-zero exit status 1.
+Traceback (most recent call last):
+  File "<stdin>", line 5, in <module>
+  File "C:\docs\git\tHead\.runtime\issue57-worktree\scripts\prepare.py", line 57, in run
+    raise subprocess.CalledProcessError(code, command)
+subprocess.CalledProcessError: Command '['C:\\docs\\git\\tHead\\.venv\\Scripts\\python.exe', 'scripts/chatterbox_eval.py', '--configuration', 'maintained', '--state', '.runtime/maintained', '--reference', 'docs/runtime/chatterbox/reference-1089-10s.wav', '--text', 'Hello. This is a local voice preview. The final words should sound clear and complete.', '--output', '.runtime/maintained/preview-1089-attempt-1']' returned non-zero exit status 1.

@@ -1,0 +1,10 @@
+Source: root normal-native launch execution transcript, session 33188.
+Observed: 9 November 2026, 10:28 Europe/London.
+Preparation rebuilt the two already installed source projects. The command
+completed, but this warning was retained as an unresolved preparation diagnostic:
+
+WARN Retrying rename from C:\docs\git\tHead\.runtime\issue57-worktree\.runtime\maintained31216\uv-cache\.tmpXNGYCf to C:\docs\git\tHead\.runtime\issue57-worktree\.runtime\maintained31216\uv-cache\archive-v0\lbh_q1TDTNgMhRxCIHG-G due to transient error: failed to rename file from C:\docs\git\tHead\.runtime\issue57-worktree\.runtime\maintained31216\uv-cache\.tmpXNGYCf to C:\docs\git\tHead\.runtime\issue57-worktree\.runtime\maintained31216\uv-cache\archive-v0\lbh_q1TDTNgMhRxCIHG-G: Access is denied. (os error 5)
+
+Cause is unknown. Antivirus/cache contention is a hypothesis, not a confirmed
+explanation. The fix removes unnecessary repeat source builds; it does not
+suppress uv warnings or declare the underlying Windows denial harmless.

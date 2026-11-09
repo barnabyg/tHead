@@ -1,0 +1,6 @@
+Running: uv venv --no-python-downloads --python C:\docs\git\tHead\.runtime\issue57-worktree\.runtime\python31216-probe\python-runtime\python\python.exe .runtime/python31216-probe/venv
+Using CPython 3.12.16 interpreter at: .runtime\python31216-probe\python-runtime\python\python.exe
+Creating virtual environment at: .runtime/python31216-probe/venv
+Activate with: .runtime\python31216-probe\venv\Scripts\activate
+Running: C:\docs\git\tHead\.runtime\issue57-worktree\.runtime\python31216-probe\venv\Scripts\python.exe -I -W error -c import platform,ssl,pyexpat; print(platform.python_version(),ssl.OPENSSL_VERSION,pyexpat.EXPAT_VERSION)
+3.12.16 OpenSSL 3.5.9 29 Sep 2026 expat_2.9.0

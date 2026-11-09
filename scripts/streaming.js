@@ -722,6 +722,7 @@ setInterval(async () => {
     const status = await (await fetch('/status', { signal: AbortSignal.timeout(10000) })).json();
     if (ticket !== epoch) return;
     if (conversation) {
+      window.renderVoiceLibrary?.(status);
       if (status.settings && !savingSettings && configTicket === settingsRevision) {
         renderSettings(status.settings);
       }
@@ -733,7 +734,10 @@ setInterval(async () => {
         pairSelector.replaceChildren(...status.pairs.map((item) => new Option(item.name, item.id)));
         pairSelector.dataset.catalogue = catalogue;
       }
-      if (voicePicker.options.length === 1) {
+      const voiceCatalogue = JSON.stringify(status.voices);
+      if (voicePicker.dataset.catalogue !== voiceCatalogue) {
+        const selectedVoice = voicePicker.value;
+        voicePicker.replaceChildren(new Option('Choose a voice', ''));
         for (const voice of status.voices) {
           const option = new Option(
             voice.name + (voice.available ? '' : ' — unavailable'),
@@ -742,6 +746,8 @@ setInterval(async () => {
           option.disabled = !voice.available;
           voicePicker.add(option);
         }
+        voicePicker.value = selectedVoice;
+        voicePicker.dataset.catalogue = voiceCatalogue;
       }
       document.querySelector('#avatar-storage-error').textContent = status.avatarStorageError;
       if (!selecting) pairSelector.value = status.selectedPair;

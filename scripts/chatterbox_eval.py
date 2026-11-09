@@ -87,6 +87,7 @@ def synthesize(args: argparse.Namespace, lock: dict[str, Any]) -> None:
             TRANSFORMERS_OFFLINE="1",
             HF_DATASETS_OFFLINE="1",
             GRADIO_ANALYTICS_ENABLED="False",
+            HF_HUB_DISABLE_TELEMETRY="1",
             DO_NOT_TRACK="1",
         )
         sys.addaudithook(reject_network)
@@ -100,15 +101,24 @@ def synthesize(args: argparse.Namespace, lock: dict[str, Any]) -> None:
             raise ValueError(
                 "PyTorch/CUDA differs from the evaluated CPU pin; prepare a fresh state"
             )
-        if args.device != "cpu":
-            raise ValueError("GPU configuration has not been evaluated; no automatic fallback")
+        if args.device == "cuda":
+            if not torch.cuda.is_available():
+                raise ValueError("Maintained CUDA candidate needs an available GPU; no fallback")
+            free, total = torch.cuda.mem_get_info()
+            if free < 8 * 1024**3:
+                raise ValueError("Maintained CUDA candidate needs 8 GiB free VRAM; no fallback")
+            report["gpu"] = torch.cuda.get_device_name()
+            report["vram_before_bytes"] = {"free": free, "total": total}
+            torch.cuda.reset_peak_memory_stats()
         torch.set_num_threads(8)
         torch.set_num_interop_threads(1)
         random.seed(args.seed)
         np.random.seed(args.seed)
         torch.manual_seed(args.seed)
         report["import_seconds"] = time.perf_counter() - started
-        model = candidate.ChatterboxTurboTTS.from_local(args.state / "model", "cpu", nano=True)
+        model = candidate.ChatterboxTurboTTS.from_local(
+            args.state / "model", args.device, nano=True
+        )
         report["ready_seconds"] = time.perf_counter() - started
         conditioning = time.perf_counter()
         model.prepare_conditionals(str(args.reference), exaggeration=0.0, norm_loudness=True)
@@ -118,7 +128,7 @@ def synthesize(args: argparse.Namespace, lock: dict[str, Any]) -> None:
             audio = model.generate(args.text, temperature=0.8, top_p=0.95, top_k=1000)
         report["synthesis_seconds"] = time.perf_counter() - generation
         report["first_pcm_seconds"] = time.perf_counter() - started
-        samples = audio.squeeze(0).numpy()
+        samples = audio.detach().cpu().squeeze(0).numpy()
         if samples.ndim != 1 or not np.isfinite(samples).all() or not np.any(samples):
             raise ValueError("Synthesis returned invalid or silent mono audio")
         output = args.output / "speech.wav"
@@ -132,6 +142,9 @@ def synthesize(args: argparse.Namespace, lock: dict[str, Any]) -> None:
             output_sha256=sha256(output),
             watermark="upstream PerthImplicitWatermarker, unmodified",
         )
+        if args.device == "cuda":
+            report["peak_allocated_bytes"] = torch.cuda.max_memory_allocated()
+            report["peak_reserved_bytes"] = torch.cuda.max_memory_reserved()
     except Exception as error:
         report["error"] = str(error)
         raise
@@ -165,7 +178,13 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--reference", required=True, type=Path)
     parser.add_argument("--text", required=True)
-    parser.add_argument("--state", type=Path, default=ROOT / ".runtime/chatterbox-eval")
+    parser.add_argument("--state", type=Path)
+    parser.add_argument(
+        "--configuration",
+        choices=["cpu", "maintained"],
+        default="cpu",
+        help="Choose the original CPU evaluation or isolated maintained CUDA candidate",
+    )
     parser.add_argument("--prepare", action="store_true", help="Download pinned evaluation assets")
     parser.add_argument("--seed", type=int, default=17)
     parser.add_argument(
@@ -174,11 +193,21 @@ def main() -> int:
     parser.add_argument(
         "--play", action="store_true", help="Open the WAV in the Windows audio player"
     )
-    parser.add_argument("--device", choices=["cpu"], default="cpu")
+    parser.add_argument("--device", choices=["cpu", "cuda"])
     parser.add_argument("--worker", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args()
     try:
-        args.state = args.state.resolve()
+        maintained = args.configuration == "maintained"
+        expected_device = "cuda" if maintained else "cpu"
+        if args.device is not None and args.device != expected_device:
+            raise ValueError(
+                "Device differs from the explicit configuration; no automatic fallback"
+            )
+        args.device = expected_device
+        args.state = (
+            args.state
+            or ROOT / ".runtime" / ("chatterbox-maintained" if maintained else "chatterbox-eval")
+        ).resolve()
         args.reference = args.reference.resolve()
         if not args.text.strip() or len(args.text) > 1200:
             raise ValueError("Enter 1–1200 characters of English text")
@@ -199,7 +228,11 @@ def main() -> int:
                 or len(reference.readframes(reference.getnframes())) != reference.getnframes() * 2
             ):
                 raise ValueError("Use a complete mono PCM16 WAV, 16–48 kHz, at most 30 seconds")
-        lock = json.loads((ROOT / "chatterbox-lock.json").read_text(encoding="utf-8"))
+        lock = json.loads(
+            (
+                ROOT / ("chatterbox-maintained-lock.json" if maintained else "chatterbox-lock.json")
+            ).read_text(encoding="utf-8")
+        )
         if args.prepare and not args.worker:
             from prepare import run
 
@@ -208,7 +241,15 @@ def main() -> int:
                     "pwsh",
                     "-NoProfile",
                     "-File",
-                    str(ROOT / "scripts/prepare-chatterbox.ps1"),
+                    str(
+                        ROOT
+                        / "scripts"
+                        / (
+                            "prepare-chatterbox-maintained.ps1"
+                            if maintained
+                            else "prepare-chatterbox.ps1"
+                        )
+                    ),
                     "-State",
                     str(args.state),
                 ],
@@ -235,6 +276,7 @@ def main() -> int:
             command = [
                 str(python),
                 "-I",
+                *(["-W", "error"] if maintained else []),
                 str(Path(__file__).resolve()),
                 "--worker",
                 "--reference",
@@ -249,6 +291,8 @@ def main() -> int:
                 str(args.seed),
                 "--device",
                 args.device,
+                "--configuration",
+                args.configuration,
             ]
             # -I excludes inherited Python paths/home from the application's other interpreter.
             try:

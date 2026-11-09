@@ -1,0 +1,5 @@
+Preflight: 733601951744 bytes free disk; 88644001792 bytes free RAM; maintained CUDA candidate configuration.
+Verified exact dependency inventory and installed source files; no reinstall required.
+Using Python 3.12.16 environment at: .runtime\maintained-idempotence\venv
+Checked 83 packages in 4ms
+All installed packages are compatible

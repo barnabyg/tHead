@@ -1,6 +1,7 @@
 """Saved-avatar transactions at the public storage boundary."""
 
 import base64
+import os
 import sqlite3
 import sys
 import tempfile
@@ -36,6 +37,19 @@ class AvatarStorageTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             AvatarStore(self.directory).get(updated.id)
         self.assertEqual(reopened.portrait(other.id), self.image)
+
+    def test_relative_user_data_stays_anchored_when_working_directory_changes(self) -> None:
+        previous = Path.cwd()
+        try:
+            os.chdir(self.directory)
+            store = AvatarStore(Path("relative-avatars"))
+            avatar = store.create("Anchored", "zira", self.encoded)
+            os.chdir(ROOT)
+            self.assertEqual(store.get(avatar.id).name, "Anchored")
+            self.assertEqual(store.portrait(avatar.id), self.image)
+            self.assertEqual(store.update(avatar.id, "Still anchored", "hazel").voice, "hazel")
+        finally:
+            os.chdir(previous)
 
     def test_failed_update_and_delete_preserve_previous_valid_record(self) -> None:
         # A real database failure after UPDATE begins proves transaction rollback.

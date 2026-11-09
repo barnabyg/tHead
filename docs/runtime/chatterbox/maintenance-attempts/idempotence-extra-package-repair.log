@@ -1,0 +1,22 @@
+Preflight: 733747650560 bytes free disk; 88660873216 bytes free RAM; maintained CUDA candidate configuration.
+Candidate needs strict preparation: Dependency inventory differs (missing=[], extra=['thead-preparation-probe'], changed=[])
+Using Python 3.12.16 environment at: .runtime\maintained-idempotence\venv
+Resolved 81 packages in 26ms
+Uninstalled 3 packages in 18ms
+ - chatterbox-tts==0.1.7+thead.1 (from file:///C:/docs/git/tHead/.runtime/issue57-worktree/.runtime/maintained-idempotence/source)
+ - resemble-perth==1.1.0 (from file:///C:/docs/git/tHead/.runtime/issue57-worktree/.runtime/maintained-idempotence/perth)
+ - thead-preparation-probe==1.0.0 (from file:///C:/docs/git/tHead/.runtime/issue57-worktree/.runtime/maintained-idempotence/extra-package)
+Using Python 3.12.16 environment at: .runtime\maintained-idempotence\venv
+Resolved 2 packages in 2ms
+   Building chatterbox-tts @ file:///C:/docs/git/tHead/.runtime/issue57-worktree/.runtime/maintained-idempotence/source
+   Building resemble-perth @ file:///C:/docs/git/tHead/.runtime/issue57-worktree/.runtime/maintained-idempotence/perth
+      Built chatterbox-tts @ file:///C:/docs/git/tHead/.runtime/issue57-worktree/.runtime/maintained-idempotence/source
+      Built resemble-perth @ file:///C:/docs/git/tHead/.runtime/issue57-worktree/.runtime/maintained-idempotence/perth
+Prepared 2 packages in 1.06s
+Installed 2 packages in 107ms
+ + chatterbox-tts==0.1.7+thead.1 (from file:///C:/docs/git/tHead/.runtime/issue57-worktree/.runtime/maintained-idempotence/source)
+ + resemble-perth==1.1.0 (from file:///C:/docs/git/tHead/.runtime/issue57-worktree/.runtime/maintained-idempotence/perth)
+Using Python 3.12.16 environment at: .runtime\maintained-idempotence\venv
+Checked 83 packages in 4ms
+All installed packages are compatible
+Verified exact dependency inventory and installed source files; no reinstall required.

@@ -1,0 +1,112 @@
+Preflight: 727340937216 bytes free disk; 84049530880 bytes free RAM; maintained CUDA candidate configuration.
+Initialized empty Git repository in C:/docs/git/tHead/.runtime/issue57-worktree/.runtime/maintained-idempotence-clean/source/.git/
+From https://github.com/resemble-ai/chatterbox
+ * branch            ab55923c27757c90cfcc407baa57dc25a7d25217 -> FETCH_HEAD
+HEAD is now at ab55923 Update README (#581)
+Initialized empty Git repository in C:/docs/git/tHead/.runtime/issue57-worktree/.runtime/maintained-idempotence-clean/perth/.git/
+From https://github.com/resemble-ai/Perth
+ * branch            ff1c8ac55a976971245cdd53c18d6131ca00d993 -> FETCH_HEAD
+HEAD is now at ff1c8ac Merge pull request #15 from akx/split-deps
+Verified CPython 3.12.16, Astral build 20261026; no host installation or PATH change.
+Using CPython 3.12.16 interpreter at: .runtime\maintained-idempotence-clean\python-runtime\python\python.exe
+Creating virtual environment at: .runtime\maintained-idempotence-clean\venv
+Activate with: .runtime\maintained-idempotence-clean\venv\Scripts\activate
+Candidate needs strict preparation: Package pins changed or have not been verified in this state
+Using Python 3.12.16 environment at: .runtime\maintained-idempotence-clean\venv
+Resolved 81 packages in 67ms
+Installed 81 packages in 38.58s
+ + annotated-doc==0.0.5
+ + anyio==4.16.0
+ + audioread==3.1.0
+ + certifi==2026.10.23
+ + cffi==2.1.1
+ + cfgv==3.5.0
+ + charset-normalizer==3.5.2
+ + click==8.5.1
+ + cloudpickle==3.1.2
+ + colorama==0.4.6
+ + conformer==0.3.2
+ + decorator==5.3.1
+ + diffusers==0.42.1
+ + distlib==0.4.4
+ + einops==0.8.2
+ + filelock==4.2.9
+ + fsspec==2026.9.0
+ + h11==0.16.0
+ + hf-xet==1.8.0
+ + httpcore2==2.16.0
+ + httpx2==2.16.0
+ + huggingface-hub==2.4.0
+ + identify==2.6.20
+ + idna==3.20
+ + importlib-metadata==10.1.0
+ + jinja2==3.1.6
+ + joblib==1.6.0
+ + lazy-loader==0.6
+ + librosa==0.11.0
+ + llvmlite==0.50.0
+ + markdown-it-py==4.2.0
+ + markupsafe==3.0.4
+ + mdurl==0.1.2
+ + ml-dtypes==0.5.4
+ + mpmath==1.3.0
+ + msgpack==1.2.4
+ + narwhals==2.28.0
+ + networkx==3.7
+ + nodeenv==1.12.0
+ + numba==0.68.1
+ + numpy==1.26.4
+ + omegaconf==2.4.0
+ + onnx==1.23.2
+ + packaging==26.3
+ + pillow==13.0.0
+ + platformdirs==4.14.5
+ + pooch==1.9.0
+ + pre-commit==4.7.0
+ + protobuf==7.36.2
+ + pycparser==3.12
+ + pydub==0.25.1
+ + pygments==2.21.0
+ + pyloudnorm==0.2.0
+ + python-discovery==1.9.5
+ + pyyaml==6.0.3
+ + regex==2026.11.9
+ + requests==2.34.2
+ + rich==15.0.0
+ + s3tokenizer==0.3.0
+ + safetensors==0.8.0
+ + scikit-learn==1.9.1
+ + scipy==1.17.1
+ + setuptools==84.2.1
+ + shellingham==1.5.4
+ + soundfile==0.13.1
+ + soxr==1.1.0
+ + sympy==1.14.0
+ + threadpoolctl==3.8.0
+ + tokenizers==0.23.3
+ + torch==2.14.1+cu130 (from https://download-r2.pytorch.org/whl/cu130/torch-2.14.1%2Bcu130-cp312-cp312-win_amd64.whl#sha256=0a09031e93632d14ef49553acd6211ece3ae9cdc0969a369b8c24e3cc4d15be9)
+ + torchaudio==2.11.1
+ + tqdm==4.70.1
+ + transformers==5.22.2
+ + truststore==0.10.5
+ + typer==0.28.0
+ + typing-extensions==4.16.0
+ + urllib3==2.8.0
+ + uv-build==0.12.7
+ + virtualenv==21.15.6
+ + wheel==0.46.3
+ + zipp==4.1.2
+Using Python 3.12.16 environment at: .runtime\maintained-idempotence-clean\venv
+Resolved 2 packages in 8ms
+   Building chatterbox-tts @ file:///C:/docs/git/tHead/.runtime/issue57-worktree/.runtime/maintained-idempotence-clean/source
+   Building resemble-perth @ file:///C:/docs/git/tHead/.runtime/issue57-worktree/.runtime/maintained-idempotence-clean/perth
+      Built resemble-perth @ file:///C:/docs/git/tHead/.runtime/issue57-worktree/.runtime/maintained-idempotence-clean/perth
+      Built chatterbox-tts @ file:///C:/docs/git/tHead/.runtime/issue57-worktree/.runtime/maintained-idempotence-clean/source
+Prepared 2 packages in 2.81s
+Installed 2 packages in 89ms
+ + chatterbox-tts==0.1.7+thead.1 (from file:///C:/docs/git/tHead/.runtime/issue57-worktree/.runtime/maintained-idempotence-clean/source)
+ + resemble-perth==1.1.0 (from file:///C:/docs/git/tHead/.runtime/issue57-worktree/.runtime/maintained-idempotence-clean/perth)
+Using Python 3.12.16 environment at: .runtime\maintained-idempotence-clean\venv
+Checked 83 packages in 6ms
+All installed packages are compatible
+Verified exact dependency inventory and installed source files; no reinstall required.

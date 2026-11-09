@@ -12,7 +12,8 @@ from pathlib import Path
 from typing import Any
 
 from avatars import AvatarStore
-from chatterbox_voice import ChatterboxVoice, prepare_references, reference_record
+from chatterbox_engine import ChatterboxEngine
+from chatterbox_voice import ChatterboxVoice, prepare_references, reference_file, reference_record
 from conversation import Conversation
 from pairs import Avatar, configured_avatars
 from prepare import ROOT, RUNTIME
@@ -108,19 +109,35 @@ class ExperimentalConversation(Conversation):
 
     def make_voice(self, avatar: Avatar) -> SpeechVoice:
         if avatar.id in REFERENCES:
+            if self.configuration == "maintained":
+                identity = REFERENCES[avatar.id]
+                path = reference_file(self.evaluation_state, identity)
+                digest = reference_record(identity)["sha256"]
+                if self.cloned_engine is None:
+                    self.cloned_engine = ChatterboxEngine(
+                        self.evaluation_state,
+                        identity,
+                        self.test_backend,
+                        "maintained",
+                        reference_path=path,
+                        reference_sha256=digest,
+                    )
+                else:
+                    self.cloned_engine.set_reference(identity, path, digest, self.shutdown)
+                return self.cloned_engine
             return ChatterboxVoice(
                 self.evaluation_state, REFERENCES[avatar.id], self.test_backend, self.configuration
             )
         return super().make_voice(avatar)
 
     def prepare_voice(self, voice: SpeechVoice) -> None:
-        if isinstance(voice, ChatterboxVoice):
+        if isinstance(voice, (ChatterboxVoice, ChatterboxEngine)):
             voice.prepare(self.shutdown)
         else:
             super().prepare_voice(voice)
 
     def speech_pcm(self, text: str, cancelled: threading.Event) -> bytes:
-        if isinstance(self.voice, ChatterboxVoice):
+        if isinstance(self.voice, (ChatterboxVoice, ChatterboxEngine)):
             return self.voice.speak(text, cancelled)
         return super().speech_pcm(text, cancelled)
 
@@ -134,7 +151,7 @@ class ExperimentalConversation(Conversation):
         if path == "/experimental":
             if set(data) - {"session", "fault"} or data.get("session") != self.identity:
                 raise ValueError("Expected the current session and a declared experimental fault")
-            if not isinstance(self.voice, ChatterboxVoice):
+            if not isinstance(self.voice, (ChatterboxVoice, ChatterboxEngine)):
                 raise ValueError("Select an experimental reference voice first")
             fault = data.get("fault", "")
             if fault not in ("", "delay", "crash", "missing-reference", "missing-model"):
@@ -162,7 +179,7 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=RUNTIME / "chatterbox-integration")
     parser.add_argument("--inputs", type=Path, default=RUNTIME / "demo-inputs")
     parser.add_argument("--state", type=Path)
-    parser.add_argument("--configuration", choices=("cpu", "cuda"), default="cpu")
+    parser.add_argument("--configuration", choices=("cpu", "cuda", "maintained"), default="cpu")
     parser.add_argument("--avatar", default="")
     parser.add_argument("--test-backend", action="store_true")
     parser.add_argument("--open-browser", action="store_true")
@@ -177,7 +194,11 @@ def main() -> None:
         args.output / "evaluation"
         if args.test_backend
         else RUNTIME
-        / ("chatterbox-eval-gpu" if args.configuration == "cuda" else "chatterbox-eval")
+        / {
+            "cpu": "chatterbox-eval",
+            "cuda": "chatterbox-eval-gpu",
+            "maintained": "chatterbox-maintained",
+        }[args.configuration]
     )
     app = ExperimentalConversation(
         inputs, args.output, state, args.test_backend, args.avatar, args.configuration
@@ -199,16 +220,7 @@ def main() -> None:
         pass
     finally:
         lifetime.cancel()
-        server.server_close()
-        app.shutdown.set()
-        if app.current:
-            app.stop(app.current.id)
-        with app.condition:
-            app.condition.notify_all()
-        app.worker.join(timeout=120)
-        app.voice.close()
-        if app.worker.is_alive():
-            raise TimeoutError("Experimental application worker did not release")
+        app.close(server)
 
 
 if __name__ == "__main__":

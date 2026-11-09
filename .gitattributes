@@ -1,3 +1,5 @@
 * text=auto eol=lf
 # Unified-diff empty context lines require a space; remove this exception with the patch.
 patches/windows-eager-single-gpu.patch whitespace=-blank-at-eol
+# Exact upstream diff context requires blank-line spaces; remove with this patch.
+patches/chatterbox-maintained.patch whitespace=-blank-at-eol

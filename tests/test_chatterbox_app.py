@@ -93,7 +93,7 @@ class ChatterboxAppTests(unittest.TestCase):
             "/ask", {"session": status["session"], "question": text, "request": uuid.uuid4().hex}
         )
 
-    def test_stop_kills_reference_worker_and_replacement_keeps_correct_voice(self) -> None:
+    def test_stop_retains_warm_worker_and_discards_late_pcm_before_replacement(self) -> None:
         selected = self.select_clone()
         self.assertEqual(selected["experimental"]["reference_id"], "librispeech-1089-10s")
         self.request("/experimental", {"session": selected["session"], "fault": "delay"})
@@ -102,7 +102,11 @@ class ChatterboxAppTests(unittest.TestCase):
         self.request("/stop", {"run": old["id"]})
         stopped = self.wait(lambda s: s["state"] == "idle")
         self.assertEqual(stopped["run"]["state"], "stopped")
-        self.assertFalse(stopped["experimental"]["worker_alive"])
+        self.assertTrue(stopped["experimental"]["worker_alive"])
+        self.assertEqual(
+            stopped["experimental"]["voice"]["worker_pid"],
+            selected["experimental"]["voice"]["worker_pid"],
+        )
         with self.assertRaises(urllib.error.HTTPError) as stale:
             self.request(f"/segment?run={old['id']}&index=0")
         self.assertEqual(stale.exception.code, 410)
@@ -112,6 +116,35 @@ class ChatterboxAppTests(unittest.TestCase):
         self.assertEqual(done["run"]["state"], "complete")
         self.assertEqual(done["run"]["pair"], "chatterbox-nano-1089")
         self.assertTrue(done["experimental"]["worker_alive"])
+        self.assertEqual(
+            done["experimental"]["voice"]["worker_pid"],
+            selected["experimental"]["voice"]["worker_pid"],
+        )
+        self.assertEqual(done["experimental"]["voice"]["lifecycle_state"], "ready")
+
+    def test_reset_during_synthesis_reuses_reference_without_reviving_old_turn(self) -> None:
+        selected = self.select_clone()
+        self.request("/experimental", {"session": selected["session"], "fault": "delay"})
+        old = self.ask()
+        self.wait(lambda s: any(e["event"] == "tts-start" for e in s["run"]["events"]))
+        began = time.monotonic()
+        self.request("/reset", {"session": selected["session"]})
+        stopped = self.wait(lambda s: s["state"] == "idle")
+        self.assertLess(time.monotonic() - began, 1)
+        self.assertNotEqual(stopped["session"], selected["session"])
+        self.assertEqual(stopped["transcript"], [])
+        self.assertIsNone(stopped["run"])
+        self.ask("short-2")
+        complete = self.wait(lambda s: s["state"] == "idle")
+        self.assertEqual(complete["run"]["state"], "complete")
+        self.assertEqual(
+            complete["experimental"]["voice"]["worker_pid"],
+            selected["experimental"]["voice"]["worker_pid"],
+        )
+        self.assertEqual(len(complete["transcript"]), 1)
+        with self.assertRaises(urllib.error.HTTPError) as stale:
+            self.request(f"/segment?run={old['id']}&index=0")
+        self.assertEqual(stale.exception.code, 410)
 
     def test_worker_crash_is_explicit_and_new_conversation_recovers_without_fallback(self) -> None:
         selected = self.select_clone()
@@ -126,6 +159,10 @@ class ChatterboxAppTests(unittest.TestCase):
         recovered = self.wait(lambda s: s["state"] == "idle")
         self.assertEqual(recovered["run"]["state"], "complete")
         self.assertEqual(recovered["experimental"]["reference_id"], "librispeech-1089-10s")
+        self.assertNotEqual(
+            recovered["experimental"]["voice"]["worker_pid"],
+            selected["experimental"]["voice"]["worker_pid"],
+        )
 
     def test_unknown_reference_paths_are_rejected_and_missing_assets_fail_explicitly(self) -> None:
         selected = self.select_clone()

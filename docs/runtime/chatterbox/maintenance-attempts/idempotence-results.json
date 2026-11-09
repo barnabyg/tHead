@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "reviewed_on": "2026-11-09",
+  "before": "Every preparation removed and rebuilt the two source distributions. The root native-launch transcript contained the retained transient Windows cache-rename warning. Its cause is unknown.",
+  "change": "Require matching lock fingerprints, the full exact dependency inventory and installed source bytes; matching repeats skip sync and source builds. Drift triggers strict sync, source reinstall and re-verification, with no inexact dependency allowance.",
+  "fresh_state": "New isolated interpreter, sources and venv using copied verified wheel/model caches; not an independent-cache final release reproduction.",
+  "timing_seconds": {
+    "fresh_seconds": 57.12446960000034,
+    "repeat_seconds": 2.807899699999325
+  },
+  "fresh_result": "passed, no warnings",
+  "repeat_result": "passed, no sync/build/reinstall and no warnings",
+  "extra_package_probe": "A locally built empty thead-preparation-probe distribution was introduced. Public preparation detected and removed it, returned to exactly 83 distributions and verified source content.",
+  "source_probe": "An extra comment was appended to the installed Chatterbox __init__.py in the isolated test state. Public preparation detected the content mismatch and restored the pinned bytes.",
+  "interruption_probe": "The initial task-owned per-file cache copy was stopped for replacement with bounded native parallel copy; it had just entered preparation and left an incomplete Torch installation. Strict preparation recovered that test state before the separate clean control. This was an agent-controlled interruption, not a compatibility failure.",
+  "gpu_work": "none",
+  "exceptions_added": []
+}

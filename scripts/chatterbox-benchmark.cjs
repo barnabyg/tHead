@@ -50,6 +50,7 @@ async function main() {
     source_files: [
       'scripts/chatterbox_app.py',
       'scripts/chatterbox_voice.py',
+      'scripts/chatterbox_engine.py',
       'scripts/chatterbox_worker.py',
       'scripts/conversation.py',
       'scripts/speech.py',
@@ -58,6 +59,8 @@ async function main() {
       'scripts/chatterbox-benchmark.cjs',
       'chatterbox-lock.json',
       'chatterbox-gpu-lock.json',
+      'chatterbox-maintained-lock.json',
+      'patches/chatterbox-maintained.patch',
       'scripts/chatterbox_eval.py',
       'docs/runtime/chatterbox/requirements-gpu.lock',
     ].map((file) => ({
@@ -218,16 +221,23 @@ async function main() {
     }
     if (process.argv[3] && !process.argv.includes('--probes')) return;
     await reset();
-    const state = path.resolve(
-      '.runtime',
-      report.initial.experimental.configuration === 'cuda'
-        ? 'chatterbox-eval-gpu'
-        : 'chatterbox-eval',
-    );
-    for (const [kind, relative] of [
+    const state =
+      process.env.THEAD_CHATTERBOX_STATE ||
+      path.resolve(
+        '.runtime',
+        {
+          cuda: 'chatterbox-eval-gpu',
+          maintained: 'chatterbox-maintained',
+          cpu: 'chatterbox-eval',
+        }[report.initial.experimental.configuration],
+      );
+    const assetProbes = [
       ['missing-reference', 'references/librispeech-1089-10s.wav'],
       ['missing-model', 'model/ve.safetensors'],
-    ]) {
+    ];
+    for (const [kind, relative] of process.argv.includes('--skip-asset-probes')
+      ? []
+      : assetProbes) {
       await select('jfk-zira');
       const asset = path.join(state, relative);
       const backup = `${asset}.issue54-probe`;
@@ -258,7 +268,14 @@ async function main() {
     }
     await reset();
     await select('chatterbox-nano-1089');
-    for (const action of ['stop-synthesis', 'reset-synthesis', 'stop-playback']) {
+    for (const action of [
+      'stop-synthesis',
+      'reset-synthesis',
+      'stop-playback',
+      'stop-synthesis',
+      'reset-synthesis',
+      'stop-playback',
+    ]) {
       const id = await submit('multi-2');
       await expect
         .poll(
@@ -316,6 +333,18 @@ async function main() {
       });
       save();
     }
+    await reset();
+    const finalCrash = await status();
+    await page.request.post(`${url}/experimental`, {
+      data: { session: finalCrash.session, fault: 'crash' },
+    });
+    const secondCrash = await turn('short-1');
+    await reset();
+    report.probes.push({
+      action: 'worker-crash-repeat',
+      crashed: secondCrash,
+      recovery: await turn('short-1'),
+    });
     report.final = await status();
     save();
   } finally {

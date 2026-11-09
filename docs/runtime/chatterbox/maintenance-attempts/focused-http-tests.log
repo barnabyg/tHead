@@ -1,0 +1,6 @@
+Running: C:\docs\git\tHead\.venv\Scripts\python.exe -W error -m unittest discover -s tests -p test_chatterbox_app.py
+....
+----------------------------------------------------------------------
+Ran 4 tests in 6.295s
+
+OK

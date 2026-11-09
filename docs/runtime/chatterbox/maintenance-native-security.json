@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "reviewed_on": "2026-11-09",
+  "scope": "The isolated Torch 2.14.1+cu130/Chatterbox candidate; includes current primary NVIDIA bulletin/component applicability. Does not substitute a Python-only advisory feed for native-component review.",
+  "sources": [
+    "https://raw.githubusercontent.com/NVIDIA/product-security/main/2026/README.md",
+    "https://raw.githubusercontent.com/NVIDIA/product-security/main/2026/5910/5910.md",
+    "https://raw.githubusercontent.com/NVIDIA/product-security/main/2026/5755/5755.md",
+    "https://raw.githubusercontent.com/NVIDIA/product-security/main/2026/5861/5861.md"
+  ],
+  "selected_components": {
+    "torch": "2.14.1+cu130",
+    "compiled_cuda": "13.0",
+    "cudnn_dll_file_version": "9.24.0.43",
+    "host_driver": "621.14"
+  },
+  "installed_file_checks": {
+    "*nvjpeg*": [],
+    "*nsight*": [],
+    "*process_nsys_rep_cli*": []
+  },
+  "advisories": [
+    {
+      "ids": [
+        "CVE-2026-65160"
+      ],
+      "component": "nvJPEG",
+      "published_affected_versions": "CUDA Toolkit 0 to 13.4.1; nvJPEG 0 to 26.06",
+      "published_fix": "CUDA 13.4 U1 / nvJPEG 26.07",
+      "candidate_applicability": "Not installed: no nvJPEG file in the candidate distribution tree; the candidate does not include torchvision or accept GPU JPEG inputs.",
+      "remediation": "No exclusion or risk acceptance. Recheck this component before adding torchvision/nvJPEG or changing the wheel profile.",
+      "exception": null
+    },
+    {
+      "ids": [
+        "CVE-2025-33228",
+        "CVE-2025-33229",
+        "CVE-2025-33230",
+        "CVE-2025-33231"
+      ],
+      "component": "Nsight Systems/Visual Studio tools",
+      "published_affected_versions": "CUDA Toolkit through 13.1; see bulletin 5755 component-specific descriptions",
+      "published_fix": "CUDA 13.1 corrected tooling",
+      "candidate_applicability": "Not installed: no Nsight files or process_nsys_rep_cli.py in the candidate distribution tree. The inference wheel is not a full CUDA Toolkit installation.",
+      "remediation": "No exclusion or risk acceptance. Recheck if profiling/developer tools are bundled.",
+      "exception": null
+    }
+  ],
+  "host_driver_review": "NVIDIA September 2026 bulletin lists fixed GeForce Windows versions 582.78 / 610.60 / 616.56 for its supported affected branches. The observed host 621.14 is newer and is not in those published affected branch ranges; no driver downgrade or runtime installer mutation is performed.",
+  "cudnn_review": "No standalone cuDNN advisory appears in the current 2026 primary bulletin index. Actual bundled DLL version retained above; future security feed/version changes require review. This is not proof against unknown vulnerabilities.",
+  "exceptions_added": []
+}

@@ -169,6 +169,8 @@ class Provider:
         text = "A black hole traps light. We detect one by its effects on nearby matter."
         if len(messages) > 1:
             text += " Earlier question: " + messages[0]["content"][:80]
+        if messages[-1]["content"].startswith("Fixture speech: "):
+            text = messages[-1]["content"][len("Fixture speech: ") :]
         if fault == "long":
             text = "word " * 90 + "Final partial"
         elif fault == "unbroken":

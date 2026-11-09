@@ -1,0 +1,29 @@
+Running: uv pip compile --python-version 3.12.10 --python-platform windows --generate-hashes --no-annotate --output-file docs/runtime/chatterbox/requirements-maintained.lock docs/runtime/chatterbox/requirements-maintained.in
+  × Failed to build `antlr4-python3-runtime==4.9.3`
+  ├─▶ The build backend returned an error
+  ╰─▶ Call to `setuptools.build_meta:__legacy__.build_wheel` failed (exit
+      code: 1)
+
+      [stderr]
+      Traceback (most recent call last):
+        File "<string>", line 8, in <module>
+        File
+      "C:\docs\git\tHead\.runtime\issue57-worktree\.runtime\maintained\uv-cache\builds-v0\.tmpKndYTe\Lib\site-packages\setuptools\__init__.py",
+      line 15, in <module>
+          from typing import TYPE_CHECKING, TypeVar, overload
+        File
+      "C:\Users\Bob\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\typing.py",
+      line 32, in <module>
+          from _typing import (
+      ImportError: cannot import name 'NoDefault' from '_typing' (unknown
+      location)
+
+      hint: This usually indicates a problem with the package or the build
+      environment.
+  help: `antlr4-python3-runtime` (v4.9.3) was included because `omegaconf`
+        (v2.3.0) depends on `antlr4-python3-runtime>=4.9.dev0, <4.10.dev0`
+Traceback (most recent call last):
+  File "<stdin>", line 4, in <module>
+  File "C:\docs\git\tHead\.runtime\issue57-worktree\scripts\prepare.py", line 57, in run
+    raise subprocess.CalledProcessError(code, command)
+subprocess.CalledProcessError: Command '['uv', 'pip', 'compile', '--python-version', '3.12.10', '--python-platform', 'windows', '--generate-hashes', '--no-annotate', '--output-file', 'docs/runtime/chatterbox/requirements-maintained.lock', 'docs/runtime/chatterbox/requirements-maintained.in']' returned non-zero exit status 1.

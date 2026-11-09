@@ -1,0 +1,604 @@
+{
+  "reviewed_on": "2026-11-09",
+  "device": "NVIDIA GeForce RTX 3090",
+  "python": "3.12.16",
+  "torch": "2.14.1+cu130",
+  "measurement": "Browser digital audio onset plus a decoded moving frame. Physical-speaker latency is unmeasured.",
+  "native_initial_pass": true,
+  "summary": {
+    "warm_onset_seconds": {
+      "count": 10,
+      "median": 2.423,
+      "minimum": 2.2144000000003725,
+      "maximum": 2.8325999999996276
+    },
+    "warm_failures": 0,
+    "cycles_passed": 12,
+    "cycles_failed": 0,
+    "failed_experiences": 0,
+    "stalls": 0
+  },
+  "turns": [
+    {
+      "label": "cold-first-turn",
+      "text": "A black hole traps light. We detect one by its effects on nearby matter.",
+      "cold": true,
+      "valid": true,
+      "first_speech_seconds": 2.8307000000001863,
+      "first_pcm_seconds": 0.7558779999999388,
+      "total_seconds": 7.4918219999999565,
+      "stalls": 0,
+      "correct_voice": true,
+      "meets_five_seconds": true,
+      "failed_experience": false,
+      "error": null
+    },
+    {
+      "label": "warm-1",
+      "text": "Yes, that sounds good.",
+      "cold": false,
+      "valid": true,
+      "first_speech_seconds": 2.231,
+      "first_pcm_seconds": 0.7865134000003309,
+      "total_seconds": 3.757052599999952,
+      "stalls": 0,
+      "correct_voice": true,
+      "meets_five_seconds": true,
+      "failed_experience": false,
+      "error": null
+    },
+    {
+      "label": "warm-2",
+      "text": "A black hole traps light. We detect one by its effects on nearby matter.",
+      "cold": false,
+      "valid": true,
+      "first_speech_seconds": 2.8320999999996275,
+      "first_pcm_seconds": 0.7529079999994792,
+      "total_seconds": 7.470188399999643,
+      "stalls": 0,
+      "correct_voice": true,
+      "meets_five_seconds": true,
+      "failed_experience": false,
+      "error": null
+    },
+    {
+      "label": "warm-3",
+      "text": "The meeting starts at nine forty-five.",
+      "cold": false,
+      "valid": true,
+      "first_speech_seconds": 2.3312000000001865,
+      "first_pcm_seconds": 0.8861894000001485,
+      "total_seconds": 4.9837531000002855,
+      "stalls": 0,
+      "correct_voice": true,
+      "meets_five_seconds": true,
+      "failed_experience": false,
+      "error": null
+    },
+    {
+      "label": "warm-4",
+      "text": "First, check the microphone. Next, record one clear sentence. Finally, listen to the last word.",
+      "cold": false,
+      "valid": true,
+      "first_speech_seconds": 2.8325999999996276,
+      "first_pcm_seconds": 0.8219466000000466,
+      "total_seconds": 9.488999299999705,
+      "stalls": 0,
+      "correct_voice": true,
+      "meets_five_seconds": true,
+      "failed_experience": false,
+      "error": null
+    },
+    {
+      "label": "warm-5",
+      "text": "I can help with that.",
+      "cold": false,
+      "valid": true,
+      "first_speech_seconds": 2.214799999999814,
+      "first_pcm_seconds": 0.752937700000075,
+      "total_seconds": 3.4250106999998025,
+      "stalls": 0,
+      "correct_voice": true,
+      "meets_five_seconds": true,
+      "failed_experience": false,
+      "error": null
+    },
+    {
+      "label": "warm-6",
+      "text": "The garden is quiet today. A small bird is singing near the window.",
+      "cold": false,
+      "valid": true,
+      "first_speech_seconds": 2.5147999999998136,
+      "first_pcm_seconds": 0.5547162000002572,
+      "total_seconds": 6.538163600000189,
+      "stalls": 0,
+      "correct_voice": true,
+      "meets_five_seconds": true,
+      "failed_experience": false,
+      "error": null
+    },
+    {
+      "label": "warm-7",
+      "text": "Please bring a glass of water.",
+      "cold": false,
+      "valid": true,
+      "first_speech_seconds": 2.214700000000186,
+      "first_pcm_seconds": 0.7629443000005267,
+      "total_seconds": 3.872334700000465,
+      "stalls": 0,
+      "correct_voice": true,
+      "meets_five_seconds": true,
+      "failed_experience": false,
+      "error": null
+    },
+    {
+      "label": "warm-8",
+      "text": "Open the book and read the first page. Then tell me what you found.",
+      "cold": false,
+      "valid": true,
+      "first_speech_seconds": 2.7152000000001864,
+      "first_pcm_seconds": 0.8407483999999386,
+      "total_seconds": 6.813469699999587,
+      "stalls": 0,
+      "correct_voice": true,
+      "meets_five_seconds": true,
+      "failed_experience": false,
+      "error": null
+    },
+    {
+      "label": "warm-9",
+      "text": "We can try again tomorrow.",
+      "cold": false,
+      "valid": true,
+      "first_speech_seconds": 2.2144000000003725,
+      "first_pcm_seconds": 0.7595445000006293,
+      "total_seconds": 3.918089200000395,
+      "stalls": 0,
+      "correct_voice": true,
+      "meets_five_seconds": true,
+      "failed_experience": false,
+      "error": null
+    },
+    {
+      "label": "warm-10",
+      "text": "The train leaves at half past ten. Please arrive early and keep your ticket ready.",
+      "cold": false,
+      "valid": true,
+      "first_speech_seconds": 2.7145,
+      "first_pcm_seconds": 0.7677817000003415,
+      "total_seconds": 7.2436390000002575,
+      "stalls": 0,
+      "correct_voice": true,
+      "meets_five_seconds": true,
+      "failed_experience": false,
+      "error": null
+    },
+    {
+      "label": "cycle-1-replacement",
+      "text": "The meeting starts at nine forty-five.",
+      "cold": false,
+      "valid": true,
+      "first_speech_seconds": 2.2315999999996277,
+      "first_pcm_seconds": 0.7951911999998629,
+      "total_seconds": 4.899858300000233,
+      "stalls": 0,
+      "correct_voice": true,
+      "meets_five_seconds": true,
+      "failed_experience": false,
+      "error": null
+    },
+    {
+      "label": "cycle-2-replacement",
+      "text": "The meeting starts at nine forty-five.",
+      "cold": false,
+      "valid": true,
+      "first_speech_seconds": 2.148,
+      "first_pcm_seconds": 0.6739140999998199,
+      "total_seconds": 4.8167757000001075,
+      "stalls": 0,
+      "correct_voice": true,
+      "meets_five_seconds": true,
+      "failed_experience": false,
+      "error": null
+    },
+    {
+      "label": "cycle-3-replacement",
+      "text": "The meeting starts at nine forty-five.",
+      "cold": false,
+      "valid": true,
+      "first_speech_seconds": 2.3462999999998138,
+      "first_pcm_seconds": 0.8764848000000711,
+      "total_seconds": 5.008447799999885,
+      "stalls": 0,
+      "correct_voice": true,
+      "meets_five_seconds": true,
+      "failed_experience": false,
+      "error": null
+    },
+    {
+      "label": "cycle-4-replacement",
+      "text": "The meeting starts at nine forty-five.",
+      "cold": false,
+      "valid": true,
+      "first_speech_seconds": 2.2321000000005586,
+      "first_pcm_seconds": 0.6976426000001084,
+      "total_seconds": 4.884033000000272,
+      "stalls": 0,
+      "correct_voice": true,
+      "meets_five_seconds": true,
+      "failed_experience": false,
+      "error": null
+    },
+    {
+      "label": "cycle-5-shared-switch",
+      "text": "I can help with that.",
+      "cold": false,
+      "valid": true,
+      "first_speech_seconds": 1.9645,
+      "first_pcm_seconds": 0.4879716000004919,
+      "total_seconds": 3.163693299999977,
+      "stalls": 0,
+      "correct_voice": true,
+      "meets_five_seconds": true,
+      "failed_experience": false,
+      "error": null
+    },
+    {
+      "label": "cycle-6-reference-switch",
+      "text": "The garden is quiet today. A small bird is singing near the window.",
+      "cold": false,
+      "valid": true,
+      "first_speech_seconds": 2.8977999999998136,
+      "first_pcm_seconds": 0.591570500000671,
+      "total_seconds": 7.114464600000247,
+      "stalls": 0,
+      "correct_voice": true,
+      "meets_five_seconds": true,
+      "failed_experience": false,
+      "error": null
+    },
+    {
+      "label": "cycle-7-replacement",
+      "text": "The meeting starts at nine forty-five.",
+      "cold": false,
+      "valid": true,
+      "first_speech_seconds": 2.281399999999441,
+      "first_pcm_seconds": 0.7983039999999164,
+      "total_seconds": 4.894275100000414,
+      "stalls": 0,
+      "correct_voice": true,
+      "meets_five_seconds": true,
+      "failed_experience": false,
+      "error": null
+    },
+    {
+      "label": "cycle-8-replacement",
+      "text": "The meeting starts at nine forty-five.",
+      "cold": false,
+      "valid": true,
+      "first_speech_seconds": 2.3476000000005586,
+      "first_pcm_seconds": 0.8831984999997076,
+      "total_seconds": 4.940134299999954,
+      "stalls": 0,
+      "correct_voice": true,
+      "meets_five_seconds": true,
+      "failed_experience": false,
+      "error": null
+    },
+    {
+      "label": "cycle-9-replacement",
+      "text": "The meeting starts at nine forty-five.",
+      "cold": false,
+      "valid": true,
+      "first_speech_seconds": 2.214600000000559,
+      "first_pcm_seconds": 0.7004226999997627,
+      "total_seconds": 4.8058674999992945,
+      "stalls": 0,
+      "correct_voice": true,
+      "meets_five_seconds": true,
+      "failed_experience": false,
+      "error": null
+    },
+    {
+      "label": "cycle-10-zira-switch",
+      "text": "The train leaves at half past ten. Please arrive early and keep your ticket ready.",
+      "cold": false,
+      "valid": true,
+      "first_speech_seconds": 1.6772000000001863,
+      "first_pcm_seconds": 0.08994749999965279,
+      "total_seconds": 7.521289899999829,
+      "stalls": 0,
+      "correct_voice": true,
+      "meets_five_seconds": true,
+      "failed_experience": false,
+      "error": null
+    },
+    {
+      "label": "cycle-10-return-clone",
+      "text": "Yes, that sounds good.",
+      "cold": false,
+      "valid": true,
+      "first_speech_seconds": 1.9978999999994411,
+      "first_pcm_seconds": 0.5285605999997642,
+      "total_seconds": 3.5387895999992907,
+      "stalls": 0,
+      "correct_voice": true,
+      "meets_five_seconds": true,
+      "failed_experience": false,
+      "error": null
+    },
+    {
+      "label": "cycle-11-hazel-switch",
+      "text": "Yes, that sounds good.",
+      "cold": false,
+      "valid": true,
+      "first_speech_seconds": 1.7207000000001862,
+      "first_pcm_seconds": 0.0517561000006026,
+      "total_seconds": 4.518732600000476,
+      "stalls": 0,
+      "correct_voice": true,
+      "meets_five_seconds": true,
+      "failed_experience": false,
+      "error": null
+    },
+    {
+      "label": "cycle-11-return-clone",
+      "text": "Yes, that sounds good.",
+      "cold": false,
+      "valid": true,
+      "first_speech_seconds": 1.9482999999998136,
+      "first_pcm_seconds": 0.5176361999992878,
+      "total_seconds": 3.479861599999822,
+      "stalls": 0,
+      "correct_voice": true,
+      "meets_five_seconds": true,
+      "failed_experience": false,
+      "error": null
+    },
+    {
+      "label": "cycle-12-reference-switch",
+      "text": "A black hole traps light. We detect one by its effects on nearby matter.",
+      "cold": false,
+      "valid": true,
+      "first_speech_seconds": 2.6650999999996277,
+      "first_pcm_seconds": 0.6186927999997351,
+      "total_seconds": 7.976187100000061,
+      "stalls": 0,
+      "correct_voice": true,
+      "meets_five_seconds": true,
+      "failed_experience": false,
+      "error": null
+    }
+  ],
+  "cycles": [
+    {
+      "action": "stop-synthesis",
+      "index": 1,
+      "valid": true,
+      "cancellation_seconds": 0.2615640999999887,
+      "readiness_wait_seconds": 0.006499800000019604,
+      "obsolete_http_status": 410,
+      "error": null
+    },
+    {
+      "action": "stop-playback",
+      "index": 2,
+      "valid": true,
+      "cancellation_seconds": 0.8212872999999963,
+      "readiness_wait_seconds": 0.006382499999977881,
+      "obsolete_http_status": 410,
+      "error": null
+    },
+    {
+      "action": "reset",
+      "index": 3,
+      "valid": true,
+      "cancellation_seconds": 0.24845840000000316,
+      "readiness_wait_seconds": 0.009313899999979185,
+      "obsolete_http_status": 410,
+      "error": null
+    },
+    {
+      "action": "crash",
+      "index": 4,
+      "valid": true,
+      "cancellation_seconds": null,
+      "readiness_wait_seconds": 0.005779099999985192,
+      "obsolete_http_status": null,
+      "error": null
+    },
+    {
+      "action": "shared-switch",
+      "index": 5,
+      "valid": true,
+      "cancellation_seconds": null,
+      "readiness_wait_seconds": null,
+      "obsolete_http_status": null,
+      "error": null
+    },
+    {
+      "action": "reference-switch",
+      "index": 6,
+      "valid": true,
+      "cancellation_seconds": null,
+      "readiness_wait_seconds": null,
+      "obsolete_http_status": null,
+      "error": null
+    },
+    {
+      "action": "stop-synthesis",
+      "index": 7,
+      "valid": true,
+      "cancellation_seconds": 0.24919109999999636,
+      "readiness_wait_seconds": 0.005799199999979464,
+      "obsolete_http_status": 410,
+      "error": null
+    },
+    {
+      "action": "reset",
+      "index": 8,
+      "valid": true,
+      "cancellation_seconds": 0.2661447000000044,
+      "readiness_wait_seconds": 0.006220600000000559,
+      "obsolete_http_status": 410,
+      "error": null
+    },
+    {
+      "action": "crash",
+      "index": 9,
+      "valid": true,
+      "cancellation_seconds": null,
+      "readiness_wait_seconds": 0.006369500000000698,
+      "obsolete_http_status": null,
+      "error": null
+    },
+    {
+      "action": "zira-switch",
+      "index": 10,
+      "valid": true,
+      "cancellation_seconds": null,
+      "readiness_wait_seconds": null,
+      "obsolete_http_status": null,
+      "error": null
+    },
+    {
+      "action": "hazel-switch",
+      "index": 11,
+      "valid": true,
+      "cancellation_seconds": null,
+      "readiness_wait_seconds": null,
+      "obsolete_http_status": null,
+      "error": null
+    },
+    {
+      "action": "reference-switch",
+      "index": 12,
+      "valid": true,
+      "cancellation_seconds": null,
+      "readiness_wait_seconds": null,
+      "obsolete_http_status": null,
+      "error": null
+    }
+  ],
+  "restart_pass": true,
+  "restart_onsets": [2.231, 1.9643000000007451, 2.0146999999992548],
+  "repair_checks": [
+    "real UI repair preserved voice identity and both avatar assignments",
+    "repaired voice produced real complete speech and moving media",
+    "in-use deletion remained blocked",
+    "explicit avatar changes allowed safe deletion without affecting other voice"
+  ],
+  "repair_pass": true,
+  "resources": {
+    "peak_device_vram_mib": 12230,
+    "peak_summed_tree_rss_bytes": 9365659648,
+    "device_vram_before_mib": 674,
+    "device_vram_after_shutdown_mib": 706,
+    "note": "Device-wide VRAM includes desktop/driver; RSS sum is conservative, not unique private RAM."
+  },
+  "human_confirmation": {
+    "date": "2026-11-09",
+    "two_remediated_previews": "Both remain acceptable",
+    "normal_app_speech_and_lip_sync": "Speech and lip sync are acceptable",
+    "physical_speaker_latency_ms": null
+  },
+  "original_reports": [
+    {
+      "file": ".runtime/voice-native-release/attempt-1.json",
+      "sha256": "bcb68a95ef5a100e8be95224bec43c976f1ccd2fc1753b4646415105454db185"
+    },
+    {
+      "file": ".runtime/voice-native-release/restart-1.json",
+      "sha256": "22ea39cc0e53b2517b584f333282a994235a7f0124927a6a9316a511a34fe6de"
+    },
+    {
+      "file": ".runtime/voice-native-release/repair-check.json",
+      "sha256": "390c617ac5239de168430473547904a9c2606ced38a1d2f7f0c454647983695c"
+    },
+    {
+      "file": ".runtime/voice-native-release/missing-engine.json",
+      "sha256": "a2aea7fbf7f1665d0885d6aa9afebe5e68b18e0ed14a3100e520d740f7e3dcb1"
+    },
+    {
+      "file": ".runtime/voice-native-release/preparation-cancel.json",
+      "sha256": "6959b7b9ae932e32ee8f0085a065c12206f4d76628e07a975241ca7283483fa9"
+    },
+    {
+      "file": ".runtime/voice-native-release/resources.jsonl",
+      "sha256": "d2d69d630277190336c0ae62e9f743dcb38cd6083b3c716672d34970503a8e73"
+    },
+    {
+      "file": ".runtime/voice-native-release/approved-profile.json",
+      "sha256": "df7676d993b145e9d4355e590a62b313e7350ad9f3e8aa90884e86ab1394b7fd"
+    },
+    {
+      "file": ".runtime/voice-native-release/approved-profile-2.json",
+      "sha256": "99714baabc763a877e3b12d85f7191e22279fefc0a451cdc2b311df5c3fef3ac"
+    },
+    {
+      "file": ".runtime/voice-native-release/approved-profile-3.json",
+      "sha256": "1571f8477b9b9a4512a2ed26434f865ef32a9d3e6c04f96b4fb8f72b0549254a"
+    },
+    {
+      "file": ".runtime/voice-native-release/cache-review.json",
+      "sha256": "d79fda06cb925bd4d74490c885ec7ebab108d9c3cf2c576619847d683779dc44"
+    },
+    {
+      "file": ".runtime/voice-native-release/cache-review-confirmation.json",
+      "sha256": "20ef01280a46cb4ab0e5e1aae41136cfa395dd43ee0d209e9cbafcd594651078"
+    }
+  ],
+  "cold_engine_preparation_seconds": 25.923996400000018,
+  "preview_preparation": [
+    {
+      "preparation_seconds": 70.2841264
+    },
+    {
+      "preparation_seconds": 26.913174500000007
+    }
+  ],
+  "clean_checkout_install": {
+    "pass": true,
+    "base_revision": "9b99179",
+    "state": "independent Python/source/wheel/model caches in fresh branch-backed checkout",
+    "command": "pwsh -NoProfile -File scripts/prepare-chatterbox-maintained.ps1 -State .runtime/chatterbox-maintained",
+    "note": "FlashHead retains its existing separately pinned runtime; full normal-app native compatibility is recorded above.",
+    "log": {
+      "sha256": "14ef146a56a31d316080978311ef20d4f48995c680fa6ed2181b4efce501534e"
+    }
+  },
+  "regular_approved_profile": {
+    "pass": true,
+    "candidate_override": false,
+    "independently_installed_runtime": true,
+    "relative_cli_paths": true,
+    "onsets": [2.3800999999996275, 1.965, 2.013700000000186]
+  },
+  "failed_validation_attempts": [
+    {
+      "attempt": "approved-profile.json",
+      "cause": "Task harness inherited a development PYTHONHOME for a different native Python version",
+      "remediation": "Isolate native interpreter environment; normal PowerShell launcher also clears PYTHONHOME/PYTHONPATH"
+    },
+    {
+      "attempt": "approved-profile-2.json",
+      "cause": "Caller-relative paths became invalid when FlashHead changed cwd",
+      "remediation": "Anchor all conversation/storage/runtime paths at public boundaries; public storage and native regular-profile checks passed"
+    },
+    {
+      "attempt": "cache-review.json",
+      "cause": "Test driver read the previous completed playback before the new run was accepted, producing a NaN onset",
+      "remediation": "Confirmation waits for a new run ID and its completion; cache eviction and unchanged worker PIDs also verified"
+    }
+  ],
+  "post_review_cache_check": {
+    "pass": true,
+    "scenario": "Warm voices A and B; delete inactive A; speak again with B through the normal native app",
+    "cache_sizes_before": [2, 2],
+    "cache_sizes_after": [1, 1],
+    "worker_pids_unchanged": true,
+    "pending_discards": 0,
+    "current_voice_onset_seconds": 2.713300000000745,
+    "shutdown": "Task server exited normally, no retained speech workers; device returned to 682 MiB desktop usage"
+  }
+}

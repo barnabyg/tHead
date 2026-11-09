@@ -1,0 +1,19 @@
+{
+  "id": "ResembleAI/chatterbox-nano",
+  "card_data": {
+    "language": [
+      "en"
+    ],
+    "license": "mit",
+    "pipeline_tag": "text-to-speech",
+    "tags": [
+      "text-to-speech",
+      "speech",
+      "speech-generation",
+      "voice-cloning"
+    ]
+  },
+  "gated": false,
+  "private": false,
+  "revision": "71ccd1d0081b430592cea481f4307e764e07bc64"
+}

@@ -1,9 +1,11 @@
 #Requires -Version 7.0
 param([Parameter(Mandatory)][ValidatePattern('^[a-z0-9-]{1,50}$')][string]$Label,
       [Parameter(Mandatory)][ValidateSet('jfk-zira','chatterbox-nano-1089','chatterbox-nano-121')][string]$Avatar,
-      [ValidateSet("cpu","cuda")][string]$Configuration = "cpu",
+      [ValidateSet("cpu","cuda","maintained")][string]$Configuration = "cpu",
+      [string]$State = '',
       [ValidateRange(1024,65535)][int]$Port = 8767,
-      [switch]$ProbesOnly, [switch]$Probes, [switch]$KeepOpen, [switch]$Prepare)
+      [switch]$ProbesOnly, [switch]$Probes, [switch]$SkipAssetProbes,
+      [switch]$KeepOpen, [switch]$Prepare)
 $ErrorActionPreference = 'Stop'
 Set-Location (Split-Path $PSScriptRoot -Parent)
 $directory = Join-Path (Get-Location) '.runtime/chatterbox-benchmarks'
@@ -19,12 +21,16 @@ $gpuBefore = & nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits
 $launch = @('-NoProfile','-File','scripts/chatterbox-app.ps1','-NoBrowser','-Port',"$Port",
             '-Output',".runtime/chatterbox-integration-$Label",'-Avatar',$Avatar,'-Configuration',$Configuration)
 if (-not $Prepare) { $launch += '-SkipPreparation' }
+if ($State) { $launch += @('-State', [IO.Path]::GetFullPath($State)) }
 $app = Start-Process pwsh -ArgumentList $launch -WindowStyle Hidden -PassThru -RedirectStandardOutput "$prefix-app.out.log" -RedirectStandardError "$prefix-app.err.log"
 $app.Id | Set-Content "$prefix-launcher.pid"
 $measure = @('scripts/chatterbox-benchmark.cjs',"$prefix.json",$Avatar)
 if ($Probes -or $ProbesOnly) { $measure += '--probes' }
 if ($ProbesOnly) { $measure += '--probes-only' }
+if ($SkipAssetProbes) { $measure += '--skip-asset-probes' }
 $env:THEAD_URL = "http://127.0.0.1:$Port"
+if ($State) { $env:THEAD_CHATTERBOX_STATE = [IO.Path]::GetFullPath($State) }
+else { Remove-Item Env:THEAD_CHATTERBOX_STATE -ErrorAction SilentlyContinue }
 $bench = Start-Process node -ArgumentList $measure -WindowStyle Hidden -PassThru -RedirectStandardOutput "$prefix.out.log" -RedirectStandardError "$prefix.err.log"
 $monitor = $null
 try {

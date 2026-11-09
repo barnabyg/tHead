@@ -1,0 +1,32 @@
+Running: uv pip install --python C:\docs\git\tHead\.runtime\issue57-worktree\.runtime\maintained\venv\Scripts\python.exe --no-index --no-deps --no-build-isolation C:\docs\git\tHead\.runtime\issue57-worktree\.runtime\maintained\source
+Using Python 3.12.10 environment at: .runtime\maintained\venv
+Resolved 1 package in 2ms
+   Building chatterbox-tts @ file:///C:/docs/git/tHead/.runtime/issue57-worktree/.runtime/maintained/source
+      Built chatterbox-tts @ file:///C:/docs/git/tHead/.runtime/issue57-worktree/.runtime/maintained/source
+Prepared 1 package in 1.29s
+Uninstalled 1 package in 30ms
+warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
+         If the cache and target directories are on different filesystems, hardlinking may not be supported.
+         If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
+Installed 1 package in 117ms
+ ~ chatterbox-tts==0.1.7+thead.1 (from file:///C:/docs/git/tHead/.runtime/issue57-worktree/.runtime/maintained/source)
+Running: C:\docs\git\tHead\.venv\Scripts\python.exe scripts/chatterbox_eval.py --configuration maintained --state .runtime/maintained --reference docs/runtime/chatterbox/reference-1089-10s.wav --text Hello. This is a local voice preview. The final words should sound clear and complete. --output .runtime/maintained/preview-1089-attempt-3
+Running: C:\docs\git\tHead\.runtime\issue57-worktree\.runtime\maintained\venv\Scripts\python.exe -I -W error C:\docs\git\tHead\.runtime\issue57-worktree\scripts\chatterbox_eval.py --worker --reference C:\docs\git\tHead\.runtime\issue57-worktree\docs\runtime\chatterbox\reference-1089-10s.wav --text Hello. This is a local voice preview. The final words should sound clear and complete. --state C:\docs\git\tHead\.runtime\issue57-worktree\.runtime\maintained --output C:\docs\git\tHead\.runtime\issue57-worktree\.runtime\maintained\preview-1089-attempt-3 --seed 17 --device cuda --configuration maintained
+
+  0%|          | 0/1000 [00:00<?, ?it/s]
+  0%|          | 4/1000 [00:00<00:28, 35.55it/s]
+  1%|          | 8/1000 [00:00<00:28, 34.62it/s]
+  2%|2         | 24/1000 [00:00<00:11, 85.22it/s]
+  4%|3         | 38/1000 [00:00<00:09, 104.42it/s]
+  5%|5         | 52/1000 [00:00<00:08, 114.55it/s]
+  7%|6         | 66/1000 [00:00<00:07, 122.51it/s]
+  8%|7         | 79/1000 [00:00<00:07, 122.20it/s]
+  9%|9         | 94/1000 [00:00<00:06, 129.95it/s]
+ 11%|#         | 109/1000 [00:00<00:06, 135.79it/s]
+ 12%|#2        | 124/1000 [00:01<00:06, 137.98it/s]
+ 13%|#3        | 131/1000 [00:01<00:07, 118.13it/s]
+S3 Token -> Mel Inference...
+
+  0%|          | 0/2 [00:00<?, ?it/s]
+100%|##########| 2/2 [00:00<00:00, 25.45it/s]
+Audition WAV and evidence: C:\docs\git\tHead\.runtime\issue57-worktree\.runtime\maintained\preview-1089-attempt-3
