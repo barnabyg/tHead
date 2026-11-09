@@ -16,7 +16,8 @@ from typing import Any, Protocol
 
 
 class SpeechVoice(Protocol):
-    metadata: dict[str, Any]
+    @property
+    def metadata(self) -> dict[str, Any]: ...
 
     def prepare(self, cancelled: threading.Event) -> None: ...
     def begin_turn(self, cancelled: threading.Event) -> None: ...

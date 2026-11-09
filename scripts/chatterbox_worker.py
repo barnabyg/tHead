@@ -53,6 +53,9 @@ def main() -> None:
             HF_HOME=str(args.state / "hf-cache"),
             HF_HUB_OFFLINE="1",
             TRANSFORMERS_OFFLINE="1",
+            HF_DATASETS_OFFLINE="1",
+            HF_HUB_DISABLE_TELEMETRY="1",
+            DO_NOT_TRACK="1",
             GRADIO_ANALYTICS_ENABLED="False",
         )
         sys.addaudithook(reject_network)

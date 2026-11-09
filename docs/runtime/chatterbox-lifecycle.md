@@ -82,3 +82,54 @@ runs, retain failures, and distinguish digital onset from physical-speaker laten
 and human listening confirmation. The normal-app handoff must document its one
 preparation-and-launch command after those dependencies land. Do not present the
 synthetic command above as native acceptance evidence.
+
+## Bounded two-worker recovery attempt
+
+Hypothesis: retaining one already-prepared standby avoids model reloading on the
+user's replacement request after Stop or a worker crash. The remediated candidate
+has measured model allocations of about 2.30 GB (2.36 GB reserved), against the
+historical FlashHead peak of about 6.8 GB on the 24 GB RTX 3090. This supports
+investigating two workers; it does not establish combined peak headroom or latency.
+
+Change: `scripts/chatterbox_engine.py::ChatterboxEngine` owns exactly two
+`ChatterboxVoice` instances, initially prepared serially. Every fresh process
+requires at least 8 GiB free VRAM and 8 GiB available RAM alongside the current
+application. Failed admission is explicit. CUDA configuration is mandatory for
+real conversational pooling, with no alternate model/device/voice substitution.
+
+Stop or crash abandons the affected worker's turn and promotes the warmed survivor.
+At most one finite background thread drains or rebuilds unavailable workers. Each
+slot is attempted once per requested reference version; repeated reference churn
+has a finite bound. There is no unlimited retry loop and no third process. If both
+workers are draining/unavailable, a request fails clearly and can be retried after
+readiness returns. Replenishment leaves the conversation, portrait and provider
+accounting alone. It may contend with current GPU work; native measurement must
+verify that performance remains acceptable.
+
+Each worker has a generated private canonical-reference snapshot beside the
+library's derived conditioning audio, preventing reference changes from rewriting
+a still-draining worker's input. Two snapshots and their atomic temporary files
+are removed on shutdown. Each worker retains the existing two-entry conditioning
+bound and removes transient imports when switching away. All IPC retains the
+request/epoch/turn/reference identity checks and detached-operation watchdogs.
+
+The pool implements the public SpeechVoice boundary and `set_reference` with the
+same signature as the single-worker adapter. `fault` delegates explicit diagnostic
+faults to the active worker. Metadata reports `ready_workers`, `worker_count`,
+`replenishing`, `lifecycle_state`, admission measurements and any `recovery_error`.
+The SpeechVoice protocol describes metadata as a readable property so both mutable
+adapter metadata and computed pool status satisfy strict typing.
+
+Measurement: the new HTTP fixture module first failed because the pool did not
+exist. After implementation, the real fixture-worker IPC tests passed Stop/late
+PCM isolation, promotion without waiting for a four-second obsolete synthesis,
+and crash/survivor promotion with one replacement. These are synthetic correctness
+checks. They provide neither native GPU timing nor physical-speaker evidence.
+Ruff, strict mypy and Bandit pass for the implementation and HTTP harness.
+
+Conclusion: bounded warm failover is implemented for integration. The earlier
+single-worker crash limitation is addressed architecturally by a warm survivor;
+#58 remains open until the normal/experimental integration is measured natively
+with the remediated pins, ten warmed turns, at least ten mixed cycles, combined
+RAM/VRAM peaks and complete resource release. No native acceptance is claimed in
+this commit. Existing human quality acceptance is preserved.
