@@ -101,8 +101,15 @@ at least 8 GiB free VRAM and fails explicitly without fallback.
 base versions and currently reports zero advisories. Chatterbox and Perth are
 source projects reviewed separately, not silently counted as no-advisory PyPI
 packages. There are 83 installed distributions in total.
-[Candidate inventory](maintenance-candidate-inventory.json) records package
-licence declarations, 222 licence/notice files and 189 native binary hashes.
+[Candidate inventory](maintenance-candidate-inventory.json) now records the exact
+final CPython 3.12.16 installation used by the completed native normal-app
+sequence: 83 distributions, 222 licence/notice files, 283 package DLL/PYD hashes,
+55 interpreter native binary/executable hashes and 72 verified source-package
+files. The final read-only source check preserves the preparation checkpoint.
+The current [81-version advisory refresh](maintenance-candidate-audit.json)
+again reports zero package advisories, with both source projects reviewed
+separately. Earlier 3.12.10 observations remain in the initial native preview
+reports and Git history.
 The current delivery keeps those upstream notices in the acquired environment;
 it does not redistribute a runtime bundle.
 

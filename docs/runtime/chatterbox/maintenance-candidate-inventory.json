@@ -2,8 +2,15 @@
   "schema_version": 1,
   "reviewed_on": "2026-11-09",
   "profile": "thead-english-nano-maintained-candidate",
-  "python": "3.12.10",
-  "python_source": "Existing native CPython3.12.10 host installation, declared prerequisite. No claim of independent Python acquisition.",
+  "python": "3.12.16",
+  "interpreter": {
+    "python": "3.12.16",
+    "openssl": "OpenSSL 3.5.9 29 Sep 2026",
+    "expat": "expat_2.9.0",
+    "architecture": "AMD64"
+  },
+  "python_source": "Hash/size-verified Astral python-build-standalone 20261026 Windows archive, independently acquired; exact details in chatterbox-maintained-lock.json and maintenance-python-security.json.",
+  "inventory_scope": "Exact maintained31216 installation used by the completed native normal-app release sequence; read-only refresh after native validation. Includes every DLL/PYD under site-packages and the pinned interpreter, rather than a selected package subset. Interpreter executable files are also included.",
   "packages": [
     {
       "name": "annotated-doc",
@@ -16,7 +23,9 @@
           "sha256": "fff170779a6acbf65abdb405c087f1cee1786691e4a96a4034517e4a504a0cdf"
         }
       ],
-      "requires": []
+      "requires": [],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: pdm-backend (2.4.9)\nRoot-Is-Purelib: true\nTag: py3-none-any\n"
     },
     {
       "name": "anyio",
@@ -34,7 +43,9 @@
         "idna>=2.8",
         "typing_extensions>=4.16.0; python_version < \"3.15\"",
         "trio>=0.32.0; extra == \"trio\""
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: setuptools (84.2.1)\nRoot-Is-Purelib: true\nTag: py3-none-any\n\n"
     },
     {
       "name": "audioread",
@@ -56,7 +67,9 @@
         "pytest-cov (>=7.0.0) ; extra == \"test\"",
         "standard-aifc ; python_version >= \"3.13\"",
         "standard-sunau ; python_version >= \"3.13\""
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: poetry-core 2.2.1\nRoot-Is-Purelib: true\nTag: py3-none-any\n"
     },
     {
       "name": "certifi",
@@ -71,7 +84,9 @@
           "sha256": "e93716da6b9c0d5a4a1df60fe695b370f0695603d21f6f83f053e42cfc10caf7"
         }
       ],
-      "requires": []
+      "requires": [],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: setuptools (84.2.1)\nRoot-Is-Purelib: true\nTag: py3-none-any\n\n"
     },
     {
       "name": "cffi",
@@ -86,7 +101,9 @@
       ],
       "requires": [
         "pycparser; implementation_name != \"PyPy\""
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: setuptools (83.0.0)\nRoot-Is-Purelib: false\nTag: cp312-cp312-win_amd64\n\n"
     },
     {
       "name": "cfgv",
@@ -99,7 +116,9 @@
           "sha256": "01fc3f8031a672b3f5d7d8ac262e432f3ea812809f5697d6bc5b270bf6446561"
         }
       ],
-      "requires": []
+      "requires": [],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: setuptools (75.5.0)\nRoot-Is-Purelib: true\nTag: py2-none-any\nTag: py3-none-any\n\n"
     },
     {
       "name": "charset-normalizer",
@@ -112,7 +131,9 @@
           "sha256": "18577485d3704f1a479ded8e573c0976cfed315fd2fd17983fa988da4c2f70d1"
         }
       ],
-      "requires": []
+      "requires": [],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: setuptools (84.0.0)\nRoot-Is-Purelib: false\nTag: cp312-cp312-win_amd64\n\n"
     },
     {
       "name": "chatterbox-tts",
@@ -138,7 +159,12 @@
         "safetensors==0.8.0",
         "pyloudnorm==0.2.0",
         "omegaconf==2.4.0"
-      ]
+      ],
+      "direct_url": {
+        "url": "file:///C:/docs/git/tHead/.runtime/issue57-worktree/.runtime/maintained31216/source",
+        "dir_info": {}
+      },
+      "wheel": "Wheel-Version: 1.0\nGenerator: setuptools (84.2.1)\nRoot-Is-Purelib: true\nTag: py3-none-any\n\n"
     },
     {
       "name": "click",
@@ -151,7 +177,9 @@
           "sha256": "9a8ad106a394e853bfe21f42f4e72d592819a22805d991b5f3275029292b658d"
         }
       ],
-      "requires": []
+      "requires": [],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: flit 3.12.0\nRoot-Is-Purelib: true\nTag: py3-none-any\n"
     },
     {
       "name": "cloudpickle",
@@ -166,7 +194,9 @@
           "sha256": "3029ea34173e9fdc233ad315dc6b100bd1ea71f529b1c1af97664a272fdc55f5"
         }
       ],
-      "requires": []
+      "requires": [],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: flit 3.12.0\nRoot-Is-Purelib: true\nTag: py3-none-any\n"
     },
     {
       "name": "colorama",
@@ -181,7 +211,9 @@
           "sha256": "cac35c02686e5d04a5a7140bfb3b36e73aed496656e891102e428886d7930318"
         }
       ],
-      "requires": []
+      "requires": [],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: hatchling 1.11.1\nRoot-Is-Purelib: true\nTag: py2-none-any\nTag: py3-none-any\n"
     },
     {
       "name": "conformer",
@@ -199,7 +231,9 @@
       "requires": [
         "einops (>=0.6.1)",
         "torch"
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: bdist_wheel (0.40.0)\nRoot-Is-Purelib: true\nTag: py3-none-any\n\n"
     },
     {
       "name": "decorator",
@@ -212,7 +246,9 @@
           "sha256": "bd12cc51405c10872497c10ca21601f1d4abc50496595cc89e89ab5dad24fb62"
         }
       ],
-      "requires": []
+      "requires": [],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: setuptools (82.0.1)\nRoot-Is-Purelib: true\nTag: py3-none-any\n\n"
     },
     {
       "name": "diffusers",
@@ -319,7 +355,9 @@
         "hf-doc-builder>=0.3.0; extra == \"dev\"",
         "torch>=2.6; extra == \"dev\"",
         "accelerate>=0.31.0; extra == \"dev\""
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: setuptools (84.2.1)\nRoot-Is-Purelib: true\nTag: py3-none-any\n\n"
     },
     {
       "name": "distlib",
@@ -334,7 +372,9 @@
           "sha256": "808e10c8a6ab8deb149ff9b3fb19f447a808094606d712a9ca57fead3552599d"
         }
       ],
-      "requires": []
+      "requires": [],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: setuptools (84.0.0)\nRoot-Is-Purelib: true\nTag: py2-none-any\nTag: py3-none-any\n\n"
     },
     {
       "name": "einops",
@@ -349,7 +389,9 @@
           "sha256": "30d984364296f51ffaecad4b01ee127e95250c5068918d4b66fc96206723e434"
         }
       ],
-      "requires": []
+      "requires": [],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: hatchling 1.27.0\nRoot-Is-Purelib: true\nTag: py3-none-any\n"
     },
     {
       "name": "filelock",
@@ -362,7 +404,9 @@
           "sha256": "608c89d5060ae9921adccf3236695bc654a9946e12323ef6c021dfa04e294d48"
         }
       ],
-      "requires": []
+      "requires": [],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: hatchling 1.32.4\nRoot-Is-Purelib: true\nTag: py3-none-any\n"
     },
     {
       "name": "fsspec",
@@ -479,7 +523,9 @@
         "zarr<3.2.0; extra == 'test-full'",
         "zstandard; (python_version < '3.14') and extra == 'test-full'",
         "tqdm; extra == 'tqdm'"
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: hatchling 1.32.3\nRoot-Is-Purelib: true\nTag: py3-none-any\n"
     },
     {
       "name": "h11",
@@ -494,7 +540,9 @@
           "sha256": "37db5bb85926db28a427a25867f10b1232003aea1be69ccb851138adb8e6f361"
         }
       ],
-      "requires": []
+      "requires": [],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: setuptools (78.1.0)\nRoot-Is-Purelib: true\nTag: py3-none-any\n\n"
     },
     {
       "name": "hf-xet",
@@ -511,7 +559,9 @@
       ],
       "requires": [
         "pytest ; extra == 'tests'"
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: maturin (1.16.0)\nRoot-Is-Purelib: false\nTag: cp38-abi3-win_amd64\n"
     },
     {
       "name": "httpcore2",
@@ -533,7 +583,9 @@
         "h2<5,>=3; extra == 'http2'",
         "socksio==1.*; extra == 'socks'",
         "trio<1.0,>=0.34.0; extra == 'trio'"
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: hatchling 1.32.4\nRoot-Is-Purelib: true\nTag: py3-none-any\n"
     },
     {
       "name": "httpx2",
@@ -564,7 +616,9 @@
         "socksio==1.*; extra == 'socks'",
         "wsproto>=1.2; extra == 'ws'",
         "backports-zstd>=1.0.0; (python_version <= '3.13') and extra == 'zstd'"
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: hatchling 1.32.4\nRoot-Is-Purelib: true\nTag: py3-none-any\n"
     },
     {
       "name": "huggingface_hub",
@@ -686,7 +740,9 @@
         "types-toml; extra == \"dev\"",
         "types-tqdm; extra == \"dev\"",
         "types-urllib3; extra == \"dev\""
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: setuptools (84.2.1)\nRoot-Is-Purelib: true\nTag: py3-none-any\n\n"
     },
     {
       "name": "identify",
@@ -705,7 +761,9 @@
       ],
       "requires": [
         "ukkonen; extra == \"license\""
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: setuptools (82.0.1)\nRoot-Is-Purelib: true\nTag: py2-none-any\nTag: py3-none-any\n\n"
     },
     {
       "name": "idna",
@@ -725,7 +783,9 @@
         "pytest >= 8.3.2 ; extra == \"all\"",
         "hypothesis >= 6.141.1 ; extra == \"all\"",
         "coverage >= 7.10.0 ; extra == \"all\""
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: flit 4.1.0\nRoot-Is-Purelib: true\nTag: py3-none-any\n"
     },
     {
       "name": "importlib_metadata",
@@ -756,7 +816,9 @@
         "pytest-cov; extra == \"cover\"",
         "pytest-enabler>=3.4; extra == \"enabler\"",
         "pytest-mypy>=1.0.1; platform_python_implementation != \"PyPy\" and extra == \"type\""
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: setuptools (84.2.1)\nRoot-Is-Purelib: true\nTag: py3-none-any\n\n"
     },
     {
       "name": "Jinja2",
@@ -774,7 +836,9 @@
       "requires": [
         "MarkupSafe>=2.0",
         "Babel>=2.7 ; extra == \"i18n\""
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: flit 3.11.0\nRoot-Is-Purelib: true\nTag: py3-none-any\n"
     },
     {
       "name": "joblib",
@@ -812,7 +876,9 @@
         "sphinx-copybutton; extra == \"docs\"",
         "sphinx-design; extra == \"docs\"",
         "tqdm; extra == \"docs\""
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: setuptools (84.0.0)\nRoot-Is-Purelib: true\nTag: py3-none-any\n\n"
     },
     {
       "name": "lazy-loader",
@@ -833,7 +899,9 @@
         "pre-commit==4.3.0; extra == \"lint\"",
         "changelist==0.5; extra == \"dev\"",
         "spin==0.15; extra == \"dev\""
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: setuptools (84.0.0)\nRoot-Is-Purelib: true\nTag: py3-none-any\n\n"
     },
     {
       "name": "librosa",
@@ -886,7 +954,9 @@
         "resampy>=0.2.2; extra == \"tests\"",
         "types-decorator; extra == \"tests\"",
         "matplotlib>=3.5.0; extra == \"display\""
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: setuptools (76.0.0)\nRoot-Is-Purelib: true\nTag: py3-none-any\n\n"
     },
     {
       "name": "llvmlite",
@@ -903,7 +973,9 @@
           "sha256": "7b564c7af9ab446d245ba66adc8cda2f61d1d162f842899557499e80b715993a"
         }
       ],
-      "requires": []
+      "requires": [],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: setuptools (84.0.0)\nRoot-Is-Purelib: false\nTag: cp312-cp312-win_amd64\n\n"
     },
     {
       "name": "markdown-it-py",
@@ -951,7 +1023,9 @@
         "pytest-regressions ; extra == \"testing\"",
         "pytest-timeout ; extra == \"testing\"",
         "requests ; extra == \"testing\""
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: flit 3.12.0\nRoot-Is-Purelib: true\nTag: py3-none-any\n"
     },
     {
       "name": "MarkupSafe",
@@ -964,7 +1038,9 @@
           "sha256": "4631ec0db5fd90a547e336817264c6798214338146f8ac94b4a57f96ee8c9ec4"
         }
       ],
-      "requires": []
+      "requires": [],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: setuptools (84.0.0)\nRoot-Is-Purelib: false\nTag: cp312-cp312-win_amd64\n\n"
     },
     {
       "name": "mdurl",
@@ -979,7 +1055,9 @@
           "sha256": "7c605df6e28667a9603118e98274f64a49ce3eed0d26fccce9534a345e0ef955"
         }
       ],
-      "requires": []
+      "requires": [],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: flit 3.7.1\nRoot-Is-Purelib: true\nTag: py3-none-any\n"
     },
     {
       "name": "ml_dtypes",
@@ -1007,7 +1085,9 @@
         "pytest-xdist; extra == \"dev\"",
         "pylint>=2.6.0; extra == \"dev\"",
         "pyink; extra == \"dev\""
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: setuptools (80.9.0)\nRoot-Is-Purelib: false\nTag: cp312-cp312-win_amd64\n\n"
     },
     {
       "name": "mpmath",
@@ -1031,7 +1111,9 @@
         "sphinx ; extra == 'docs'",
         "gmpy2 (>=2.1.0a4) ; (platform_python_implementation != \"PyPy\") and extra == 'gmpy'",
         "pytest (>=4.6) ; extra == 'tests'"
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: bdist_wheel (0.38.4)\nRoot-Is-Purelib: true\nTag: py3-none-any\n\n"
     },
     {
       "name": "msgpack",
@@ -1044,7 +1126,9 @@
           "sha256": "4fbdff42eba4593c16f7a7ea7078883b2b734870a1e2b636284ce2dce62bf4f7"
         }
       ],
-      "requires": []
+      "requires": [],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: setuptools (84.2.1)\nRoot-Is-Purelib: false\nTag: cp312-cp312-win_amd64\n\n"
     },
     {
       "name": "narwhals",
@@ -1073,7 +1157,9 @@
         "narwhals[duckdb] ; extra == 'sql'",
         "sqlparse>=0.5.5 ; extra == 'sql'",
         "sqlframe>=3.22.0,!=3.39.3 ; extra == 'sqlframe'"
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: uv 0.13.6\nRoot-Is-Purelib: true\nTag: py3-none-any\n"
     },
     {
       "name": "networkx",
@@ -1126,7 +1212,9 @@
         "pytest-xdist>=3.0; extra == \"test\"",
         "pytest-mpl; extra == \"test-extras\"",
         "pytest-randomly; extra == \"test-extras\""
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: setuptools (84.0.0)\nRoot-Is-Purelib: true\nTag: py3-none-any\n\n"
     },
     {
       "name": "nodeenv",
@@ -1144,7 +1232,9 @@
       "requires": [
         "certifi; extra == \"certifi\"",
         "shtab>=1.11; extra == \"completion\""
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: setuptools (84.2.1)\nRoot-Is-Purelib: true\nTag: py3-none-any\n\n"
     },
     {
       "name": "numba",
@@ -1166,7 +1256,9 @@
       "requires": [
         "llvmlite<0.51,>=0.50.0dev0",
         "numpy<2.6,>=1.22"
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: setuptools (84.2.1)\nRoot-Is-Purelib: false\nTag: cp312-cp312-win_amd64\n\n"
     },
     {
       "name": "numpy",
@@ -1193,7 +1285,9 @@
           "sha256": "b4bc2f4fa1c95778f1ed3dd8f14706bece399475b978f9f34b5d3cd72521b48a"
         }
       ],
-      "requires": []
+      "requires": [],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: meson\nRoot-Is-Purelib: false\nTag: cp312-cp312-win_amd64"
     },
     {
       "name": "omegaconf",
@@ -1231,7 +1325,9 @@
         "towncrier; extra == \"dev\"",
         "twine; extra == \"dev\"",
         "pydevd; extra == \"dev\""
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: setuptools (84.0.0)\nRoot-Is-Purelib: true\nTag: py3-none-any\n\n"
     },
     {
       "name": "onnx",
@@ -1254,7 +1350,9 @@
         "typing_extensions>=4.7.1",
         "ml_dtypes>=0.5.4",
         "Pillow>=12.2.0; extra == \"reference\""
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: scikit-build-core 1.1.1\nRoot-Is-Purelib: false\nTag: cp312-abi3-win_amd64\n\n"
     },
     {
       "name": "packaging",
@@ -1275,7 +1373,9 @@
           "sha256": "b70e7e9b742f1cc6f948b34c16aa39ffece94196364bc88ff0d2180f0028fac5"
         }
       ],
-      "requires": []
+      "requires": [],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: flit 3.12.0\nRoot-Is-Purelib: true\nTag: py3-none-any\n"
     },
     {
       "name": "pillow",
@@ -1315,7 +1415,9 @@
         "setuptools; extra == \"tests\"",
         "trove-classifiers>=2024.10.12; extra == \"tests\"",
         "defusedxml; extra == \"xmp\""
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: setuptools (84.0.0)\nRoot-Is-Purelib: false\nTag: cp312-cp312-win_amd64\n\n"
     },
     {
       "name": "platformdirs",
@@ -1328,7 +1430,9 @@
           "sha256": "29e0fd62e929850e86eb28c3fdccf0cefdf4fa94879011cffb3d0d4bed6d4db6"
         }
       ],
-      "requires": []
+      "requires": [],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: hatchling 1.32.4\nRoot-Is-Purelib: true\nTag: py3-none-any\n"
     },
     {
       "name": "pooch",
@@ -1350,7 +1454,9 @@
         "xxhash>=1.4.3; extra == \"xxhash\"",
         "pytest-httpserver; extra == \"test\"",
         "pytest-localftpserver; extra == \"test\""
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: setuptools (80.10.2)\nRoot-Is-Purelib: true\nTag: py3-none-any\n\n"
     },
     {
       "name": "pre_commit",
@@ -1373,7 +1479,9 @@
         "nodeenv>=0.11.1",
         "pyyaml>=5.1",
         "virtualenv>=20.10.0"
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: setuptools (82.0.1)\nRoot-Is-Purelib: true\nTag: py2-none-any\nTag: py3-none-any\n\n"
     },
     {
       "name": "protobuf",
@@ -1386,7 +1494,9 @@
           "sha256": "6e5e117324afd944dcf67f36cf329843bc1a92229a8cd9bb573d7a83130fea7d"
         }
       ],
-      "requires": []
+      "requires": [],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: bazel-wheelmaker 1.0\nRoot-Is-Purelib: false\nTag: cp310-abi3-win_amd64\n"
     },
     {
       "name": "pycparser",
@@ -1399,7 +1509,9 @@
           "sha256": "0a9e78156ae8b96caf1b4f11ac2df424b83de29736f9e757630548a6272fdf90"
         }
       ],
-      "requires": []
+      "requires": [],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: setuptools (84.2.1)\nRoot-Is-Purelib: true\nTag: py3-none-any\n\n"
     },
     {
       "name": "pydub",
@@ -1414,7 +1526,9 @@
           "sha256": "ae856536224cc7a389e968771fc5f259814bdd0da63539cf72282adbaef6897a"
         }
       ],
-      "requires": []
+      "requires": [],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: bdist_wheel (0.36.2)\nRoot-Is-Purelib: true\nTag: py2-none-any\nTag: py3-none-any\n\n"
     },
     {
       "name": "Pygments",
@@ -1429,7 +1543,9 @@
       ],
       "requires": [
         "colorama>=0.4.6; extra == 'windows-terminal'"
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: hatchling 1.32.0\nRoot-Is-Purelib: true\nTag: py3-none-any\n"
     },
     {
       "name": "pyloudnorm",
@@ -1445,7 +1561,9 @@
       "requires": [
         "scipy>=1.0.1",
         "numpy>=1.14.2"
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: setuptools (80.9.0)\nRoot-Is-Purelib: true\nTag: py3-none-any\n\n"
     },
     {
       "name": "python-discovery",
@@ -1460,7 +1578,9 @@
       ],
       "requires": [
         "filelock>=3.16.1"
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: hatchling 1.32.4\nRoot-Is-Purelib: true\nTag: py3-none-any\n"
     },
     {
       "name": "PyYAML",
@@ -1475,7 +1595,9 @@
           "sha256": "8d3928f9dc4490fd635707cb88eb26bd764102a7282954307d3e5167a577e8a4"
         }
       ],
-      "requires": []
+      "requires": [],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: setuptools (80.9.0)\nRoot-Is-Purelib: false\nTag: cp312-cp312-win_amd64\n\n"
     },
     {
       "name": "regex",
@@ -1488,7 +1610,9 @@
           "sha256": "3d220c06594b826bbabf110312f60f385f99e57e529fa4b9e536f79091f8b4c7"
         }
       ],
-      "requires": []
+      "requires": [],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: setuptools (84.2.1)\nRoot-Is-Purelib: false\nTag: cp312-cp312-win_amd64\n\n"
     },
     {
       "name": "requests",
@@ -1514,7 +1638,9 @@
         "certifi>=2023.5.7",
         "PySocks!=1.5.7,>=1.5.6; extra == \"socks\"",
         "chardet<8,>=3.0.2; extra == \"use-chardet-on-py3\""
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: setuptools (82.0.1)\nRoot-Is-Purelib: true\nTag: py3-none-any\n\n"
     },
     {
       "name": "resemble-perth",
@@ -1530,7 +1656,12 @@
         "soundfile>=0.12.0",
         "torch>=2.1.0",
         "torchaudio>=2.1.0"
-      ]
+      ],
+      "direct_url": {
+        "url": "file:///C:/docs/git/tHead/.runtime/issue57-worktree/.runtime/maintained31216/perth",
+        "dir_info": {}
+      },
+      "wheel": "Wheel-Version: 1.0\nGenerator: uv 0.12.7\nRoot-Is-Purelib: true\nTag: py3-none-any\n"
     },
     {
       "name": "rich",
@@ -1549,7 +1680,9 @@
         "ipywidgets (>=7.5.1,<9) ; extra == \"jupyter\"",
         "markdown-it-py (>=2.2.0)",
         "pygments (>=2.13.0,<3.0.0)"
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: poetry-core 2.3.1\nRoot-Is-Purelib: true\nTag: py3-none-any\n"
     },
     {
       "name": "s3tokenizer",
@@ -1575,7 +1708,9 @@
         "black ; extra == 'dev'",
         "flake8 ; extra == 'dev'",
         "isort ; extra == 'dev'"
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: setuptools (75.3.2)\nRoot-Is-Purelib: true\nTag: py3-none-any\n\n"
     },
     {
       "name": "safetensors",
@@ -1627,7 +1762,9 @@
         "tf-nightly ; extra == 'tf-nightly'",
         "safetensors[numpy] ; extra == 'torch'",
         "torch>=2.4 ; extra == 'torch'"
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: maturin (1.13.3)\nRoot-Is-Purelib: false\nTag: cp310-abi3-win_amd64\n"
     },
     {
       "name": "scikit-learn",
@@ -1654,7 +1791,9 @@
         "joblib>=1.4.0",
         "narwhals>=2.0.1",
         "threadpoolctl>=3.5.0"
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: meson\nRoot-Is-Purelib: false\nTag: cp312-cp312-win_amd64"
     },
     {
       "name": "scipy",
@@ -1724,7 +1863,9 @@
         "pycodestyle; extra == \"dev\"",
         "ruff>=0.12.0; extra == \"dev\"",
         "cython-lint>=0.12.2; extra == \"dev\""
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: meson\nRoot-Is-Purelib: false\nTag: cp312-cp312-win_amd64"
     },
     {
       "name": "setuptools",
@@ -1852,7 +1993,9 @@
         "mypy==1.18.*; extra == \"type\"",
         "importlib_metadata>=7.0.2; python_version < \"3.10\" and extra == \"type\"",
         "jaraco.develop>=7.21; sys_platform != \"cygwin\" and extra == \"type\""
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: setuptools (84.2.1)\nRoot-Is-Purelib: true\nTag: py3-none-any\n\n"
     },
     {
       "name": "shellingham",
@@ -1867,7 +2010,9 @@
           "sha256": "f388fd38cad13112c1dc0f669bbe80e7f84541edbafb72f3030d2ca7642c3c9d"
         }
       ],
-      "requires": []
+      "requires": [],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: bdist_wheel (0.41.2)\nRoot-Is-Purelib: true\nTag: py2-none-any\nTag: py3-none-any\n\n"
     },
     {
       "name": "soundfile",
@@ -1889,7 +2034,9 @@
       "requires": [
         "cffi >=1.0",
         "numpy"
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: bdist_wheel (0.43.0)\nRoot-Is-Purelib: true\nTag: py2-none-win_amd64\nTag: py3-none-win_amd64\n\n"
     },
     {
       "name": "soxr",
@@ -1921,7 +2068,9 @@
         "myst-parser; extra == \"docs\"",
         "linkify-it-py; extra == \"docs\"",
         "pytest; extra == \"test\""
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: scikit-build-core 0.12.2\nRoot-Is-Purelib: false\nTag: cp312-abi3-win_amd64\n\n"
     },
     {
       "name": "sympy",
@@ -1944,7 +2093,9 @@
         "mpmath<1.4,>=1.1.0",
         "pytest>=7.1.0; extra == \"dev\"",
         "hypothesis>=6.70.0; extra == \"dev\""
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: setuptools (79.0.1)\nRoot-Is-Purelib: true\nTag: py3-none-any\n\n"
     },
     {
       "name": "threadpoolctl",
@@ -1957,7 +2108,9 @@
           "sha256": "ecd5f3320c3064582c4ebd53e413d8cd3ee5bb85f039e4137a3e9d3497a43cd4"
         }
       ],
-      "requires": []
+      "requires": [],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: flit 4.2.0\nRoot-Is-Purelib: true\nTag: py3-none-any\n"
     },
     {
       "name": "tokenizers",
@@ -1980,7 +2133,9 @@
         "datasets ; extra == 'testing'",
         "ruff ; extra == 'testing'",
         "ty ; extra == 'testing'"
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: maturin (1.15.0)\nRoot-Is-Purelib: false\nTag: cp310-abi3-win_amd64\n"
     },
     {
       "name": "torch",
@@ -2396,7 +2551,12 @@
         "optree>=0.13.0; extra == \"optree\"",
         "opt-einsum>=3.3; extra == \"opt-einsum\"",
         "pyyaml; extra == \"pyyaml\""
-      ]
+      ],
+      "direct_url": {
+        "url": "https://download-r2.pytorch.org/whl/cu130/torch-2.14.1%2Bcu130-cp312-cp312-win_amd64.whl",
+        "archive_info": {}
+      },
+      "wheel": "Wheel-Version: 1.0\nGenerator: scikit-build-core 1.0.0\nRoot-Is-Purelib: false\nTag: cp312-cp312-win_amd64\n\n"
     },
     {
       "name": "torchaudio",
@@ -2413,7 +2573,9 @@
       ],
       "requires": [
         "torch>=2.11"
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: setuptools (84.0.0)\nRoot-Is-Purelib: false\nTag: py3-none-win_amd64\n\n"
     },
     {
       "name": "tqdm",
@@ -2430,7 +2592,9 @@
         "requests; extra == \"telegram\"",
         "envwrap; extra == \"telegram\"",
         "ipywidgets>=6; extra == \"notebook\""
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: setuptools (84.0.0)\nRoot-Is-Purelib: true\nTag: py3-none-any\n\n"
     },
     {
       "name": "transformers",
@@ -2685,7 +2849,9 @@
         "sudachipy>=0.6.6; extra == \"dev\"",
         "sudachidict_core>=20220729; extra == \"dev\"",
         "scikit-learn; extra == \"dev\""
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: setuptools (79.0.1)\nRoot-Is-Purelib: true\nTag: py3-none-any\n\n"
     },
     {
       "name": "truststore",
@@ -2698,7 +2864,9 @@
           "sha256": "33be7b7e8fa4fd19b1760e1a8ed8a668bdab852c91b692dd41424bcb725a9fca"
         }
       ],
-      "requires": []
+      "requires": [],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: flit 3.12.0\nRoot-Is-Purelib: true\nTag: py3-none-any\n"
     },
     {
       "name": "typer",
@@ -2720,7 +2888,9 @@
         "rich>=13.8.0",
         "annotated-doc>=0.0.2",
         "colorama; platform_system == \"Windows\""
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: pdm-backend (2.5.0)\nRoot-Is-Purelib: true\nTag: py3-none-any\n"
     },
     {
       "name": "typing_extensions",
@@ -2733,7 +2903,9 @@
           "sha256": "3b2f81fe21d181c499c59a256c8e1968455d6689d269aa85373bfb6af41da3bf"
         }
       ],
-      "requires": []
+      "requires": [],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: flit 3.12.0\nRoot-Is-Purelib: true\nTag: py3-none-any\n"
     },
     {
       "name": "urllib3",
@@ -2752,7 +2924,9 @@
         "h2<5,>=4; extra == 'h2'",
         "pysocks!=1.5.7,<2.0,>=1.5.6; extra == 'socks'",
         "backports-zstd>=1.0.0; (python_version < '3.14') and extra == 'zstd'"
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: hatchling 1.32.0\nRoot-Is-Purelib: true\nTag: py3-none-any\n"
     },
     {
       "name": "uv-build",
@@ -2769,7 +2943,9 @@
           "sha256": "860e3d7a86b84e6a7012c7a635fc64df475cebc6cce34dfeb73a5982ec58176c"
         }
       ],
-      "requires": []
+      "requires": [],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: maturin (1.14.1)\nRoot-Is-Purelib: false\nTag: py3-none-win_amd64\n"
     },
     {
       "name": "virtualenv",
@@ -2794,7 +2970,9 @@
         "platformdirs<5,>=4.4",
         "python-discovery>=1.6.1",
         "typing-extensions>=4.16; python_version < '3.11'"
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: hatchling 1.32.4\nRoot-Is-Purelib: true\nTag: py3-none-any\n"
     },
     {
       "name": "wheel",
@@ -2811,7 +2989,9 @@
         "packaging >= 24.0",
         "pytest >= 6.0.0 ; extra == \"test\"",
         "setuptools >= 77 ; extra == \"test\""
-      ]
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: flit 3.12.0\nRoot-Is-Purelib: true\nTag: py3-none-any\n"
     },
     {
       "name": "zipp",
@@ -2843,10 +3023,1598 @@
         "pytest-cov; extra == \"cover\"",
         "pytest-enabler>=3.4; extra == \"enabler\"",
         "pytest-mypy>=1.0.1; platform_python_implementation != \"PyPy\" and extra == \"type\""
+      ],
+      "direct_url": null,
+      "wheel": "Wheel-Version: 1.0\nGenerator: setuptools (84.2.1)\nRoot-Is-Purelib: true\nTag: py3-none-any\n\n"
+    }
+  ],
+  "source_projects": [
+    {
+      "name": "chatterbox-tts",
+      "version": "0.1.7+thead.1",
+      "directory": "source",
+      "installed_source_verification": "All package file names and bytes match the revision/patch-verified source tree, including Perth checkpoint; read-only verification performed after native release sequence.",
+      "licence_file": {
+        "file": "source/LICENSE",
+        "sha256": "4248e910a928849fe5815a0f9236e17fa07768d95b9193212752c464b93d6caa"
+      },
+      "package_files": [
+        {
+          "file": "__init__.py",
+          "bytes": 170,
+          "sha256": "bc17d3b96ed0c05461b68de3c359af26bbfe2341d17d1775d40430baa30aae1f"
+        },
+        {
+          "file": "models/__init__.py",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "file": "models/s3gen/__init__.py",
+          "bytes": 68,
+          "sha256": "1eb98b785c481502e515676da0e65afbfd8fa2254ae303b6fa9714db6a52730c"
+        },
+        {
+          "file": "models/s3gen/configs.py",
+          "bytes": 220,
+          "sha256": "15a84f5819e0fe1371ae4f5ac7e3cfb56df52cf36704401586efddd0383697fb"
+        },
+        {
+          "file": "models/s3gen/const.py",
+          "bytes": 34,
+          "sha256": "0a3a957453060ca081a427e71559889f65e45181e6d7befa649e7314cd90e516"
+        },
+        {
+          "file": "models/s3gen/decoder.py",
+          "bytes": 13171,
+          "sha256": "40d093fd61549a09f5f71d74081585df1e3871b3a8e6b6fafde12bb447701810"
+        },
+        {
+          "file": "models/s3gen/f0_predictor.py",
+          "bytes": 1993,
+          "sha256": "917825eec353b9601b9f7af0c0e3603eb1061d8b641539225e78c910d7bc2255"
+        },
+        {
+          "file": "models/s3gen/flow.py",
+          "bytes": 8178,
+          "sha256": "1e9bc8219eb0832b6db2b86bf7e4085dc9d0c0de47e5c496eb94bbd38b01511d"
+        },
+        {
+          "file": "models/s3gen/flow_matching.py",
+          "bytes": 10786,
+          "sha256": "63fc979521e1b758f0e8f3bee00a496a53184a714ef1a7a723b319a58158d612"
+        },
+        {
+          "file": "models/s3gen/hifigan.py",
+          "bytes": 17652,
+          "sha256": "e49f4723323937493ecf5f6c7f1934f57766ef46c74eaf7c60bf456a1c6fe897"
+        },
+        {
+          "file": "models/s3gen/matcha/decoder.py",
+          "bytes": 14435,
+          "sha256": "a9f35df7b3eb1c7defb8744626b32ef0504a519a066f3240fde90393a39b3488"
+        },
+        {
+          "file": "models/s3gen/matcha/flow_matching.py",
+          "bytes": 4556,
+          "sha256": "56614b92aad52f713c198ae089d47e6a7df13450f3cf5d1144f65fb34c35107d"
+        },
+        {
+          "file": "models/s3gen/matcha/text_encoder.py",
+          "bytes": 14965,
+          "sha256": "a1e993ad219d95dee864e010d8415e7057abb6131a21550093d83db0279b01cb"
+        },
+        {
+          "file": "models/s3gen/matcha/transformer.py",
+          "bytes": 13237,
+          "sha256": "66ff2092d974a99b251b9d8e5c08bbcecceaedfaf41e2bd8af2b4bc7a56dcbea"
+        },
+        {
+          "file": "models/s3gen/s3gen.py",
+          "bytes": 13189,
+          "sha256": "b3ea20b6f3f98dacfa3c2c99502bbf3dfbe7a77362f2ce0d16783d4324e6fc96"
+        },
+        {
+          "file": "models/s3gen/transformer/__init__.py",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "file": "models/s3gen/transformer/activation.py",
+          "bytes": 3089,
+          "sha256": "a4a96caea9f7b05111286de5ea760bdfdf9c4e53448f53420857dc04a50440c2"
+        },
+        {
+          "file": "models/s3gen/transformer/attention.py",
+          "bytes": 14415,
+          "sha256": "28c38f1e3ea1aeac1526e98f8349d9f068e25f1f6ae246c60badc3d540d62794"
+        },
+        {
+          "file": "models/s3gen/transformer/convolution.py",
+          "bytes": 5230,
+          "sha256": "eb5f41f324a97225c73b9c430af8bb231bd77386ef18450bb0fd329f469ab4e1"
+        },
+        {
+          "file": "models/s3gen/transformer/embedding.py",
+          "bytes": 11399,
+          "sha256": "3646e748783fe6c069b424cc9cbfe81bc54a5ccfea1ae7041df398a603cccd3e"
+        },
+        {
+          "file": "models/s3gen/transformer/encoder_layer.py",
+          "bytes": 9602,
+          "sha256": "1920582be2c9b7cf7835e7b539118ec1eb9da8f2c711c6257f8598b3792951b9"
+        },
+        {
+          "file": "models/s3gen/transformer/positionwise_feed_forward.py",
+          "bytes": 4219,
+          "sha256": "6e8038e3bcc8ca086ddca508fb9b9d40bf3ab98bebabcf5c94935d032329d0f8"
+        },
+        {
+          "file": "models/s3gen/transformer/subsampling.py",
+          "bytes": 12666,
+          "sha256": "31fc0347a851abc1205dfd4cf68099c0c416589c3e99a07b250e8630cece19d0"
+        },
+        {
+          "file": "models/s3gen/transformer/upsample_encoder.py",
+          "bytes": 13694,
+          "sha256": "1794ff01b678791ad665d7b0c0999448e760fc1dcb3bc8208de5f58510c1f68c"
+        },
+        {
+          "file": "models/s3gen/utils/class_utils.py",
+          "bytes": 2334,
+          "sha256": "02f3cb3a55ee124c279777245b09061fa15a8182e6e7d7762f8fa45c0a631948"
+        },
+        {
+          "file": "models/s3gen/utils/intmeanflow.py",
+          "bytes": 951,
+          "sha256": "df3c73d77244518c7b90224c2a5180bf0435d27868f598cb876cfcf812aa5285"
+        },
+        {
+          "file": "models/s3gen/utils/mask.py",
+          "bytes": 7666,
+          "sha256": "902c85fbbd1e30a0cb9792cdcf1b9acd97804bd5cb3b5d6a440dc236f274bb3e"
+        },
+        {
+          "file": "models/s3gen/utils/mel.py",
+          "bytes": 2556,
+          "sha256": "afbb6fe14c30e104cb2617230daa2a6770f97452948b2e6f6eea4a4c2f4ff3ba"
+        },
+        {
+          "file": "models/s3gen/xvector.py",
+          "bytes": 14141,
+          "sha256": "c7c759920cbf1aac9f12e0a15c1bf3d38da51ca9d3ea7a7b53cf740c86fe17fa"
+        },
+        {
+          "file": "models/s3tokenizer/__init__.py",
+          "bytes": 595,
+          "sha256": "7357ce9a0349bae51e8e8cabcdd01ba8534dd6a2373c1e092291ecb716414fe0"
+        },
+        {
+          "file": "models/s3tokenizer/s3tokenizer.py",
+          "bytes": 5155,
+          "sha256": "76eae9f95b14608c4847c9d7acfcf08138c365640b0d4589de01e742b0e5eb43"
+        },
+        {
+          "file": "models/t3/__init__.py",
+          "bytes": 19,
+          "sha256": "cfecc1c7df7d22398157d40605abfa64f30ef9b697190dc4f57b229299f70538"
+        },
+        {
+          "file": "models/t3/inference/t3_hf_backend.py",
+          "bytes": 3990,
+          "sha256": "2d8407cf500ec1e6b707b060861145bb7802741328d76ec341280c06c7f3f2b5"
+        },
+        {
+          "file": "models/t3/llama_configs.py",
+          "bytes": 2608,
+          "sha256": "8d348019801dd017d85b88c2a17c5f785e6bb4ffba4ba6edf190a8996536a60a"
+        },
+        {
+          "file": "models/t3/modules/cond_enc.py",
+          "bytes": 3293,
+          "sha256": "d8128803091423141051caf295de6208113da987fe537de5566c4b84e19df847"
+        },
+        {
+          "file": "models/t3/modules/learned_pos_emb.py",
+          "bytes": 1099,
+          "sha256": "2ec5b09ce94d71261e9c25833a08f666bd6e2d5439b2314123e035c02df8b7af"
+        },
+        {
+          "file": "models/t3/modules/perceiver.py",
+          "bytes": 7719,
+          "sha256": "f9c4b0130652e94d05873ead931ecd399a9dd644b7a17edf1b76d7d7f2bfbf42"
+        },
+        {
+          "file": "models/t3/modules/t3_config.py",
+          "bytes": 1245,
+          "sha256": "e07d8c09f85242f061a036cb1ac56de5b49cd5444790e8ac35098df44348801f"
+        },
+        {
+          "file": "models/t3/t3.py",
+          "bytes": 18116,
+          "sha256": "bfb689c9018a329aa3a1a364aaa6d03a68a97b7352cbc394a13d4711742f9a0a"
+        },
+        {
+          "file": "models/tokenizers/__init__.py",
+          "bytes": 48,
+          "sha256": "6759fb8b4f6d50b8e4ab8ddd0e39d44e1ca7196544f93311b385a7eeea6c38c2"
+        },
+        {
+          "file": "models/tokenizers/tokenizer.py",
+          "bytes": 10202,
+          "sha256": "e169f02f14b008e8e7a4f29df66ecafaa29972ff4a38724b51545b8563861889"
+        },
+        {
+          "file": "models/utils.py",
+          "bytes": 148,
+          "sha256": "c30615629f906acf71c67104a78d36f682c635e55b808d7d8022d47a2738b225"
+        },
+        {
+          "file": "models/voice_encoder/__init__.py",
+          "bytes": 56,
+          "sha256": "adf1bcef74e90dae0fcb5c2945103cbc0bd9af15cc9be4288f960ad7d22ce678"
+        },
+        {
+          "file": "models/voice_encoder/config.py",
+          "bytes": 406,
+          "sha256": "0b41d794a16fd94929b37fd229dc61d3634178a11046a6b5834e109109a8e3c8"
+        },
+        {
+          "file": "models/voice_encoder/melspec.py",
+          "bytes": 1940,
+          "sha256": "0f5fea173841c5150fa6ea9236160798c8ee24afba724d65da61dce78a4d48e8"
+        },
+        {
+          "file": "models/voice_encoder/voice_encoder.py",
+          "bytes": 10555,
+          "sha256": "4b12e9d49cbb7ce81e6731c02d4f37a9b763ef7419dba95a7e66ea078d49a9c3"
+        },
+        {
+          "file": "mtl_tts.py",
+          "bytes": 11721,
+          "sha256": "936759044e54cffe8c68b91b32e01da0bc032a1e084f769f0403080d86ad153c"
+        },
+        {
+          "file": "tts.py",
+          "bytes": 8924,
+          "sha256": "7896787bc17e20eafcd1dce7b8a4a6ea3a6478baab771c60d63e9e81f5564195"
+        },
+        {
+          "file": "tts_turbo.py",
+          "bytes": 11823,
+          "sha256": "bb2eaebe5c794fa1de9762502c7bccdcae8a9d3b0433f8194ce804a2c964889d"
+        },
+        {
+          "file": "vc.py",
+          "bytes": 3520,
+          "sha256": "4093a7edf32b1174999b00a74b5b83de193763c65249b0d5288d5f45f3ac2d71"
+        }
+      ]
+    },
+    {
+      "name": "resemble-perth",
+      "version": "1.1.0",
+      "directory": "perth",
+      "installed_source_verification": "All package file names and bytes match the revision/patch-verified source tree, including Perth checkpoint; read-only verification performed after native release sequence.",
+      "licence_file": {
+        "file": "perth/LICENSE",
+        "sha256": "4543f6777abede354f09bc2ba6580bd475c364e7d6f39315bf9d315d033b48f4"
+      },
+      "package_files": [
+        {
+          "file": "__init__.py",
+          "bytes": 856,
+          "sha256": "9608dbd3ad783d7cfa5e455f4c0f4b55c232339f5c78b12fa35033928b90b6a1"
+        },
+        {
+          "file": "cli/__init__.py",
+          "bytes": 107,
+          "sha256": "878c345d2efabb0f93b36eb57fa86e325b5aeabf28ed54cf11b702d88477498a"
+        },
+        {
+          "file": "cli/watermark_cli.py",
+          "bytes": 5143,
+          "sha256": "071efea826d41b67ebe2c3695f6055c62e7db74f2fffebc01467303b9ceadc32"
+        },
+        {
+          "file": "config.py",
+          "bytes": 4561,
+          "sha256": "d7d16a15c53087c895345da7522ee4ca4e3354bad44c0de6871d80aa7ef6a492"
+        },
+        {
+          "file": "dummy_watermarker.py",
+          "bytes": 1794,
+          "sha256": "11645acda37fbc70c481e1f034a0ae62099f222783d0859c611a721f43b5a407"
+        },
+        {
+          "file": "perth_net/__init__.py",
+          "bytes": 211,
+          "sha256": "57cb1f06014a3c1828fe16569b8d2cddb0776672e12ab4df42ddf04d5ca91572"
+        },
+        {
+          "file": "perth_net/perth_net_implicit/__init__.py",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "file": "perth_net/perth_net_implicit/audio_processor.py",
+          "bytes": 1635,
+          "sha256": "54a725918961f0c468503a9c34eec8722643a90dcdbefff941b41b97db607793"
+        },
+        {
+          "file": "perth_net/perth_net_implicit/checkpoint_manager.py",
+          "bytes": 2224,
+          "sha256": "ea3e1a016ec654b630f85f11840d6b1a23388a794dff7d1d23437f32ef40691e"
+        },
+        {
+          "file": "perth_net/perth_net_implicit/config.py",
+          "bytes": 756,
+          "sha256": "e2f001e114e516f11cc2b8c093d12f3b186a7881f3a3fcd7d81c6ae9fbdf5b58"
+        },
+        {
+          "file": "perth_net/perth_net_implicit/model/__init__.py",
+          "bytes": 894,
+          "sha256": "1c8f62c99bc6c6bfddb9255f2101fb3c8219bd2df73f182da64fad607d5d5362"
+        },
+        {
+          "file": "perth_net/perth_net_implicit/model/decoder.py",
+          "bytes": 2879,
+          "sha256": "17e36a21196a801bc920cc4d0a7fb5a4b0811ccd6793fbb849423379e9ee9b4d"
+        },
+        {
+          "file": "perth_net/perth_net_implicit/model/encoder.py",
+          "bytes": 981,
+          "sha256": "d08b893760666c46e6497ed63c80e054702329c151f7ee96c5bb908412888bb5"
+        },
+        {
+          "file": "perth_net/perth_net_implicit/model/perth_net.py",
+          "bytes": 4144,
+          "sha256": "0679ea14ac124d350eb3dfc213dd8d9829b449cbd2da1acb06c030661565e33a"
+        },
+        {
+          "file": "perth_net/perth_net_implicit/perth_watermarker.py",
+          "bytes": 2730,
+          "sha256": "7bd8c5fd1ac5dac577f6d8f5f23ea7cbad7f28b449c1864996b2c4162fa2b417"
+        },
+        {
+          "file": "perth_net/perth_net_implicit/utils.py",
+          "bytes": 5104,
+          "sha256": "55bf374a355124dedf7f9bd5ee3535d8d65dba41f0a6363c7e3cb881da3c1eac"
+        },
+        {
+          "file": "perth_net/pretrained/implicit/hparams.yaml",
+          "bytes": 257,
+          "sha256": "c66e8f8ce5b09d100e719843a064d37a97c5aec13510824343bf4e096b3184db"
+        },
+        {
+          "file": "perth_net/pretrained/implicit/id.txt",
+          "bytes": 22,
+          "sha256": "f4129d0cce1fcd76a01c778dd46aeecc84130e38d83c98402abf2e1b9c49770d"
+        },
+        {
+          "file": "perth_net/pretrained/implicit/perth_net_250000.pth.tar",
+          "bytes": 37429684,
+          "sha256": "a15bce457ebc53ce5e6c9c3f11df78cf7ee2bf9cdab0a798902135b4c4027670"
+        },
+        {
+          "file": "utils.py",
+          "bytes": 6768,
+          "sha256": "6bf68c94d9a470dded54544e4ee9d63c3256455c1a1ffa280b1223297a83154d"
+        },
+        {
+          "file": "watermarker.py",
+          "bytes": 2392,
+          "sha256": "3e8587c30a4063c7b065ab415190fd5185d04f99f974b0cc47f338ecaa55446e"
+        },
+        {
+          "file": "waveform.py",
+          "bytes": 2523,
+          "sha256": "fb14829df176df64514eb510a6f3a40f5d379d836939df97db7a0ee5543ae8ca"
+        }
       ]
     }
   ],
   "native_binaries": [
+    {
+      "file": "_cffi_backend.cp312-win_amd64.pyd",
+      "bytes": 181248,
+      "sha256": "9af5e4f68a41f26b726f2e9424f9d58a4f5666189f6a48be95f406b257102aec"
+    },
+    {
+      "file": "_soundfile_data/libsndfile_x64.dll",
+      "bytes": 2364416,
+      "sha256": "22518c16f9d13eda5ae5adf999c4740d7d16cc2d6b178b36dd4ac2f759a38559"
+    },
+    {
+      "file": "charset_normalizer/cd.cp312-win_amd64.pyd",
+      "bytes": 115712,
+      "sha256": "2bdbc0805f85565d76f8d6166e451bfafa6d5490b06b36c9f423cd0102b4f149"
+    },
+    {
+      "file": "charset_normalizer/md.cp312-win_amd64.pyd",
+      "bytes": 208384,
+      "sha256": "b08be5d29125f39a92e22d0abe4b9160753f7a790fffd07258319a8e16394afa"
+    },
+    {
+      "file": "google/_upb/_message.pyd",
+      "bytes": 745134,
+      "sha256": "58a206771b73f129d45dd2cda625bd4f7d6347b5f2d6dd76b4dbf4d2c6e3ac59"
+    },
+    {
+      "file": "hf_xet/hf_xet.pyd",
+      "bytes": 9512960,
+      "sha256": "f4e963b3bc1cfc9fcbdaae1dec8f861a28e35fddd05d9c03753eb9ffae176949"
+    },
+    {
+      "file": "llvmlite/binding/llvmlite.dll",
+      "bytes": 120369664,
+      "sha256": "a3500f4ffd7c4b47ec785c5964af7ed01fb95dd125c0d7efcdb680920821da6f"
+    },
+    {
+      "file": "llvmlite.libs/msvcp140-8f141b4454fa78db34bc1f28c571b4da.dll",
+      "bytes": 557648,
+      "sha256": "8f141b4454fa78db34bc1f28c571b4da0e00cd2c43f7ad0e282f313036826aae"
+    },
+    {
+      "file": "markupsafe/_speedups.cp312-win_amd64.pyd",
+      "bytes": 11776,
+      "sha256": "a1bf1fb566f920b5670dca3b31acb0148636cfff8aa8108d938f91550358b231"
+    },
+    {
+      "file": "ml_dtypes/_ml_dtypes_ext.cp312-win_amd64.pyd",
+      "bytes": 818176,
+      "sha256": "4948495f24678c35b88edb7d484572cd7ac638dd73b2140776f501b6f148df81"
+    },
+    {
+      "file": "msgpack/_cmsgpack.cp312-win_amd64.pyd",
+      "bytes": 135680,
+      "sha256": "b1358491f49e39b2e589a1f177fff40d6c1d3d5bce08f33e49b3c1ffe96487ee"
+    },
+    {
+      "file": "numba/_devicearray.cp312-win_amd64.pyd",
+      "bytes": 12288,
+      "sha256": "82177de965dce158cc2a51889546b55f9b6b863191b11596c55b795eb8ab2271"
+    },
+    {
+      "file": "numba/_dispatcher.cp312-win_amd64.pyd",
+      "bytes": 41472,
+      "sha256": "8ba51b83b2a8e84fec7f9b0a193634e6abcb3f20d3832ab9d4226848ddd2bcec"
+    },
+    {
+      "file": "numba/_dynfunc.cp312-win_amd64.pyd",
+      "bytes": 16896,
+      "sha256": "ae62e32560d17cc00b15dfefde43cbec02f679dc3e38b0e1e25dfe94f2174885"
+    },
+    {
+      "file": "numba/_helperlib.cp312-win_amd64.pyd",
+      "bytes": 203776,
+      "sha256": "2ac658f841a7ddcc64a64681fee58cb36344d0abaefbf2e73973c9faafe552b9"
+    },
+    {
+      "file": "numba/core/runtime/_nrt_python.cp312-win_amd64.pyd",
+      "bytes": 25088,
+      "sha256": "5a044e0895626101b1724f751bedb27555fe698a848fb54a911dc180f2cb0b88"
+    },
+    {
+      "file": "numba/core/typeconv/_typeconv.cp312-win_amd64.pyd",
+      "bytes": 20480,
+      "sha256": "c2e48c185e1c0e0a5be75ddbc142fb0bf7ad445be4d8467750236b4ec21ae965"
+    },
+    {
+      "file": "numba/cuda/cudadrv/_extras.cp312-win_amd64.pyd",
+      "bytes": 10752,
+      "sha256": "74d5756b2fd1b9f26ec41da69b17d0b0551100bf009382ca182ca90d63dfd9e8"
+    },
+    {
+      "file": "numba/experimental/jitclass/_box.cp312-win_amd64.pyd",
+      "bytes": 12800,
+      "sha256": "c0e6a6fe53e0fb5b8ea782f7a2202ad409d9d7fa469042703571f6a7b1404a59"
+    },
+    {
+      "file": "numba/mviewbuf.cp312-win_amd64.pyd",
+      "bytes": 14848,
+      "sha256": "8804d711ee3da92a037f6b7c0a270cc8acf3e40f7c88fef339af8269ec53be79"
+    },
+    {
+      "file": "numba/np/ufunc/_internal.cp312-win_amd64.pyd",
+      "bytes": 23552,
+      "sha256": "c3ce2d31f1422132127c581acfca4217fa90af54e9fe5b5b919844ff67aa7510"
+    },
+    {
+      "file": "numba/np/ufunc/_num_threads.cp312-win_amd64.pyd",
+      "bytes": 10752,
+      "sha256": "cce0d5511a5149ce31253f3c3b68397ac9a8ea27262e66fc93dd0df0ae0f3c8d"
+    },
+    {
+      "file": "numba/np/ufunc/omppool.cp312-win_amd64.pyd",
+      "bytes": 36352,
+      "sha256": "6a623b7ecf5cfb362890a19c5e7b834c3e830030fcb82c0c71e382cb603ee27d"
+    },
+    {
+      "file": "numba/np/ufunc/tbbpool.cp312-win_amd64.pyd",
+      "bytes": 46592,
+      "sha256": "307a170a3b9f392d56f62f8183d342aa0994eaa63d8a19714757cb815d1c055f"
+    },
+    {
+      "file": "numba/np/ufunc/workqueue.cp312-win_amd64.pyd",
+      "bytes": 38400,
+      "sha256": "3359c82c12b6912086887423a44777b9b4ff53288772014964cf456e6b9c6aae"
+    },
+    {
+      "file": "numpy/core/_multiarray_tests.cp312-win_amd64.pyd",
+      "bytes": 66048,
+      "sha256": "d9017d99e0b6cad2f02462420793551fe9e6b836f3a800228caaeed144a32b75"
+    },
+    {
+      "file": "numpy/core/_multiarray_umath.cp312-win_amd64.pyd",
+      "bytes": 2842624,
+      "sha256": "5d4f44389d1b4e9aa62af63b716a0d4266dbb56fefa9bf27831f85b695994da5"
+    },
+    {
+      "file": "numpy/core/_operand_flag_tests.cp312-win_amd64.pyd",
+      "bytes": 11264,
+      "sha256": "6b2a6d51c423411bae8fecc5e739d2251abb7f82521125c68a1734e58c7ad92d"
+    },
+    {
+      "file": "numpy/core/_rational_tests.cp312-win_amd64.pyd",
+      "bytes": 40448,
+      "sha256": "2bb8e20ef34acdb42105daaf1fb4246493f46d49b84d614ab6fefbd4e4e428ad"
+    },
+    {
+      "file": "numpy/core/_simd.cp312-win_amd64.pyd",
+      "bytes": 2236928,
+      "sha256": "9d7bfef85379008c0c28469eea756ee3d1a52983801b76d35f80e91317cb5431"
+    },
+    {
+      "file": "numpy/core/_struct_ufunc_tests.cp312-win_amd64.pyd",
+      "bytes": 13824,
+      "sha256": "310d34efdd848e7e0e1165c8c67914c0d3f066a5dbae7c91a27cba41e05ca53a"
+    },
+    {
+      "file": "numpy/core/_umath_tests.cp312-win_amd64.pyd",
+      "bytes": 32768,
+      "sha256": "8407002ff967c7e7e514388a6fc1cbd51b375586ef774030361094f8b357d216"
+    },
+    {
+      "file": "numpy/fft/_pocketfft_internal.cp312-win_amd64.pyd",
+      "bytes": 110080,
+      "sha256": "f0a4df58721cb85ca35f5f3b8c47538c53d57bbcca4fc5c07a6c06ac4c5ef421"
+    },
+    {
+      "file": "numpy/linalg/_umath_linalg.cp312-win_amd64.pyd",
+      "bytes": 106496,
+      "sha256": "7652e82c6c53249b911dde9822b71a7ecbecbc699c79475862e779a51d7f1d0f"
+    },
+    {
+      "file": "numpy/linalg/lapack_lite.cp312-win_amd64.pyd",
+      "bytes": 17920,
+      "sha256": "4a4db19ed6cb68529fe3ed22cbbdbd90b30b6dc1ebb2817d19bba65759c173c0"
+    },
+    {
+      "file": "numpy/random/_bounded_integers.cp312-win_amd64.pyd",
+      "bytes": 231936,
+      "sha256": "0c19ec0b3129f12df51982aace8478f8274a5b0d6a2206be1d0e1ee0227c36a4"
+    },
+    {
+      "file": "numpy/random/_common.cp312-win_amd64.pyd",
+      "bytes": 166400,
+      "sha256": "774bf3e20e2b1ca9797deb1daccb88a776a70c8555a501454d8d900a14585134"
+    },
+    {
+      "file": "numpy/random/_generator.cp312-win_amd64.pyd",
+      "bytes": 689152,
+      "sha256": "8979528423faffa32d4d6edddc0b3591b8fd465c7549263267c4b249e2f1d03b"
+    },
+    {
+      "file": "numpy/random/_mt19937.cp312-win_amd64.pyd",
+      "bytes": 75776,
+      "sha256": "592238b7a62fb033724cfd745be6036700f584d6c4ee8baf83cb77788320aa49"
+    },
+    {
+      "file": "numpy/random/_pcg64.cp312-win_amd64.pyd",
+      "bytes": 81920,
+      "sha256": "d9a1618ba4515eb6c41dcac7b99400d07e22cd56ad4f3ba94cb84dd231cf73a8"
+    },
+    {
+      "file": "numpy/random/_philox.cp312-win_amd64.pyd",
+      "bytes": 68608,
+      "sha256": "34363add569504b32533fa65b6933feb2ba2bcf0fe10be47c55fbdad2e223df8"
+    },
+    {
+      "file": "numpy/random/_sfc64.cp312-win_amd64.pyd",
+      "bytes": 50688,
+      "sha256": "a241dfd9d3abaeff3028ba98bd8c573d4f8c7d2990119634b4a280fc3fd33de9"
+    },
+    {
+      "file": "numpy/random/bit_generator.cp312-win_amd64.pyd",
+      "bytes": 160768,
+      "sha256": "d335d1443e324a7a89582cc3e85bd850198eb3133c3dd38c7f55c6f609b0cfd8"
+    },
+    {
+      "file": "numpy/random/mtrand.cp312-win_amd64.pyd",
+      "bytes": 582656,
+      "sha256": "2df309f3cc66116966484fcc466cef200aff8d2a4c8ea482d3530b5cccb89394"
+    },
+    {
+      "file": "numpy.libs/libopenblas64__v0.3.23-293-gc2f4bdbb-gcc_10_3_0-2bde3a66a51006b2b53eb373ff767a3f.dll",
+      "bytes": 38168576,
+      "sha256": "57b87772bf676b5c2d718c79dddc9f039d79ec3319fee1398cc305adff7b69e5"
+    },
+    {
+      "file": "onnx/onnx_cpp2py_export.pyd",
+      "bytes": 3671552,
+      "sha256": "6489f9fa4e03a5d2d82814568c3a22ff759153ea80012fe865ea089ac2cec7ca"
+    },
+    {
+      "file": "onnx.libs/msvcp140-a4c2229bdc2a2a630acdc095b4d86008.dll",
+      "bytes": 575056,
+      "sha256": "a4c2229bdc2a2a630acdc095b4d86008e5c3e3bc7773174354f3da4f5beb9cde"
+    },
+    {
+      "file": "PIL/_avif.cp312-win_amd64.pyd",
+      "bytes": 7893504,
+      "sha256": "3c31d65c8b3b4c91ac2838d5c843a6b2479d775b6904fe654d60b56d41772411"
+    },
+    {
+      "file": "PIL/_imaging.cp312-win_amd64.pyd",
+      "bytes": 2662400,
+      "sha256": "7140f56d38dd6cd51512f8122386bcb914c5df2a82eb5f719c973527d9213cee"
+    },
+    {
+      "file": "PIL/_imagingcms.cp312-win_amd64.pyd",
+      "bytes": 275456,
+      "sha256": "2640857cace64d69735bdcaa3987e9ad70f85168abc1a8662079c77ac44b5301"
+    },
+    {
+      "file": "PIL/_imagingft.cp312-win_amd64.pyd",
+      "bytes": 2250752,
+      "sha256": "985228f6086171978abb5d04f2f625c489fdc9d7f0a92f2077a621ff184a599e"
+    },
+    {
+      "file": "PIL/_imagingmath.cp312-win_amd64.pyd",
+      "bytes": 21504,
+      "sha256": "01c6f9de6f0d6ed46d1df1d4a9cdf47e399306870453f26a5326368f7db0b3ad"
+    },
+    {
+      "file": "PIL/_imagingmorph.cp312-win_amd64.pyd",
+      "bytes": 12288,
+      "sha256": "e74547cf128ee13d81d7c4ef6d5be079f230062b5a8e9ec648afdc9ce228af39"
+    },
+    {
+      "file": "PIL/_imagingtk.cp312-win_amd64.pyd",
+      "bytes": 14336,
+      "sha256": "e1c87f73e96d2269395624d03b3808300f4b0f795f5fad1ecc3d1492e5dcc7c2"
+    },
+    {
+      "file": "PIL/_webp.cp312-win_amd64.pyd",
+      "bytes": 415744,
+      "sha256": "bb9c64d38a6e4857bd3358e14dbe6cf3a4593b1efcd1185fdba1ef8931550896"
+    },
+    {
+      "file": "regex/_regex.cp312-win_amd64.pyd",
+      "bytes": 736768,
+      "sha256": "3d4ddf2e6098bcf9e4bfddef77543c68977a653f41a64aa776e8a0a5deb71f44"
+    },
+    {
+      "file": "safetensors/_safetensors_rust.pyd",
+      "bytes": 734720,
+      "sha256": "80a2b3f7658854ade855c5fb6192ee38fe2c7fbfd38d1c7c1f4d2c44f67125e4"
+    },
+    {
+      "file": "scipy/_cyutility.cp312-win_amd64.pyd",
+      "bytes": 186368,
+      "sha256": "1990a1fbef9f2f75556db35b81d7180c903fc54db3f8fd08c14ac2cbc805c61b"
+    },
+    {
+      "file": "scipy/_lib/_ccallback_c.cp312-win_amd64.pyd",
+      "bytes": 105472,
+      "sha256": "509d2e681897f4253263c063ad8a2aa0c2459b85ce3d86754b401d42ab26dc9a"
+    },
+    {
+      "file": "scipy/_lib/_fpumode.cp312-win_amd64.pyd",
+      "bytes": 15872,
+      "sha256": "f00f7a238a65d40eb6939bac18ef8c407dd345cf26c7e83bb0a185ab03756814"
+    },
+    {
+      "file": "scipy/_lib/_test_ccallback.cp312-win_amd64.pyd",
+      "bytes": 52224,
+      "sha256": "57431ca6b0015ec5534f8f8419216cd76f06191a271ddbf5e750d595eaf82ff2"
+    },
+    {
+      "file": "scipy/_lib/_test_deprecation_call.cp312-win_amd64.pyd",
+      "bytes": 33792,
+      "sha256": "20f122cd55541a794a8c49308eb545a83a86a01d6a049a1ce9b66d2ba5e76286"
+    },
+    {
+      "file": "scipy/_lib/_test_deprecation_def.cp312-win_amd64.pyd",
+      "bytes": 24576,
+      "sha256": "118091bc00e030f12f820975ec605dbec71ee7a101cd594c6aec658d6d733487"
+    },
+    {
+      "file": "scipy/_lib/_uarray/_uarray.cp312-win_amd64.pyd",
+      "bytes": 235008,
+      "sha256": "2fa9cd0fca336b35fca629e2ceedde50fdeed9d6d6ea3575a2bc4889222bc2d6"
+    },
+    {
+      "file": "scipy/_lib/messagestream.cp312-win_amd64.pyd",
+      "bytes": 60416,
+      "sha256": "b4679bc7cc58c3dd7cb29689ae96ab295fff3412b1724baa7d2b7c6cf86f6c15"
+    },
+    {
+      "file": "scipy/cluster/_hierarchy.cp312-win_amd64.pyd",
+      "bytes": 245760,
+      "sha256": "d0f3ecaf076a4dd76f565fea77a48902c52c0017f801ebcca9559bd8bbb41f13"
+    },
+    {
+      "file": "scipy/cluster/_optimal_leaf_ordering.cp312-win_amd64.pyd",
+      "bytes": 173056,
+      "sha256": "b04f540816f40caf0516c1487cae2eca92cec792145f96a4bd38bbce5d2f597f"
+    },
+    {
+      "file": "scipy/cluster/_vq.cp312-win_amd64.pyd",
+      "bytes": 110080,
+      "sha256": "3dfe9c54f9b339d73c884907616d8dc63bed2bea49256c443fb81f0d49769013"
+    },
+    {
+      "file": "scipy/fft/_pocketfft/pypocketfft.cp312-win_amd64.pyd",
+      "bytes": 1097216,
+      "sha256": "dd089b853dd1382b4ce73a138076efa8dda9391efa6090ee31fe607e2bdee313"
+    },
+    {
+      "file": "scipy/fftpack/convolve.cp312-win_amd64.pyd",
+      "bytes": 124928,
+      "sha256": "b3c2881a63d1676579f4f398ec68d08f30cc108fcb595a1b91feb41a75d2994c"
+    },
+    {
+      "file": "scipy/integrate/_dop.cp312-win_amd64.pyd",
+      "bytes": 95232,
+      "sha256": "cf340c300760f60abf1f734e30869a4caf5e975d5355d177a009bfefc55fb156"
+    },
+    {
+      "file": "scipy/integrate/_odepack.cp312-win_amd64.pyd",
+      "bytes": 228352,
+      "sha256": "b87d527753a64e761ea8de0ea98da5f9fb37d4749905e07841c75e7f355c8c96"
+    },
+    {
+      "file": "scipy/integrate/_quadpack.cp312-win_amd64.pyd",
+      "bytes": 143360,
+      "sha256": "cb28ae63f88e3ecf211bf8f5f27323a9295f30aaa0ff1bfbeb7d62bf434329c2"
+    },
+    {
+      "file": "scipy/integrate/_test_multivariate.cp312-win_amd64.pyd",
+      "bytes": 17920,
+      "sha256": "9f13805d7933823250c360616d9af4c3bd7732088373dcff43ae5e29009b4749"
+    },
+    {
+      "file": "scipy/integrate/_vode.cp312-win_amd64.pyd",
+      "bytes": 278528,
+      "sha256": "9455a7ae1a8e85a8008a4fcd6e4460b583bea0cd0860253f6309e2806a020814"
+    },
+    {
+      "file": "scipy/interpolate/_dfitpack.cp312-win_amd64.pyd",
+      "bytes": 675328,
+      "sha256": "351b13a45d45b01736350911ba9aa10ba4ea236a4b33875da70f01df89347288"
+    },
+    {
+      "file": "scipy/interpolate/_dierckx.cp312-win_amd64.pyd",
+      "bytes": 1016832,
+      "sha256": "36e8ab8e5aa64f735c68e380e3d17b3f8fef9c7d871a658d3915f0b7cbe16a0a"
+    },
+    {
+      "file": "scipy/interpolate/_fitpack.cp312-win_amd64.pyd",
+      "bytes": 420864,
+      "sha256": "e017d57aa95ac206befa452fbf1b8e35aff05f6a22205fcec96804e8911f1c95"
+    },
+    {
+      "file": "scipy/interpolate/_interpnd.cp312-win_amd64.pyd",
+      "bytes": 228864,
+      "sha256": "d7a4ad815dfa5f533354b825783a26b320d2f167f1e142f36d15aa36137ba0bb"
+    },
+    {
+      "file": "scipy/interpolate/_ppoly.cp312-win_amd64.pyd",
+      "bytes": 231424,
+      "sha256": "cdac95584e8dd9056ba64b38a13f50feacdacfb5c0a0a38c2e90175646092391"
+    },
+    {
+      "file": "scipy/interpolate/_rbfinterp_pythran.cp312-win_amd64.pyd",
+      "bytes": 1165312,
+      "sha256": "bfefea84ca4f6adf1a5de7d113360d30e643e0a2b94a99beaa8ed0bf6e3536c5"
+    },
+    {
+      "file": "scipy/interpolate/_rgi_cython.cp312-win_amd64.pyd",
+      "bytes": 122880,
+      "sha256": "c3e7e6243a3b7a64aedc4291852bad2e3fc64caa51e611ce866ce68e2991cb2f"
+    },
+    {
+      "file": "scipy/io/_fast_matrix_market/_fmm_core.cp312-win_amd64.pyd",
+      "bytes": 2846208,
+      "sha256": "3918a898ade2c78d93ddd302f1447a4442e5bef7d63107b73655d4d64aa8e814"
+    },
+    {
+      "file": "scipy/io/matlab/_mio5_utils.cp312-win_amd64.pyd",
+      "bytes": 178176,
+      "sha256": "ab0536b6d57881314284cc17a90479dbade9441434643b9fd649b6ddaedea637"
+    },
+    {
+      "file": "scipy/io/matlab/_mio_utils.cp312-win_amd64.pyd",
+      "bytes": 52736,
+      "sha256": "0ec808b641fafaab37322e9835d067ee51a59c739d8836b4106fdc4d8a40469c"
+    },
+    {
+      "file": "scipy/io/matlab/_streams.cp312-win_amd64.pyd",
+      "bytes": 105984,
+      "sha256": "9ff3b4b033ae5440170646ade943197f45ed07c6224f943419388e3e54b6bc4a"
+    },
+    {
+      "file": "scipy/linalg/_batched_linalg.cp312-win_amd64.pyd",
+      "bytes": 1057792,
+      "sha256": "c6df23588eba47a89edeed4474974d6ea816060d7749a2821a564a857d79a255"
+    },
+    {
+      "file": "scipy/linalg/_cythonized_array_utils.cp312-win_amd64.pyd",
+      "bytes": 312832,
+      "sha256": "5a88e80730755f2577ac1826ccc567b4a524fe2b30052f99c87311f755c8f74e"
+    },
+    {
+      "file": "scipy/linalg/_decomp_interpolative.cp312-win_amd64.pyd",
+      "bytes": 749056,
+      "sha256": "3600e8ec1622c6977125638fee701558609dc2d372dbc118a66becbee20c1db1"
+    },
+    {
+      "file": "scipy/linalg/_decomp_lu_cython.cp312-win_amd64.pyd",
+      "bytes": 120832,
+      "sha256": "3005373a7d19051fc61d451f140bf961e0caaf2f95ea0fb442908c57345bc1a0"
+    },
+    {
+      "file": "scipy/linalg/_decomp_update.cp312-win_amd64.pyd",
+      "bytes": 282624,
+      "sha256": "10b7ee93b4a18bef35182b844eb54457ceaad866ef9aa76d6fc1e4b9fc71b59d"
+    },
+    {
+      "file": "scipy/linalg/_fblas.cp312-win_amd64.pyd",
+      "bytes": 737792,
+      "sha256": "3c6e3904bdfb3849a94db9e21863b5ce98516d7df41764afb8c27bde7c387e34"
+    },
+    {
+      "file": "scipy/linalg/_flapack.cp312-win_amd64.pyd",
+      "bytes": 2273280,
+      "sha256": "0de0eb87b20daaeb54f26abf23d54a02215cbdc19c8245aadb3fa86e96804328"
+    },
+    {
+      "file": "scipy/linalg/_linalg_pythran.cp312-win_amd64.pyd",
+      "bytes": 1061888,
+      "sha256": "cdf6e618ef2ad73ae92e843600a70d4c87078561ebb4375f26402958b8f714e1"
+    },
+    {
+      "file": "scipy/linalg/_matfuncs_expm.cp312-win_amd64.pyd",
+      "bytes": 229376,
+      "sha256": "65e2c40301818e461f81d35b4cd7a282c9502d9beb0599d4b6a330826a3309bd"
+    },
+    {
+      "file": "scipy/linalg/_matfuncs_schur_sqrtm.cp312-win_amd64.pyd",
+      "bytes": 211456,
+      "sha256": "a30c2700d337cee784c08d4ea7fff536ab3b881b3f535c0b0b68babde2e5c4f0"
+    },
+    {
+      "file": "scipy/linalg/_matfuncs_sqrtm_triu.cp312-win_amd64.pyd",
+      "bytes": 103424,
+      "sha256": "539fd829f3f86f20f78838a3d2080c61292c6d0fbd748036751c04b8eb464478"
+    },
+    {
+      "file": "scipy/linalg/_solve_toeplitz.cp312-win_amd64.pyd",
+      "bytes": 122880,
+      "sha256": "ab6049fe4ae0ae781e6562d78fee3e9c1715cf3dd4686428fedbaaf99c4dab4f"
+    },
+    {
+      "file": "scipy/linalg/cython_blas.cp312-win_amd64.pyd",
+      "bytes": 119296,
+      "sha256": "7cb7d97da1cdcdbce9af4adb83638ee5185a857918c5e0b7e1696e527c3c0d81"
+    },
+    {
+      "file": "scipy/linalg/cython_lapack.cp312-win_amd64.pyd",
+      "bytes": 199168,
+      "sha256": "84cc424fa42d3a2c1abaaf20107930c327f585599ca47fa4540d4f9a9f5d53a4"
+    },
+    {
+      "file": "scipy/ndimage/_ctest.cp312-win_amd64.pyd",
+      "bytes": 16896,
+      "sha256": "5209e5ad9816fdf85c3cfba74d9cda7a51e27a3340484f2b5eaac47a61026833"
+    },
+    {
+      "file": "scipy/ndimage/_cytest.cp312-win_amd64.pyd",
+      "bytes": 71168,
+      "sha256": "3cea1263ad1fb73157c4a8b6ad2dc91786e2014159d87bb4f522397f6d2fb674"
+    },
+    {
+      "file": "scipy/ndimage/_nd_image.cp312-win_amd64.pyd",
+      "bytes": 177664,
+      "sha256": "7a5bfe894a43b761f2042f2a35c1e799aaa964b60e33b1acc55bf8062636f191"
+    },
+    {
+      "file": "scipy/ndimage/_ni_label.cp312-win_amd64.pyd",
+      "bytes": 205312,
+      "sha256": "b7dd341165d5ca1960ff96b1d6600822cdd50614f1328537d9311e219ae38d12"
+    },
+    {
+      "file": "scipy/ndimage/_rank_filter_1d.cp312-win_amd64.pyd",
+      "bytes": 124416,
+      "sha256": "eb419d67ee29fa9615f01d288b43b8c0288da67043aa494b481c93b24d92b9d9"
+    },
+    {
+      "file": "scipy/odr/__odrpack.cp312-win_amd64.pyd",
+      "bytes": 689152,
+      "sha256": "9a83361de5e9a5c41958efba5fadd498ea797eba8bd7e958440fa5191ed01923"
+    },
+    {
+      "file": "scipy/optimize/_bglu_dense.cp312-win_amd64.pyd",
+      "bytes": 173568,
+      "sha256": "3168df9f9c5a3ba0ef428c1c5ca13a6fced1a164b4d31cc4d71aca1baf58f50f"
+    },
+    {
+      "file": "scipy/optimize/_direct.cp312-win_amd64.pyd",
+      "bytes": 70656,
+      "sha256": "6ea9f33c61aa3009eb557db94bc80c74b8b25947553a9950bf4ef1e4c4cc372e"
+    },
+    {
+      "file": "scipy/optimize/_group_columns.cp312-win_amd64.pyd",
+      "bytes": 1033216,
+      "sha256": "a3ee6c6801009f84b3aa8a980c83a0b1983d33fcf944144cda3cda691ecca43b"
+    },
+    {
+      "file": "scipy/optimize/_highspy/_core.cp312-win_amd64.pyd",
+      "bytes": 6443520,
+      "sha256": "99d5c437bca5ee91c8785721fe69b235b6b348cff9c27a7436501f4cc419baad"
+    },
+    {
+      "file": "scipy/optimize/_highspy/_highs_options.cp312-win_amd64.pyd",
+      "bytes": 1278464,
+      "sha256": "98acb3f762673688fc402e893d3313d267733135f0e1c07ef508cbcdb4b2ad8f"
+    },
+    {
+      "file": "scipy/optimize/_lbfgsb.cp312-win_amd64.pyd",
+      "bytes": 171520,
+      "sha256": "9d087101aadc47b4ac09332433edcc3be64de36a135acc7c728f079c3af9ebea"
+    },
+    {
+      "file": "scipy/optimize/_lsap.cp312-win_amd64.pyd",
+      "bytes": 177664,
+      "sha256": "f8ff7561bd1ea3027c809fc804c8b1316376e589d12aef3a1ebcb2a6d2c3d18d"
+    },
+    {
+      "file": "scipy/optimize/_lsq/givens_elimination.cp312-win_amd64.pyd",
+      "bytes": 70656,
+      "sha256": "22553b97f9e3c32f5fbbc1b8b9c5c4a4e0251f441366472844a824f01ae63021"
+    },
+    {
+      "file": "scipy/optimize/_minpack.cp312-win_amd64.pyd",
+      "bytes": 124928,
+      "sha256": "95b27adf583cb4c0d660141adba5d179b9df4a42474b2ff230d598673794fab4"
+    },
+    {
+      "file": "scipy/optimize/_moduleTNC.cp312-win_amd64.pyd",
+      "bytes": 145920,
+      "sha256": "0e57c01521068abf89c818e42693ffb20612ff9319d6942d490c4fd6a48873e2"
+    },
+    {
+      "file": "scipy/optimize/_pava_pybind.cp312-win_amd64.pyd",
+      "bytes": 317952,
+      "sha256": "03cfa01ef5ed5829057e629497cc052e83eb9729a95a244e6fdbea66eb8dadd0"
+    },
+    {
+      "file": "scipy/optimize/_slsqplib.cp312-win_amd64.pyd",
+      "bytes": 172544,
+      "sha256": "0174a3e1849cb4312b17fa6d6fe55de618a02c94ec9f7d9b12199270c6faac75"
+    },
+    {
+      "file": "scipy/optimize/_trlib/_trlib.cp312-win_amd64.pyd",
+      "bytes": 206848,
+      "sha256": "ec5edbbfa97f3dc4a1f2e155bcf350ca6b25ad238e486ba72da2fef46ea42ff1"
+    },
+    {
+      "file": "scipy/optimize/_zeros.cp312-win_amd64.pyd",
+      "bytes": 23040,
+      "sha256": "001213b4192a7427197626c5a7ac86d9e2c1fd7512be56a495cb192a66bbd4ed"
+    },
+    {
+      "file": "scipy/optimize/cython_optimize/_zeros.cp312-win_amd64.pyd",
+      "bytes": 78848,
+      "sha256": "40cc706e7eec0865e3892e0b669cd99728c4b886f31c46f43085d5d21143753a"
+    },
+    {
+      "file": "scipy/signal/_max_len_seq_inner.cp312-win_amd64.pyd",
+      "bytes": 1006592,
+      "sha256": "687669b40d0da549bf08e6313ca075cab60a4467e0d7ad2cf72ce48d696e14a9"
+    },
+    {
+      "file": "scipy/signal/_peak_finding_utils.cp312-win_amd64.pyd",
+      "bytes": 148480,
+      "sha256": "8a7a0344794f64468036af28767f601c9b42421c44dbea271e885bd752e92f97"
+    },
+    {
+      "file": "scipy/signal/_sigtools.cp312-win_amd64.pyd",
+      "bytes": 126976,
+      "sha256": "6a28e8ab89bfbf6d1ad7a53aadad4f21407b82553f1cc46adc1994f51a84afcd"
+    },
+    {
+      "file": "scipy/signal/_sosfilt.cp312-win_amd64.pyd",
+      "bytes": 106496,
+      "sha256": "e83c7db9488406099a1e6727de2f85eeb4aea67ab00e1a9a998513a5ad067c55"
+    },
+    {
+      "file": "scipy/signal/_spline.cp312-win_amd64.pyd",
+      "bytes": 63488,
+      "sha256": "ed3e2c3b7dcaf74539455d432c0200d2f72698d6190671301c83e8e067d716e6"
+    },
+    {
+      "file": "scipy/signal/_upfirdn_apply.cp312-win_amd64.pyd",
+      "bytes": 199680,
+      "sha256": "6e630a041fe96ede5c855705b1d56f1a0aa4e35fbc717bca9d19c003fb3ade39"
+    },
+    {
+      "file": "scipy/sparse/_csparsetools.cp312-win_amd64.pyd",
+      "bytes": 483840,
+      "sha256": "356e21967b04d9d9c97fdd602be3e6b94f208511d6b86fe2caf5464ea87bddd8"
+    },
+    {
+      "file": "scipy/sparse/_sparsetools.cp312-win_amd64.pyd",
+      "bytes": 4114944,
+      "sha256": "1d507be93679e2a8dc12c2b64a3a59a074c140460ab5ba8d40a7b5bdf36202fb"
+    },
+    {
+      "file": "scipy/sparse/csgraph/_flow.cp312-win_amd64.pyd",
+      "bytes": 168960,
+      "sha256": "e512929f71f152921590077ea3f6cb2598fbe68a0d5cea0f328da738d1cac7ce"
+    },
+    {
+      "file": "scipy/sparse/csgraph/_matching.cp312-win_amd64.pyd",
+      "bytes": 175104,
+      "sha256": "d6c4fd5d1c7c31efaea8fdf5f72e887de90beb8f6b33b2f1afec79abe60436ef"
+    },
+    {
+      "file": "scipy/sparse/csgraph/_min_spanning_tree.cp312-win_amd64.pyd",
+      "bytes": 104448,
+      "sha256": "5e116133bf8cebf1de481cb2dcad3e1c4eaa1483b2c09e8ebf061cd30e988fe9"
+    },
+    {
+      "file": "scipy/sparse/csgraph/_reordering.cp312-win_amd64.pyd",
+      "bytes": 150528,
+      "sha256": "4e3333df00b90c717c37b1a3ebe14d8c99bce8826b2b8b3c98f53b2dd8240b79"
+    },
+    {
+      "file": "scipy/sparse/csgraph/_shortest_path.cp312-win_amd64.pyd",
+      "bytes": 544256,
+      "sha256": "d2d2817f778f160420ab56ff9f727321795bb8dcce2276fe9af43dcd51cceda2"
+    },
+    {
+      "file": "scipy/sparse/csgraph/_tools.cp312-win_amd64.pyd",
+      "bytes": 155136,
+      "sha256": "bbe80ea9f718dc39cc4b18654371c6e924fafaf74c8cba588ba2723ce30ae9cd"
+    },
+    {
+      "file": "scipy/sparse/csgraph/_traversal.cp312-win_amd64.pyd",
+      "bytes": 344576,
+      "sha256": "1817674c68d6db6f67b7b0343cae803fb789b9410d13db53b3d6b64a1ced6715"
+    },
+    {
+      "file": "scipy/sparse/linalg/_dsolve/_superlu.cp312-win_amd64.pyd",
+      "bytes": 542208,
+      "sha256": "075d7ab28c49252f4ee5980ce9ae5ca804c6859649f650405813ff8649368e17"
+    },
+    {
+      "file": "scipy/sparse/linalg/_eigen/arpack/_arpacklib.cp312-win_amd64.pyd",
+      "bytes": 339968,
+      "sha256": "f532cab33e8ee89eef19e8a3e2bd31485487c4b172beaf52446f2bd2af3b110c"
+    },
+    {
+      "file": "scipy/sparse/linalg/_propack.cp312-win_amd64.pyd",
+      "bytes": 288768,
+      "sha256": "7f8f73cc897677ef5825214f3a26d56f266c55efa45fdeceb0c733a1956db096"
+    },
+    {
+      "file": "scipy/spatial/_ckdtree.cp312-win_amd64.pyd",
+      "bytes": 1523200,
+      "sha256": "8894f6d534e6d514926a8272eb3a1088c02502a921e1cd890390865097ed4813"
+    },
+    {
+      "file": "scipy/spatial/_distance_pybind.cp312-win_amd64.pyd",
+      "bytes": 1382912,
+      "sha256": "d42a4996f4aa38699d8f148571a5360704801f3c0525fae4489f6d040a283b51"
+    },
+    {
+      "file": "scipy/spatial/_distance_wrap.cp312-win_amd64.pyd",
+      "bytes": 107008,
+      "sha256": "4f46b39f8da613b30e99174ce294069e8f14f86df38e6bb2a0c0d5481d92dfbe"
+    },
+    {
+      "file": "scipy/spatial/_hausdorff.cp312-win_amd64.pyd",
+      "bytes": 95744,
+      "sha256": "f2cd4ab4bdd825a5672a83df4f0b71fd80cf19954373c692a1e4916622bb14a9"
+    },
+    {
+      "file": "scipy/spatial/_qhull.cp312-win_amd64.pyd",
+      "bytes": 846336,
+      "sha256": "28f1c8b17398c7066e30ea40c6b035e47ef65039c503eb635307d0337144e333"
+    },
+    {
+      "file": "scipy/spatial/_voronoi.cp312-win_amd64.pyd",
+      "bytes": 85504,
+      "sha256": "5609f28d114b61cf12e1613da4c9072ed5ebbe400d65d38f17c79d8d9b835c1a"
+    },
+    {
+      "file": "scipy/spatial/transform/_rigid_transform_cy.cp312-win_amd64.pyd",
+      "bytes": 242688,
+      "sha256": "8de630dfc038d90734a7f027bceb530bcd4cd41f713ca1a06ecade83511041ad"
+    },
+    {
+      "file": "scipy/spatial/transform/_rotation_cy.cp312-win_amd64.pyd",
+      "bytes": 557568,
+      "sha256": "4f68115dad53da6a532a54d81e334931f14455e523a3fe78caf1523f1fead01e"
+    },
+    {
+      "file": "scipy/special/_comb.cp312-win_amd64.pyd",
+      "bytes": 46080,
+      "sha256": "82ada506eca2932774300cc9012eadf31875da5ba1ad8cd6e096621ac881d16a"
+    },
+    {
+      "file": "scipy/special/_ellip_harm_2.cp312-win_amd64.pyd",
+      "bytes": 139264,
+      "sha256": "d543824c8e47d5c0ab9097d590425845099b6cbae5e293630375d36ce8e286e0"
+    },
+    {
+      "file": "scipy/special/_gufuncs.cp312-win_amd64.pyd",
+      "bytes": 1515008,
+      "sha256": "2ba405a2ecd205798bedc38cde6245eceff1555939d3405c71a5c773a4a76caa"
+    },
+    {
+      "file": "scipy/special/_specfun.cp312-win_amd64.pyd",
+      "bytes": 294400,
+      "sha256": "92f64cc95773ea0b05c570004ab74d85415e513949536f874a4d7b214ad40794"
+    },
+    {
+      "file": "scipy/special/_special_ufuncs.cp312-win_amd64.pyd",
+      "bytes": 2292224,
+      "sha256": "b8ab31cc0efdc8edb2b54051344d36eeddbf45b326a462f20666e33369e626a5"
+    },
+    {
+      "file": "scipy/special/_test_internal.cp312-win_amd64.pyd",
+      "bytes": 93696,
+      "sha256": "ba136bee38b3fca732cf2dc50649f3535a32670f13c6966cef2b3d8cf0ee59c9"
+    },
+    {
+      "file": "scipy/special/_ufuncs.cp312-win_amd64.pyd",
+      "bytes": 1398784,
+      "sha256": "6eca0912fdbc826e8779e604c08f19cdffbb6d6b60f1b198ad31cdc99e58d339"
+    },
+    {
+      "file": "scipy/special/_ufuncs_cxx.cp312-win_amd64.pyd",
+      "bytes": 2404864,
+      "sha256": "f89da2936994df638b028977e664f50aad6a48a999d18ae5f7bf519d5b5a2479"
+    },
+    {
+      "file": "scipy/special/cython_special.cp312-win_amd64.pyd",
+      "bytes": 2196480,
+      "sha256": "7708b736984c88478ae991d5a71c649fd93b50f868f793b455b141cd1f2c0976"
+    },
+    {
+      "file": "scipy/stats/_ansari_swilk_statistics.cp312-win_amd64.pyd",
+      "bytes": 107008,
+      "sha256": "145cfe092095639cf1dbaa516f999dbb04bbd05a997858563bcce8b9c84bd37e"
+    },
+    {
+      "file": "scipy/stats/_biasedurn.cp312-win_amd64.pyd",
+      "bytes": 349696,
+      "sha256": "ebfdf10213b9d76455807f767d614b9d5dbbe1d2070cda62a69df6156959e934"
+    },
+    {
+      "file": "scipy/stats/_levy_stable/levyst.cp312-win_amd64.pyd",
+      "bytes": 51200,
+      "sha256": "2de6bcecfee01e58636c7b081810c25aac7d8d05933111e90afdd8b2c4a07b4f"
+    },
+    {
+      "file": "scipy/stats/_qmc_cy.cp312-win_amd64.pyd",
+      "bytes": 278528,
+      "sha256": "1cf44a4b588797fd7d60bbdd51cdd9edde76bdc792d6179e6f69cb42490c308e"
+    },
+    {
+      "file": "scipy/stats/_qmvnt_cy.cp312-win_amd64.pyd",
+      "bytes": 128000,
+      "sha256": "555de14acbde9924146c2b20e8ddabdbcb86e88591d7a3cc6a4b3b34310150c0"
+    },
+    {
+      "file": "scipy/stats/_rcont/rcont.cp312-win_amd64.pyd",
+      "bytes": 109568,
+      "sha256": "3f757ef287d8171155cd0557b13ad1e8c9b3f05cc3885b3aaceb9dbdc4a0ef15"
+    },
+    {
+      "file": "scipy/stats/_sobol.cp312-win_amd64.pyd",
+      "bytes": 192512,
+      "sha256": "eb481e44503e8b1720102539a6d6b93fcc8bbc63e570851dc5a6a08ca3cf0287"
+    },
+    {
+      "file": "scipy/stats/_stats.cp312-win_amd64.pyd",
+      "bytes": 484352,
+      "sha256": "d32a2011e311b1e269ec5277c14c1e6e8a88a973c9915f8cdea739e362074bd0"
+    },
+    {
+      "file": "scipy/stats/_stats_pythran.cp312-win_amd64.pyd",
+      "bytes": 1107968,
+      "sha256": "60a27e71341812d0ffa05cbb3b35167b5429d9db90ac28063f1abdf76dfe028a"
+    },
+    {
+      "file": "scipy/stats/_unuran/unuran_wrapper.cp312-win_amd64.pyd",
+      "bytes": 1262080,
+      "sha256": "db29ada784cfe6f9539aa2bf93aa42f489cdad011b55591dfa503f42cf269ab8"
+    },
+    {
+      "file": "scipy.libs/libscipy_openblas-64eda39e79589aedb16f58e5547eb599.dll",
+      "bytes": 20260864,
+      "sha256": "64eda39e79589aedb16f58e5547eb599f0b5855505d56b9d40022e2eee354a0b"
+    },
+    {
+      "file": "sklearn/.libs/msvcp140.dll",
+      "bytes": 643512,
+      "sha256": "7c26614e1d733892c2deac7e245ce115504b1d80592dd0a01b08e3e5a55f89ca"
+    },
+    {
+      "file": "sklearn/.libs/vcomp140.dll",
+      "bytes": 212920,
+      "sha256": "95d4ce4a6802d1e18b5e0e1722cc30ea72ca7e033f83828f05c0b7b993fe7cbf"
+    },
+    {
+      "file": "sklearn/__check_build/_check_build.cp312-win_amd64.pyd",
+      "bytes": 28160,
+      "sha256": "30c6427098a8b40cf8a619f9a0e054083e38dd83fc79dfd00e5d4d37c615d7a1"
+    },
+    {
+      "file": "sklearn/_cyutility.cp312-win_amd64.pyd",
+      "bytes": 129024,
+      "sha256": "58c1f75ad76f6f6d9e70e0967c20e2a1aa5c1cea335cec240ea06a8a7391c8c6"
+    },
+    {
+      "file": "sklearn/_isotonic.cp312-win_amd64.pyd",
+      "bytes": 89600,
+      "sha256": "f5c85aa6a70f526e01dabb843766457231ad857fb3ab63013a586348b16a771c"
+    },
+    {
+      "file": "sklearn/_loss/_loss.cp312-win_amd64.pyd",
+      "bytes": 1325056,
+      "sha256": "323f709430ebfcf14a67760f8b0f585bcece1377ae3ff816762e572731226410"
+    },
+    {
+      "file": "sklearn/cluster/_dbscan_inner.cp312-win_amd64.pyd",
+      "bytes": 43008,
+      "sha256": "94e24d28a99cecafe32bb6aada821764a084ad310d953ca028092b352c591995"
+    },
+    {
+      "file": "sklearn/cluster/_hdbscan/_linkage.cp312-win_amd64.pyd",
+      "bytes": 88064,
+      "sha256": "6342f1b4b163fec8c1ac401a8c5488cfe7dcc578ff0ce838b0ab81c3a03c001e"
+    },
+    {
+      "file": "sklearn/cluster/_hdbscan/_reachability.cp312-win_amd64.pyd",
+      "bytes": 143872,
+      "sha256": "038034f8e35657b98420f3410dbb0773b5cfa308e745e78eb5fd5d4ee1be204f"
+    },
+    {
+      "file": "sklearn/cluster/_hdbscan/_tree.cp312-win_amd64.pyd",
+      "bytes": 168448,
+      "sha256": "4f6ffb9dc593df1263204fdcd48b9d729f41f036f4456e0f7da1505bb786c52d"
+    },
+    {
+      "file": "sklearn/cluster/_hierarchical_fast.cp312-win_amd64.pyd",
+      "bytes": 116224,
+      "sha256": "3c7c3e391bdd3aa7bfa30a2d7f58a030b6a936525bd9dd33040375aa2295f86d"
+    },
+    {
+      "file": "sklearn/cluster/_k_means_common.cp312-win_amd64.pyd",
+      "bytes": 197120,
+      "sha256": "c3a03a6e8899ccddf0297c31a288230861d40b5168f5b2d3a69d811f7813cf65"
+    },
+    {
+      "file": "sklearn/cluster/_k_means_elkan.cp312-win_amd64.pyd",
+      "bytes": 224768,
+      "sha256": "fddde3cb766b2b1512f9cdeedc72bf10686fb1a5ff697ed4b12eaf00f2ee9e5a"
+    },
+    {
+      "file": "sklearn/cluster/_k_means_lloyd.cp312-win_amd64.pyd",
+      "bytes": 145408,
+      "sha256": "942662a2a87050a9b409e66bb3c8082a37061b7dc38cbc70e2b3f343fade3777"
+    },
+    {
+      "file": "sklearn/cluster/_k_means_minibatch.cp312-win_amd64.pyd",
+      "bytes": 99328,
+      "sha256": "c670e15d27c83a98e4d336f9794caea48d36110a4bfec332686d9b094756d923"
+    },
+    {
+      "file": "sklearn/datasets/_svmlight_format_fast.cp312-win_amd64.pyd",
+      "bytes": 272896,
+      "sha256": "7f16fceb4add6a0f0325761962a3056327675f8a917cb665aa69c815b14cea59"
+    },
+    {
+      "file": "sklearn/decomposition/_cdnmf_fast.cp312-win_amd64.pyd",
+      "bytes": 59392,
+      "sha256": "817cc739e99b381f794d167105063bf2445308ee9c09ac54ce1eebbdfde1d82f"
+    },
+    {
+      "file": "sklearn/decomposition/_online_lda_fast.cp312-win_amd64.pyd",
+      "bytes": 83968,
+      "sha256": "1d307005321ee105ecfca86a5f4b3a3762e043ae65c65d7de888725a3a37dc50"
+    },
+    {
+      "file": "sklearn/ensemble/_gradient_boosting.cp312-win_amd64.pyd",
+      "bytes": 71168,
+      "sha256": "99e1d595b3d7aa9fa0686d704b734146ccd4d234ccac73145899e2f9573b18ea"
+    },
+    {
+      "file": "sklearn/ensemble/_hist_gradient_boosting/_binning.cp312-win_amd64.pyd",
+      "bytes": 42496,
+      "sha256": "22060da321eaba776ad07c2163662c4726f4cb07e7a6c170b49c3ef4190c16ce"
+    },
+    {
+      "file": "sklearn/ensemble/_hist_gradient_boosting/_gradient_boosting.cp312-win_amd64.pyd",
+      "bytes": 47104,
+      "sha256": "d6d5898feab87a3d185b1a1a5df6c42ab8e2150158f5b3817197422beaf83f7f"
+    },
+    {
+      "file": "sklearn/ensemble/_hist_gradient_boosting/_predictor.cp312-win_amd64.pyd",
+      "bytes": 65536,
+      "sha256": "45e15b182689bc525556b2899fd910ba240b2e186530f20bb85638a5a5bc9876"
+    },
+    {
+      "file": "sklearn/ensemble/_hist_gradient_boosting/common.cp312-win_amd64.pyd",
+      "bytes": 31232,
+      "sha256": "a8339a3c17a2fb10f5d8286ac57459051e1313cfc158af7bdb49a01ec3a695a5"
+    },
+    {
+      "file": "sklearn/ensemble/_hist_gradient_boosting/histogram.cp312-win_amd64.pyd",
+      "bytes": 128512,
+      "sha256": "1cb3d95c2a265521ee5b95987e77756247c5a753f8b57e9598e6d54782e8d6cf"
+    },
+    {
+      "file": "sklearn/ensemble/_hist_gradient_boosting/splitting.cp312-win_amd64.pyd",
+      "bytes": 139264,
+      "sha256": "fcccb28b03fff20810b1ee8bab06dbb981ebfb4b1e62eb61513b61da1a0f5a56"
+    },
+    {
+      "file": "sklearn/feature_extraction/_hashing_fast.cp312-win_amd64.pyd",
+      "bytes": 59392,
+      "sha256": "9e38bf4c3ecd872614ca614af954409de1dee566772008acb1636decf9451aa4"
+    },
+    {
+      "file": "sklearn/linear_model/_cd_fast.cp312-win_amd64.pyd",
+      "bytes": 321024,
+      "sha256": "74df558e12d5964d7fd1c5c9638279899d6047e85ee8318d54ef26fac9450de3"
+    },
+    {
+      "file": "sklearn/linear_model/_sag_fast.cp312-win_amd64.pyd",
+      "bytes": 95232,
+      "sha256": "5b34cef1fac5247d0521b8f5e3e553c6d177ddb04dd9f5ce4d0085f8e5ac7080"
+    },
+    {
+      "file": "sklearn/linear_model/_sgd_fast.cp312-win_amd64.pyd",
+      "bytes": 139776,
+      "sha256": "293137f29320f563f431996c5fed95ad48a6cd3f572fdeb09677fed604e249f0"
+    },
+    {
+      "file": "sklearn/manifold/_barnes_hut_tsne.cp312-win_amd64.pyd",
+      "bytes": 64000,
+      "sha256": "3af83ff5f67d1c9a611face36dc060d80e7fb70a58a821a8976a4ff25ea7c0d8"
+    },
+    {
+      "file": "sklearn/manifold/_utils.cp312-win_amd64.pyd",
+      "bytes": 47104,
+      "sha256": "b3224343f41bee90361881e9f3495e313a70148ac8fa0baf2a6af877623c42f7"
+    },
+    {
+      "file": "sklearn/metrics/_dist_metrics.cp312-win_amd64.pyd",
+      "bytes": 372736,
+      "sha256": "ca4ba8bae92df5daae7a7dbbdac15a07a93d0df0870b53ffe701ec1e02ff77ac"
+    },
+    {
+      "file": "sklearn/metrics/_pairwise_distances_reduction/_argkmin.cp312-win_amd64.pyd",
+      "bytes": 125952,
+      "sha256": "8e06c0768678af1bd7f2a8d5cd02b33f2f473937222f964d6718db982d0a5957"
+    },
+    {
+      "file": "sklearn/metrics/_pairwise_distances_reduction/_argkmin_classmode.cp312-win_amd64.pyd",
+      "bytes": 85504,
+      "sha256": "4df5e870c63a18e0892dcfd3a649c34633a1779a7749a78f7297913bbbe5b0b5"
+    },
+    {
+      "file": "sklearn/metrics/_pairwise_distances_reduction/_base.cp312-win_amd64.pyd",
+      "bytes": 108544,
+      "sha256": "b1299efed6967ce41a47940cf1f46c1a154ce975b689a17fd724d3218fb09d46"
+    },
+    {
+      "file": "sklearn/metrics/_pairwise_distances_reduction/_datasets_pair.cp312-win_amd64.pyd",
+      "bytes": 196096,
+      "sha256": "9c715a5a70eba7997e5a4bb7b5cd299189dd3262a53527171fba2ca1fe0ffe1c"
+    },
+    {
+      "file": "sklearn/metrics/_pairwise_distances_reduction/_middle_term_computer.cp312-win_amd64.pyd",
+      "bytes": 204288,
+      "sha256": "ea619fba202c6dbe34c034894ba255f7210ab681b133f02f556796732e4713ef"
+    },
+    {
+      "file": "sklearn/metrics/_pairwise_distances_reduction/_radius_neighbors.cp312-win_amd64.pyd",
+      "bytes": 158208,
+      "sha256": "3e0164ff762a8f060de04659c08d9575396d1bca1936e6ca00558f83d7c882ee"
+    },
+    {
+      "file": "sklearn/metrics/_pairwise_distances_reduction/_radius_neighbors_classmode.cp312-win_amd64.pyd",
+      "bytes": 93696,
+      "sha256": "033d718f9726ef09d26cd554e87eedb26062237f5e1141a935a617c026382780"
+    },
+    {
+      "file": "sklearn/metrics/_pairwise_fast.cp312-win_amd64.pyd",
+      "bytes": 83968,
+      "sha256": "688638b541ba819b122913954de64a7bce325cf60caf1c795cf32d0e10a409db"
+    },
+    {
+      "file": "sklearn/metrics/cluster/_expected_mutual_info_fast.cp312-win_amd64.pyd",
+      "bytes": 53760,
+      "sha256": "b7ddbfee3fa96aa29d04f0c002319bd9dcf531f7239bb8f1aff4fbbca0f1ff37"
+    },
+    {
+      "file": "sklearn/neighbors/_ball_tree.cp312-win_amd64.pyd",
+      "bytes": 369152,
+      "sha256": "fcee2186ea3fa26b6f546d6165542d5d2f49be688b236465b202c9ec886dea26"
+    },
+    {
+      "file": "sklearn/neighbors/_kd_tree.cp312-win_amd64.pyd",
+      "bytes": 369152,
+      "sha256": "a6c3c53b0e39a98e9698ad8dc2ee8eab4db400ffb3f8b6588a86dc12de4afe88"
+    },
+    {
+      "file": "sklearn/neighbors/_partition_nodes.cp312-win_amd64.pyd",
+      "bytes": 36864,
+      "sha256": "cc8d0cb9609652fccb6f82b1950e71eedd90e76f7d364d31ed76e97d3fda853a"
+    },
+    {
+      "file": "sklearn/neighbors/_quad_tree.cp312-win_amd64.pyd",
+      "bytes": 106496,
+      "sha256": "ee7ac896c2a4208664b424ecb23c00a38f9e97598e88cb063ce1607540972d3e"
+    },
+    {
+      "file": "sklearn/preprocessing/_csr_polynomial_expansion.cp312-win_amd64.pyd",
+      "bytes": 215552,
+      "sha256": "faa9d01d30e426912789fca67d55f11dac8ea728aa46d1deaeb86e5731779b86"
+    },
+    {
+      "file": "sklearn/preprocessing/_target_encoder_fast.cp312-win_amd64.pyd",
+      "bytes": 232448,
+      "sha256": "28c54c43acdb9d825feedcaf0c303f7e4b97a18b40547d7a11d05ddfd3e237ec"
+    },
+    {
+      "file": "sklearn/svm/_liblinear.cp312-win_amd64.pyd",
+      "bytes": 112640,
+      "sha256": "aa36d6ee05dae68169f159577a3778e986324dfb331cc235304a6c9dde89b117"
+    },
+    {
+      "file": "sklearn/svm/_libsvm.cp312-win_amd64.pyd",
+      "bytes": 242688,
+      "sha256": "f0d36495ac641236bd8232fd7e854bc29ff70dbfbaf66996987cde239e7eea5b"
+    },
+    {
+      "file": "sklearn/svm/_libsvm_sparse.cp312-win_amd64.pyd",
+      "bytes": 197120,
+      "sha256": "2d19052077a650f75c6f90f0c503a70e3d6e683bf4183473fa7aa69e92c59ae9"
+    },
+    {
+      "file": "sklearn/svm/_newrand.cp312-win_amd64.pyd",
+      "bytes": 38912,
+      "sha256": "8b16affdba2b8bcdbf5fa8bb3aca1d3526fb638876b62ceb5cf1866d3f0bb240"
+    },
+    {
+      "file": "sklearn/tree/_criterion.cp312-win_amd64.pyd",
+      "bytes": 150528,
+      "sha256": "9d54792ccfa50dac7002988bd7a9d94681eaf8df776b11a7548825a440db96b8"
+    },
+    {
+      "file": "sklearn/tree/_partitioner.cp312-win_amd64.pyd",
+      "bytes": 111104,
+      "sha256": "a9552713fb809cdc4d9282544c27efffb5dffa9c45f89a919f8497b3e54f29ef"
+    },
+    {
+      "file": "sklearn/tree/_splitter.cp312-win_amd64.pyd",
+      "bytes": 88064,
+      "sha256": "0b20944fdd733bc0acb6cb93dc9ed5ebdb945e02dc01a89d18c0ad36617f5e9d"
+    },
+    {
+      "file": "sklearn/tree/_tree.cp312-win_amd64.pyd",
+      "bytes": 279552,
+      "sha256": "4fc913357d7581966366c6ab8234be39a843282083159a23a213af1bdf2d4a93"
+    },
+    {
+      "file": "sklearn/tree/_utils.cp312-win_amd64.pyd",
+      "bytes": 64000,
+      "sha256": "ae18cb32d27315aeb872e05da7ae4aa163ef444f971ab4a872e8a018813825b3"
+    },
+    {
+      "file": "sklearn/utils/_bitset.cp312-win_amd64.pyd",
+      "bytes": 44032,
+      "sha256": "3083525da5ab70e9bb5c2aa6ab1eddb64da02c77c3b7407183e630faf741e094"
+    },
+    {
+      "file": "sklearn/utils/_cython_blas.cp312-win_amd64.pyd",
+      "bytes": 153600,
+      "sha256": "09f3face648b60fa5239b43cef4c83dc1c95a29e2dd010cc20832977ddb6befd"
+    },
+    {
+      "file": "sklearn/utils/_fast_dict.cp312-win_amd64.pyd",
+      "bytes": 90112,
+      "sha256": "01a5361f3b326f936ff86a6e49ae298cf5c7112928d2897e50b63623f788e3b8"
+    },
+    {
+      "file": "sklearn/utils/_heap.cp312-win_amd64.pyd",
+      "bytes": 17408,
+      "sha256": "1d4b0ba3fe6209e685d446c5001ad01bb22def900f2ec37b816b61f1e1fa4d88"
+    },
+    {
+      "file": "sklearn/utils/_isfinite.cp312-win_amd64.pyd",
+      "bytes": 57344,
+      "sha256": "b5664c8de91e49ea7974aa5efd282cc76b383bde6d7fe32d785b6a8a4a2eb0e5"
+    },
+    {
+      "file": "sklearn/utils/_openmp_helpers.cp312-win_amd64.pyd",
+      "bytes": 43008,
+      "sha256": "dec08cd057ac558eb82df7691089008ca5d9e28e7518ee2889761356e79533d2"
+    },
+    {
+      "file": "sklearn/utils/_random.cp312-win_amd64.pyd",
+      "bytes": 113664,
+      "sha256": "891ecce0cc8d5ecb7b8664efb8f6ba08c9f022f3481596e7b5eb3513e070c368"
+    },
+    {
+      "file": "sklearn/utils/_seq_dataset.cp312-win_amd64.pyd",
+      "bytes": 118784,
+      "sha256": "1feb07ceb887fcf8187021de9de0be9d2c14f0125d78994c5216a1b47ba53e45"
+    },
+    {
+      "file": "sklearn/utils/_sorting.cp312-win_amd64.pyd",
+      "bytes": 56320,
+      "sha256": "599155533ec09fecf176c97a947d81d79700651f3e3f7e4c3f930b866727617c"
+    },
+    {
+      "file": "sklearn/utils/_typedefs.cp312-win_amd64.pyd",
+      "bytes": 74752,
+      "sha256": "d243a0f17e6bfed83158cda39cc022485ff99b23d2f16c136a00f899983dc208"
+    },
+    {
+      "file": "sklearn/utils/_vector_sentinel.cp312-win_amd64.pyd",
+      "bytes": 95232,
+      "sha256": "9e5092c49dc2b6a9e04a13f00ee09c35a71809d068afe840ab1839f9e5675463"
+    },
+    {
+      "file": "sklearn/utils/_weight_vector.cp312-win_amd64.pyd",
+      "bytes": 50688,
+      "sha256": "6f37afd3efd296b4b02be0b5a096702c1fd1c8669d36f5fd90f016d3ccca9092"
+    },
+    {
+      "file": "sklearn/utils/arrayfuncs.cp312-win_amd64.pyd",
+      "bytes": 84480,
+      "sha256": "127c47b3ff218988042e4859dca8b786f6ef3703676785bcc10bc3773e976732"
+    },
+    {
+      "file": "sklearn/utils/murmurhash.cp312-win_amd64.pyd",
+      "bytes": 60416,
+      "sha256": "6bb43e6f6e0c09bc490ad1e783cc3bb0109934b766b35f84c4b02608e0616d2c"
+    },
+    {
+      "file": "sklearn/utils/sparsefuncs_fast.cp312-win_amd64.pyd",
+      "bytes": 463360,
+      "sha256": "4e6b9173db142e9ae19ebdb47946f301586cd5a881edef780370f0cd1695090e"
+    },
+    {
+      "file": "soxr/soxr_ext.pyd",
+      "bytes": 354304,
+      "sha256": "17850a2a3af1c7f317a13ab5065711e9e40ac3a92ca17fefb6e4bda58b7ad908"
+    },
+    {
+      "file": "tokenizers/tokenizers.pyd",
+      "bytes": 7860736,
+      "sha256": "cef9accc734aed0f2095ba7c073a48f90cb2f6dfd50e02b22f9f7d75727aadd9"
+    },
     {
       "file": "torch/_C.cp312-win_amd64.pyd",
       "bytes": 9728,
@@ -3048,752 +4816,299 @@
       "sha256": "1f047faec08d9a35c304fb4a7cf13853589359a8f7cbfdd48c5d5807712dcf05"
     },
     {
-      "file": "torchaudio/lib/libtorchaudio.pyd",
-      "bytes": 199168,
-      "sha256": "087459e04798f6758a3bfa68877aa194c8f31ade82e93837d3f978369782cdda"
-    },
-    {
       "file": "torchaudio/lib/_torchaudio.pyd",
       "bytes": 31232,
       "sha256": "ec4b89c121c5c12e407b730c8eb0b1778eee092ce710e99ca2e144d7d3d8cee3"
     },
     {
-      "file": "numpy/core/_multiarray_tests.cp312-win_amd64.pyd",
-      "bytes": 66048,
-      "sha256": "d9017d99e0b6cad2f02462420793551fe9e6b836f3a800228caaeed144a32b75"
-    },
-    {
-      "file": "numpy/core/_multiarray_umath.cp312-win_amd64.pyd",
-      "bytes": 2842624,
-      "sha256": "5d4f44389d1b4e9aa62af63b716a0d4266dbb56fefa9bf27831f85b695994da5"
-    },
-    {
-      "file": "numpy/core/_operand_flag_tests.cp312-win_amd64.pyd",
-      "bytes": 11264,
-      "sha256": "6b2a6d51c423411bae8fecc5e739d2251abb7f82521125c68a1734e58c7ad92d"
-    },
-    {
-      "file": "numpy/core/_rational_tests.cp312-win_amd64.pyd",
-      "bytes": 40448,
-      "sha256": "2bb8e20ef34acdb42105daaf1fb4246493f46d49b84d614ab6fefbd4e4e428ad"
-    },
-    {
-      "file": "numpy/core/_simd.cp312-win_amd64.pyd",
-      "bytes": 2236928,
-      "sha256": "9d7bfef85379008c0c28469eea756ee3d1a52983801b76d35f80e91317cb5431"
-    },
-    {
-      "file": "numpy/core/_struct_ufunc_tests.cp312-win_amd64.pyd",
-      "bytes": 13824,
-      "sha256": "310d34efdd848e7e0e1165c8c67914c0d3f066a5dbae7c91a27cba41e05ca53a"
-    },
-    {
-      "file": "numpy/core/_umath_tests.cp312-win_amd64.pyd",
-      "bytes": 32768,
-      "sha256": "8407002ff967c7e7e514388a6fc1cbd51b375586ef774030361094f8b357d216"
-    },
-    {
-      "file": "numpy/fft/_pocketfft_internal.cp312-win_amd64.pyd",
-      "bytes": 110080,
-      "sha256": "f0a4df58721cb85ca35f5f3b8c47538c53d57bbcca4fc5c07a6c06ac4c5ef421"
-    },
-    {
-      "file": "numpy/linalg/lapack_lite.cp312-win_amd64.pyd",
-      "bytes": 17920,
-      "sha256": "4a4db19ed6cb68529fe3ed22cbbdbd90b30b6dc1ebb2817d19bba65759c173c0"
-    },
-    {
-      "file": "numpy/linalg/_umath_linalg.cp312-win_amd64.pyd",
-      "bytes": 106496,
-      "sha256": "7652e82c6c53249b911dde9822b71a7ecbecbc699c79475862e779a51d7f1d0f"
-    },
-    {
-      "file": "numpy/random/bit_generator.cp312-win_amd64.pyd",
-      "bytes": 160768,
-      "sha256": "d335d1443e324a7a89582cc3e85bd850198eb3133c3dd38c7f55c6f609b0cfd8"
-    },
-    {
-      "file": "numpy/random/mtrand.cp312-win_amd64.pyd",
-      "bytes": 582656,
-      "sha256": "2df309f3cc66116966484fcc466cef200aff8d2a4c8ea482d3530b5cccb89394"
-    },
-    {
-      "file": "numpy/random/_bounded_integers.cp312-win_amd64.pyd",
-      "bytes": 231936,
-      "sha256": "0c19ec0b3129f12df51982aace8478f8274a5b0d6a2206be1d0e1ee0227c36a4"
-    },
-    {
-      "file": "numpy/random/_common.cp312-win_amd64.pyd",
-      "bytes": 166400,
-      "sha256": "774bf3e20e2b1ca9797deb1daccb88a776a70c8555a501454d8d900a14585134"
-    },
-    {
-      "file": "numpy/random/_generator.cp312-win_amd64.pyd",
-      "bytes": 689152,
-      "sha256": "8979528423faffa32d4d6edddc0b3591b8fd465c7549263267c4b249e2f1d03b"
-    },
-    {
-      "file": "numpy/random/_mt19937.cp312-win_amd64.pyd",
-      "bytes": 75776,
-      "sha256": "592238b7a62fb033724cfd745be6036700f584d6c4ee8baf83cb77788320aa49"
-    },
-    {
-      "file": "numpy/random/_pcg64.cp312-win_amd64.pyd",
-      "bytes": 81920,
-      "sha256": "d9a1618ba4515eb6c41dcac7b99400d07e22cd56ad4f3ba94cb84dd231cf73a8"
-    },
-    {
-      "file": "numpy/random/_philox.cp312-win_amd64.pyd",
-      "bytes": 68608,
-      "sha256": "34363add569504b32533fa65b6933feb2ba2bcf0fe10be47c55fbdad2e223df8"
-    },
-    {
-      "file": "numpy/random/_sfc64.cp312-win_amd64.pyd",
-      "bytes": 50688,
-      "sha256": "a241dfd9d3abaeff3028ba98bd8c573d4f8c7d2990119634b4a280fc3fd33de9"
-    },
-    {
-      "file": "scipy/_cyutility.cp312-win_amd64.pyd",
-      "bytes": 186368,
-      "sha256": "1990a1fbef9f2f75556db35b81d7180c903fc54db3f8fd08c14ac2cbc805c61b"
-    },
-    {
-      "file": "scipy/cluster/_hierarchy.cp312-win_amd64.pyd",
-      "bytes": 245760,
-      "sha256": "d0f3ecaf076a4dd76f565fea77a48902c52c0017f801ebcca9559bd8bbb41f13"
-    },
-    {
-      "file": "scipy/cluster/_optimal_leaf_ordering.cp312-win_amd64.pyd",
-      "bytes": 173056,
-      "sha256": "b04f540816f40caf0516c1487cae2eca92cec792145f96a4bd38bbce5d2f597f"
-    },
-    {
-      "file": "scipy/cluster/_vq.cp312-win_amd64.pyd",
-      "bytes": 110080,
-      "sha256": "3dfe9c54f9b339d73c884907616d8dc63bed2bea49256c443fb81f0d49769013"
-    },
-    {
-      "file": "scipy/fftpack/convolve.cp312-win_amd64.pyd",
-      "bytes": 124928,
-      "sha256": "b3c2881a63d1676579f4f398ec68d08f30cc108fcb595a1b91feb41a75d2994c"
-    },
-    {
-      "file": "scipy/integrate/_dop.cp312-win_amd64.pyd",
-      "bytes": 95232,
-      "sha256": "cf340c300760f60abf1f734e30869a4caf5e975d5355d177a009bfefc55fb156"
-    },
-    {
-      "file": "scipy/integrate/_odepack.cp312-win_amd64.pyd",
-      "bytes": 228352,
-      "sha256": "b87d527753a64e761ea8de0ea98da5f9fb37d4749905e07841c75e7f355c8c96"
-    },
-    {
-      "file": "scipy/integrate/_quadpack.cp312-win_amd64.pyd",
-      "bytes": 143360,
-      "sha256": "cb28ae63f88e3ecf211bf8f5f27323a9295f30aaa0ff1bfbeb7d62bf434329c2"
-    },
-    {
-      "file": "scipy/integrate/_test_multivariate.cp312-win_amd64.pyd",
-      "bytes": 17920,
-      "sha256": "9f13805d7933823250c360616d9af4c3bd7732088373dcff43ae5e29009b4749"
-    },
-    {
-      "file": "scipy/integrate/_vode.cp312-win_amd64.pyd",
-      "bytes": 278528,
-      "sha256": "9455a7ae1a8e85a8008a4fcd6e4460b583bea0cd0860253f6309e2806a020814"
-    },
-    {
-      "file": "scipy/interpolate/_dfitpack.cp312-win_amd64.pyd",
-      "bytes": 675328,
-      "sha256": "351b13a45d45b01736350911ba9aa10ba4ea236a4b33875da70f01df89347288"
-    },
-    {
-      "file": "scipy/interpolate/_dierckx.cp312-win_amd64.pyd",
-      "bytes": 1016832,
-      "sha256": "36e8ab8e5aa64f735c68e380e3d17b3f8fef9c7d871a658d3915f0b7cbe16a0a"
-    },
-    {
-      "file": "scipy/interpolate/_fitpack.cp312-win_amd64.pyd",
-      "bytes": 420864,
-      "sha256": "e017d57aa95ac206befa452fbf1b8e35aff05f6a22205fcec96804e8911f1c95"
-    },
-    {
-      "file": "scipy/interpolate/_interpnd.cp312-win_amd64.pyd",
-      "bytes": 228864,
-      "sha256": "d7a4ad815dfa5f533354b825783a26b320d2f167f1e142f36d15aa36137ba0bb"
-    },
-    {
-      "file": "scipy/interpolate/_ppoly.cp312-win_amd64.pyd",
-      "bytes": 231424,
-      "sha256": "cdac95584e8dd9056ba64b38a13f50feacdacfb5c0a0a38c2e90175646092391"
-    },
-    {
-      "file": "scipy/interpolate/_rbfinterp_pythran.cp312-win_amd64.pyd",
-      "bytes": 1165312,
-      "sha256": "bfefea84ca4f6adf1a5de7d113360d30e643e0a2b94a99beaa8ed0bf6e3536c5"
-    },
-    {
-      "file": "scipy/interpolate/_rgi_cython.cp312-win_amd64.pyd",
-      "bytes": 122880,
-      "sha256": "c3e7e6243a3b7a64aedc4291852bad2e3fc64caa51e611ce866ce68e2991cb2f"
-    },
-    {
-      "file": "scipy/linalg/cython_blas.cp312-win_amd64.pyd",
-      "bytes": 119296,
-      "sha256": "7cb7d97da1cdcdbce9af4adb83638ee5185a857918c5e0b7e1696e527c3c0d81"
-    },
-    {
-      "file": "scipy/linalg/cython_lapack.cp312-win_amd64.pyd",
+      "file": "torchaudio/lib/libtorchaudio.pyd",
       "bytes": 199168,
-      "sha256": "84cc424fa42d3a2c1abaaf20107930c327f585599ca47fa4540d4f9a9f5d53a4"
+      "sha256": "087459e04798f6758a3bfa68877aa194c8f31ade82e93837d3f978369782cdda"
     },
     {
-      "file": "scipy/linalg/_batched_linalg.cp312-win_amd64.pyd",
-      "bytes": 1057792,
-      "sha256": "c6df23588eba47a89edeed4474974d6ea816060d7749a2821a564a857d79a255"
-    },
-    {
-      "file": "scipy/linalg/_cythonized_array_utils.cp312-win_amd64.pyd",
-      "bytes": 312832,
-      "sha256": "5a88e80730755f2577ac1826ccc567b4a524fe2b30052f99c87311f755c8f74e"
-    },
-    {
-      "file": "scipy/linalg/_decomp_interpolative.cp312-win_amd64.pyd",
-      "bytes": 749056,
-      "sha256": "3600e8ec1622c6977125638fee701558609dc2d372dbc118a66becbee20c1db1"
-    },
-    {
-      "file": "scipy/linalg/_decomp_lu_cython.cp312-win_amd64.pyd",
-      "bytes": 120832,
-      "sha256": "3005373a7d19051fc61d451f140bf961e0caaf2f95ea0fb442908c57345bc1a0"
-    },
-    {
-      "file": "scipy/linalg/_decomp_update.cp312-win_amd64.pyd",
-      "bytes": 282624,
-      "sha256": "10b7ee93b4a18bef35182b844eb54457ceaad866ef9aa76d6fc1e4b9fc71b59d"
-    },
-    {
-      "file": "scipy/linalg/_fblas.cp312-win_amd64.pyd",
-      "bytes": 737792,
-      "sha256": "3c6e3904bdfb3849a94db9e21863b5ce98516d7df41764afb8c27bde7c387e34"
-    },
-    {
-      "file": "scipy/linalg/_flapack.cp312-win_amd64.pyd",
-      "bytes": 2273280,
-      "sha256": "0de0eb87b20daaeb54f26abf23d54a02215cbdc19c8245aadb3fa86e96804328"
-    },
-    {
-      "file": "scipy/linalg/_linalg_pythran.cp312-win_amd64.pyd",
-      "bytes": 1061888,
-      "sha256": "cdf6e618ef2ad73ae92e843600a70d4c87078561ebb4375f26402958b8f714e1"
-    },
-    {
-      "file": "scipy/linalg/_matfuncs_expm.cp312-win_amd64.pyd",
-      "bytes": 229376,
-      "sha256": "65e2c40301818e461f81d35b4cd7a282c9502d9beb0599d4b6a330826a3309bd"
-    },
-    {
-      "file": "scipy/linalg/_matfuncs_schur_sqrtm.cp312-win_amd64.pyd",
-      "bytes": 211456,
-      "sha256": "a30c2700d337cee784c08d4ea7fff536ab3b881b3f535c0b0b68babde2e5c4f0"
-    },
-    {
-      "file": "scipy/linalg/_matfuncs_sqrtm_triu.cp312-win_amd64.pyd",
-      "bytes": 103424,
-      "sha256": "539fd829f3f86f20f78838a3d2080c61292c6d0fbd748036751c04b8eb464478"
-    },
-    {
-      "file": "scipy/linalg/_solve_toeplitz.cp312-win_amd64.pyd",
-      "bytes": 122880,
-      "sha256": "ab6049fe4ae0ae781e6562d78fee3e9c1715cf3dd4686428fedbaaf99c4dab4f"
-    },
-    {
-      "file": "scipy/ndimage/_ctest.cp312-win_amd64.pyd",
-      "bytes": 16896,
-      "sha256": "5209e5ad9816fdf85c3cfba74d9cda7a51e27a3340484f2b5eaac47a61026833"
-    },
-    {
-      "file": "scipy/ndimage/_cytest.cp312-win_amd64.pyd",
-      "bytes": 71168,
-      "sha256": "3cea1263ad1fb73157c4a8b6ad2dc91786e2014159d87bb4f522397f6d2fb674"
-    },
-    {
-      "file": "scipy/ndimage/_nd_image.cp312-win_amd64.pyd",
-      "bytes": 177664,
-      "sha256": "7a5bfe894a43b761f2042f2a35c1e799aaa964b60e33b1acc55bf8062636f191"
-    },
-    {
-      "file": "scipy/ndimage/_ni_label.cp312-win_amd64.pyd",
-      "bytes": 205312,
-      "sha256": "b7dd341165d5ca1960ff96b1d6600822cdd50614f1328537d9311e219ae38d12"
-    },
-    {
-      "file": "scipy/ndimage/_rank_filter_1d.cp312-win_amd64.pyd",
-      "bytes": 124416,
-      "sha256": "eb419d67ee29fa9615f01d288b43b8c0288da67043aa494b481c93b24d92b9d9"
-    },
-    {
-      "file": "scipy/odr/__odrpack.cp312-win_amd64.pyd",
-      "bytes": 689152,
-      "sha256": "9a83361de5e9a5c41958efba5fadd498ea797eba8bd7e958440fa5191ed01923"
-    },
-    {
-      "file": "scipy/optimize/_bglu_dense.cp312-win_amd64.pyd",
-      "bytes": 173568,
-      "sha256": "3168df9f9c5a3ba0ef428c1c5ca13a6fced1a164b4d31cc4d71aca1baf58f50f"
-    },
-    {
-      "file": "scipy/optimize/_direct.cp312-win_amd64.pyd",
-      "bytes": 70656,
-      "sha256": "6ea9f33c61aa3009eb557db94bc80c74b8b25947553a9950bf4ef1e4c4cc372e"
-    },
-    {
-      "file": "scipy/optimize/_group_columns.cp312-win_amd64.pyd",
-      "bytes": 1033216,
-      "sha256": "a3ee6c6801009f84b3aa8a980c83a0b1983d33fcf944144cda3cda691ecca43b"
-    },
-    {
-      "file": "scipy/optimize/_lbfgsb.cp312-win_amd64.pyd",
-      "bytes": 171520,
-      "sha256": "9d087101aadc47b4ac09332433edcc3be64de36a135acc7c728f079c3af9ebea"
-    },
-    {
-      "file": "scipy/optimize/_lsap.cp312-win_amd64.pyd",
-      "bytes": 177664,
-      "sha256": "f8ff7561bd1ea3027c809fc804c8b1316376e589d12aef3a1ebcb2a6d2c3d18d"
-    },
-    {
-      "file": "scipy/optimize/_minpack.cp312-win_amd64.pyd",
-      "bytes": 124928,
-      "sha256": "95b27adf583cb4c0d660141adba5d179b9df4a42474b2ff230d598673794fab4"
-    },
-    {
-      "file": "scipy/optimize/_moduleTNC.cp312-win_amd64.pyd",
-      "bytes": 145920,
-      "sha256": "0e57c01521068abf89c818e42693ffb20612ff9319d6942d490c4fd6a48873e2"
-    },
-    {
-      "file": "scipy/optimize/_pava_pybind.cp312-win_amd64.pyd",
-      "bytes": 317952,
-      "sha256": "03cfa01ef5ed5829057e629497cc052e83eb9729a95a244e6fdbea66eb8dadd0"
-    },
-    {
-      "file": "scipy/optimize/_slsqplib.cp312-win_amd64.pyd",
-      "bytes": 172544,
-      "sha256": "0174a3e1849cb4312b17fa6d6fe55de618a02c94ec9f7d9b12199270c6faac75"
-    },
-    {
-      "file": "scipy/optimize/_zeros.cp312-win_amd64.pyd",
-      "bytes": 23040,
-      "sha256": "001213b4192a7427197626c5a7ac86d9e2c1fd7512be56a495cb192a66bbd4ed"
-    },
-    {
-      "file": "scipy/signal/_max_len_seq_inner.cp312-win_amd64.pyd",
-      "bytes": 1006592,
-      "sha256": "687669b40d0da549bf08e6313ca075cab60a4467e0d7ad2cf72ce48d696e14a9"
-    },
-    {
-      "file": "scipy/signal/_peak_finding_utils.cp312-win_amd64.pyd",
-      "bytes": 148480,
-      "sha256": "8a7a0344794f64468036af28767f601c9b42421c44dbea271e885bd752e92f97"
-    },
-    {
-      "file": "scipy/signal/_sigtools.cp312-win_amd64.pyd",
-      "bytes": 126976,
-      "sha256": "6a28e8ab89bfbf6d1ad7a53aadad4f21407b82553f1cc46adc1994f51a84afcd"
-    },
-    {
-      "file": "scipy/signal/_sosfilt.cp312-win_amd64.pyd",
-      "bytes": 106496,
-      "sha256": "e83c7db9488406099a1e6727de2f85eeb4aea67ab00e1a9a998513a5ad067c55"
-    },
-    {
-      "file": "scipy/signal/_spline.cp312-win_amd64.pyd",
-      "bytes": 63488,
-      "sha256": "ed3e2c3b7dcaf74539455d432c0200d2f72698d6190671301c83e8e067d716e6"
-    },
-    {
-      "file": "scipy/signal/_upfirdn_apply.cp312-win_amd64.pyd",
-      "bytes": 199680,
-      "sha256": "6e630a041fe96ede5c855705b1d56f1a0aa4e35fbc717bca9d19c003fb3ade39"
-    },
-    {
-      "file": "scipy/sparse/_csparsetools.cp312-win_amd64.pyd",
-      "bytes": 483840,
-      "sha256": "356e21967b04d9d9c97fdd602be3e6b94f208511d6b86fe2caf5464ea87bddd8"
-    },
-    {
-      "file": "scipy/sparse/_sparsetools.cp312-win_amd64.pyd",
-      "bytes": 4114944,
-      "sha256": "1d507be93679e2a8dc12c2b64a3a59a074c140460ab5ba8d40a7b5bdf36202fb"
-    },
-    {
-      "file": "scipy/spatial/_ckdtree.cp312-win_amd64.pyd",
-      "bytes": 1523200,
-      "sha256": "8894f6d534e6d514926a8272eb3a1088c02502a921e1cd890390865097ed4813"
-    },
-    {
-      "file": "scipy/spatial/_distance_pybind.cp312-win_amd64.pyd",
-      "bytes": 1382912,
-      "sha256": "d42a4996f4aa38699d8f148571a5360704801f3c0525fae4489f6d040a283b51"
-    },
-    {
-      "file": "scipy/spatial/_distance_wrap.cp312-win_amd64.pyd",
-      "bytes": 107008,
-      "sha256": "4f46b39f8da613b30e99174ce294069e8f14f86df38e6bb2a0c0d5481d92dfbe"
-    },
-    {
-      "file": "scipy/spatial/_hausdorff.cp312-win_amd64.pyd",
-      "bytes": 95744,
-      "sha256": "f2cd4ab4bdd825a5672a83df4f0b71fd80cf19954373c692a1e4916622bb14a9"
-    },
-    {
-      "file": "scipy/spatial/_qhull.cp312-win_amd64.pyd",
-      "bytes": 846336,
-      "sha256": "28f1c8b17398c7066e30ea40c6b035e47ef65039c503eb635307d0337144e333"
-    },
-    {
-      "file": "scipy/spatial/_voronoi.cp312-win_amd64.pyd",
-      "bytes": 85504,
-      "sha256": "5609f28d114b61cf12e1613da4c9072ed5ebbe400d65d38f17c79d8d9b835c1a"
-    },
-    {
-      "file": "scipy/special/cython_special.cp312-win_amd64.pyd",
-      "bytes": 2196480,
-      "sha256": "7708b736984c88478ae991d5a71c649fd93b50f868f793b455b141cd1f2c0976"
-    },
-    {
-      "file": "scipy/special/_comb.cp312-win_amd64.pyd",
-      "bytes": 46080,
-      "sha256": "82ada506eca2932774300cc9012eadf31875da5ba1ad8cd6e096621ac881d16a"
-    },
-    {
-      "file": "scipy/special/_ellip_harm_2.cp312-win_amd64.pyd",
-      "bytes": 139264,
-      "sha256": "d543824c8e47d5c0ab9097d590425845099b6cbae5e293630375d36ce8e286e0"
-    },
-    {
-      "file": "scipy/special/_gufuncs.cp312-win_amd64.pyd",
-      "bytes": 1515008,
-      "sha256": "2ba405a2ecd205798bedc38cde6245eceff1555939d3405c71a5c773a4a76caa"
-    },
-    {
-      "file": "scipy/special/_specfun.cp312-win_amd64.pyd",
-      "bytes": 294400,
-      "sha256": "92f64cc95773ea0b05c570004ab74d85415e513949536f874a4d7b214ad40794"
-    },
-    {
-      "file": "scipy/special/_special_ufuncs.cp312-win_amd64.pyd",
-      "bytes": 2292224,
-      "sha256": "b8ab31cc0efdc8edb2b54051344d36eeddbf45b326a462f20666e33369e626a5"
-    },
-    {
-      "file": "scipy/special/_test_internal.cp312-win_amd64.pyd",
-      "bytes": 93696,
-      "sha256": "ba136bee38b3fca732cf2dc50649f3535a32670f13c6966cef2b3d8cf0ee59c9"
-    },
-    {
-      "file": "scipy/special/_ufuncs.cp312-win_amd64.pyd",
-      "bytes": 1398784,
-      "sha256": "6eca0912fdbc826e8779e604c08f19cdffbb6d6b60f1b198ad31cdc99e58d339"
-    },
-    {
-      "file": "scipy/special/_ufuncs_cxx.cp312-win_amd64.pyd",
-      "bytes": 2404864,
-      "sha256": "f89da2936994df638b028977e664f50aad6a48a999d18ae5f7bf519d5b5a2479"
-    },
-    {
-      "file": "scipy/stats/_ansari_swilk_statistics.cp312-win_amd64.pyd",
-      "bytes": 107008,
-      "sha256": "145cfe092095639cf1dbaa516f999dbb04bbd05a997858563bcce8b9c84bd37e"
-    },
-    {
-      "file": "scipy/stats/_biasedurn.cp312-win_amd64.pyd",
-      "bytes": 349696,
-      "sha256": "ebfdf10213b9d76455807f767d614b9d5dbbe1d2070cda62a69df6156959e934"
-    },
-    {
-      "file": "scipy/stats/_qmc_cy.cp312-win_amd64.pyd",
-      "bytes": 278528,
-      "sha256": "1cf44a4b588797fd7d60bbdd51cdd9edde76bdc792d6179e6f69cb42490c308e"
-    },
-    {
-      "file": "scipy/stats/_qmvnt_cy.cp312-win_amd64.pyd",
-      "bytes": 128000,
-      "sha256": "555de14acbde9924146c2b20e8ddabdbcb86e88591d7a3cc6a4b3b34310150c0"
-    },
-    {
-      "file": "scipy/stats/_sobol.cp312-win_amd64.pyd",
-      "bytes": 192512,
-      "sha256": "eb481e44503e8b1720102539a6d6b93fcc8bbc63e570851dc5a6a08ca3cf0287"
-    },
-    {
-      "file": "scipy/stats/_stats.cp312-win_amd64.pyd",
-      "bytes": 484352,
-      "sha256": "d32a2011e311b1e269ec5277c14c1e6e8a88a973c9915f8cdea739e362074bd0"
-    },
-    {
-      "file": "scipy/stats/_stats_pythran.cp312-win_amd64.pyd",
-      "bytes": 1107968,
-      "sha256": "60a27e71341812d0ffa05cbb3b35167b5429d9db90ac28063f1abdf76dfe028a"
-    },
-    {
-      "file": "scipy/_lib/messagestream.cp312-win_amd64.pyd",
-      "bytes": 60416,
-      "sha256": "b4679bc7cc58c3dd7cb29689ae96ab295fff3412b1724baa7d2b7c6cf86f6c15"
-    },
-    {
-      "file": "scipy/_lib/_ccallback_c.cp312-win_amd64.pyd",
-      "bytes": 105472,
-      "sha256": "509d2e681897f4253263c063ad8a2aa0c2459b85ce3d86754b401d42ab26dc9a"
-    },
-    {
-      "file": "scipy/_lib/_fpumode.cp312-win_amd64.pyd",
-      "bytes": 15872,
-      "sha256": "f00f7a238a65d40eb6939bac18ef8c407dd345cf26c7e83bb0a185ab03756814"
-    },
-    {
-      "file": "scipy/_lib/_test_ccallback.cp312-win_amd64.pyd",
-      "bytes": 52224,
-      "sha256": "57431ca6b0015ec5534f8f8419216cd76f06191a271ddbf5e750d595eaf82ff2"
-    },
-    {
-      "file": "scipy/_lib/_test_deprecation_call.cp312-win_amd64.pyd",
-      "bytes": 33792,
-      "sha256": "20f122cd55541a794a8c49308eb545a83a86a01d6a049a1ce9b66d2ba5e76286"
-    },
-    {
-      "file": "scipy/_lib/_test_deprecation_def.cp312-win_amd64.pyd",
-      "bytes": 24576,
-      "sha256": "118091bc00e030f12f820975ec605dbec71ee7a101cd594c6aec658d6d733487"
-    },
-    {
-      "file": "scipy/_lib/_uarray/_uarray.cp312-win_amd64.pyd",
-      "bytes": 235008,
-      "sha256": "2fa9cd0fca336b35fca629e2ceedde50fdeed9d6d6ea3575a2bc4889222bc2d6"
-    },
-    {
-      "file": "scipy/stats/_levy_stable/levyst.cp312-win_amd64.pyd",
-      "bytes": 51200,
-      "sha256": "2de6bcecfee01e58636c7b081810c25aac7d8d05933111e90afdd8b2c4a07b4f"
-    },
-    {
-      "file": "scipy/stats/_rcont/rcont.cp312-win_amd64.pyd",
-      "bytes": 109568,
-      "sha256": "3f757ef287d8171155cd0557b13ad1e8c9b3f05cc3885b3aaceb9dbdc4a0ef15"
-    },
-    {
-      "file": "scipy/stats/_unuran/unuran_wrapper.cp312-win_amd64.pyd",
-      "bytes": 1262080,
-      "sha256": "db29ada784cfe6f9539aa2bf93aa42f489cdad011b55591dfa503f42cf269ab8"
-    },
-    {
-      "file": "scipy/spatial/transform/_rigid_transform_cy.cp312-win_amd64.pyd",
-      "bytes": 242688,
-      "sha256": "8de630dfc038d90734a7f027bceb530bcd4cd41f713ca1a06ecade83511041ad"
-    },
-    {
-      "file": "scipy/spatial/transform/_rotation_cy.cp312-win_amd64.pyd",
-      "bytes": 557568,
-      "sha256": "4f68115dad53da6a532a54d81e334931f14455e523a3fe78caf1523f1fead01e"
-    },
-    {
-      "file": "scipy/sparse/csgraph/_flow.cp312-win_amd64.pyd",
-      "bytes": 168960,
-      "sha256": "e512929f71f152921590077ea3f6cb2598fbe68a0d5cea0f328da738d1cac7ce"
-    },
-    {
-      "file": "scipy/sparse/csgraph/_matching.cp312-win_amd64.pyd",
-      "bytes": 175104,
-      "sha256": "d6c4fd5d1c7c31efaea8fdf5f72e887de90beb8f6b33b2f1afec79abe60436ef"
-    },
-    {
-      "file": "scipy/sparse/csgraph/_min_spanning_tree.cp312-win_amd64.pyd",
-      "bytes": 104448,
-      "sha256": "5e116133bf8cebf1de481cb2dcad3e1c4eaa1483b2c09e8ebf061cd30e988fe9"
-    },
-    {
-      "file": "scipy/sparse/csgraph/_reordering.cp312-win_amd64.pyd",
-      "bytes": 150528,
-      "sha256": "4e3333df00b90c717c37b1a3ebe14d8c99bce8826b2b8b3c98f53b2dd8240b79"
-    },
-    {
-      "file": "scipy/sparse/csgraph/_shortest_path.cp312-win_amd64.pyd",
-      "bytes": 544256,
-      "sha256": "d2d2817f778f160420ab56ff9f727321795bb8dcce2276fe9af43dcd51cceda2"
-    },
-    {
-      "file": "scipy/sparse/csgraph/_tools.cp312-win_amd64.pyd",
-      "bytes": 155136,
-      "sha256": "bbe80ea9f718dc39cc4b18654371c6e924fafaf74c8cba588ba2723ce30ae9cd"
-    },
-    {
-      "file": "scipy/sparse/csgraph/_traversal.cp312-win_amd64.pyd",
-      "bytes": 344576,
-      "sha256": "1817674c68d6db6f67b7b0343cae803fb789b9410d13db53b3d6b64a1ced6715"
-    },
-    {
-      "file": "scipy/sparse/linalg/_propack.cp312-win_amd64.pyd",
-      "bytes": 288768,
-      "sha256": "7f8f73cc897677ef5825214f3a26d56f266c55efa45fdeceb0c733a1956db096"
-    },
-    {
-      "file": "scipy/sparse/linalg/_dsolve/_superlu.cp312-win_amd64.pyd",
-      "bytes": 542208,
-      "sha256": "075d7ab28c49252f4ee5980ce9ae5ca804c6859649f650405813ff8649368e17"
-    },
-    {
-      "file": "scipy/sparse/linalg/_eigen/arpack/_arpacklib.cp312-win_amd64.pyd",
-      "bytes": 339968,
-      "sha256": "f532cab33e8ee89eef19e8a3e2bd31485487c4b172beaf52446f2bd2af3b110c"
-    },
-    {
-      "file": "scipy/optimize/cython_optimize/_zeros.cp312-win_amd64.pyd",
-      "bytes": 78848,
-      "sha256": "40cc706e7eec0865e3892e0b669cd99728c4b886f31c46f43085d5d21143753a"
-    },
-    {
-      "file": "scipy/optimize/_highspy/_core.cp312-win_amd64.pyd",
-      "bytes": 6443520,
-      "sha256": "99d5c437bca5ee91c8785721fe69b235b6b348cff9c27a7436501f4cc419baad"
-    },
-    {
-      "file": "scipy/optimize/_highspy/_highs_options.cp312-win_amd64.pyd",
-      "bytes": 1278464,
-      "sha256": "98acb3f762673688fc402e893d3313d267733135f0e1c07ef508cbcdb4b2ad8f"
-    },
-    {
-      "file": "scipy/optimize/_lsq/givens_elimination.cp312-win_amd64.pyd",
-      "bytes": 70656,
-      "sha256": "22553b97f9e3c32f5fbbc1b8b9c5c4a4e0251f441366472844a824f01ae63021"
-    },
-    {
-      "file": "scipy/optimize/_trlib/_trlib.cp312-win_amd64.pyd",
-      "bytes": 206848,
-      "sha256": "ec5edbbfa97f3dc4a1f2e155bcf350ca6b25ad238e486ba72da2fef46ea42ff1"
-    },
-    {
-      "file": "scipy/io/matlab/_mio5_utils.cp312-win_amd64.pyd",
-      "bytes": 178176,
-      "sha256": "ab0536b6d57881314284cc17a90479dbade9441434643b9fd649b6ddaedea637"
-    },
-    {
-      "file": "scipy/io/matlab/_mio_utils.cp312-win_amd64.pyd",
-      "bytes": 52736,
-      "sha256": "0ec808b641fafaab37322e9835d067ee51a59c739d8836b4106fdc4d8a40469c"
-    },
-    {
-      "file": "scipy/io/matlab/_streams.cp312-win_amd64.pyd",
-      "bytes": 105984,
-      "sha256": "9ff3b4b033ae5440170646ade943197f45ed07c6224f943419388e3e54b6bc4a"
-    },
-    {
-      "file": "scipy/io/_fast_matrix_market/_fmm_core.cp312-win_amd64.pyd",
-      "bytes": 2846208,
-      "sha256": "3918a898ade2c78d93ddd302f1447a4442e5bef7d63107b73655d4d64aa8e814"
-    },
-    {
-      "file": "scipy/fft/_pocketfft/pypocketfft.cp312-win_amd64.pyd",
-      "bytes": 1097216,
-      "sha256": "dd089b853dd1382b4ce73a138076efa8dda9391efa6090ee31fe607e2bdee313"
-    },
-    {
-      "file": "_soundfile_data/libsndfile_x64.dll",
-      "bytes": 2364416,
-      "sha256": "22518c16f9d13eda5ae5adf999c4740d7d16cc2d6b178b36dd4ac2f759a38559"
-    },
-    {
-      "file": "soxr/soxr_ext.pyd",
-      "bytes": 354304,
-      "sha256": "17850a2a3af1c7f317a13ab5065711e9e40ac3a92ca17fefb6e4bda58b7ad908"
-    },
-    {
-      "file": "llvmlite/binding/llvmlite.dll",
-      "bytes": 120369664,
-      "sha256": "a3500f4ffd7c4b47ec785c5964af7ed01fb95dd125c0d7efcdb680920821da6f"
-    },
-    {
-      "file": "numba/mviewbuf.cp312-win_amd64.pyd",
-      "bytes": 14848,
-      "sha256": "8804d711ee3da92a037f6b7c0a270cc8acf3e40f7c88fef339af8269ec53be79"
-    },
-    {
-      "file": "numba/_devicearray.cp312-win_amd64.pyd",
-      "bytes": 12288,
-      "sha256": "82177de965dce158cc2a51889546b55f9b6b863191b11596c55b795eb8ab2271"
-    },
-    {
-      "file": "numba/_dispatcher.cp312-win_amd64.pyd",
-      "bytes": 41472,
-      "sha256": "8ba51b83b2a8e84fec7f9b0a193634e6abcb3f20d3832ab9d4226848ddd2bcec"
-    },
-    {
-      "file": "numba/_dynfunc.cp312-win_amd64.pyd",
-      "bytes": 16896,
-      "sha256": "ae62e32560d17cc00b15dfefde43cbec02f679dc3e38b0e1e25dfe94f2174885"
-    },
-    {
-      "file": "numba/_helperlib.cp312-win_amd64.pyd",
-      "bytes": 203776,
-      "sha256": "2ac658f841a7ddcc64a64681fee58cb36344d0abaefbf2e73973c9faafe552b9"
-    },
-    {
-      "file": "numba/np/ufunc/omppool.cp312-win_amd64.pyd",
-      "bytes": 36352,
-      "sha256": "6a623b7ecf5cfb362890a19c5e7b834c3e830030fcb82c0c71e382cb603ee27d"
-    },
-    {
-      "file": "numba/np/ufunc/tbbpool.cp312-win_amd64.pyd",
-      "bytes": 46592,
-      "sha256": "307a170a3b9f392d56f62f8183d342aa0994eaa63d8a19714757cb815d1c055f"
-    },
-    {
-      "file": "numba/np/ufunc/workqueue.cp312-win_amd64.pyd",
-      "bytes": 38400,
-      "sha256": "3359c82c12b6912086887423a44777b9b4ff53288772014964cf456e6b9c6aae"
-    },
-    {
-      "file": "numba/np/ufunc/_internal.cp312-win_amd64.pyd",
-      "bytes": 23552,
-      "sha256": "c3ce2d31f1422132127c581acfca4217fa90af54e9fe5b5b919844ff67aa7510"
-    },
+      "file": "yaml/_yaml.cp312-win_amd64.pyd",
+      "bytes": 253952,
+      "sha256": "4fd0e84f50261ed0886cffcdd8008b055af3352546e649c3d741b50eae1f9b5f"
+    }
+  ],
+  "interpreter_native_binaries": [
     {
-      "file": "numba/np/ufunc/_num_threads.cp312-win_amd64.pyd",
-      "bytes": 10752,
-      "sha256": "cce0d5511a5149ce31253f3c3b68397ac9a8ea27262e66fc93dd0df0ae0f3c8d"
+      "file": "DLLs/_asyncio.pyd",
+      "bytes": 59392,
+      "sha256": "6c3570716921fd402c441c3ad8fab159f80c60fc55dd31ebb273e18d0764b2ff"
     },
     {
-      "file": "numba/experimental/jitclass/_box.cp312-win_amd64.pyd",
-      "bytes": 12800,
-      "sha256": "c0e6a6fe53e0fb5b8ea782f7a2202ad409d9d7fa469042703571f6a7b1404a59"
+      "file": "DLLs/_bz2.pyd",
+      "bytes": 73216,
+      "sha256": "4ce0888c64c92806abfa067ddd0a3fffa0cb0be230c2d5a6054094af343c64a7"
     },
     {
-      "file": "numba/cuda/cudadrv/_extras.cp312-win_amd64.pyd",
-      "bytes": 10752,
-      "sha256": "74d5756b2fd1b9f26ec41da69b17d0b0551100bf009382ca182ca90d63dfd9e8"
+      "file": "DLLs/_ctypes.pyd",
+      "bytes": 116224,
+      "sha256": "0abcfe23e653e2bc6da07265dcdbe7c1f381bc97183e251db484ea4e33abfcbe"
     },
     {
-      "file": "numba/core/runtime/_nrt_python.cp312-win_amd64.pyd",
+      "file": "DLLs/_ctypes_test.pyd",
       "bytes": 25088,
-      "sha256": "5a044e0895626101b1724f751bedb27555fe698a848fb54a911dc180f2cb0b88"
+      "sha256": "67a27bf1ce7ee1c2315925afbc0ae8969745e9e07e62420c3ef3752133a8aeac"
     },
     {
-      "file": "numba/core/typeconv/_typeconv.cp312-win_amd64.pyd",
+      "file": "DLLs/_decimal.pyd",
+      "bytes": 248832,
+      "sha256": "ea563edf82530e516560880767779b6c5c23d84b6cbdfa19ba5e8322f9d42709"
+    },
+    {
+      "file": "DLLs/_elementtree.pyd",
+      "bytes": 122368,
+      "sha256": "e40b9ead71dd6d0a72e551f8f783fc3658a745bb3060b7a313d64535ce6da45e"
+    },
+    {
+      "file": "DLLs/_hashlib.pyd",
+      "bytes": 54784,
+      "sha256": "2339f748935aca402ceb1e397c9f488bb42200eea7804d31f973a8ced6fe1a4b"
+    },
+    {
+      "file": "DLLs/_lzma.pyd",
+      "bytes": 153088,
+      "sha256": "c1109a16ebe0f573f1df565899adee57ce73a9633a6bab8b6d1cc9ce483d0c85"
+    },
+    {
+      "file": "DLLs/_msi.pyd",
+      "bytes": 33280,
+      "sha256": "690b8452bf071057142da6a6e49233c70af0c6c177982b175bb2ae81d87f4480"
+    },
+    {
+      "file": "DLLs/_multiprocessing.pyd",
+      "bytes": 24064,
+      "sha256": "246dcc0dcb2ddff11c9491110dd334a785ca266a2257268ead09ed9ffecc2fbd"
+    },
+    {
+      "file": "DLLs/_overlapped.pyd",
+      "bytes": 44032,
+      "sha256": "fc1bd45848f10d2a3c32d568990e922e8567cc4ccd3e97ae9e07829184cbf03d"
+    },
+    {
+      "file": "DLLs/_queue.pyd",
       "bytes": 20480,
-      "sha256": "c2e48c185e1c0e0a5be75ddbc142fb0bf7ad445be4d8467750236b4ec21ae965"
+      "sha256": "e0b738902e9b229896e8aded26b2616abeafa7c46293362c95a83dce840205e5"
     },
     {
-      "file": "tokenizers/tokenizers.pyd",
-      "bytes": 7860736,
-      "sha256": "cef9accc734aed0f2095ba7c073a48f90cb2f6dfd50e02b22f9f7d75727aadd9"
+      "file": "DLLs/_socket.pyd",
+      "bytes": 71680,
+      "sha256": "0dff3e3b7777b0cbc5f278e020239c9a03b7b470cf4ea6c62b1cfd2fdbddcbb7"
     },
     {
-      "file": "safetensors/_safetensors_rust.pyd",
-      "bytes": 734720,
-      "sha256": "80a2b3f7658854ade855c5fb6192ee38fe2c7fbfd38d1c7c1f4d2c44f67125e4"
+      "file": "DLLs/_sqlite3.pyd",
+      "bytes": 112128,
+      "sha256": "8d1ef0cf074a10f7e28835c235260293e4bdb07c1952852f01acc2136f952b66"
+    },
+    {
+      "file": "DLLs/_ssl.pyd",
+      "bytes": 165888,
+      "sha256": "27b8579d4c14134f7c97266956f4a6218f13d4c15e242c67b93b2b03adbad1a2"
+    },
+    {
+      "file": "DLLs/_testbuffer.pyd",
+      "bytes": 43520,
+      "sha256": "e75e13c69dc6b3356c36ad92f22bce2b167429da2d9f23dd2fdb468570514a52"
+    },
+    {
+      "file": "DLLs/_testcapi.pyd",
+      "bytes": 297984,
+      "sha256": "02d7208f8f48a1cccce93b206a1495c22a92c22bc0920527a2b1253211d4fd72"
+    },
+    {
+      "file": "DLLs/_testclinic.pyd",
+      "bytes": 55296,
+      "sha256": "a56f642441c08efa924903da519d1d2f8a9ef1b09aa7339835a225e263b9b43e"
+    },
+    {
+      "file": "DLLs/_testconsole.pyd",
+      "bytes": 15360,
+      "sha256": "c2d8054c935a1f26f86e36844bd1c9fe057c70b3a58c9f5cb771c5baf33a0f35"
+    },
+    {
+      "file": "DLLs/_testimportmultiple.pyd",
+      "bytes": 13312,
+      "sha256": "a9c153455d15025d51b051d27cc969597979d9c31a39b874f1d4f29a9c5140d6"
+    },
+    {
+      "file": "DLLs/_testinternalcapi.pyd",
+      "bytes": 39936,
+      "sha256": "2f2494b889da2af415187bbad350a61a2dccc65354b0db80f7e0cb6484722345"
+    },
+    {
+      "file": "DLLs/_testmultiphase.pyd",
+      "bytes": 27648,
+      "sha256": "7a59b63b2a6fd7b37e13ad1b4419522486eaca035559abfb73f8e6929e65e416"
+    },
+    {
+      "file": "DLLs/_testsinglephase.pyd",
+      "bytes": 18432,
+      "sha256": "0a30c8a3afa4c927220c6bc83dee5e6c3460b19e67a38241639f17151e86c523"
+    },
+    {
+      "file": "DLLs/_tkinter.pyd",
+      "bytes": 55296,
+      "sha256": "1eec44128ed888022dd4b86b26b03e676020ab1d5df5fbb4107fe4267f38272a"
+    },
+    {
+      "file": "DLLs/_uuid.pyd",
+      "bytes": 13824,
+      "sha256": "689143e8379254e6a5b046dd709d25bce0703f049607d99d13616a8559a0c07e"
+    },
+    {
+      "file": "DLLs/_wmi.pyd",
+      "bytes": 25600,
+      "sha256": "4aed43305acffa5a530970532169367c59062996bb08a938713bf0044cb8b433"
+    },
+    {
+      "file": "DLLs/_zoneinfo.pyd",
+      "bytes": 36352,
+      "sha256": "891306bb828888741d26dc83f778025e2c1e3564837293354300096c0127c965"
+    },
+    {
+      "file": "DLLs/libcrypto-3-x64.dll",
+      "bytes": 7856640,
+      "sha256": "dce8937b5cb456a0d6c4040cba760b9b97881631b5ef844a64ca0175c7c35f90"
+    },
+    {
+      "file": "DLLs/libffi-8.dll",
+      "bytes": 28160,
+      "sha256": "2ce5d09874ff875d6cc5e220d23520d38a362dd73517081571d1e032acebfef9"
+    },
+    {
+      "file": "DLLs/libssl-3-x64.dll",
+      "bytes": 1571840,
+      "sha256": "58a5cfda3f9057a743c87f623780b0b358279d394467abbd35ff2570fbd0c366"
+    },
+    {
+      "file": "DLLs/pyexpat.pyd",
+      "bytes": 211456,
+      "sha256": "48595059edc8d5c049edada829a71056971473855a39e65e872f4112fc97d258"
+    },
+    {
+      "file": "DLLs/select.pyd",
+      "bytes": 18944,
+      "sha256": "09ec190e299a2925d65d66821510ef11db0b1c2db13069a0185bf970977c5429"
+    },
+    {
+      "file": "DLLs/sqlite3.dll",
+      "bytes": 1607680,
+      "sha256": "cb82c726c39bb73717a8820688137cf3504d4fba928f188504384c23b6602817"
+    },
+    {
+      "file": "DLLs/tcl86t.dll",
+      "bytes": 1839896,
+      "sha256": "a308beae8555cff5ac2aff7eaf0aef40b5fe173f047e246dc49da9a4d3ef62f9"
+    },
+    {
+      "file": "DLLs/tk86t.dll",
+      "bytes": 1589528,
+      "sha256": "20f4876506bce7f89e53570e64fd1dce30a64548326b45f372871c7019560df4"
+    },
+    {
+      "file": "DLLs/unicodedata.pyd",
+      "bytes": 1127936,
+      "sha256": "6e12f0e3fc207e82cc59b62acbd68e0ae1fbc7f513d9475e4c66c3036d80732d"
+    },
+    {
+      "file": "DLLs/winsound.pyd",
+      "bytes": 18432,
+      "sha256": "a039b2614f247910759e2af5f831b819ce1bd74595769e1fb67cf964e00a6a95"
+    },
+    {
+      "file": "DLLs/zlib1.dll",
+      "bytes": 146208,
+      "sha256": "1dd27f0411ebb31bd148a61589cee254410915f1e6c37aa3ffa52fac71a5426c"
+    },
+    {
+      "file": "python3.dll",
+      "bytes": 56320,
+      "sha256": "d054a745b92a230114251975f7296178131a284f872ea97817d4b820453c5c90"
+    },
+    {
+      "file": "python312.dll",
+      "bytes": 6970368,
+      "sha256": "00f1e27a720f04606d9f6eac703b89418265fde213d6cb9378a0a4854b5d4669"
+    },
+    {
+      "file": "tcl/dde1.4/tcldde14.dll",
+      "bytes": 37664,
+      "sha256": "95454d21be84b4bef1f90b7aff56484b0111b30384d7c6d1a05463871c8036d3"
+    },
+    {
+      "file": "tcl/reg1.3/tclreg13.dll",
+      "bytes": 34584,
+      "sha256": "0250f59bf28cb7b65ed46a3befab5cff58785628502c5bd982e4c890580b85ad"
+    },
+    {
+      "file": "tcl/tix8.4.3/tix84.dll",
+      "bytes": 371200,
+      "sha256": "5b98953e5e36f4a3c889131a852d92e35070c708033f470319317fd7cd4a7b1d"
+    },
+    {
+      "file": "vcruntime140.dll",
+      "bytes": 124544,
+      "sha256": "d5e4d9a3e835fa679450145d6a7d94e36573a509317111904d9b3712c30d9066"
+    },
+    {
+      "file": "vcruntime140_1.dll",
+      "bytes": 49792,
+      "sha256": "1f2d41c4aa5db0bc33ebf7b66d72943a817d7ce6cbe880502a9403823633093f"
+    },
+    {
+      "file": "Lib/site-packages/pip/_vendor/distlib/t32.exe",
+      "bytes": 97792,
+      "sha256": "5fd873e09786a1eaabaa44261e9e30609d88745da040ebb702c1a5069ab345ca"
+    },
+    {
+      "file": "Lib/site-packages/pip/_vendor/distlib/t64-arm.exe",
+      "bytes": 182784,
+      "sha256": "81f7936c6d05cadd4a185bb9a8a64abe9a72c937ad979ea5afe672de59123fcc"
+    },
+    {
+      "file": "Lib/site-packages/pip/_vendor/distlib/t64.exe",
+      "bytes": 108032,
+      "sha256": "acd47a82dc01132e3b8414f683c2e117c18aedbf650a370249fe9fdbc445cda1"
+    },
+    {
+      "file": "Lib/site-packages/pip/_vendor/distlib/w32.exe",
+      "bytes": 91648,
+      "sha256": "f27b3724964ff524e837374847d2856f7d10a884516fc34200d0a2332a739789"
+    },
+    {
+      "file": "Lib/site-packages/pip/_vendor/distlib/w64-arm.exe",
+      "bytes": 168448,
+      "sha256": "f6704d3a1022f69ad6b7e604a927d00ce2f9dae515bfad5a7df9a2e3e4bd2448"
+    },
+    {
+      "file": "Lib/site-packages/pip/_vendor/distlib/w64.exe",
+      "bytes": 101888,
+      "sha256": "55b21889fd3d28799b834fba3d29482e7aa1b0519864b790e3914af7cdda666b"
+    },
+    {
+      "file": "Lib/venv/scripts/nt/python.exe",
+      "bytes": 262144,
+      "sha256": "2a5550d982664f182db9b0629bebdadc6a980b0093b8741966e820419288211d"
+    },
+    {
+      "file": "Lib/venv/scripts/nt/pythonw.exe",
+      "bytes": 249856,
+      "sha256": "018be45d82d2785ab708c1ca7a20ac46bc0a268b3cd3d2f7da9c874013f4445c"
+    },
+    {
+      "file": "python.exe",
+      "bytes": 91648,
+      "sha256": "246221b571e7a692a8b26818b628cac4c163e836de9897812eaebc2a8e1efa90"
+    },
+    {
+      "file": "pythonw.exe",
+      "bytes": 90112,
+      "sha256": "da3619599a88ea75e15ae743bb8a544f432035a717b46dd3533605eca65bdee1"
     }
   ],
   "models_and_sources": "Exact immutable revisions, SHA256 model assets and source patch in chatterbox-maintained-lock.json",
   "licence_clearance": "Current route directly acquires upstream wheels and preserves all bundled notices; no runtime binaries redistributed by tHead. See maintenance.md for exact obligations.",
-  "current_python_pin": "3.12.16; separate acquisition/venv evidence in maintenance-python-security.json. This inventory and the initial native previews describe the historical 3.12.10 candidate."
+  "historical_inventory": "Earlier 3.12.10 candidate inventory remains in Git history; initial standalone previews and original 112-package CPU/CUDA inventories remain in maintenance-attempts/ and maintenance-installed-inventory.json."
 }

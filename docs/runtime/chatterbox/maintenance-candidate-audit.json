@@ -2,496 +2,597 @@
   "schema_version": 1,
   "reviewed_on": "2026-11-09",
   "profile": "thead-english-nano-maintained-candidate",
+  "python": "3.12.16",
+  "scope": "Read-only refresh of the exact maintained31216 package inventory after completed native normal-app validation. Official local Torch wheel version is normalized to its base PyPI version for advisory lookup only; installation still requires the exact CUDA wheel/hash.",
+  "installed_distributions": 83,
   "packages": [
     {
       "name": "annotated-doc",
       "version": "0.0.5",
+      "installed_version": "0.0.5",
       "source": "https://pypi.org/pypi/annotated-doc/0.0.5/json",
       "advisories": []
     },
     {
       "name": "anyio",
       "version": "4.16.0",
+      "installed_version": "4.16.0",
       "source": "https://pypi.org/pypi/anyio/4.16.0/json",
       "advisories": []
     },
     {
       "name": "audioread",
       "version": "3.1.0",
+      "installed_version": "3.1.0",
       "source": "https://pypi.org/pypi/audioread/3.1.0/json",
       "advisories": []
     },
     {
       "name": "certifi",
       "version": "2026.10.23",
+      "installed_version": "2026.10.23",
       "source": "https://pypi.org/pypi/certifi/2026.10.23/json",
       "advisories": []
     },
     {
       "name": "cffi",
       "version": "2.1.1",
+      "installed_version": "2.1.1",
       "source": "https://pypi.org/pypi/cffi/2.1.1/json",
       "advisories": []
     },
     {
       "name": "cfgv",
       "version": "3.5.0",
+      "installed_version": "3.5.0",
       "source": "https://pypi.org/pypi/cfgv/3.5.0/json",
       "advisories": []
     },
     {
       "name": "charset-normalizer",
       "version": "3.5.2",
+      "installed_version": "3.5.2",
       "source": "https://pypi.org/pypi/charset-normalizer/3.5.2/json",
       "advisories": []
     },
     {
       "name": "click",
       "version": "8.5.1",
+      "installed_version": "8.5.1",
       "source": "https://pypi.org/pypi/click/8.5.1/json",
       "advisories": []
     },
     {
       "name": "cloudpickle",
       "version": "3.1.2",
+      "installed_version": "3.1.2",
       "source": "https://pypi.org/pypi/cloudpickle/3.1.2/json",
       "advisories": []
     },
     {
       "name": "colorama",
       "version": "0.4.6",
+      "installed_version": "0.4.6",
       "source": "https://pypi.org/pypi/colorama/0.4.6/json",
       "advisories": []
     },
     {
       "name": "conformer",
       "version": "0.3.2",
+      "installed_version": "0.3.2",
       "source": "https://pypi.org/pypi/conformer/0.3.2/json",
       "advisories": []
     },
     {
       "name": "decorator",
       "version": "5.3.1",
+      "installed_version": "5.3.1",
       "source": "https://pypi.org/pypi/decorator/5.3.1/json",
       "advisories": []
     },
     {
       "name": "diffusers",
       "version": "0.42.1",
+      "installed_version": "0.42.1",
       "source": "https://pypi.org/pypi/diffusers/0.42.1/json",
       "advisories": []
     },
     {
       "name": "distlib",
       "version": "0.4.4",
+      "installed_version": "0.4.4",
       "source": "https://pypi.org/pypi/distlib/0.4.4/json",
       "advisories": []
     },
     {
       "name": "einops",
       "version": "0.8.2",
+      "installed_version": "0.8.2",
       "source": "https://pypi.org/pypi/einops/0.8.2/json",
       "advisories": []
     },
     {
       "name": "filelock",
       "version": "4.2.9",
+      "installed_version": "4.2.9",
       "source": "https://pypi.org/pypi/filelock/4.2.9/json",
       "advisories": []
     },
     {
       "name": "fsspec",
       "version": "2026.9.0",
+      "installed_version": "2026.9.0",
       "source": "https://pypi.org/pypi/fsspec/2026.9.0/json",
       "advisories": []
     },
     {
       "name": "h11",
       "version": "0.16.0",
+      "installed_version": "0.16.0",
       "source": "https://pypi.org/pypi/h11/0.16.0/json",
       "advisories": []
     },
     {
       "name": "hf-xet",
       "version": "1.8.0",
+      "installed_version": "1.8.0",
       "source": "https://pypi.org/pypi/hf-xet/1.8.0/json",
       "advisories": []
     },
     {
       "name": "httpcore2",
       "version": "2.16.0",
+      "installed_version": "2.16.0",
       "source": "https://pypi.org/pypi/httpcore2/2.16.0/json",
       "advisories": []
     },
     {
       "name": "httpx2",
       "version": "2.16.0",
+      "installed_version": "2.16.0",
       "source": "https://pypi.org/pypi/httpx2/2.16.0/json",
       "advisories": []
     },
     {
       "name": "huggingface_hub",
       "version": "2.4.0",
+      "installed_version": "2.4.0",
       "source": "https://pypi.org/pypi/huggingface_hub/2.4.0/json",
       "advisories": []
     },
     {
       "name": "identify",
       "version": "2.6.20",
+      "installed_version": "2.6.20",
       "source": "https://pypi.org/pypi/identify/2.6.20/json",
       "advisories": []
     },
     {
       "name": "idna",
       "version": "3.20",
+      "installed_version": "3.20",
       "source": "https://pypi.org/pypi/idna/3.20/json",
       "advisories": []
     },
     {
       "name": "importlib_metadata",
       "version": "10.1.0",
+      "installed_version": "10.1.0",
       "source": "https://pypi.org/pypi/importlib_metadata/10.1.0/json",
       "advisories": []
     },
     {
       "name": "Jinja2",
       "version": "3.1.6",
+      "installed_version": "3.1.6",
       "source": "https://pypi.org/pypi/Jinja2/3.1.6/json",
       "advisories": []
     },
     {
       "name": "joblib",
       "version": "1.6.0",
+      "installed_version": "1.6.0",
       "source": "https://pypi.org/pypi/joblib/1.6.0/json",
       "advisories": []
     },
     {
       "name": "lazy-loader",
       "version": "0.6",
+      "installed_version": "0.6",
       "source": "https://pypi.org/pypi/lazy-loader/0.6/json",
       "advisories": []
     },
     {
       "name": "librosa",
       "version": "0.11.0",
+      "installed_version": "0.11.0",
       "source": "https://pypi.org/pypi/librosa/0.11.0/json",
       "advisories": []
     },
     {
       "name": "llvmlite",
       "version": "0.50.0",
+      "installed_version": "0.50.0",
       "source": "https://pypi.org/pypi/llvmlite/0.50.0/json",
       "advisories": []
     },
     {
       "name": "markdown-it-py",
       "version": "4.2.0",
+      "installed_version": "4.2.0",
       "source": "https://pypi.org/pypi/markdown-it-py/4.2.0/json",
       "advisories": []
     },
     {
       "name": "MarkupSafe",
       "version": "3.0.4",
+      "installed_version": "3.0.4",
       "source": "https://pypi.org/pypi/MarkupSafe/3.0.4/json",
       "advisories": []
     },
     {
       "name": "mdurl",
       "version": "0.1.2",
+      "installed_version": "0.1.2",
       "source": "https://pypi.org/pypi/mdurl/0.1.2/json",
       "advisories": []
     },
     {
       "name": "ml_dtypes",
       "version": "0.5.4",
+      "installed_version": "0.5.4",
       "source": "https://pypi.org/pypi/ml_dtypes/0.5.4/json",
       "advisories": []
     },
     {
       "name": "mpmath",
       "version": "1.3.0",
+      "installed_version": "1.3.0",
       "source": "https://pypi.org/pypi/mpmath/1.3.0/json",
       "advisories": []
     },
     {
       "name": "msgpack",
       "version": "1.2.4",
+      "installed_version": "1.2.4",
       "source": "https://pypi.org/pypi/msgpack/1.2.4/json",
       "advisories": []
     },
     {
       "name": "narwhals",
       "version": "2.28.0",
+      "installed_version": "2.28.0",
       "source": "https://pypi.org/pypi/narwhals/2.28.0/json",
       "advisories": []
     },
     {
       "name": "networkx",
       "version": "3.7",
+      "installed_version": "3.7",
       "source": "https://pypi.org/pypi/networkx/3.7/json",
       "advisories": []
     },
     {
       "name": "nodeenv",
       "version": "1.12.0",
+      "installed_version": "1.12.0",
       "source": "https://pypi.org/pypi/nodeenv/1.12.0/json",
       "advisories": []
     },
     {
       "name": "numba",
       "version": "0.68.1",
+      "installed_version": "0.68.1",
       "source": "https://pypi.org/pypi/numba/0.68.1/json",
       "advisories": []
     },
     {
       "name": "numpy",
       "version": "1.26.4",
+      "installed_version": "1.26.4",
       "source": "https://pypi.org/pypi/numpy/1.26.4/json",
       "advisories": []
     },
     {
       "name": "omegaconf",
       "version": "2.4.0",
+      "installed_version": "2.4.0",
       "source": "https://pypi.org/pypi/omegaconf/2.4.0/json",
       "advisories": []
     },
     {
       "name": "onnx",
       "version": "1.23.2",
+      "installed_version": "1.23.2",
       "source": "https://pypi.org/pypi/onnx/1.23.2/json",
       "advisories": []
     },
     {
       "name": "packaging",
       "version": "26.3",
+      "installed_version": "26.3",
       "source": "https://pypi.org/pypi/packaging/26.3/json",
       "advisories": []
     },
     {
       "name": "pillow",
       "version": "13.0.0",
+      "installed_version": "13.0.0",
       "source": "https://pypi.org/pypi/pillow/13.0.0/json",
       "advisories": []
     },
     {
       "name": "platformdirs",
       "version": "4.14.5",
+      "installed_version": "4.14.5",
       "source": "https://pypi.org/pypi/platformdirs/4.14.5/json",
       "advisories": []
     },
     {
       "name": "pooch",
       "version": "1.9.0",
+      "installed_version": "1.9.0",
       "source": "https://pypi.org/pypi/pooch/1.9.0/json",
       "advisories": []
     },
     {
       "name": "pre_commit",
       "version": "4.7.0",
+      "installed_version": "4.7.0",
       "source": "https://pypi.org/pypi/pre_commit/4.7.0/json",
       "advisories": []
     },
     {
       "name": "protobuf",
       "version": "7.36.2",
+      "installed_version": "7.36.2",
       "source": "https://pypi.org/pypi/protobuf/7.36.2/json",
       "advisories": []
     },
     {
       "name": "pycparser",
       "version": "3.12",
+      "installed_version": "3.12",
       "source": "https://pypi.org/pypi/pycparser/3.12/json",
       "advisories": []
     },
     {
       "name": "pydub",
       "version": "0.25.1",
+      "installed_version": "0.25.1",
       "source": "https://pypi.org/pypi/pydub/0.25.1/json",
       "advisories": []
     },
     {
       "name": "Pygments",
       "version": "2.21.0",
+      "installed_version": "2.21.0",
       "source": "https://pypi.org/pypi/Pygments/2.21.0/json",
       "advisories": []
     },
     {
       "name": "pyloudnorm",
       "version": "0.2.0",
+      "installed_version": "0.2.0",
       "source": "https://pypi.org/pypi/pyloudnorm/0.2.0/json",
       "advisories": []
     },
     {
       "name": "python-discovery",
       "version": "1.9.5",
+      "installed_version": "1.9.5",
       "source": "https://pypi.org/pypi/python-discovery/1.9.5/json",
       "advisories": []
     },
     {
       "name": "PyYAML",
       "version": "6.0.3",
+      "installed_version": "6.0.3",
       "source": "https://pypi.org/pypi/PyYAML/6.0.3/json",
       "advisories": []
     },
     {
       "name": "regex",
       "version": "2026.11.9",
+      "installed_version": "2026.11.9",
       "source": "https://pypi.org/pypi/regex/2026.11.9/json",
       "advisories": []
     },
     {
       "name": "requests",
       "version": "2.34.2",
+      "installed_version": "2.34.2",
       "source": "https://pypi.org/pypi/requests/2.34.2/json",
       "advisories": []
     },
     {
       "name": "rich",
       "version": "15.0.0",
+      "installed_version": "15.0.0",
       "source": "https://pypi.org/pypi/rich/15.0.0/json",
       "advisories": []
     },
     {
       "name": "s3tokenizer",
       "version": "0.3.0",
+      "installed_version": "0.3.0",
       "source": "https://pypi.org/pypi/s3tokenizer/0.3.0/json",
       "advisories": []
     },
     {
       "name": "safetensors",
       "version": "0.8.0",
+      "installed_version": "0.8.0",
       "source": "https://pypi.org/pypi/safetensors/0.8.0/json",
       "advisories": []
     },
     {
       "name": "scikit-learn",
       "version": "1.9.1",
+      "installed_version": "1.9.1",
       "source": "https://pypi.org/pypi/scikit-learn/1.9.1/json",
       "advisories": []
     },
     {
       "name": "scipy",
       "version": "1.17.1",
+      "installed_version": "1.17.1",
       "source": "https://pypi.org/pypi/scipy/1.17.1/json",
       "advisories": []
     },
     {
       "name": "setuptools",
       "version": "84.2.1",
+      "installed_version": "84.2.1",
       "source": "https://pypi.org/pypi/setuptools/84.2.1/json",
       "advisories": []
     },
     {
       "name": "shellingham",
       "version": "1.5.4",
+      "installed_version": "1.5.4",
       "source": "https://pypi.org/pypi/shellingham/1.5.4/json",
       "advisories": []
     },
     {
       "name": "soundfile",
       "version": "0.13.1",
+      "installed_version": "0.13.1",
       "source": "https://pypi.org/pypi/soundfile/0.13.1/json",
       "advisories": []
     },
     {
       "name": "soxr",
       "version": "1.1.0",
+      "installed_version": "1.1.0",
       "source": "https://pypi.org/pypi/soxr/1.1.0/json",
       "advisories": []
     },
     {
       "name": "sympy",
       "version": "1.14.0",
+      "installed_version": "1.14.0",
       "source": "https://pypi.org/pypi/sympy/1.14.0/json",
       "advisories": []
     },
     {
       "name": "threadpoolctl",
       "version": "3.8.0",
+      "installed_version": "3.8.0",
       "source": "https://pypi.org/pypi/threadpoolctl/3.8.0/json",
       "advisories": []
     },
     {
       "name": "tokenizers",
       "version": "0.23.3",
+      "installed_version": "0.23.3",
       "source": "https://pypi.org/pypi/tokenizers/0.23.3/json",
       "advisories": []
     },
     {
       "name": "torch",
       "version": "2.14.1",
+      "installed_version": "2.14.1+cu130",
       "source": "https://pypi.org/pypi/torch/2.14.1/json",
       "advisories": []
     },
     {
       "name": "torchaudio",
       "version": "2.11.1",
+      "installed_version": "2.11.1",
       "source": "https://pypi.org/pypi/torchaudio/2.11.1/json",
       "advisories": []
     },
     {
       "name": "tqdm",
       "version": "4.70.1",
+      "installed_version": "4.70.1",
       "source": "https://pypi.org/pypi/tqdm/4.70.1/json",
       "advisories": []
     },
     {
       "name": "transformers",
       "version": "5.22.2",
+      "installed_version": "5.22.2",
       "source": "https://pypi.org/pypi/transformers/5.22.2/json",
       "advisories": []
     },
     {
       "name": "truststore",
       "version": "0.10.5",
+      "installed_version": "0.10.5",
       "source": "https://pypi.org/pypi/truststore/0.10.5/json",
       "advisories": []
     },
     {
       "name": "typer",
       "version": "0.28.0",
+      "installed_version": "0.28.0",
       "source": "https://pypi.org/pypi/typer/0.28.0/json",
       "advisories": []
     },
     {
       "name": "typing_extensions",
       "version": "4.16.0",
+      "installed_version": "4.16.0",
       "source": "https://pypi.org/pypi/typing_extensions/4.16.0/json",
       "advisories": []
     },
     {
       "name": "urllib3",
       "version": "2.8.0",
+      "installed_version": "2.8.0",
       "source": "https://pypi.org/pypi/urllib3/2.8.0/json",
       "advisories": []
     },
     {
       "name": "uv-build",
       "version": "0.12.7",
+      "installed_version": "0.12.7",
       "source": "https://pypi.org/pypi/uv-build/0.12.7/json",
       "advisories": []
     },
     {
       "name": "virtualenv",
       "version": "21.15.6",
+      "installed_version": "21.15.6",
       "source": "https://pypi.org/pypi/virtualenv/21.15.6/json",
       "advisories": []
     },
     {
       "name": "wheel",
       "version": "0.46.3",
+      "installed_version": "0.46.3",
       "source": "https://pypi.org/pypi/wheel/0.46.3/json",
       "advisories": []
     },
     {
       "name": "zipp",
       "version": "4.1.2",
+      "installed_version": "4.1.2",
       "source": "https://pypi.org/pypi/zipp/4.1.2/json",
       "advisories": []
     }
   ],
   "unresolved_advisory_records": 0,
-  "source_projects": "Chatterbox0.1.7+thead.1 and Perth1.1.0 reviewed separately by immutable source revision; not silently treated as PyPI no-advisory results.",
-  "native_binary_licence_clearance": "Upstream wheel notices retained during direct acquisition to the user PC; tHead does not bundle or republish these binaries. Future bundle redistribution requires the listed licence obligations.",
-  "release_decision": "no-go pending final current-interpreter native release evidence"
+  "source_projects": [
+    {
+      "name": "chatterbox-tts",
+      "version": "0.1.7+thead.1",
+      "directory": "source",
+      "installed_source_verification": "All package file names and bytes match the revision/patch-verified source tree, including Perth checkpoint; read-only verification performed after native release sequence.",
+      "inventory_file": "maintenance-candidate-inventory.json"
+    },
+    {
+      "name": "resemble-perth",
+      "version": "1.1.0",
+      "directory": "perth",
+      "installed_source_verification": "All package file names and bytes match the revision/patch-verified source tree, including Perth checkpoint; read-only verification performed after native release sequence.",
+      "inventory_file": "maintenance-candidate-inventory.json"
+    }
+  ],
+  "source_projects_review": "The two immutable hash/revision-pinned source projects are reviewed separately; neither is silently counted as a no-advisory PyPI package. Installed source bytes were rechecked after native validation.",
+  "native_binary_licences": "Upstream notices retained under direct acquisition to the user PC; see maintenance.md and maintenance-native-security.json.",
+  "release_decision": "Native normal-app sequence passed; final released-commit verification and enablement decision are recorded in the release report.",
+  "exceptions_added": []
 }
