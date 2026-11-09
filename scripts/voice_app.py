@@ -44,6 +44,7 @@ class VoiceLibrary:
         self.error = ""
         self.audio = b""
         self.worker: threading.Thread | None = None
+        self.preview_running = False
 
     def readiness(self) -> dict[str, Any]:
         return self.preparation.status()
@@ -91,7 +92,7 @@ class VoiceLibrary:
                 raise ValueError("Voice library is shutting down")
             if operation in self.obsolete:
                 raise ValueError("Voice operation was cancelled")
-            if self.state in ("importing", "previewing", "cancelling"):
+            if self.preview_running or self.state in ("importing", "previewing", "cancelling"):
                 raise ValueError("Wait for the current voice operation to finish")
             if operation == self.operation and self.candidate_id:
                 return self.store.candidate(self.candidate_id)
@@ -134,6 +135,7 @@ class VoiceLibrary:
                 raise ValueError("Prepare the recording before previewing")
             record = self.store.candidate(self.candidate_id)
             self.state, self.error, self.audio = "previewing", "", b""
+            self.preview_running = True
             self.worker = threading.Thread(
                 target=self.synthesise, args=(operation, record, self.cancelled), daemon=True
             )
@@ -143,6 +145,7 @@ class VoiceLibrary:
     def synthesise(
         self, operation: str, record: dict[str, Any], cancelled: threading.Event
     ) -> None:
+        released = False
         try:
             voice = self.engine(record, cancelled)
             voice.prepare(cancelled)
@@ -157,6 +160,7 @@ class VoiceLibrary:
                 audio.setframerate(16000)
                 audio.writeframes(pcm)
             self.release_preview()
+            released = True
             with self.lock:
                 self.current(operation)
                 self.store.mark_previewed(record["id"], record["sha256"])
@@ -170,13 +174,14 @@ class VoiceLibrary:
                     self.store.cancel(record["id"])
                     self.candidate_id = ""
         finally:
-            if cancelled.is_set():
+            if not released:
                 try:
                     self.release_preview()
                 except (OSError, ValueError, RuntimeError, TimeoutError):
-                    # Cancellation remains final even when restoring an unavailable voice fails.
+                    # Preview failure/cancellation stays final if restoring a voice also fails.
                     pass
             with self.lock:
+                self.preview_running = False
                 if self.operation == operation and self.state == "cancelling":
                     self.state = "cancelled"
 
@@ -214,7 +219,7 @@ class VoiceLibrary:
             if self.candidate_id and self.state != "saved":
                 self.store.cancel(self.candidate_id)
             self.candidate_id = ""
-            self.state = "cancelling" if self.worker and self.worker.is_alive() else "cancelled"
+            self.state = "cancelling" if self.preview_running else "cancelled"
 
     def close(self) -> None:
         self.cancel()
