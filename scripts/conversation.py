@@ -22,13 +22,10 @@ from chatterbox_voice import ChatterboxVoice
 from pairs import DEFAULT_PAIR, Avatar
 from prepare import RUNTIME
 from provider import (
-    INPUT_BOUND,
-    INSTRUCTIONS,
     MODEL,
     MODEL_DEFAULTS,
     MODEL_ERRORS,
     MODEL_LEVELS,
-    OUTPUT_TOKENS,
     Provider,
     validate_level,
     validate_model,
@@ -86,6 +83,7 @@ class Turn(Session):
             "pair": self.pair,
             "model": self.provider.model,
             "thinkingLevel": self.provider.thinking_level,
+            "tokenLimits": self.provider.token_settings(),
         }
 
 
@@ -224,7 +222,15 @@ class Conversation(Demonstration):
         with self.condition:
             if data.get("session") != self.identity:
                 raise ValueError("Stale session; reload before changing settings")
-            if set(data) - {"session", "model", "thinkingLevel", "defaultAvatar"}:
+            if set(data) - {
+                "session",
+                "model",
+                "thinkingLevel",
+                "defaultAvatar",
+                "maxOutputTokens",
+                "answerTokenTarget",
+                "inputTokenLimit",
+            }:
                 raise ValueError("Unknown setting; reload Settings and retry")
             model = validate_model(data.get("model", self.provider.model))
             level = data.get("thinkingLevel", self.provider.thinking_level)
@@ -233,10 +239,20 @@ class Conversation(Demonstration):
                 level = MODEL_DEFAULTS[model]
                 message = f"Thinking level changed to {level}; the selected model requires it."
             validate_level(model, level)
+            provider = Provider(
+                model,
+                self.provider.fixture,
+                level,
+                max_output_tokens=data.get("maxOutputTokens", self.provider.max_output_tokens),
+                answer_token_target=data.get(
+                    "answerTokenTarget", self.provider.answer_token_target
+                ),
+                input_token_limit=data.get("inputTokenLimit", self.provider.input_token_limit),
+            )
             if "defaultAvatar" in data:
                 self.avatars.set_default_avatar(data["defaultAvatar"])
                 message = "Default avatar saved; applies when the app next starts."
-            self.provider = Provider(model, self.provider.fixture, level)
+            self.provider = provider
             self.settings_message = message
             return self.status()
 
@@ -244,6 +260,7 @@ class Conversation(Demonstration):
         return {
             "model": self.provider.model,
             "thinkingLevel": self.provider.thinking_level,
+            **self.provider.token_settings(),
             "defaultAvatar": self.avatars.default_avatar(),
             "message": self.settings_message,
             "models": [
@@ -672,20 +689,20 @@ class Conversation(Demonstration):
         # UTF-8 bytes upper-bound text BPE tokens, with explicit framing margin.
         def bound(messages: list[dict[str, str]]) -> int:
             return (
-                len(INSTRUCTIONS.encode())
+                len(self.provider.instructions.encode())
                 + 256
                 + sum(len(m["content"].encode()) + 64 for m in messages)
             )
 
         messages = [{"role": "user", "content": question}]
-        if bound(messages) > INPUT_BOUND:
+        if bound(messages) > self.provider.input_token_limit:
             raise ValueError("Question exceeds the configured input allowance")
         retained = 0
         for turn in reversed(self.transcript):
             exchange = [{"role": "user", "content": turn.question}]
             if turn.state == "complete":
                 exchange.append({"role": "assistant", "content": turn.answer})
-            if bound(exchange + messages) > INPUT_BOUND:
+            if bound(exchange + messages) > self.provider.input_token_limit:
                 break
             messages = exchange + messages
             retained += 1
@@ -743,7 +760,9 @@ class Conversation(Demonstration):
                 raise ValueError(self.budget_error)
             # The only application provider-request boundary. Every explicit retry
             # enters here and receives its own durable reservation before dispatch.
-            reservation = self.budget.reserve(self.provider.model, input_bound, OUTPUT_TOKENS)
+            reservation = self.budget.reserve(
+                self.provider.model, input_bound, self.provider.max_output_tokens
+            )
             session = Turn(self.directory, self.fragment_frames, self.identity, question.strip())
             session.provider = self.provider
             session.reservation = reservation
@@ -790,6 +809,7 @@ class Conversation(Demonstration):
                 "provider-request",
                 messages=session.messages,
                 configuration=session.provider.configuration(),
+                instructions=session.provider.instructions,
             )
         for event in session.provider.stream(session.messages, session.cancelled, session.fault):
             if session.cancelled.is_set():

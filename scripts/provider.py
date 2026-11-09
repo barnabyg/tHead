@@ -11,12 +11,9 @@ import time
 from collections.abc import Iterator
 from typing import Any
 
-INSTRUCTIONS = (
-    "Answer in English using approximately two to four concise spoken sentences. "
-    "Use plain text, no markdown. Finish the answer within 240 output tokens."
-)
 MODEL = "gpt-6-luna"
 OUTPUT_TOKENS = 384
+ANSWER_TOKEN_TARGET = 240
 INPUT_BOUND = 8192
 # Official model identifiers verified 2026-11-08; see runtime documentation.
 MODEL_ERRORS = {
@@ -48,19 +45,53 @@ def validate_model(model: Any) -> str:
 
 class Provider:
     def __init__(
-        self, model: str = MODEL, fixture: bool = False, thinking_level: str | None = None
+        self,
+        model: str = MODEL,
+        fixture: bool = False,
+        thinking_level: str | None = None,
+        *,
+        max_output_tokens: int = OUTPUT_TOKENS,
+        answer_token_target: int = ANSWER_TOKEN_TARGET,
+        input_token_limit: int = INPUT_BOUND,
     ) -> None:
+        for label, value, minimum, maximum in (
+            ("Maximum output tokens", max_output_tokens, 16, 32768),
+            ("Answer token target", answer_token_target, 1, 32768),
+            ("Input token allowance", input_token_limit, 512, 131072),
+        ):
+            if type(value) is not int or not minimum <= value <= maximum:
+                raise ValueError(f"{label} must be a whole number from {minimum} to {maximum}")
+        if answer_token_target > max_output_tokens:
+            raise ValueError("Answer token target must not exceed maximum output tokens")
         self.model = model
         self.fixture = fixture
+        self.max_output_tokens = max_output_tokens
+        self.answer_token_target = answer_token_target
+        self.input_token_limit = input_token_limit
         self.thinking_level = (
             MODEL_DEFAULTS.get(model, "none") if thinking_level is None else thinking_level
         )
+
+    @property
+    def instructions(self) -> str:
+        return (
+            "Answer in English using approximately two to four concise spoken sentences. "
+            "Use plain text, no markdown. "
+            f"Finish the answer within {self.answer_token_target} output tokens."
+        )
+
+    def token_settings(self) -> dict[str, int]:
+        return {
+            "maxOutputTokens": self.max_output_tokens,
+            "answerTokenTarget": self.answer_token_target,
+            "inputTokenLimit": self.input_token_limit,
+        }
 
     def configuration(self) -> dict[str, Any]:
         return {
             "model": self.model,
             "reasoning": {"effort": self.thinking_level},
-            "max_output_tokens": OUTPUT_TOKENS,
+            "max_output_tokens": self.max_output_tokens,
         }
 
     def stream(
@@ -106,7 +137,7 @@ class Provider:
                 body=json.dumps(
                     {
                         **self.configuration(),
-                        "instructions": INSTRUCTIONS,
+                        "instructions": self.instructions,
                         "input": messages,
                         "stream": True,
                         "store": False,

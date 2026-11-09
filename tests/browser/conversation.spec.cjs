@@ -1102,6 +1102,82 @@ test('model settings validate exact identifiers and switch contextual turns with
   await expect(page.locator('#turn-usage')).toContainText('gpt-6.1-sol');
 });
 
+test('token limits save together, survive refresh and control future requests and context', async ({
+  page,
+  request,
+}, info) => {
+  await openSettings(page);
+  const output = page.getByLabel('Maximum output tokens', { exact: true });
+  const target = page.getByLabel('Answer token target', { exact: true });
+  const input = page.getByLabel('Input token allowance', { exact: true });
+  const save = page.getByRole('button', { name: 'Save token limits', exact: true });
+  await expect(output).toHaveValue('384');
+  await expect(target).toHaveValue('240');
+  await expect(input).toHaveValue('8192');
+  await backToConversation(page);
+  await page.getByLabel('Diagnostic fault').selectOption('llm-connect');
+  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await openSettings(page);
+  await output.fill('1024');
+  await target.fill('800');
+  await input.fill('512');
+  // Periodic status refreshes must preserve an unsaved edit, including blurred fields.
+  await page.getByRole('heading', { name: 'Settings', exact: true }).click();
+  await page.waitForResponse('**/status');
+  await expect(output).toHaveValue('1024');
+  await expect(target).toHaveValue('800');
+  await expect(input).toHaveValue('512');
+  await save.click();
+  await expect(page.locator('#settings-status')).toContainText('Saved');
+  const active = await (await request.get(`${info.url}/status`)).json();
+  expect(active.run.tokenLimits).toEqual({
+    maxOutputTokens: 384,
+    answerTokenTarget: 240,
+    inputTokenLimit: 8192,
+  });
+  await target.fill('1025');
+  await save.click();
+  await expect(page.locator('#settings-status')).toContainText('must not exceed');
+  await expect(save).toBeEnabled();
+  await target.fill('800');
+  await save.click();
+  await expect(page.locator('#settings-status')).toContainText('Saved');
+  await page.reload();
+  await openSettings(page);
+  await expect(output).toHaveValue('1024');
+  await expect(target).toHaveValue('800');
+  await expect(input).toHaveValue('512');
+  await backToConversation(page);
+  await expect
+    .poll(async () => (await (await request.get(`${info.url}/status`)).json()).state)
+    .toBe('idle');
+  await expect(page.getByRole('button', { name: 'Ask', exact: true })).toBeEnabled();
+  await page.getByLabel('Question', { exact: true }).fill('Follow-up');
+  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await expect
+    .poll(async () => {
+      const status = await (await request.get(`${info.url}/status`)).json();
+      return status.run.events.find((event) => event.event === 'provider-request')?.configuration
+        .max_output_tokens;
+    })
+    .toBe(1024);
+  const next = await (await request.get(`${info.url}/status`)).json();
+  expect(next.run.tokenLimits).toEqual({
+    maxOutputTokens: 1024,
+    answerTokenTarget: 800,
+    inputTokenLimit: 512,
+  });
+  const event = next.run.events.find((event) => event.event === 'provider-request');
+  expect(event.instructions).toContain('within 800 output tokens');
+  expect(event.messages).toEqual([{ role: 'user', content: 'Follow-up' }]);
+  expect(next.contextOmitted).toBe(1);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await openSettings(page);
+  await save.scrollIntoViewIfNeeded();
+  await expect(save).toBeInViewport();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+});
+
 for (const [model, levels] of [
   ['gpt-6.1-sol', ['low', 'medium', 'high', 'xhigh', 'max']],
   ['gpt-6-luna', ['none', 'low', 'medium', 'high', 'xhigh', 'max']],
