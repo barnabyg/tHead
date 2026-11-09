@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import hashlib
 import os
 import re
 import threading
@@ -15,6 +16,7 @@ from typing import Any
 
 from avatars import AvatarStore, decode_portrait, user_data_directory, voice_catalogue
 from budget import PRICES, Budget, BudgetError
+from chatterbox_voice import ChatterboxVoice
 from pairs import DEFAULT_PAIR, Avatar
 from prepare import RUNTIME
 from provider import (
@@ -31,6 +33,8 @@ from provider import (
 )
 from speech import SpeechVoice, Voice
 from streaming import Demonstration, LoopbackServer, Session, handler
+from voice_app import PREVIEW_TEXT, VoiceLibrary
+from voices import VoiceStore
 
 PAIR_FAULTS = {
     "pair-portrait-missing": "Portrait missing; rerun the preparation/launch command",
@@ -86,6 +90,8 @@ class Conversation(Demonstration):
     page = "conversation.html"
 
     def command(self, path: str, data: dict[str, Any]) -> dict[str, Any]:
+        if path.startswith("/voices/"):
+            return self.voice_command(path, data)
         if path == "/settings":
             return self.configure(data)
         if path == "/avatars":
@@ -123,9 +129,20 @@ class Conversation(Demonstration):
         user_data: Path | None = None,
         avatar_store: AvatarStore | None = None,
     ) -> None:
-        self.avatars = avatar_store or AvatarStore(
-            user_data or (directory / "user-data" if test_backend else user_data_directory())
+        local_data = user_data or (
+            directory / "user-data" if test_backend else user_data_directory()
         )
+        self.voice_store = VoiceStore(local_data)
+        self.clone_state = (
+            directory / "clone-engine" if test_backend else RUNTIME / "chatterbox-maintained"
+        )
+        self.cloned_engine: ChatterboxVoice | None = None
+        self.clone_saved_reference: dict[str, Any] | None = None
+        self.clone_lock = threading.RLock()
+        self.voice_library = VoiceLibrary(
+            self.voice_store, test_backend, self.cloned_voice, self.release_preview
+        )
+        self.avatars = avatar_store or AvatarStore(local_data, self.voice_store)
         self.voices = voice_catalogue(test_backend)
         self.selected_pair = self.avatars.get(pair)
         self.active_pair = ""
@@ -192,9 +209,116 @@ class Conversation(Demonstration):
         return {"id": avatar.id, "name": avatar.name}
 
     def validate_voice(self, voice: Any) -> None:
-        available = voice_catalogue(self.test_backend, str(voice))
+        available = self.voice_choices()
         if not any(v["id"] == voice and v["available"] for v in available):
-            raise ValueError("Voice unavailable; restore the supported Windows voice and retry")
+            raise ValueError("Voice unavailable; check Voices to repair it or choose another voice")
+
+    def voice_choices(self) -> list[dict[str, Any]]:
+        readiness = self.voice_library.readiness()
+        return self.voices + [
+            {
+                **record,
+                "available": record["available"] and readiness["available"],
+                "error": record["error"] or readiness["error"],
+                "editable": True,
+            }
+            for record in self.voice_store.list()
+        ]
+
+    def cloned_voice(
+        self, record: dict[str, Any], cancelled: threading.Event | None = None
+    ) -> ChatterboxVoice:
+        self.voice_library.require_available()
+        with self.clone_lock:
+            if cancelled is not None and cancelled.is_set():
+                raise InterruptedError("Voice preparation cancelled")
+            raw = self.voice_store.reference(record["id"])
+            if hashlib.sha256(raw).hexdigest() != record["sha256"]:
+                raise ValueError("Voice reference changed; repair it in Voices")
+            # Only canonical, verified private audio reaches the worker; never client paths.
+            references = self.voice_store.path.parent / "conditioning"
+            references.mkdir(parents=True, exist_ok=True)
+            path = references / "active.wav"
+            temporary = references / "active.tmp"
+            try:
+                temporary.write_bytes(raw)
+                temporary.replace(path)
+            finally:
+                temporary.unlink(missing_ok=True)
+            if self.cloned_engine is None:
+                self.cloned_engine = ChatterboxVoice(
+                    self.clone_state,
+                    record["id"],
+                    self.test_backend,
+                    "maintained",
+                    reference_path=path,
+                    reference_sha256=record["sha256"],
+                )
+            else:
+                self.cloned_engine.set_reference(record["id"], path, record["sha256"], cancelled)
+            if record["id"].startswith("voice-"):
+                self.clone_saved_reference = record
+            return self.cloned_engine
+
+    def release_preview(self) -> None:
+        with self.clone_lock:
+            if self.clone_saved_reference:
+                try:
+                    self.cloned_voice(self.voice_store.read(self.clone_saved_reference["id"]))
+                    return
+                except (OSError, ValueError, RuntimeError, TimeoutError):
+                    self.clone_saved_reference = None
+            if self.cloned_engine:
+                self.cloned_engine.close()
+                self.cloned_engine = None
+            (self.voice_store.path.parent / "conditioning/active.wav").unlink(missing_ok=True)
+            (self.voice_store.path.parent / "conditioning/active.tmp").unlink(missing_ok=True)
+
+    def voice_command(self, path: str, data: dict[str, Any]) -> dict[str, Any]:
+        if data.get("session") != self.identity:
+            raise ValueError("Stale session; reopen Voices")
+        if path == "/voices/cancel":
+            self.voice_library.cancel(str(data.get("operation", "")))
+            return self.voice_library.status()
+        if path == "/voices/import":
+            return self.voice_library.import_audio(data)
+        if path == "/voices/preview":
+            with self.condition:
+                if not self.pair_selectable():
+                    raise ValueError("Stop the conversation and wait before previewing")
+                return self.voice_library.preview(str(data.get("operation", "")))
+        if path == "/voices/save":
+            return self.voice_library.save(str(data.get("operation", "")), data.get("name"))
+        if path == "/voices/repair":
+            with self.condition:
+                if self.state != "idle":
+                    raise ValueError("Stop and wait before repairing a voice")
+                return self.voice_library.save(
+                    str(data.get("operation", "")), data.get("name"), str(data.get("id", ""))
+                )
+        if path == "/voices/prepare":
+            self.voice_library.require_available()
+            return self.voice_library.readiness()
+        if path == "/voices/rename":
+            return self.voice_store.rename(str(data.get("id", "")), data.get("name"))
+        if path == "/voices/delete":
+            with self.condition:
+                if not self.pair_selectable():
+                    raise ValueError("Stop and wait before deleting a voice")
+                self.voice_store.delete(str(data.get("id", "")), data.get("name"))
+            if self.clone_saved_reference and self.clone_saved_reference["id"] == data.get("id"):
+                self.clone_saved_reference = None
+                self.release_preview()
+            return {"ok": True}
+        raise ValueError("Unknown voice action")
+
+    def preview_audio(self, session: str, operation: str) -> bytes:
+        if session != self.identity:
+            raise ValueError("Stale preview session")
+        return self.voice_library.preview_audio(operation)
+
+    def preview_captions(self) -> bytes:
+        return ("WEBVTT\n\n00:00:00.000 --> 00:00:31.000\n" + PREVIEW_TEXT + "\n").encode()
 
     def portrait(self, identity: str) -> bytes:
         avatar = self.avatars.get(identity)
@@ -253,22 +377,37 @@ class Conversation(Demonstration):
             if not self.test_backend:
                 inference.get_base_data(pipeline, str(portrait), 42, False)
             self.pair_probe("pair-prepare", "pair-delay-fail")
-            self.voice.close()
+            if self.voice is not candidate and self.voice is not self.cloned_engine:
+                self.voice.close()
             with self.condition:
                 self.voice = candidate
                 self.portrait_path = portrait
                 self.active_pair = pair.id
                 self.loading["tts"] = candidate.metadata
         finally:
-            if self.voice is not candidate:
+            if self.voice is not candidate and candidate is not self.cloned_engine:
                 candidate.close()
 
     def make_voice(self, avatar: Avatar) -> SpeechVoice:
+        if avatar.voice not in ("zira", "hazel"):
+            return self.cloned_voice(self.voice_store.read(avatar.voice))
         return Voice(avatar.voice_lock)
 
     def prepare_voice(self, voice: SpeechVoice) -> None:
-        if not self.test_backend:
+        if not self.test_backend or isinstance(voice, ChatterboxVoice):
             voice.prepare(self.shutdown)
+
+    def speech_pcm(self, text: str, cancelled: threading.Event) -> bytes:
+        if isinstance(self.voice, ChatterboxVoice):
+            return self.voice.speak(text, cancelled)
+        return super().speech_pcm(text, cancelled)
+
+    def prepare_speech(self, session: Session) -> None:
+        if self.selected_pair.voice.startswith("voice-"):
+            self.voice = self.cloned_voice(
+                self.voice_store.read(self.selected_pair.voice), session.cancelled
+            )
+        super().prepare_speech(session)
 
     def imported_portrait(self, identity: str) -> Path:
         # One derived model input per server output directory, never the user's source path.
@@ -329,7 +468,11 @@ class Conversation(Demonstration):
             and current.state == "complete"
             and not any(e["event"] == "ended" for e in current.events)
         )
-        return self.state == "idle" and not playback
+        return (
+            self.state == "idle"
+            and not playback
+            and self.voice_library.state not in ("previewing", "cancelling")
+        )
 
     def readiness(self) -> dict[str, Any]:
         return {
@@ -361,7 +504,8 @@ class Conversation(Demonstration):
                 "conversationEnabled": True,
                 "pairs": avatars,
                 "avatars": avatars,
-                "voices": self.voices,
+                "voices": self.voice_choices(),
+                "voiceLibrary": self.voice_library.status(),
                 "avatarStorageError": self.avatars.error or self.avatars.record_error,
                 "activeAvatar": self.active_pair,
                 "selectedAvatar": self.selected_pair.id,
@@ -408,6 +552,7 @@ class Conversation(Demonstration):
         with self.condition:
             if identity != self.identity:
                 raise ValueError("Session was lost or reset; reload the conversation")
+            self.voice_library.cancel()
             if self.current and not self.current.cancelled.is_set():
                 self.stop(self.current.id)
             self.identity = uuid.uuid4().hex
@@ -485,7 +630,11 @@ class Conversation(Demonstration):
                 raise ValueError("Expected response request identity")
             if request_id in self.cancelled_requests:
                 raise ValueError("Response was cancelled before dispatch")
-            if not self.ready or self.state != "idle":
+            if (
+                not self.ready
+                or self.state != "idle"
+                or self.voice_library.state in ("previewing", "cancelling")
+            ):
                 raise ValueError("Wait for readiness and resource release")
             if not self.provider.fixture and not os.environ.get("OPENAI_API_KEY"):
                 raise ValueError("Set OPENAI_API_KEY in the backend and restart")
@@ -636,13 +785,18 @@ def main() -> None:
         pass
     finally:
         lifetime.cancel()
-        server.server_close()
         app.shutdown.set()
         if app.current:
             app.stop(app.current.id)
         with app.condition:
             app.condition.notify_all()
+        app.voice_library.close()
+        server.server_close()
         app.worker.join(timeout=120)
+        app.clone_saved_reference = None
+        app.release_preview()
+        if app.worker.is_alive():
+            raise TimeoutError("Conversation worker did not release")
 
 
 if __name__ == "__main__":

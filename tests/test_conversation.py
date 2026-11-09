@@ -2,6 +2,7 @@
 
 import base64
 import json
+import socket
 import subprocess  # nosec B404
 import sys
 import tempfile
@@ -12,6 +13,7 @@ import urllib.request
 import uuid
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -77,8 +79,9 @@ class ConversationTests(unittest.TestCase):
         self.assertIn("Unknown avatar", invalid.stderr)
 
     def stop_process(self) -> None:
-        self.process.terminate()
-        self.process.communicate(timeout=30)
+        if self.process.poll() is None:
+            self.request("/shutdown", {})
+        self.process.communicate(timeout=180)
 
     def test_duplicate_listener_fails_without_serving_the_wrong_application(self) -> None:
         identity = self.request("/status")["session"]
@@ -127,6 +130,115 @@ class ConversationTests(unittest.TestCase):
                 "request": uuid.uuid4().hex,
             },
         )
+
+    def clone_voice(self, name: str, reference: str = "1089") -> dict[str, Any]:
+        operation = uuid.uuid4().hex
+        session = self.request("/status")["session"]
+        self.request(
+            "/voices/import",
+            {
+                "session": session,
+                "operation": operation,
+                "name": name,
+                "filename": "recording.wav",
+                "permission": True,
+                "audio": base64.b64encode(
+                    (ROOT / f"docs/runtime/chatterbox/reference-{reference}-10s.wav").read_bytes()
+                ).decode(),
+            },
+        )
+        self.request("/voices/preview", {"session": session, "operation": operation})
+        self.wait(lambda s: s["voiceLibrary"]["previewReady"])
+        saved = self.request(
+            "/voices/save", {"session": session, "operation": operation, "name": name}
+        )
+        self.assertEqual(
+            self.request(
+                "/voices/save", {"session": session, "operation": operation, "name": name}
+            )["id"],
+            saved["id"],
+        )
+        return saved
+
+    def test_saved_voice_is_shared_and_reference_switches_reuse_worker_without_provider_calls(
+        self,
+    ) -> None:
+        before = self.request("/status")
+        first = self.clone_voice("Local reader")
+        second = self.clone_voice("Other reader", "121")
+        avatars = []
+        image = base64.b64encode((ROOT / "tests/fixtures/portrait.jpg").read_bytes()).decode()
+        for name, voice in (("First", first), ("Shared", first), ("Other", second)):
+            avatars.append(
+                self.request(
+                    "/avatars",
+                    {
+                        "session": before["session"],
+                        "name": name,
+                        "voice": voice["id"],
+                        "image": image,
+                    },
+                )
+            )
+        unchanged = self.request("/status")
+        self.assertEqual(unchanged["activeAvatar"], before["activeAvatar"])
+        self.assertEqual(unchanged["transcript"], before["transcript"])
+        self.assertEqual(unchanged["budget"]["estimated_usd"], before["budget"]["estimated_usd"])
+        pids = set()
+        for avatar in avatars:
+            self.request("/select", {"session": before["session"], "avatar": avatar["id"]})
+            self.wait(lambda s: s["ready"])
+            self.ask()
+            done = self.wait(lambda s: s["state"] == "idle")
+            metrics = next(e for e in done["run"]["events"] if e["event"] == "tts-segment")
+            pids.add(metrics["engine_metrics"]["worker_pid"])
+            self.assertEqual(done["run"]["state"], "complete")
+            self.request("/stop", {"run": done["run"]["id"]})
+        self.assertEqual(len(pids), 1)
+        with self.assertRaises(urllib.error.HTTPError) as rejected:
+            self.request("/voices/delete", {"session": before["session"], **first})
+        self.assertEqual(rejected.exception.code, 409)
+        rejected.exception.close()
+        self.stop_process()
+        self.start_app()
+        reopened = self.request("/status")
+        self.assertEqual(len([v for v in reopened["voices"] if v.get("editable")]), 2)
+        self.assertEqual(len([a for a in reopened["avatars"] if a["voice"] == first["id"]]), 2)
+
+    def test_cancel_before_upload_finishes_rejects_late_import_and_shutdown_releases_socket(
+        self,
+    ) -> None:
+        before = self.request("/status")
+        operation = uuid.uuid4().hex
+        body = json.dumps(
+            {
+                "session": before["session"],
+                "operation": operation,
+                "name": "Obsolete",
+                "filename": "source.wav",
+                "permission": True,
+                "audio": base64.b64encode(
+                    (ROOT / "docs/runtime/chatterbox/reference-1089-10s.wav").read_bytes()
+                ).decode(),
+            }
+        ).encode()
+        port = urlparse(self.url).port
+        assert port is not None  # nosec B101
+        with socket.create_connection(("127.0.0.1", port), timeout=30) as upload:
+            headers = (
+                f"POST /voices/import HTTP/1.0\r\nHost: 127.0.0.1:{port}\r\n"
+                f"Content-Length: {len(body)}\r\nContent-Type: application/json\r\n\r\n"
+            ).encode()
+            upload.sendall(headers + body[:100])
+            self.request("/voices/cancel", {"session": before["session"], "operation": operation})
+            upload.sendall(body[100:])
+            self.assertIn(b"409", upload.recv(4096).split(b"\r\n", 1)[0])
+        self.assertFalse(any(v.get("editable") for v in self.request("/status")["voices"]))
+        with socket.create_connection(("127.0.0.1", port), timeout=30) as incomplete:
+            incomplete.sendall(headers + b"{")
+            self.request("/shutdown", {})
+            self.process.communicate(timeout=30)
+            self.assertEqual(incomplete.recv(4096)[:1], b"")
 
     def test_model_settings_preserve_context_and_capture_active_turn(self) -> None:
         status = self.request("/status")

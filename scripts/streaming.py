@@ -669,6 +669,21 @@ def handler(demo: Demonstration) -> type[BaseHTTPRequestHandler]:
                 self.reply(200, (ROOT / "scripts/streaming.js").read_bytes(), "text/javascript")
             elif parsed.path == "/status":
                 self.reply(200, json.dumps(demo.status()).encode())
+            elif parsed.path == "/voice-preview" and hasattr(demo, "preview_audio"):
+                try:
+                    self.reply(
+                        200,
+                        demo.preview_audio(
+                            query.get("session", [""])[0], query.get("operation", [""])[0]
+                        ),
+                        "audio/wav",
+                    )
+                except ValueError as error:
+                    self.reply(410, json.dumps({"error": str(error)}).encode())
+            elif parsed.path == "/voices.js" and demo.page == "conversation.html":
+                self.reply(200, (ROOT / "scripts/voices.js").read_bytes(), "text/javascript")
+            elif parsed.path == "/voice-preview-captions" and hasattr(demo, "preview_captions"):
+                self.reply(200, demo.preview_captions(), "text/vtt")
             elif parsed.path == "/portrait":
                 # Resolve only declared assets; never accept a filesystem path from the URL.
                 try:
@@ -718,9 +733,21 @@ def handler(demo: Demonstration) -> type[BaseHTTPRequestHandler]:
             if origin and origin != f"http://{self.headers.get('Host')}":
                 self.reply(403, b"{}")
                 return
+            upload_slot = None
+            library = getattr(demo, "voice_library", None)
+            if self.path == "/voices/import" and library is not None:
+                upload_slot = library.upload_slot
+                if not upload_slot.acquire(blocking=False):
+                    self.reply(429, b'{"error":"Another recording upload is in progress"}')
+                    return
             try:
+                if upload_slot is not None and library is not None:
+                    library.track_upload(self.connection)
                 size = int(self.headers.get("Content-Length", "0"))
                 limit = 7 * 1024 * 1024 if self.path in ("/avatars", "/avatars/update") else 65536
+                if self.path == "/voices/import":
+                    limit = ((20 * 1024 * 1024 + 2) // 3) * 4 + 4096
+                    self.connection.settimeout(180)
                 if not 0 <= size <= limit:
                     raise ValueError("Request too large")
                 data = json.loads(self.rfile.read(size) or b"{}")
@@ -740,6 +767,14 @@ def handler(demo: Demonstration) -> type[BaseHTTPRequestHandler]:
                     "/avatars/update",
                     "/avatars/delete",
                     "/settings",
+                    "/voices/import",
+                    "/voices/preview",
+                    "/voices/save",
+                    "/voices/cancel",
+                    "/voices/rename",
+                    "/voices/delete",
+                    "/voices/repair",
+                    "/voices/prepare",
                 ):
                     result = demo.command(self.path, data)
                 elif demo.page == "conversation.html" and self.path in (
@@ -796,6 +831,12 @@ def handler(demo: Demonstration) -> type[BaseHTTPRequestHandler]:
                 self.reply(429, json.dumps({"error": str(error)}).encode())
             except (ValueError, TypeError, KeyError) as error:
                 self.reply(409, json.dumps({"error": str(error)}).encode())
+            except (OSError, RuntimeError, TimeoutError) as error:
+                self.reply(503, json.dumps({"error": str(error)}).encode())
+            finally:
+                if upload_slot is not None and library is not None:
+                    library.untrack_upload(self.connection)
+                    upload_slot.release()
 
     return Handler
 

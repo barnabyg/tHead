@@ -18,6 +18,7 @@ from typing import Any
 
 from pairs import Avatar, configured_avatars, supported_voices
 from speech import Voice
+from voices import VoiceStore
 
 MAX_IMAGE_BYTES = 5 * 1024 * 1024
 MAX_DIMENSION = 4096
@@ -93,8 +94,9 @@ def decode_portrait(encoded: Any) -> bytes:
 
 
 class AvatarStore:
-    def __init__(self, directory: Path) -> None:
+    def __init__(self, directory: Path, voices: VoiceStore | None = None) -> None:
         self.path = directory / "avatars.sqlite3"
+        self.voices = voices
         self.error = ""
         self.record_error = ""
         try:
@@ -135,7 +137,8 @@ class AvatarStore:
                         or not identity.startswith("avatar-")
                         or not isinstance(name, str)
                         or not name.strip()
-                        or voice not in supported_voices()
+                        or not isinstance(voice, str)
+                        or (voice not in supported_voices() and not voice.startswith("voice-"))
                     ):
                         self.record_error = (
                             "Invalid saved avatar record; restore avatar storage from backup"
@@ -184,7 +187,10 @@ class AvatarStore:
         if not isinstance(name, str) or not 1 <= len(name.strip()) <= MAX_NAME:
             raise ValueError("Enter an Avatar name of 1–80 characters")
         name = name.strip()
-        if not isinstance(voice, str) or voice not in supported_voices():
+        if not isinstance(voice, str) or (
+            voice not in supported_voices()
+            and (self.voices is None or not self.voices.read(voice)["available"])
+        ):
             raise ValueError("Choose an available supported local English voice")
         if any(a.name.casefold() == name.casefold() for a in configured_avatars().values()):
             raise ValueError("An avatar with this name already exists; choose another name")
