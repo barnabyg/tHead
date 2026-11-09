@@ -57,9 +57,11 @@ class ChatterboxPreparationTests(unittest.TestCase):
 
     def test_empty_environment_cannot_be_recorded_as_prepared(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
-            state = Path(temporary)
+            # Hosted Windows TEMP can use an 8.3 alias; venv warns unless canonicalized.
+            state = Path(temporary).resolve()
             environment = state / "venv"
-            venv.EnvBuilder(with_pip=False).create(environment)
+            with self.assertNoLogs("venv", level="WARNING"):
+                venv.EnvBuilder(with_pip=False).create(environment)
             python = environment / (
                 "Scripts/python.exe" if sys.platform == "win32" else "bin/python"
             )
