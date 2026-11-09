@@ -354,6 +354,65 @@ for (const action of ['start', 'cancel']) {
   });
 }
 
+for (const outcome of ['failed', 'cancelled']) {
+  test(`voice preparation can retry ${outcome} while the previous start reply is delayed`, async ({
+    page,
+  }) => {
+    const backend = await preparationStatus(page, {
+      state: 'idle',
+      available: false,
+      eligible: true,
+      error: 'Local voice engine is not prepared.',
+    });
+    let releaseOld;
+    backend.startGate = new Promise((resolve) => {
+      releaseOld = resolve;
+    });
+    await expect(page.locator('#voice-readiness')).toContainText('not prepared');
+    await page.locator('#prepare-voices').click();
+    await expect(page.locator('#voice-readiness')).toContainText('Preparing local voices');
+    backend.readiness = { state: outcome, available: false, eligible: true, error: '' };
+    await expect(page.locator('#voice-readiness')).toContainText(
+      outcome === 'failed' ? 'Local voice preparation failed' : 'Preparation cancelled',
+    );
+    const retry = page.getByRole('button', { name: 'Retry voice preparation', exact: true });
+    // Retry must follow the polled outcome, well before the 30 s POST timeout.
+    await expect(retry).toBeEnabled({ timeout: 10_000 });
+    let releaseNew;
+    let accepted;
+    const gate = new Promise((resolve) => {
+      releaseNew = resolve;
+    });
+    const acceptance = new Promise((resolve) => {
+      accepted = resolve;
+    });
+    await page.route('**/voices/prepare', async (route) => {
+      accepted();
+      await gate;
+      backend.readiness = { state: 'ready', available: true, eligible: true, error: '' };
+      await route.fulfill({ json: backend.readiness });
+    });
+    await retry.click();
+    await acceptance;
+    await expect(page.locator('#voice-readiness')).toContainText(
+      'Starting local voice preparation',
+    );
+    const oldReply = page.waitForResponse('**/voices/prepare');
+    releaseOld();
+    await (await oldReply).finished();
+    await expect(page.locator('#voice-readiness')).toContainText(
+      'Starting local voice preparation',
+    );
+    await expect(page.locator('#prepare-voices')).toBeDisabled();
+    releaseNew();
+    await expect(page.locator('#voice-readiness')).toContainText(
+      'Setup complete — ready to clone voices',
+    );
+    await expect(page.locator('#clone-voice')).toBeEnabled();
+    await expect(page.locator('#voice-result')).toBeEmpty();
+  });
+}
+
 for (const [state, error] of [
   ['idle', 'Local cloned voices require the verified RTX 3090 CUDA configuration.'],
   ['ready', 'Local GPU runtime unavailable. Prepare the normal app and retry.'],

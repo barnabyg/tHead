@@ -22,6 +22,7 @@ let voiceReadiness = null;
 let voiceReadinessVersion = 0;
 let preparationStarting = false;
 let preparationStartVersion = 0;
+let preparationAttempt = 0;
 let preparationAttempted = false;
 let preparationActionError = '';
 let preparationCancelling = false;
@@ -34,6 +35,12 @@ function updateVoicePreparation(readiness) {
     preparationActionError = '';
   }
   voiceReadiness = readiness;
+  if (
+    voiceReadinessVersion !== preparationStartVersion &&
+    ['preparing', 'ready', 'failed', 'cancelled'].includes(readiness.state)
+  ) {
+    preparationStarting = false;
+  }
   if (readiness.state === 'preparing') preparationAttempted = true;
   else preparationCancelling = false;
   renderVoicePreparation();
@@ -189,6 +196,7 @@ document.querySelector('#prepare-voices').addEventListener('click', async () => 
   preparationAttempted = true;
   preparationActionError = '';
   preparationStartVersion = voiceReadinessVersion;
+  const attempt = ++preparationAttempt;
   window.voicePreparationRevision++;
   const version = voiceReadinessVersion;
   document.querySelector('#voice-result').textContent = '';
@@ -196,12 +204,14 @@ document.querySelector('#prepare-voices').addEventListener('click', async () => 
   try {
     const readiness = await post('/voices/prepare', { session: sessionIdentity });
     // A status poll may already have observed a newer outcome than this reply.
-    if (version === voiceReadinessVersion) updateVoicePreparation(readiness);
+    if (attempt === preparationAttempt && version === voiceReadinessVersion)
+      updateVoicePreparation(readiness);
   } catch (error) {
-    if (version === voiceReadinessVersion) preparationActionError = String(error);
+    if (attempt === preparationAttempt && version === voiceReadinessVersion)
+      preparationActionError = String(error);
   } finally {
     window.voicePreparationRevision++;
-    preparationStarting = false;
+    if (attempt === preparationAttempt) preparationStarting = false;
     renderVoicePreparation();
   }
 });
