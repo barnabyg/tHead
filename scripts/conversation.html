@@ -612,13 +612,15 @@
       </main>
       <main id="voices-dialog" hidden aria-labelledby="voices-title">
         <h2 id="voices-title" tabindex="-1">Voices</h2>
-        <p id="voice-readiness" role="status" aria-live="polite"></p>
-        <button type="button" id="prepare-voices">Prepare local voices / retry</button>
+        <p id="voice-readiness" role="status" aria-live="polite" aria-atomic="true" tabindex="-1">
+          Checking local voice availability…
+        </p>
+        <button type="button" id="prepare-voices" disabled>Prepare local voices</button>
         <button type="button" id="cancel-voice-preparation" hidden>Cancel preparation</button>
         <p>Cloned recordings stay on this PC. Existing Zira and Hazel voices remain available.</p>
         <ul id="saved-voices" aria-label="Saved voices"></ul>
         <p id="voice-result" role="status" aria-live="polite"></p>
-        <button type="button" id="clone-voice">Clone voice</button>
+        <button type="button" id="clone-voice" disabled>Clone voice</button>
         <button type="button" id="voices-back">Back to Settings</button>
         <form id="clone-form" hidden novalidate>
           <h3 id="clone-title">Clone voice</h3>

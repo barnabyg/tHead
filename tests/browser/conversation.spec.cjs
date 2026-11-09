@@ -5,6 +5,447 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 
+async function preparationStatus(page, readiness) {
+  const backend = { readiness, starts: 0 };
+  await page.route('**/status', async (route) => {
+    const response = await route.fetch();
+    const status = await response.json();
+    status.voiceLibrary.readiness = backend.readiness;
+    await route.fulfill({ json: status });
+  });
+  await page.route('**/voices/prepare', async (route) => {
+    backend.starts++;
+    backend.readiness = {
+      state: 'preparing',
+      available: false,
+      eligible: true,
+      error: '',
+      message: 'Preparing local voices. Downloads and checks may take several minutes.',
+    };
+    const response = backend.readiness;
+    if (backend.startGate) await backend.startGate;
+    await route.fulfill({ json: response });
+  });
+  await page.reload();
+  await expect(page.locator('#voices-title')).toBeHidden();
+  await openSettings(page);
+  await page.getByRole('button', { name: 'Voices', exact: true }).click();
+  return backend;
+}
+
+test('voice preparation distinguishes unprepared and installed engines without starting downloads', async ({
+  page,
+}) => {
+  const backend = await preparationStatus(page, {
+    state: 'idle',
+    available: false,
+    eligible: true,
+    error: 'Local voice engine is not prepared. Choose Prepare local voices.',
+    message: 'Verified RTX 3090 configuration.',
+  });
+  await expect(page.locator('#voice-readiness')).toContainText('not prepared');
+  await expect(
+    page.getByRole('button', { name: 'Prepare local voices', exact: true }),
+  ).toBeEnabled();
+  await expect(page.getByRole('button', { name: 'Clone voice', exact: true })).toBeDisabled();
+  await expect(page.locator('#cancel-voice-preparation')).toBeHidden();
+  backend.readiness = {
+    state: 'idle',
+    available: true,
+    eligible: true,
+    error: '',
+    message: 'Verified RTX 3090 configuration.',
+  };
+  await expect(page.locator('#voice-readiness')).toContainText('Ready to clone voices');
+  await expect(page.locator('#voice-readiness')).not.toContainText('Setup complete');
+  await expect(page.locator('#prepare-voices')).toBeHidden();
+  await expect(page.getByRole('button', { name: 'Clone voice', exact: true })).toBeEnabled();
+  await page.reload();
+  await openSettings(page);
+  await page.getByRole('button', { name: 'Voices', exact: true }).click();
+  await expect(page.locator('#voice-readiness')).toContainText('Ready to clone voices');
+  expect(backend.starts).toBe(0);
+});
+
+test('voice preparation follows backend completion and ignores a late start acknowledgement', async ({
+  page,
+}) => {
+  const backend = await preparationStatus(page, {
+    state: 'idle',
+    available: false,
+    eligible: true,
+    error: 'Local voice engine is not prepared.',
+    message: 'Verified RTX 3090 configuration.',
+  });
+  let release;
+  backend.startGate = new Promise((resolve) => {
+    release = resolve;
+  });
+  const prepare = page.locator('#prepare-voices');
+  const cancel = page.getByRole('button', { name: 'Cancel preparation', exact: true });
+  const clone = page.getByRole('button', { name: 'Clone voice', exact: true });
+  await expect(prepare).toBeEnabled();
+  await prepare.focus();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#voice-readiness')).toContainText('Preparing local voices');
+  await expect(prepare).toBeDisabled();
+  await expect(cancel).toBeVisible();
+  await expect(cancel).toBeFocused();
+  await expect(clone).toBeDisabled();
+  await expect(page.locator('#voices-dialog')).not.toContainText('Preparation requested.');
+  expect(backend.starts).toBe(1);
+  backend.readiness = {
+    state: 'ready',
+    available: false,
+    eligible: true,
+    error: 'Engine validation is incomplete.',
+  };
+  await expect(page.locator('#voice-readiness')).toContainText('Engine validation is incomplete');
+  await expect(clone).toBeDisabled();
+  backend.readiness = { state: 'ready', available: true, eligible: true, error: '' };
+  await expect(page.locator('#voice-readiness')).toContainText(
+    'Setup complete — ready to clone voices',
+  );
+  await expect(page.locator('#voice-readiness')).toHaveAttribute('role', 'status');
+  await expect(page.locator('#voice-readiness')).toHaveAttribute('aria-live', 'polite');
+  await expect(clone).toBeEnabled();
+  const acknowledgement = page.waitForResponse('**/voices/prepare');
+  release();
+  await (await acknowledgement).finished();
+  await expect(prepare).toBeHidden();
+  await expect(cancel).toBeHidden();
+  await expect(page.locator('#voice-result')).toBeEmpty();
+  await expect(clone).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(page.getByLabel('Voice name', { exact: true })).toBeFocused();
+  await page.getByRole('button', { name: 'Cancel', exact: true }).click();
+  await page.getByRole('button', { name: 'Back to Settings', exact: true }).click();
+  await page.getByRole('button', { name: 'Voices', exact: true }).click();
+  await expect(page.locator('#voice-readiness')).toContainText('ready to clone voices');
+  await page.reload();
+  await openSettings(page);
+  await page.getByRole('button', { name: 'Voices', exact: true }).click();
+  await expect(page.locator('#voice-readiness')).toHaveText('Ready to clone voices.');
+  await expect(clone).toBeEnabled();
+  expect(backend.starts).toBe(1);
+});
+
+for (const outcome of ['failed', 'cancelled']) {
+  test(`voice preparation retries after ${outcome} without stale outcomes`, async ({ page }) => {
+    const backend = await preparationStatus(page, {
+      state: 'idle',
+      available: false,
+      eligible: true,
+      error: 'Local voice engine is not prepared.',
+    });
+    const prepare = page.locator('#prepare-voices');
+    const clone = page.getByRole('button', { name: 'Clone voice', exact: true });
+    await expect(page.locator('#voice-readiness')).toContainText('not prepared');
+    await prepare.click();
+    await expect(page.locator('#voice-readiness')).toContainText('Preparing local voices');
+    backend.readiness = {
+      state: outcome,
+      available: true,
+      eligible: true,
+      error: outcome === 'failed' ? 'Download checksum mismatch; see app-preparation.log.' : '',
+    };
+    await expect(page.locator('#voice-readiness')).toContainText(
+      outcome === 'failed' ? 'Download checksum mismatch' : 'Preparation cancelled',
+    );
+    await expect(page.locator('#voice-readiness')).not.toContainText('ready to clone');
+    await expect(clone).toBeDisabled();
+    await expect(
+      page.getByRole('button', { name: 'Retry voice preparation', exact: true }),
+    ).toBeEnabled();
+    await expect(page.locator('#cancel-voice-preparation')).toBeHidden();
+    await expect(page.locator('#voice-result')).toBeEmpty();
+    await prepare.click();
+    await expect(page.locator('#voice-readiness')).toContainText('Preparing local voices');
+    await expect(page.locator('#voices-dialog')).not.toContainText(
+      /checksum mismatch|Preparation cancelled|Preparation requested\./,
+    );
+    backend.readiness = { state: 'ready', available: true, eligible: true, error: '' };
+    await expect(page.locator('#voice-readiness')).toContainText(
+      'Setup complete — ready to clone voices',
+    );
+    await expect(clone).toBeEnabled();
+    await expect(prepare).toBeHidden();
+    expect(backend.starts).toBe(2);
+  });
+}
+
+test('voice preparation cancellation waits for the backend outcome and can retry', async ({
+  page,
+}) => {
+  const backend = await preparationStatus(page, {
+    state: 'preparing',
+    available: false,
+    eligible: true,
+    error: '',
+  });
+  let release;
+  const gate = new Promise((resolve) => {
+    release = resolve;
+  });
+  let cancels = 0;
+  await page.route('**/voices/prepare/cancel', async (route) => {
+    cancels++;
+    await gate;
+    await route.fulfill({
+      json: { state: 'preparing', available: false, eligible: true, error: '' },
+    });
+  });
+  const cancel = page.getByRole('button', { name: 'Cancel preparation', exact: true });
+  await expect(page.locator('#voice-readiness')).toContainText('Preparing local voices');
+  await cancel.click();
+  await expect(cancel).toBeVisible();
+  await expect(cancel).toBeDisabled();
+  await expect(page.locator('#voice-readiness')).toContainText(
+    'Cancelling local voice preparation',
+  );
+  await expect(page.locator('#clone-voice')).toBeDisabled();
+  backend.readiness = { state: 'cancelled', available: false, eligible: true, error: '' };
+  await expect(page.locator('#voice-readiness')).toContainText('Preparation cancelled');
+  await expect(
+    page.getByRole('button', { name: 'Retry voice preparation', exact: true }),
+  ).toBeFocused();
+  const acknowledgement = page.waitForResponse('**/voices/prepare/cancel');
+  release();
+  await (await acknowledgement).finished();
+  await expect(page.locator('#voice-readiness')).toContainText('Preparation cancelled');
+  await expect(cancel).toBeHidden();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#voice-readiness')).toContainText('Preparing local voices');
+  await expect(cancel).toBeEnabled();
+  await expect(cancel).toBeFocused();
+  await expect(page.locator('#voice-result')).toBeEmpty();
+  expect(cancels).toBe(1);
+  expect(backend.starts).toBe(1);
+});
+
+test('voice preparation rejects duplicate pending starts and clears request errors on retry', async ({
+  page,
+}) => {
+  const backend = await preparationStatus(page, {
+    state: 'idle',
+    available: false,
+    eligible: true,
+    error: 'Local voice engine is not prepared.',
+  });
+  let release;
+  let accepted;
+  const gate = new Promise((resolve) => {
+    release = resolve;
+  });
+  const acceptance = new Promise((resolve) => {
+    accepted = resolve;
+  });
+  let starts = 0;
+  await page.route('**/voices/prepare', async (route) => {
+    starts++;
+    accepted();
+    await gate;
+    await route.fulfill({
+      status: 409,
+      json: { error: 'Choose Zira/Hazel and wait before preparing local voices' },
+    });
+  });
+  const prepare = page.locator('#prepare-voices');
+  await expect(page.locator('#voice-readiness')).toContainText('not prepared');
+  await prepare.click();
+  await acceptance;
+  await expect(prepare).toBeDisabled();
+  await expect(page.locator('#voice-readiness')).toContainText('Starting local voice preparation');
+  await page.keyboard.press('Enter');
+  expect(starts).toBe(1);
+  release();
+  await expect(page.locator('#voice-readiness')).toContainText('Choose Zira/Hazel and wait');
+  await expect(
+    page.getByRole('button', { name: 'Retry voice preparation', exact: true }),
+  ).toBeEnabled();
+  await expect(page.locator('#clone-voice')).toBeDisabled();
+  await expect(page.locator('#voice-result')).toBeEmpty();
+  await page.route('**/voices/prepare', async (route) => {
+    backend.readiness = { state: 'preparing', available: false, eligible: true, error: '' };
+    await route.fulfill({ json: backend.readiness });
+  });
+  await prepare.click();
+  await expect(page.locator('#voice-readiness')).toContainText('Preparing local voices');
+  await expect(page.locator('#voices-dialog')).not.toContainText('Choose Zira/Hazel and wait');
+  await page.route('**/voices/prepare/cancel', async (route) => {
+    await route.fulfill({
+      status: 503,
+      json: { error: 'Cancellation could not be requested. Try Cancel preparation again.' },
+    });
+  });
+  const cancel = page.getByRole('button', { name: 'Cancel preparation', exact: true });
+  await cancel.click();
+  await expect(page.locator('#voice-readiness')).toContainText(
+    'Cancellation could not be requested',
+  );
+  await expect(cancel).toBeEnabled();
+  await expect(page.locator('#voice-result')).toBeEmpty();
+  backend.readiness = { state: 'ready', available: true, eligible: true, error: '' };
+  await expect(page.locator('#voice-readiness')).toContainText(
+    'Setup complete — ready to clone voices',
+  );
+  await expect(page.locator('#voices-dialog')).not.toContainText(
+    'Cancellation could not be requested',
+  );
+});
+
+for (const action of ['start', 'cancel']) {
+  test(`voice preparation ignores a status poll sampled before ${action}`, async ({ page }) => {
+    const backend = await preparationStatus(page, {
+      state: action === 'start' ? 'idle' : 'preparing',
+      available: false,
+      eligible: true,
+      error: action === 'start' ? 'Local voice engine is not prepared.' : '',
+    });
+    await expect(page.locator('#voice-readiness')).toContainText(
+      action === 'start' ? 'not prepared' : 'Preparing local voices',
+    );
+    let sampled;
+    let release;
+    const snapshot = new Promise((resolve) => {
+      sampled = resolve;
+    });
+    const gate = new Promise((resolve) => {
+      release = resolve;
+    });
+    await page.route(
+      '**/status',
+      async (route) => {
+        const response = await route.fetch();
+        const status = await response.json();
+        status.voiceLibrary.readiness = backend.readiness;
+        sampled();
+        await gate;
+        await route.fulfill({ json: status });
+      },
+      { times: 1 },
+    );
+    await snapshot;
+    // Keep subsequent polls from concealing a regression caused by this stale reply.
+    await page.route('**/status', (route) => route.abort());
+    await page.route('**/voices/prepare/cancel', async (route) => {
+      backend.readiness = { state: 'cancelled', available: false, eligible: true, error: '' };
+      await route.fulfill({ json: backend.readiness });
+    });
+    await page
+      .locator(action === 'start' ? '#prepare-voices' : '#cancel-voice-preparation')
+      .click();
+    const expected = action === 'start' ? 'Preparing local voices' : 'Preparation cancelled';
+    await expect(page.locator('#voice-readiness')).toContainText(expected);
+    const staleResponse = page.waitForResponse('**/status');
+    release();
+    await (await staleResponse).finished();
+    await expect(page.locator('#voice-readiness')).toContainText(expected);
+    await expect(page.locator('#clone-voice')).toBeDisabled();
+    if (action === 'start') {
+      await expect(page.locator('#prepare-voices')).toBeDisabled();
+      await expect(page.locator('#cancel-voice-preparation')).toBeVisible();
+    } else {
+      await expect(
+        page.getByRole('button', { name: 'Retry voice preparation', exact: true }),
+      ).toBeEnabled();
+      await expect(page.locator('#cancel-voice-preparation')).toBeHidden();
+    }
+  });
+}
+
+for (const outcome of ['failed', 'cancelled']) {
+  test(`voice preparation can retry ${outcome} while the previous start reply is delayed`, async ({
+    page,
+  }) => {
+    const backend = await preparationStatus(page, {
+      state: 'idle',
+      available: false,
+      eligible: true,
+      error: 'Local voice engine is not prepared.',
+    });
+    let releaseOld;
+    backend.startGate = new Promise((resolve) => {
+      releaseOld = resolve;
+    });
+    await expect(page.locator('#voice-readiness')).toContainText('not prepared');
+    await page.locator('#prepare-voices').click();
+    await expect(page.locator('#voice-readiness')).toContainText('Preparing local voices');
+    backend.readiness = { state: outcome, available: false, eligible: true, error: '' };
+    await expect(page.locator('#voice-readiness')).toContainText(
+      outcome === 'failed' ? 'Local voice preparation failed' : 'Preparation cancelled',
+    );
+    const retry = page.getByRole('button', { name: 'Retry voice preparation', exact: true });
+    // Retry must follow the polled outcome, well before the 30 s POST timeout.
+    await expect(retry).toBeEnabled({ timeout: 10_000 });
+    let releaseNew;
+    let accepted;
+    const gate = new Promise((resolve) => {
+      releaseNew = resolve;
+    });
+    const acceptance = new Promise((resolve) => {
+      accepted = resolve;
+    });
+    await page.route('**/voices/prepare', async (route) => {
+      accepted();
+      await gate;
+      backend.readiness = { state: 'ready', available: true, eligible: true, error: '' };
+      await route.fulfill({ json: backend.readiness });
+    });
+    await retry.click();
+    await acceptance;
+    await expect(page.locator('#voice-readiness')).toContainText(
+      'Starting local voice preparation',
+    );
+    const oldReply = page.waitForResponse('**/voices/prepare');
+    releaseOld();
+    await (await oldReply).finished();
+    await expect(page.locator('#voice-readiness')).toContainText(
+      'Starting local voice preparation',
+    );
+    await expect(page.locator('#prepare-voices')).toBeDisabled();
+    releaseNew();
+    await expect(page.locator('#voice-readiness')).toContainText(
+      'Setup complete — ready to clone voices',
+    );
+    await expect(page.locator('#clone-voice')).toBeEnabled();
+    await expect(page.locator('#voice-result')).toBeEmpty();
+  });
+}
+
+for (const [state, error] of [
+  ['idle', 'Local cloned voices require the verified RTX 3090 CUDA configuration.'],
+  ['ready', 'Local GPU runtime unavailable. Prepare the normal app and retry.'],
+]) {
+  test(`voice preparation keeps ${state} device/runtime blockers separate from readiness`, async ({
+    page,
+    request,
+  }, info) => {
+    const before = await (await request.get(`${info.url}/status`)).json();
+    const backend = await preparationStatus(page, {
+      state,
+      available: false,
+      eligible: false,
+      error,
+    });
+    await expect(page.locator('#voice-readiness')).toHaveText(error);
+    await expect(page.locator('#prepare-voices')).toBeVisible();
+    await expect(page.locator('#prepare-voices')).toBeDisabled();
+    await expect(page.locator('#clone-voice')).toBeDisabled();
+    await expect(page.locator('#cancel-voice-preparation')).toBeHidden();
+    await expect(page.locator('#voice-result')).toBeEmpty();
+    await page.getByRole('button', { name: 'Back to Settings', exact: true }).click();
+    await page.getByRole('button', { name: 'Create avatar', exact: true }).click();
+    for (const voice of ['zira', 'hazel']) {
+      await expect(page.locator(`#avatar-voice option[value="${voice}"]`)).toBeEnabled();
+    }
+    const after = await (await request.get(`${info.url}/status`)).json();
+    expect(after.voices).toEqual(before.voices);
+    expect(after.avatars).toEqual(before.avatars);
+    expect(backend.starts).toBe(0);
+  });
+}
+
 test('edit saved avatar retains identity and unchanged portrait across restart', async ({
   page,
   request,

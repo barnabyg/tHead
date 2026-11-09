@@ -718,11 +718,12 @@ setInterval(async () => {
   polling = true;
   const ticket = epoch;
   const configTicket = settingsRevision;
+  const preparationTicket = window.voicePreparationRevision;
   try {
     const status = await (await fetch('/status', { signal: AbortSignal.timeout(10000) })).json();
     if (ticket !== epoch) return;
     if (conversation) {
-      window.renderVoiceLibrary?.(status);
+      window.renderVoiceLibrary?.(status, preparationTicket);
       if (status.settings && !savingSettings && configTicket === settingsRevision) {
         renderSettings(status.settings);
       }
