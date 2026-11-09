@@ -22,6 +22,22 @@ the real local speech/video pipeline and opens http://127.0.0.1:8765 with
 no-cost deterministic provider answers. It requires no API key. Omit
 `-FixtureProvider` for normal provider operation with a backend API key.
 
+Before uploading, crop the portrait to a square with the face comfortably inside
+the frame. Playback uses a 512 × 512 centre crop, while the idle portrait displays
+the original image; a non-square image can change framing when speech starts.
+For example, a centred square crop of a 1854 × 2670 image is 1854 × 1854, removing
+408 pixels from both the top and bottom. Move the crop as needed to frame the face.
+The editor shows this guidance before upload and an advisory with the dimensions
+of any non-square selection or saved portrait. It does not crop or reject these
+images; original uploads and saved avatars remain unchanged.
+
+Manual check after launching with the command above: open **Create avatar** and
+verify the square-crop guidance is visible before choosing a file. Select a
+1854 × 2670 portrait and expect a warning with those dimensions. Select a square
+crop and expect the warning to clear. Save/select that avatar, ask a question and
+compare framing before, during and after speech. Repeat through **Edit avatar**
+to replace an existing portrait with its square crop.
+
 Open **Settings**, then choose **Create avatar**. Enter **My avatar**, pick a local JPEG/PNG and an
 available **Voice**, inspect the preview and choose **Save avatar**. Expect a
 confirmation and one entry under that name. Saving does not select the new

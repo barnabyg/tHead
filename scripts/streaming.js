@@ -107,6 +107,19 @@ const pairSelector = document.querySelector('#pair');
 const avatarEditor = document.querySelector('#avatar-editor');
 const avatarForm = document.querySelector('#avatar-form');
 const imagePicker = document.querySelector('#avatar-image');
+const avatarPreview = document.querySelector('#avatar-preview');
+const imageWarning = document.querySelector('#avatar-image-warning');
+avatarPreview?.addEventListener('load', () => {
+  if (avatarPreview.hidden) return;
+  const { naturalWidth: width, naturalHeight: height } = avatarPreview;
+  imageWarning.textContent =
+    width !== height
+      ? `${width} × ${height} is not square. Crop it to a square before uploading to avoid a framing change during playback.`
+      : '';
+});
+avatarPreview?.addEventListener('error', () => {
+  imageWarning.textContent = '';
+});
 const voicePicker = document.querySelector('#avatar-voice');
 let savingAvatar = false;
 let previewUrl = '';
@@ -177,6 +190,7 @@ function closeAvatarEditor() {
   avatarForm.reset();
   editingAvatar = null;
   document.querySelector('#avatar-save-status').textContent = '';
+  imageWarning.textContent = '';
   URL.revokeObjectURL(previewUrl);
   previewUrl = '';
   document.querySelector('#avatar-preview').hidden = true;
@@ -187,6 +201,7 @@ avatarEditor?.addEventListener('cancel', (event) => {
   closeAvatarEditor();
 });
 imagePicker?.addEventListener('change', () => {
+  imageWarning.textContent = '';
   URL.revokeObjectURL(previewUrl);
   const file = imagePicker.files[0];
   previewUrl = file ? URL.createObjectURL(file) : '';
