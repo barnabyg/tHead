@@ -220,20 +220,7 @@ def main() -> None:
         pass
     finally:
         lifetime.cancel()
-        app.shutdown.set()
-        if app.current:
-            app.stop(app.current.id)
-        with app.condition:
-            app.condition.notify_all()
-        app.voice_library.close()
-        server.server_close()
-        app.voice_store.close()
-        app.worker.join(timeout=120)
-        app.voice.close()
-        if app.cloned_engine and app.cloned_engine is not app.voice:
-            app.cloned_engine.close()
-        if app.worker.is_alive():
-            raise TimeoutError("Experimental application worker did not release")
+        app.close(server)
 
 
 if __name__ == "__main__":

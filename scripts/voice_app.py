@@ -14,6 +14,7 @@ from collections.abc import Callable
 from typing import Any
 
 from chatterbox_setup import SpeechPreparation
+from shutdown import cleanup, join_worker
 from speech import SpeechVoice
 from voices import MAX_INPUT_BYTES, VoiceStore
 
@@ -227,8 +228,6 @@ class VoiceLibrary:
             self.state = "cancelling" if self.preview_running else "cancelled"
 
     def close(self) -> None:
-        self.cancel()
-        self.preparation.close()
         with self.lock:
             self.closed = True
             for connection in self.upload_connections:
@@ -236,7 +235,8 @@ class VoiceLibrary:
                     connection.shutdown(socket.SHUT_RDWR)
                 except OSError:
                     pass  # The uploading client may already have disconnected.
-        if self.worker:
-            self.worker.join(timeout=120)
-            if self.worker.is_alive():
-                raise TimeoutError("Voice preview worker did not release")
+        cleanup(
+            ("cancel voice operation", self.cancel),
+            ("voice preparation", self.preparation.close),
+            ("voice preview worker", lambda: join_worker(self.worker, 120)),
+        )

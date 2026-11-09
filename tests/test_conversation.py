@@ -160,6 +160,78 @@ class ConversationTests(unittest.TestCase):
         )
         return saved
 
+    def test_shutdown_releases_cached_speech_and_lease_after_a_new_storage_failure(self) -> None:
+        saved = self.clone_voice("Shutdown reader")
+        session = self.request("/status")["session"]
+        avatar = self.request(
+            "/avatars",
+            {
+                "session": session,
+                "name": "Shutdown avatar",
+                "voice": saved["id"],
+                "image": base64.b64encode(
+                    (ROOT / "tests/fixtures/portrait.jpg").read_bytes()
+                ).decode(),
+            },
+        )
+        self.request("/select", {"session": session, "avatar": avatar["id"]})
+        selected = self.wait(lambda value: value["ready"])
+        self.assertEqual(selected["speechEngine"]["worker_count"], 2)
+        # Query only this task-owned parent's children, without requiring a GPU
+        # process library. B603/B607: fixed OS inspection and numeric process ID.
+        children = subprocess.run(  # nosec B603 B607
+            [
+                "pwsh",
+                "-NoProfile",
+                "-Command",
+                "$all = Get-CimInstance Win32_Process; "
+                f"$ids = @({self.process.pid}); "
+                "do { $new = @($all | Where-Object { $_.ParentProcessId -in $ids "
+                "-and $_.ProcessId -notin $ids } | ForEach-Object ProcessId); "
+                "$ids += $new } while ($new.Count); "
+                f"$ids | Where-Object {{ $_ -ne {self.process.pid} }}",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=True,
+        )
+        worker_ids = [int(line) for line in children.stdout.splitlines() if line.strip()]
+        # Windows virtual-environment launchers may introduce intermediary PIDs.
+        self.assertGreaterEqual(len(worker_ids), 2)
+        self.assertIn(selected["speechEngine"]["worker_pid"], worker_ids)
+        self.request("/select", {"session": session, "avatar": "jfk-zira"})
+        self.wait(lambda value: value["ready"])
+        directory = Path(self.temporary.name) / "user-data"
+        conditioning = directory / "conditioning"
+        self.assertEqual(len(list(conditioning.glob("engine-*.wav"))), 2)
+        self.assertEqual(len(list((directory / "voice-imports/leases").glob("*.lock"))), 1)
+        # A new storage fault must remain unobserved until teardown, rather than
+        # being converted to the known catalogue-error path by a status poll.
+        (directory / "avatars.sqlite3").rename(directory / "preserved.sqlite3")
+        self.request("/shutdown", {})
+        output, _ = self.process.communicate(timeout=180)
+        self.assertNotEqual(self.process.returncode, 0)
+        self.assertIn("storage unavailable", output)
+        self.assertIn("Shutdown cleanup failed", output)
+        processes = subprocess.run(  # nosec B603 B607
+            [
+                "pwsh",
+                "-NoProfile",
+                "-Command",
+                "Get-Process -Id "
+                + ",".join(str(pid) for pid in worker_ids)
+                + " -ErrorAction SilentlyContinue | ForEach-Object Id; exit 0",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=True,
+        )
+        self.assertEqual(processes.stdout.strip(), "")
+        self.assertEqual(list(conditioning.iterdir()), [])
+        self.assertEqual(list((directory / "voice-imports/leases").glob("*.lock")), [])
+
     def test_saved_voice_is_shared_and_reference_switches_reuse_worker_without_provider_calls(
         self,
     ) -> None:

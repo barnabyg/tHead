@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from chatterbox_voice import ChatterboxVoice, reference_record, validate_reference
+from shutdown import cleanup, join_worker
 
 MINIMUM_FREE_RAM = 8 * 1024**3
 MINIMUM_FREE_VRAM = 8 * 1024**3
@@ -379,19 +380,15 @@ class ChatterboxEngine:
         with self.lock:
             if self.turn_cancelled:
                 self.turn_cancelled.set()
-        errors = []
-        for slot in self.slots:
-            try:
-                slot.voice.close()
-            except (OSError, RuntimeError, TimeoutError) as error:
-                errors.append(error)
-        replenisher = self.replenisher
-        if replenisher and replenisher is not threading.current_thread():
-            replenisher.join(timeout=240)
-            if replenisher.is_alive():
-                errors.append(TimeoutError("Speech replenishment did not stop"))
-        for slot in self.slots:
-            slot.path.unlink(missing_ok=True)
-            slot.path.with_suffix(".tmp").unlink(missing_ok=True)
-        if errors:
-            raise RuntimeError("Speech workers could not be released completely") from errors[0]
+        paths = [path for slot in self.slots for path in (slot.path, slot.path.with_suffix(".tmp"))]
+        cleanup(
+            *(
+                (f"speech worker {index}", slot.voice.close)
+                for index, slot in enumerate(self.slots)
+            ),
+            ("speech replenisher", lambda: join_worker(self.replenisher, 240)),
+            *(
+                ("speech snapshot", lambda path=path: path.unlink(missing_ok=True))
+                for path in paths
+            ),
+        )

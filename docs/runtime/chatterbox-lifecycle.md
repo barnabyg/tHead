@@ -104,6 +104,14 @@ are removed on shutdown. Each worker retains the existing two-entry conditioning
 bound and removes transient imports when switching away. All IPC retains the
 request/epoch/turn/reference identity checks and detached-operation watchdogs.
 
+Normal and experimental startup share the same shutdown owner. It signals the
+active turn first, then attempts preparation/preview cancellation, upload-socket
+release, server closure, storage-lease release, worker joins, speech-pool closure
+and reference removal independently. A new database fault or bounded join failure
+is reported only after the remaining cleanup has been attempted. The no-GPU HTTP
+regression removes the database immediately before shutdown and verifies that
+cached worker processes, import leases and derived reference files are released.
+
 The pool implements the public SpeechVoice boundary and `set_reference` with the
 same signature as the single-worker adapter. `fault` delegates explicit diagnostic
 faults to the active worker. Metadata reports `ready_workers`, `worker_count`,

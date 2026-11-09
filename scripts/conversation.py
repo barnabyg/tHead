@@ -33,6 +33,7 @@ from provider import (
     validate_level,
     validate_model,
 )
+from shutdown import cleanup, join_worker
 from speech import SpeechVoice, Voice
 from streaming import Demonstration, LoopbackServer, Session, handler
 from voice_app import PREVIEW_TEXT, VoiceLibrary
@@ -182,6 +183,42 @@ class Conversation(Demonstration):
         except BudgetError as error:
             self.budget_error = str(error)
         super().__init__(inputs, directory, test_backend, 8, True, diagnostics or fixture)
+
+    def close(self, server: LoopbackServer) -> None:
+        # Signal owners before joining them, without holding the application lock
+        # across any blocking cleanup. Storage failures must not strand GPU workers.
+        self.shutdown.set()
+        with self.condition:
+            current = self.current
+            if current is not None:
+                current.cancelled.set()
+                with current.condition:
+                    current.condition.notify_all()
+            self.condition.notify_all()
+        self.clone_saved_reference = None
+        paths = [
+            self.voice_store.path.parent / "conditioning" / name
+            for name in ("active.wav", "active.tmp")
+        ]
+        cleanup(
+            ("voice library", self.voice_library.close),
+            ("HTTP server", server.server_close),
+            ("voice storage", self.voice_store.close),
+            ("conversation worker", lambda: join_worker(self.worker, 120)),
+            ("active speech", lambda: self.voice.close()),
+            (
+                "cached speech",
+                lambda: (
+                    self.cloned_engine.close()
+                    if self.cloned_engine and self.cloned_engine is not self.voice
+                    else None
+                ),
+            ),
+            *(
+                ("reference snapshot", lambda path=path: path.unlink(missing_ok=True))
+                for path in paths
+            ),
+        )
 
     def configure(self, data: dict[str, Any]) -> dict[str, Any]:
         with self.condition:
@@ -835,19 +872,7 @@ def main() -> None:
         pass
     finally:
         lifetime.cancel()
-        app.shutdown.set()
-        if app.current:
-            app.stop(app.current.id)
-        with app.condition:
-            app.condition.notify_all()
-        app.voice_library.close()
-        server.server_close()
-        app.voice_store.close()
-        app.worker.join(timeout=120)
-        app.clone_saved_reference = None
-        app.release_preview()
-        if app.worker.is_alive():
-            raise TimeoutError("Conversation worker did not release")
+        app.close(server)
 
 
 if __name__ == "__main__":
