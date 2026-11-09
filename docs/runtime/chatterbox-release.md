@@ -26,6 +26,7 @@ old experimental fixture harness. No paid provider request was made.
 | Missing engine | All five avatars/two saved voices retained; requested voice explicitly unavailable, no substitution |
 | Damaged reference | Actual normal UI repair preserved the voice ID and both avatar assignments; repaired native speech/media completed |
 | In-use deletion | Blocked with avatar names; deliberate avatar voice changes then allowed deletion without affecting the other voice |
+| Inactive cache deletion | Both worker caches dropped from two references to one, preserving worker PIDs; current voice spoke again in 2.7133 s |
 | Cancel optional preparation | 0.1311 s; saved voices/avatars preserved and Zira stayed ready |
 | Human confirmation, 9 November 2026 | Both concise remediated previews remained acceptable; normal-app speech completeness/intelligibility and lip sync accepted |
 
@@ -42,11 +43,13 @@ available. No Chatterbox advisory exclusions, warning baseline or new runtime
 security exception was introduced. Repository maintainers own the pinned patch
 series and the documented before-release/monthly update checks.
 
-Two final validation failures are retained in the individual results: an inherited
+Validation failures are retained in the individual results: an inherited
 development Python home broke a task harness launch, and relative paths became
 invalid when FlashHead changed directory. Native interpreter isolation and public
 path anchoring fixed them; the independently installed regular profile then
-passed, including relative CLI paths. Late storage failures now leave built-ins
+passed, including relative CLI paths. A later cache-check driver initially read
+the previous playback result; confirmation waited for the new run and passed.
+Late storage failures now leave built-ins
 usable and release import leases safely for repair/restart.
 
 Normal usage does not download Chatterbox until the user explicitly chooses
