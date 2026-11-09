@@ -98,8 +98,10 @@ class SourceAcquisitionTests(unittest.TestCase):
             git(origin, "init", "--quiet")
             git(origin, "config", "user.name", "Acquisition fixture")
             git(origin, "config", "user.email", "fixture@example.invalid")
+            git(origin, "config", "core.autocrlf", "false")
             (origin / "reference.txt").write_bytes(b"original\n")
-            git(origin, "add", "reference.txt")
+            (origin / "other.txt").write_bytes(b"remaining target file\n")
+            git(origin, "add", "reference.txt", "other.txt")
             git(origin, "commit", "--quiet", "-m", "fixture")
             revision = git(origin, "rev-parse", "HEAD")
             patch = root / "fixture.patch"
@@ -220,7 +222,16 @@ class SourceAcquisitionTests(unittest.TestCase):
             self.assertIn("Unrecognized Git lock", unknown_lock.stderr)
             self.assertEqual(git_lock.read_bytes(), b"unknown manual Git configuration")
             git_lock.unlink()
-            for interrupted_at in ("metadata", "init", "fetch"):
+            for interrupted_at in (
+                "metadata",
+                "init",
+                "fetch",
+                "checkout",
+                "checkout-index-partial",
+                "checkout-modified",
+                "checkout-extra",
+                "checkout-index-private",
+            ):
                 with self.subTest(interrupted_at=interrupted_at):
                     retry_state = root / interrupted_at
                     retry_source = retry_state / "source"
@@ -229,9 +240,24 @@ class SourceAcquisitionTests(unittest.TestCase):
                         (retry_source / ".git").mkdir()
                     else:
                         git(retry_source, "init", "--quiet")
-                    if interrupted_at == "fetch":
+                    if interrupted_at == "fetch" or interrupted_at.startswith("checkout"):
                         git(retry_source, "remote", "add", "origin", str(origin))
                         git(retry_source, "fetch", "--quiet", "origin", revision)
+                    if interrupted_at.startswith("checkout"):
+                        # Git materialized one exact blob before its first index/HEAD commit.
+                        (retry_source / "reference.txt").write_bytes(b"original\n")
+                        # Recovery must override Windows checkout conversion as well.
+                        git(retry_source, "config", "core.autocrlf", "true")
+                    if interrupted_at == "checkout-index-partial":
+                        git(retry_source, "-c", "core.autocrlf=false", "add", "reference.txt")
+                    if interrupted_at == "checkout-modified":
+                        (retry_source / "reference.txt").write_bytes(b"private local bytes\n")
+                    if interrupted_at == "checkout-extra":
+                        (retry_source / "private.txt").write_bytes(b"unrecognized local bytes\n")
+                    if interrupted_at == "checkout-index-private":
+                        (retry_source / "reference.txt").write_bytes(b"private staged bytes\n")
+                        git(retry_source, "-c", "core.autocrlf=false", "add", "reference.txt")
+                        (retry_source / "reference.txt").write_bytes(b"original\n")
                     retry = command(
                         "pwsh",
                         "-NoProfile",
@@ -241,8 +267,37 @@ class SourceAcquisitionTests(unittest.TestCase):
                         str(retry_state),
                         "-SourcesOnly",
                     )
+                    if interrupted_at in (
+                        "checkout-modified",
+                        "checkout-extra",
+                        "checkout-index-private",
+                    ):
+                        self.assertNotEqual(retry.returncode, 0)
+                        self.assertIn("preserve this state", retry.stderr)
+                        if interrupted_at == "checkout-modified":
+                            self.assertEqual(
+                                (retry_source / "reference.txt").read_bytes(),
+                                b"private local bytes\n",
+                            )
+                        elif interrupted_at == "checkout-extra":
+                            self.assertEqual(
+                                (retry_source / "private.txt").read_bytes(),
+                                b"unrecognized local bytes\n",
+                            )
+                        else:
+                            self.assertEqual(
+                                git(retry_source, "show", ":reference.txt"), "private staged bytes"
+                            )
+                            self.assertEqual(
+                                (retry_source / "reference.txt").read_bytes(), b"original\n"
+                            )
+                        self.assertFalse((retry_source / "other.txt").exists())
+                        continue
                     self.assertEqual(retry.returncode, 0, retry.stdout + retry.stderr)
                     self.assertEqual((retry_source / "reference.txt").read_text(), "maintained\n")
+                    self.assertEqual(
+                        (retry_source / "other.txt").read_bytes(), b"remaining target file\n"
+                    )
             (source / "reference.txt").write_bytes(b"private local modification\n")
             changed = command(
                 "pwsh",

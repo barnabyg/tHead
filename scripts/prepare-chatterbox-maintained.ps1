@@ -145,6 +145,7 @@ function Invoke-Checked([string]$Program, [string[]]$Arguments) {
         $locks = @('config.lock')
         if ($Arguments -contains 'fetch') { $locks = @('shallow.lock', 'FETCH_HEAD.lock', 'packed-refs.lock') }
         elseif ($Arguments -contains 'checkout') { $locks = @('index.lock', 'HEAD.lock') }
+        elseif ($Arguments -contains 'read-tree' -or $Arguments -contains 'checkout-index') { $locks = @('index.lock') }
         elseif ($Arguments -contains 'apply') { $locks = @() }
         elseif ($Arguments[0] -eq 'init') { $locks = @('config.lock', 'HEAD.lock') }
         foreach ($name in $allowedLocks) {
@@ -186,6 +187,52 @@ function Invoke-Checked([string]$Program, [string[]]$Arguments) {
         }
         $process.Dispose()
     }
+}
+
+function Resume-MaterializedCheckout([string]$Destination, [string]$Revision) {
+    $metadata = Join-Path $Destination '.git'
+    $children = @(Get-ChildItem -LiteralPath $Destination -Force | Where-Object Name -ne '.git')
+    if (-not $children -and -not (Test-Path -LiteralPath (Join-Path $metadata 'index'))) { return }
+
+    # Missing index entries are expected after a first checkout was interrupted.
+    # Any addition, changed blob/mode or unmerged entry is private staged data.
+    & git -C $Destination diff --cached --quiet --diff-filter=ACMRTUXB $Revision --
+    if ($LASTEXITCODE -ne 0) { throw 'Interrupted checkout has index changes; preserve this state and choose a fresh -State directory.' }
+    $modes = @(& git -C $Destination ls-tree -r '--format=%(objectmode)' $Revision)
+    if ($LASTEXITCODE -ne 0 -or @($modes | Where-Object { $_ -cnotin @('100644', '100755') }).Count) {
+        throw 'Interrupted checkout has unsupported tree entries; preserve this state and choose a fresh -State directory.'
+    }
+    $paths = @(& git -C $Destination ls-tree -r --name-only $Revision)
+    if ($LASTEXITCODE -ne 0 -or @($paths | Where-Object { $_.StartsWith('"') }).Count) {
+        throw 'Interrupted checkout has unsupported tree paths; preserve this state and choose a fresh -State directory.'
+    }
+    $boundary = $metadata + [IO.Path]::DirectorySeparatorChar
+    foreach ($entry in (Get-ChildItem -LiteralPath $Destination -Recurse -Force)) {
+        if ($entry.FullName -eq $metadata -or $entry.FullName.StartsWith($boundary, [StringComparison]::OrdinalIgnoreCase)) { continue }
+        $null = Assert-StatePath $entry.FullName
+        $relative = [IO.Path]::GetRelativePath($Destination, $entry.FullName).Replace('\', '/')
+        $objects = @(& git --literal-pathspecs -C $Destination ls-tree '--format=%(objectmode) %(objecttype) %(objectname)' $Revision -- $relative)
+        if ($LASTEXITCODE -ne 0 -or $objects.Count -ne 1) {
+            throw 'Interrupted checkout contains unknown paths; preserve this state and choose a fresh -State directory.'
+        }
+        if ($entry.PSIsContainer) {
+            if ($objects[0] -notmatch '^040000 tree [a-f0-9]{40}$') { throw 'Interrupted checkout path type differs; preserve this state.' }
+            continue
+        }
+        if ($objects[0] -notmatch '^100(?:644|755) blob ([a-f0-9]{40})$') {
+            throw 'Interrupted checkout contains an unsupported file type; preserve this state.'
+        }
+        $expected = $Matches[1]
+        $actual = & git -C $Destination hash-object --no-filters -- $relative
+        if ($LASTEXITCODE -ne 0 -or $actual -cne $expected) {
+            throw 'Interrupted checkout contains changed file bytes; preserve this state and choose a fresh -State directory.'
+        }
+    }
+    $missing = @($paths | Where-Object { -not (Test-Path -LiteralPath (Join-Path $Destination $_) -PathType Leaf) })
+    Invoke-Checked git @('-C', $Destination, 'read-tree', $Revision)
+    # Populate only absent paths. Without --force, Git also refuses a file that
+    # appears after validation; existing matching files are never overwritten.
+    foreach ($path in $missing) { Invoke-Checked git @('-C', $Destination, '-c', 'core.autocrlf=false', 'checkout-index', '--', $path) }
 }
 
 function Prepare-Source([string]$Name, [string]$Url, [string]$Revision) {
@@ -239,6 +286,7 @@ function Prepare-Source([string]$Name, [string]$Url, [string]$Revision) {
         # Fetch/checkout may have been cancelled. A normal checkout (never force)
         # protects any local files or index changes created before the interruption.
         Invoke-Checked git @('-C', $destination, '-c', 'http.lowSpeedLimit=1024', '-c', 'http.lowSpeedTime=120', 'fetch', '--depth=1', 'origin', $Revision)
+        Resume-MaterializedCheckout $destination $Revision
         Invoke-Checked git @('-C', $destination, '-c', 'core.autocrlf=false', 'checkout', '--detach', $Revision)
     }
     Invoke-Checked git @('-C', $destination, 'config', 'core.autocrlf', 'false')

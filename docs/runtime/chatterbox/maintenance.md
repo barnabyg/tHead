@@ -91,6 +91,11 @@ run only one preparation per state.
 Retry resumes incomplete source acquisition from the exact pinned origin without
 overwriting local edits, and re-extracts verified Python archives in fresh marked
 staging while retaining legacy/unrecognized staging.
+For an interrupted first checkout, existing ordinary files must exactly match
+the pinned Git blobs and any index entries must match the pinned tree. Recovery
+then fills only missing paths without force, explicitly retaining LF bytes on
+Windows. Changed/staged private bytes, unknown paths, links or ambiguous paths
+are preserved and require a fresh state instead of automatic adoption.
 The acquisition-only diagnostic switches `-SourcesOnly` (maintained preparation)
 and `-ExtractOnly` (Python preparation) stop before installation/runtime approval.
 Preparation takes an exclusive state lease and records Git process identities.
