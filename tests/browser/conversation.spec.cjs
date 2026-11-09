@@ -1167,6 +1167,67 @@ test('create a named avatar without changing selection or making a provider requ
   expect((await (await request.get(`${info.url}/status`)).json()).run.pair).toBe(avatar.id);
 });
 
+test('avatar editor explains square cropping before upload and flags non-square portraits', async ({
+  page,
+  request,
+}, info) => {
+  const portrait = await page.evaluate(() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1854;
+    canvas.height = 2670;
+    return canvas.toDataURL('image/png').split(',')[1];
+  });
+  await openSettings(page);
+  await page.getByRole('button', { name: 'Create avatar', exact: true }).click();
+  await expect(page.locator('#avatar-image-guidance')).toContainText('square');
+  const warning = page.locator('#avatar-image-warning');
+  await expect(warning).toBeEmpty();
+  const picker = page.getByLabel('Portrait image', { exact: true });
+  await picker.setInputFiles({
+    name: 'tall.png',
+    mimeType: 'image/png',
+    buffer: Buffer.from(portrait, 'base64'),
+  });
+  await expect(warning).toContainText('1854 × 2670');
+  await expect(warning).toContainText('Crop it to a square');
+  await picker.setInputFiles('tests/fixtures/portrait.jpg');
+  await expect(warning).toBeEmpty();
+  await picker.setInputFiles({
+    name: 'tall.png',
+    mimeType: 'image/png',
+    buffer: Buffer.from(portrait, 'base64'),
+  });
+  await expect(warning).toContainText('1854 × 2670');
+  await picker.setInputFiles({
+    name: 'broken.png',
+    mimeType: 'image/png',
+    buffer: Buffer.from('not an image'),
+  });
+  await expect(warning).toBeEmpty();
+  await page.getByRole('button', { name: 'Cancel', exact: true }).click();
+  await page.getByRole('button', { name: 'Create avatar', exact: true }).click();
+  await expect(warning).toBeEmpty();
+  await picker.setInputFiles({
+    name: 'tall.png',
+    mimeType: 'image/png',
+    buffer: Buffer.from(portrait, 'base64'),
+  });
+  await page.getByLabel('Avatar name', { exact: true }).fill('Tall portrait');
+  await page.getByLabel('Voice', { exact: true }).selectOption('zira');
+  await page.getByRole('button', { name: 'Save avatar', exact: true }).click();
+  await expect(page.locator('#avatar-editor')).toBeHidden();
+  const status = await (await request.get(`${info.url}/status`)).json();
+  const avatar = status.avatars.find((item) => item.name === 'Tall portrait');
+  expect(await (await request.get(`${info.url}/portrait?avatar=${avatar.id}`)).body()).toEqual(
+    Buffer.from(portrait, 'base64'),
+  );
+  await page.getByLabel('Avatar', { exact: true }).selectOption(avatar.id);
+  await expect(page.locator('#pair-status')).toContainText('Active: Tall portrait');
+  await page.getByRole('button', { name: 'Edit avatar', exact: true }).click();
+  await expect(warning).toContainText('1854 × 2670');
+  await page.getByRole('button', { name: 'Cancel', exact: true }).click();
+});
+
 test('creation validates decoded uploads and names, retains fields and cancels without saving', async ({
   page,
   request,

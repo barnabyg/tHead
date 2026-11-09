@@ -730,8 +730,21 @@
         <label for="avatar-name">Avatar name</label>
         <input id="avatar-name" required maxlength="80" autocomplete="off">
         <label for="avatar-image">Portrait image</label>
-        <input id="avatar-image" type="file" accept="image/jpeg,image/png" required>
-        <p>JPEG or PNG, at most 5 MiB and 4096 × 4096 pixels. Portraits stay on this computer.</p>
+        <p id="avatar-image-guidance">
+          For consistent framing, crop your portrait to a square before uploading. Playback uses a
+          512 × 512 centre crop.
+        </p>
+        <input
+          id="avatar-image"
+          type="file"
+          accept="image/jpeg,image/png"
+          aria-describedby="avatar-image-guidance avatar-image-limits avatar-image-warning"
+          required
+        >
+        <p id="avatar-image-limits">
+          JPEG or PNG, at most 5 MiB and 4096 × 4096 pixels. Portraits stay on this computer.
+        </p>
+        <p id="avatar-image-warning" role="status" aria-live="polite"></p>
         <img
           id="avatar-preview"
           alt="Portrait preview"
