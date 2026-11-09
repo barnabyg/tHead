@@ -25,6 +25,9 @@ def main() -> None:
     parser.add_argument("--initialize-budget", action="store_true")
     parser.add_argument("--budget")
     parser.add_argument("--user-data", type=Path)
+    parser.add_argument("--candidate-chatterbox", action="store_true")
+    parser.add_argument("--chatterbox-state", type=Path)
+    parser.add_argument("--skip-preparation", action="store_true")
     parser.add_argument("--port", type=int, default=8765)
     parser.add_argument(
         "--avatar",
@@ -38,36 +41,38 @@ def main() -> None:
             AvatarStore(args.user_data or user_data_directory()).get(args.pair)
         except ValueError as error:
             parser.error(str(error))
-    run([sys.executable, str(ROOT / "scripts/demo.py"), "--prepare-only"], 18000)
-    if args.conversation:
+    if not args.skip_preparation:
+        run([sys.executable, str(ROOT / "scripts/demo.py"), "--prepare-only"], 18000)
+    if args.conversation and not args.skip_preparation:
         for pair in configured_pairs().values():
             asset = pair.portrait
             acquire(asset["url"], RUNTIME / "demo-inputs" / asset["filename"], asset["sha256"])
     lock = json.loads((ROOT / "demo-lock.json").read_text(encoding="utf-8"))
     ffmpeg = RUNTIME / "media" / lock["media"]["directory"] / "bin/ffmpeg.exe"
-    run(
-        [
-            str(ffmpeg),
-            "-nostdin",
-            "-v",
-            "error",
-            "-y",
-            "-ss",
-            "31",
-            "-i",
-            str(RUNTIME / "demo-inputs/speech.ogg"),
-            "-t",
-            "20",
-            "-ac",
-            "1",
-            "-ar",
-            "16000",
-            "-c:a",
-            "pcm_s16le",
-            str(RUNTIME / "demo-inputs/english-long.wav"),
-        ],
-        180,
-    )
+    if not args.skip_preparation:
+        run(
+            [
+                str(ffmpeg),
+                "-nostdin",
+                "-v",
+                "error",
+                "-y",
+                "-ss",
+                "31",
+                "-i",
+                str(RUNTIME / "demo-inputs/speech.ogg"),
+                "-t",
+                "20",
+                "-ac",
+                "1",
+                "-ar",
+                "16000",
+                "-c:a",
+                "pcm_s16le",
+                str(RUNTIME / "demo-inputs/english-long.wav"),
+            ],
+            180,
+        )
     if not args.no_browser:
         threading.Timer(2, lambda: webbrowser.open(f"http://127.0.0.1:{args.port}")).start()
     # The server shuts down after two hours. Allow five more minutes for imports,
@@ -86,6 +91,18 @@ def main() -> None:
             *(["--initialize-budget"] if args.initialize_budget else []),
             *(["--budget", args.budget] if args.budget else []),
             *(["--user-data", str(args.user_data)] if args.user_data else []),
+            *(
+                ["--output", str(args.user_data / "app-output")]
+                if args.candidate_chatterbox and args.user_data
+                else []
+            ),
+            *(
+                ["--budget", str(args.user_data / "candidate-budget.sqlite3")]
+                if args.candidate_chatterbox and args.user_data and not args.budget
+                else []
+            ),
+            *(["--candidate-chatterbox"] if args.candidate_chatterbox else []),
+            *(["--chatterbox-state", str(args.chatterbox_state)] if args.chatterbox_state else []),
             *(["--speech", "--output", str(RUNTIME / "speech")] if args.speech else []),
             *(["--diagnostics"] if args.diagnostics else []),
         ],

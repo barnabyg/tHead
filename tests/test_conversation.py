@@ -240,6 +240,14 @@ class ConversationTests(unittest.TestCase):
             self.process.communicate(timeout=30)
             self.assertEqual(incomplete.recv(4096)[:1], b"")
 
+    def test_explicit_fixture_speech_uses_normal_provider_and_media_path_without_paid_calls(
+        self,
+    ) -> None:
+        self.ask("Fixture speech: The final words should be complete.")
+        done = self.wait(lambda value: value["state"] == "idle")
+        self.assertEqual(done["run"]["answer"], "The final words should be complete.")
+        self.assertEqual(done["run"]["state"], "complete")
+
     def test_model_settings_preserve_context_and_capture_active_turn(self) -> None:
         status = self.request("/status")
         self.assertEqual(status["settings"]["model"], "gpt-6-luna")

@@ -16,6 +16,8 @@ from typing import Any
 
 from avatars import AvatarStore, decode_portrait, user_data_directory, voice_catalogue
 from budget import PRICES, Budget, BudgetError
+from chatterbox_engine import ChatterboxEngine
+from chatterbox_setup import SpeechPreparation
 from chatterbox_voice import ChatterboxVoice
 from pairs import DEFAULT_PAIR, Avatar
 from prepare import RUNTIME
@@ -128,19 +130,29 @@ class Conversation(Demonstration):
         pair: str = DEFAULT_PAIR,
         user_data: Path | None = None,
         avatar_store: AvatarStore | None = None,
+        candidate_chatterbox: bool = False,
+        chatterbox_state: Path | None = None,
     ) -> None:
         local_data = user_data or (
             directory / "user-data" if test_backend else user_data_directory()
         )
         self.voice_store = VoiceStore(local_data)
-        self.clone_state = (
+        self.candidate_chatterbox = candidate_chatterbox
+        self.clone_state = chatterbox_state or (
             directory / "clone-engine" if test_backend else RUNTIME / "chatterbox-maintained"
         )
-        self.cloned_engine: ChatterboxVoice | None = None
+        self.cloned_engine: ChatterboxEngine | None = None
         self.clone_saved_reference: dict[str, Any] | None = None
         self.clone_lock = threading.RLock()
+        self.speech_preparation = SpeechPreparation(
+            self.clone_state, test_backend, candidate_chatterbox
+        )
         self.voice_library = VoiceLibrary(
-            self.voice_store, test_backend, self.cloned_voice, self.release_preview
+            self.voice_store,
+            test_backend,
+            self.cloned_voice,
+            self.release_preview,
+            self.speech_preparation,
         )
         self.avatars = avatar_store or AvatarStore(local_data, self.voice_store)
         self.voices = voice_catalogue(test_backend)
@@ -227,7 +239,7 @@ class Conversation(Demonstration):
 
     def cloned_voice(
         self, record: dict[str, Any], cancelled: threading.Event | None = None
-    ) -> ChatterboxVoice:
+    ) -> ChatterboxEngine:
         self.voice_library.require_available()
         with self.clone_lock:
             if cancelled is not None and cancelled.is_set():
@@ -246,7 +258,7 @@ class Conversation(Demonstration):
             finally:
                 temporary.unlink(missing_ok=True)
             if self.cloned_engine is None:
-                self.cloned_engine = ChatterboxVoice(
+                self.cloned_engine = ChatterboxEngine(
                     self.clone_state,
                     record["id"],
                     self.test_backend,
@@ -297,8 +309,23 @@ class Conversation(Demonstration):
                     str(data.get("operation", "")), data.get("name"), str(data.get("id", ""))
                 )
         if path == "/voices/prepare":
-            self.voice_library.require_available()
+            with self.condition:
+                if not self.pair_selectable() or self.selected_pair.voice.startswith("voice-"):
+                    raise ValueError("Choose Zira/Hazel and wait before preparing local voices")
+            if self.speech_preparation.eligibility()["available"] and self.cloned_engine:
+                self.clone_saved_reference = None
+                self.release_preview()
+            return self.speech_preparation.start()
+        if path == "/voices/prepare/cancel":
+            self.speech_preparation.cancel()
             return self.voice_library.readiness()
+        if path == "/voices/diagnostic":
+            if not self.diagnostics or not (self.test_backend or self.candidate_chatterbox):
+                raise ValueError("Voice faults require the explicit diagnostic candidate launcher")
+            if data.get("fault") not in ("delay", "crash") or self.cloned_engine is not self.voice:
+                raise ValueError("Select a cloned voice and a declared diagnostic fault")
+            self.cloned_engine.fault = str(data["fault"])
+            return {"ok": True}
         if path == "/voices/rename":
             return self.voice_store.rename(str(data.get("id", "")), data.get("name"))
         if path == "/voices/delete":
@@ -394,11 +421,11 @@ class Conversation(Demonstration):
         return Voice(avatar.voice_lock)
 
     def prepare_voice(self, voice: SpeechVoice) -> None:
-        if not self.test_backend or isinstance(voice, ChatterboxVoice):
+        if not self.test_backend or isinstance(voice, (ChatterboxVoice, ChatterboxEngine)):
             voice.prepare(self.shutdown)
 
     def speech_pcm(self, text: str, cancelled: threading.Event) -> bytes:
-        if isinstance(self.voice, ChatterboxVoice):
+        if isinstance(self.voice, (ChatterboxVoice, ChatterboxEngine)):
             return self.voice.speak(text, cancelled)
         return super().speech_pcm(text, cancelled)
 
@@ -506,6 +533,7 @@ class Conversation(Demonstration):
                 "avatars": avatars,
                 "voices": self.voice_choices(),
                 "voiceLibrary": self.voice_library.status(),
+                "speechEngine": dict(self.voice.metadata),
                 "avatarStorageError": self.avatars.error or self.avatars.record_error,
                 "activeAvatar": self.active_pair,
                 "selectedAvatar": self.selected_pair.id,
@@ -636,6 +664,11 @@ class Conversation(Demonstration):
                 or self.voice_library.state in ("previewing", "cancelling")
             ):
                 raise ValueError("Wait for readiness and resource release")
+            if self.selected_pair.voice.startswith("voice-"):
+                self.voice_library.require_available()
+                record = self.voice_store.read(self.selected_pair.voice)
+                if not record["available"]:
+                    raise ValueError(record["error"])
             if not self.provider.fixture and not os.environ.get("OPENAI_API_KEY"):
                 raise ValueError("Set OPENAI_API_KEY in the backend and restart")
             if len(self.transcript) >= 100:
@@ -745,6 +778,8 @@ def main() -> None:
     parser.add_argument("--budget", type=Path)
     parser.add_argument("--initialize-budget", action="store_true")
     parser.add_argument("--user-data", type=Path)
+    parser.add_argument("--candidate-chatterbox", action="store_true")
+    parser.add_argument("--chatterbox-state", type=Path)
     parser.add_argument(
         "--avatar",
         "--pair",
@@ -752,6 +787,13 @@ def main() -> None:
         default=os.environ.get("THEAD_AVATAR", os.environ.get("THEAD_PAIR", DEFAULT_PAIR)),
     )
     args = parser.parse_args()
+    if args.candidate_chatterbox and not (
+        args.diagnostics and args.fixture_provider and args.user_data
+    ):
+        parser.error(
+            "--candidate-chatterbox requires --diagnostics, --fixture-provider "
+            "and isolated --user-data"
+        )
     app = Conversation(
         args.inputs,
         args.output,
@@ -773,6 +815,8 @@ def main() -> None:
         args.initialize_budget,
         args.pair,
         args.user_data,
+        candidate_chatterbox=args.candidate_chatterbox,
+        chatterbox_state=args.chatterbox_state,
     )
     server = LoopbackServer(("127.0.0.1", args.port), handler(app))
     lifetime = threading.Timer(7200, server.shutdown)
@@ -792,6 +836,7 @@ def main() -> None:
             app.condition.notify_all()
         app.voice_library.close()
         server.server_close()
+        app.voice_store.close()
         app.worker.join(timeout=120)
         app.clone_saved_reference = None
         app.release_preview()

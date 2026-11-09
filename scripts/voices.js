@@ -106,10 +106,15 @@ document.querySelector('#stop').addEventListener('click', async () => {
 document.querySelector('#prepare-voices').addEventListener('click', async () => {
   try {
     await post('/voices/prepare', { session: sessionIdentity });
-    document.querySelector('#voice-result').textContent = 'Preparation ready.';
+    document.querySelector('#voice-result').textContent = 'Preparation requested.';
   } catch (error) {
     document.querySelector('#voice-result').textContent = String(error);
   }
+});
+document.querySelector('#cancel-voice-preparation').addEventListener('click', async () => {
+  await post('/voices/prepare/cancel', { session: sessionIdentity }).catch((error) => {
+    document.querySelector('#voice-result').textContent = String(error);
+  });
 });
 
 clonePreview.addEventListener('click', async () => {
@@ -215,8 +220,10 @@ window.renderVoiceLibrary = (status) => {
   if (!status.voiceLibrary) return;
   const library = status.voiceLibrary;
   const readiness = library.readiness;
+  document.querySelector('#prepare-voices').disabled = readiness.state === 'preparing';
+  document.querySelector('#cancel-voice-preparation').hidden = readiness.state !== 'preparing';
   document.querySelector('#voice-readiness').textContent =
-    readiness.message || readiness.error || 'Local engine ready. Preview speech is synthetic.';
+    readiness.error || readiness.message || 'Local engine ready. Preview speech is synthetic.';
   if (voiceOperation && voiceSession !== status.session && !voiceSaving) cancelVoiceOperation();
   if (voiceOperation && library.operation === voiceOperation && !voiceSaving) {
     if (library.state === 'failed' || library.state === 'cancelled') {

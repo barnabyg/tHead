@@ -13,7 +13,7 @@ from collections import deque
 from collections.abc import Callable
 from typing import Any
 
-from chatterbox_release import release_readiness
+from chatterbox_setup import SpeechPreparation
 from speech import SpeechVoice
 from voices import MAX_INPUT_BYTES, VoiceStore
 
@@ -27,9 +27,11 @@ class VoiceLibrary:
         fixture: bool,
         engine: Callable[[dict[str, Any], threading.Event | None], SpeechVoice],
         release_preview: Callable[[], None],
+        preparation: SpeechPreparation,
     ) -> None:
         self.store, self.fixture, self.engine = store, fixture, engine
         self.release_preview = release_preview
+        self.preparation = preparation
         self.lock = threading.RLock()
         self.upload_slot = threading.BoundedSemaphore(1)
         self.upload_connections: set[socket.socket] = set()
@@ -44,14 +46,7 @@ class VoiceLibrary:
         self.worker: threading.Thread | None = None
 
     def readiness(self) -> dict[str, Any]:
-        if self.fixture:
-            return {
-                "available": True,
-                "error": "",
-                "fixture": True,
-                "message": "Synthetic protocol fixture. This does not demonstrate cloned speech.",
-            }
-        return release_readiness()
+        return self.preparation.status()
 
     def track_upload(self, connection: socket.socket) -> None:
         with self.lock:
@@ -223,6 +218,7 @@ class VoiceLibrary:
 
     def close(self) -> None:
         self.cancel()
+        self.preparation.close()
         with self.lock:
             self.closed = True
             for connection in self.upload_connections:

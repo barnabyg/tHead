@@ -775,6 +775,8 @@ def handler(demo: Demonstration) -> type[BaseHTTPRequestHandler]:
                     "/voices/delete",
                     "/voices/repair",
                     "/voices/prepare",
+                    "/voices/prepare/cancel",
+                    "/voices/diagnostic",
                 ):
                     result = demo.command(self.path, data)
                 elif demo.page == "conversation.html" and self.path in (

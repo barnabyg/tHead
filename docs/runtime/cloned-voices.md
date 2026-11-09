@@ -72,6 +72,40 @@ not become server paths. No server-path/URL import is accepted.
 
 ## Real native use
 
+For the isolated **native release candidate**, use the normal launcher path with
+real local speech, real FlashHead media and free fixture provider text. From
+`C:/docs/git/tHead`, with Windows 11, PowerShell 7, Git, uv 0.11.7, the normal
+FlashHead prerequisites, an RTX 3090/CUDA-13-compatible driver, 20 GiB free disk
+and at least 8 GiB free RAM/VRAM alongside FlashHead:
+
+```powershell
+pwsh -NoProfile -File ./scripts/voice-native-demo.ps1
+```
+
+This explicitly prepares the hash-pinned Python/source/packages/model in an
+isolated environment and opens the normal app at
+[port 8771](http://127.0.0.1:8771). Follow the same short clone/preview/save/shared
+avatar scenario above; this mode produces real cloned speech and moving
+portraits. Data and the fixture budget are isolated in the temporary
+`tHead-voice-native` directory. `-UserData`, `-ChatterboxState` and `-Port` select
+independent test locations. After preparation, disconnect the network and repeat
+preview/conversation; no speech request downloads anything. Ordinary `run.bat`
+continues to use the regular release gate.
+
+The diagnostic CLI `-CandidateChatterbox` requires `-Diagnostics`,
+`-FixtureProvider` and an explicit isolated `-UserData`. It cannot turn a paid
+provider request into a hidden fallback. In this mode, ask
+`Fixture speech: The final words should be complete.` for exact free fixture
+speech through the normal provider/conversation path. All other questions retain
+the existing fixture answers. Diagnostic worker crashes use the session-bound
+`/voices/diagnostic` API; no crash control is added to the ordinary UI.
+
+Voices → Prepare local voices / retry starts an explicit bounded setup job when
+the runtime is eligible; progress, failure, retry and Cancel preparation are
+visible. Zira/Hazel remain usable while optional preparation runs. Select
+Zira/Hazel before changing an installed cloned-voice environment. Interrupted
+setup preserves the existing voice library and verified acquisition state.
+
 Use the [maintenance candidate guide](chatterbox/maintenance.md) for the isolated
 research runtime and short offline regression previews. This is an explicit
 preparation route, not permission to enable regular voices. The normal app shows
