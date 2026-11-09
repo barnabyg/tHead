@@ -109,7 +109,8 @@
       justify-content: flex-end;
       gap: 8px;
     }
-    #settings-page {
+    #settings-page,
+    #voices-dialog {
       flex: 1;
       min-height: 0;
       overflow: auto;
@@ -117,6 +118,24 @@
       background: #1a221e;
       border: 1px solid #344139;
       border-radius: 22px;
+    }
+    #voices-dialog input:not([type="checkbox"]) {
+      width: min(100%, 560px);
+      min-height: 44px;
+      margin-bottom: 8px;
+    }
+    #voices-dialog input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      vertical-align: middle;
+    }
+    #voices-dialog audio {
+      display: block;
+      max-width: 100%;
+      margin: 12px 0;
+    }
+    #voices-dialog audio[hidden] {
+      display: none;
     }
     #settings-title {
       margin-top: 0;
@@ -190,6 +209,10 @@
       font-size: 13px;
       color: #c7d2c9;
       margin-bottom: 8px;
+    }
+    #voices-dialog label {
+      display: block;
+      margin: 12px 0 6px;
     }
     #thinking-level,
     #model,
@@ -574,6 +597,7 @@
           <button type="button" id="delete-avatar" hidden>Delete avatar</button>
           <p id="avatar-result" role="status"></p>
           <p id="avatar-storage-error" role="status"></p>
+          <button type="button" id="open-voices">Voices</button>
           <label for="model">Model</label>
           <select id="model" disabled aria-describedby="model-availability"></select>
           <p id="model-availability"></p>
@@ -585,6 +609,46 @@
           </p>
           <p id="settings-status" role="status" aria-live="polite"></p>
         </div>
+      </main>
+      <main id="voices-dialog" hidden aria-labelledby="voices-title">
+        <h2 id="voices-title" tabindex="-1">Voices</h2>
+        <p id="voice-readiness" role="status" aria-live="polite"></p>
+        <button type="button" id="prepare-voices">Check preparation / retry</button>
+        <p>Cloned recordings stay on this PC. Existing Zira and Hazel voices remain available.</p>
+        <ul id="saved-voices" aria-label="Saved voices"></ul>
+        <p id="voice-result" role="status" aria-live="polite"></p>
+        <button type="button" id="clone-voice">Clone voice</button>
+        <button type="button" id="voices-back">Back to Settings</button>
+        <form id="clone-form" hidden novalidate>
+          <h3 id="clone-title">Clone voice</h3>
+          <label for="clone-name">Voice name</label>
+          <input id="clone-name" required maxlength="80" autocomplete="off">
+          <label for="clone-recording">Recording</label>
+          <input id="clone-recording" type="file" accept=".wav,.mp3,.m4a" required>
+          <p>
+            One English speaker in a quiet recording, preferably 10–20 seconds. WAV, MP3 or M4A,
+            over 5 and at most 30 seconds, at most 20 MiB. Format checks do not assess speakers,
+            noise or clone quality.
+          </p>
+          <label
+            ><input id="clone-permission" type="checkbox" required>
+            I own this recording or have permission to use it
+          </label>
+          <p id="clone-status" role="status" aria-live="polite"></p>
+          <audio id="clone-audio" aria-label="Synthetic voice preview" controls hidden>
+            <track
+              kind="captions"
+              src="/voice-preview-captions"
+              srclang="en"
+              label="English"
+              default
+            >
+          </audio>
+          <button type="button" id="clone-preview">Preview</button>
+          <button type="button" id="clone-stop">Stop preview</button>
+          <button type="submit" id="clone-save" disabled>Save voice</button>
+          <button type="button" id="clone-cancel">Cancel</button>
+        </form>
       </main>
       <details class="utilities">
         <summary>Session details</summary>
@@ -656,6 +720,7 @@
       <button type="button" id="confirm-delete-avatar">Confirm deletion</button>
       <button type="button" id="cancel-delete-avatar">Cancel</button>
     </dialog>
+
     <dialog id="avatar-editor" aria-labelledby="avatar-title">
       <form id="avatar-form" novalidate>
         <h2 id="avatar-title">Create avatar</h2>
@@ -680,5 +745,6 @@
       </form>
     </dialog>
     <script src="/player.js"></script>
+    <script src="/voices.js"></script>
   </body>
 </html>

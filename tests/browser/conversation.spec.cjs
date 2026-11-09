@@ -53,6 +53,143 @@ async function openSettings(page) {
   }
 }
 
+test('clone preview saves one private reusable voice without changing avatar, context or budget', async ({
+  page,
+  request,
+}, info) => {
+  const before = await (await request.get(`${info.url}/status`)).json();
+  await openSettings(page);
+  await page.getByRole('button', { name: 'Voices', exact: true }).click();
+  await page.getByRole('button', { name: 'Clone voice', exact: true }).click();
+  await page.getByLabel('Voice name', { exact: true }).fill('Local reader');
+  const sourceRecording = path.join(info.output, 'source.wav');
+  fs.copyFileSync('docs/runtime/chatterbox/reference-1089-10s.wav', sourceRecording);
+  await page.getByLabel('Recording', { exact: true }).setInputFiles(sourceRecording);
+  await page.getByLabel('I own this recording or have permission to use it').check();
+  await page.getByRole('button', { name: 'Preview', exact: true }).click();
+  await expect(page.locator('#clone-status')).toContainText('Synthetic preview ready');
+  await page.screenshot({ path: info.outputPath('clone-screen.png') });
+  await page.getByRole('button', { name: 'Stop preview', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Save voice', exact: true })).toBeEnabled();
+  await page.getByRole('button', { name: 'Save voice', exact: true }).click();
+  await expect(page.locator('#voice-result')).toContainText('Saved Local reader');
+  const saved = await (await request.get(`${info.url}/status`)).json();
+  fs.unlinkSync(sourceRecording);
+  const voice = saved.voices.find((v) => v.name === 'Local reader');
+  expect(voice.id).toMatch(/^voice-/);
+  expect(saved.activeAvatar).toBe(before.activeAvatar);
+  expect(saved.transcript).toEqual(before.transcript);
+  expect(saved.budget.estimated_usd).toBe(before.budget.estimated_usd);
+  await page.getByRole('button', { name: 'Back to Settings', exact: true }).click();
+  for (const name of ['Reader one', 'Reader two']) {
+    await page.getByRole('button', { name: 'Create avatar', exact: true }).click();
+    await page.getByLabel('Avatar name', { exact: true }).fill(name);
+    await page
+      .getByLabel('Portrait image', { exact: true })
+      .setInputFiles('tests/fixtures/portrait.jpg');
+    await page.getByLabel('Voice', { exact: true }).selectOption(voice.id);
+    await page.getByRole('button', { name: 'Save avatar', exact: true }).click();
+    await expect(page.locator('#avatar-result')).toContainText(`Created ${name}`);
+  }
+  const assigned = await (await request.get(`${info.url}/status`)).json();
+  expect(assigned.avatars.filter((a) => a.voice === voice.id)).toHaveLength(2);
+  const rejected = await request.post(`${info.url}/voices/delete`, {
+    data: { session: assigned.session, id: voice.id, name: voice.name },
+  });
+  expect(rejected.status()).toBe(409);
+  expect((await rejected.json()).error).toContain('Reader one');
+  await stopFixture(info);
+  await startFixture(info);
+  await page.goto(info.url);
+  await expect
+    .poll(async () => {
+      const status = await (await request.get(`${info.url}/status`)).json();
+      return status.voices.filter((v) => v.id === voice.id && v.available).length;
+    })
+    .toBe(1);
+});
+
+test('changing a recording and leaving Voices invalidates preview and cannot save stale audio', async ({
+  page,
+  request,
+}, info) => {
+  await openSettings(page);
+  await page.getByRole('button', { name: 'Voices', exact: true }).click();
+  await page.getByRole('button', { name: 'Clone voice', exact: true }).click();
+  await page.getByLabel('Voice name', { exact: true }).fill('Unsaved reader');
+  await page
+    .getByLabel('Recording', { exact: true })
+    .setInputFiles('docs/runtime/chatterbox/reference-1089-10s.wav');
+  await page.getByLabel('I own this recording or have permission to use it').check();
+  await page.getByRole('button', { name: 'Preview', exact: true }).click();
+  await expect(page.locator('#clone-status')).toContainText('Synthetic preview ready');
+  const before = await (await request.get(`${info.url}/status`)).json();
+  const oldPreview = await page.locator('#clone-audio').getAttribute('src');
+  await page.getByLabel('Recording', { exact: true }).setInputFiles({
+    name: 'invalid.wav',
+    mimeType: 'audio/wav',
+    buffer: Buffer.from('not audio'),
+  });
+  await expect(page.getByRole('button', { name: 'Save voice', exact: true })).toBeDisabled();
+  await expect(page.getByLabel('Voice name', { exact: true })).toHaveValue('Unsaved reader');
+  await expect.poll(async () => (await request.get(info.url + oldPreview)).status()).toBe(410);
+  const staleSave = await request.post(`${info.url}/voices/save`, {
+    data: {
+      session: before.session,
+      operation: before.voiceLibrary.operation,
+      name: 'Wrong voice',
+    },
+  });
+  expect(staleSave.status()).toBe(409);
+  await page.getByRole('button', { name: 'Preview', exact: true }).click();
+  await expect(page.locator('#clone-status')).toContainText('corrupt or unsupported');
+  await expect(page.getByLabel('Voice name', { exact: true })).toHaveValue('Unsaved reader');
+  await page.getByRole('button', { name: 'New conversation', exact: true }).click();
+  await page.getByRole('button', { name: 'Back to Settings', exact: true }).click();
+  expect(
+    (await (await request.get(`${info.url}/status`)).json()).voices.filter((v) => v.editable),
+  ).toHaveLength(0);
+});
+
+test('an atomic save result remains visible when reset happens before its reply arrives', async ({
+  page,
+  request,
+}, info) => {
+  await openSettings(page);
+  await page.getByRole('button', { name: 'Voices', exact: true }).click();
+  await page.getByRole('button', { name: 'Clone voice', exact: true }).click();
+  await page.getByLabel('Voice name', { exact: true }).fill('Save result');
+  await page
+    .getByLabel('Recording', { exact: true })
+    .setInputFiles('docs/runtime/chatterbox/reference-1089-10s.wav');
+  await page.getByLabel('I own this recording or have permission to use it').check();
+  await page.getByRole('button', { name: 'Preview', exact: true }).click();
+  await expect(page.locator('#clone-status')).toContainText('Synthetic preview ready');
+  let release;
+  const gate = new Promise((resolve) => {
+    release = resolve;
+  });
+  let committed;
+  const commit = new Promise((resolve) => {
+    committed = resolve;
+  });
+  await page.route('**/voices/save', async (route) => {
+    const response = await route.fetch();
+    committed();
+    await gate;
+    await route.fulfill({ response });
+  });
+  await page.getByRole('button', { name: 'Save voice', exact: true }).click();
+  await commit;
+  await expect(page.getByRole('button', { name: 'Cancel', exact: true })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Back to Settings', exact: true })).toBeDisabled();
+  await page.getByRole('button', { name: 'New conversation', exact: true }).click();
+  release();
+  await expect(page.locator('#voice-result')).toContainText('Saved Save result');
+  const status = await (await request.get(`${info.url}/status`)).json();
+  expect(status.voices.filter((v) => v.name === 'Save result')).toHaveLength(1);
+});
+
 test('cancel editing and deletion; confirmed selected deletion falls back permanently without losing context', async ({
   page,
   request,

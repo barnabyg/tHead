@@ -115,3 +115,8 @@ The [isolated Chatterbox evaluation](docs/runtime/chatterbox-evaluation.md) prov
 an opt-in pinned reference-audio audition and [FlashHead integration harness](docs/runtime/chatterbox-integration.md).
 It remains research tooling with unresolved production adoption gates and candidate
 security findings. Normal voices and saved avatar formats are unchanged.
+
+The [private cloned-voice library and cloning controls](docs/runtime/cloned-voices.md)
+add local recording import, preview/save, shared voice IDs, rename/delete and repair.
+Regular Chatterbox speech remains gated on the maintenance and native release
+checks. The guide includes a one-command isolated, no-cost manual fixture.
