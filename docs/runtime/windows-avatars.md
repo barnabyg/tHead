@@ -23,13 +23,13 @@ no-cost deterministic provider answers. It requires no API key. Omit
 `-FixtureProvider` for normal provider operation with a backend API key.
 
 Before uploading, crop the portrait to a square with the face comfortably inside
-the frame. Playback uses a 512 × 512 centre crop, while the idle portrait displays
-the original image; a non-square image can change framing when speech starts.
+the frame. The idle preview and playback both use a square centre crop. Choose
+the playback size under **Avatar resolution** in Settings.
 For example, a centred square crop of a 1854 × 2670 image is 1854 × 1854, removing
 408 pixels from both the top and bottom. Move the crop as needed to frame the face.
 The editor shows this guidance before upload and an advisory with the dimensions
-of any non-square selection or saved portrait. It does not crop or reject these
-images; original uploads and saved avatars remain unchanged.
+of any non-square selection or saved portrait. tHead keeps the original upload
+and applies the crop for display and generation.
 
 Manual check after launching with the command above: open **Create avatar** and
 verify the square-crop guidance is visible before choosing a file. Select a

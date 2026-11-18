@@ -457,6 +457,30 @@ class ConversationTests(unittest.TestCase):
         recovered = self.request("/settings", {"session": status["session"], "model": "gpt-6-luna"})
         self.assertEqual(recovered["model"], "gpt-6-luna")
 
+    def test_higher_resolution_keeps_rendering_until_all_media_is_ready(self) -> None:
+        settings = {"session": self.request("/status")["session"]}
+        for invalid in (True, "640", 640.0, 1024):
+            with self.assertRaises(urllib.error.HTTPError) as error:
+                self.request("/settings", {**settings, "avatarResolution": invalid})
+            self.assertEqual(error.exception.code, 409)
+        self.assertEqual(self.request("/status")["settings"]["avatarResolution"], 512)
+        self.request("/settings", {**settings, "avatarResolution": 640})
+        run = self.ask("Fixture speech: " + "Another sentence. " * 12, fault="buffer-delay")
+        self.wait(lambda s: any(e["event"] == "buffer-delay" for e in s["run"]["events"]))
+        segment = f"/segment?run={run['id']}&index=0"
+        # Loopback fixture only. A fragment exists, but remains private until rendering ends.
+        with urllib.request.urlopen(self.url + segment, timeout=10) as response:  # nosec B310
+            self.assertEqual(response.status, 202)
+        changed = self.request("/settings", {**settings, "avatarResolution": 768})
+        self.assertEqual(changed["settings"]["avatarResolution"], 768)
+        self.assertEqual(changed["run"]["avatarResolution"], 640)
+        self.assertTrue(changed["run"]["deferPlayback"])
+        done = self.wait(lambda s: s["state"] == "idle")["run"]
+        self.assertEqual(done["state"], "complete")
+        self.assertGreater(done["parts"], 10)
+        with urllib.request.urlopen(self.url + segment, timeout=10) as response:  # nosec B310
+            self.assertEqual(response.status, 200)
+
     def test_avatar_mutation_guards_and_selected_repreparation(self) -> None:
         status = self.request("/status")
         data = {"session": status["session"], "name": "Saved", "voice": "hazel"}
@@ -629,6 +653,7 @@ class ConversationTests(unittest.TestCase):
                     "model": "gpt-6.1-sol",
                     "defaultAvatar": "hopper-hazel",
                     "inputTokenLimit": 600,
+                    "avatarResolution": 768,
                 },
             )
         self.assertIn("storage unavailable", error.exception.read().decode())

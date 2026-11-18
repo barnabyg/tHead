@@ -27,7 +27,14 @@ from prepare import RUNTIME
 from provider import INPUT_BOUND, OUTPUT_TOKENS, Provider, validate_level, validate_model
 from shutdown import cleanup, join_worker
 from speech import SpeechVoice, Voice
-from streaming import Demonstration, LoopbackServer, Session, handler
+from streaming import (
+    AVATAR_RESOLUTIONS,
+    DEFAULT_AVATAR_RESOLUTION,
+    Demonstration,
+    LoopbackServer,
+    Session,
+    handler,
+)
 from voice_app import PREVIEW_TEXT, VoiceLibrary
 from voices import VoiceStore
 
@@ -44,9 +51,14 @@ PAIR_FAULTS = {
 
 class Turn(Session):
     def __init__(
-        self, directory: Path, fragment_frames: int, conversation: str, question: str
+        self,
+        directory: Path,
+        fragment_frames: int,
+        conversation: str,
+        question: str,
+        avatar_resolution: int,
     ) -> None:
-        super().__init__(directory, fragment_frames)
+        super().__init__(directory, fragment_frames, avatar_resolution)
         self.conversation = conversation
         self.question = question
         self.answer = ""
@@ -168,6 +180,10 @@ class Conversation(Demonstration):
         offline = test_backend or fixture
         models = FIXTURE_MODELS if offline else {}
         saved = self.avatars.preferences()
+        self.avatar_resolution = next(
+            (size for size in AVATAR_RESOLUTIONS if str(size) == saved.get("avatarResolution")),
+            DEFAULT_AVATAR_RESOLUTION,
+        )
         startup_model = model or saved.get("model", MODEL)
         level = saved.get("thinkingLevel") if startup_model == saved.get("model") else None
         info = models.get(startup_model)
@@ -271,46 +287,45 @@ class Conversation(Demonstration):
         with self.condition:
             if data.get("session") != self.identity:
                 raise ValueError("Stale session; reload before changing settings")
-            if set(data) - {
-                "session",
-                "model",
-                "thinkingLevel",
-                "defaultAvatar",
-                "maxOutputTokens",
-                "inputTokenLimit",
-            }:
+            provider_keys = {"model", "thinkingLevel", "maxOutputTokens", "inputTokenLimit"}
+            if set(data) - provider_keys - {"session", "defaultAvatar", "avatarResolution"}:
                 raise ValueError("Unknown setting; reload Settings and retry")
-            if set(data) == {"session", "defaultAvatar"}:
-                self.avatars.set_default_avatar(data["defaultAvatar"])
-                self.settings_message = "Default avatar saved; applies when the app next starts."
-                return self.status()
-            model = data.get("model", self.provider.model)
-            info = validate_model(model, self.provider.models)
-            level = data.get("thinkingLevel", self.provider.thinking_level)
-            message = ""
-            if "thinkingLevel" not in data and level not in info.levels:
-                level = info.default
-                message = f"Thinking level changed to {level}; the selected model requires it."
-            validate_level(info, level)
-            provider = Provider(
-                model,
-                self.provider.fixture,
-                level,
-                models=self.provider.models,
-                max_output_tokens=data.get("maxOutputTokens", self.provider.max_output_tokens),
-                input_token_limit=data.get("inputTokenLimit", self.provider.input_token_limit),
-            )
             changes: dict[str, Any] = {}
-            if "model" in data or "thinkingLevel" in data:
-                changes.update(model=model, thinkingLevel=level)
-            limits = provider.token_settings()
-            saving_limits = bool(data.keys() & limits.keys())
-            if saving_limits:
-                changes.update(limits)
+            message = ""
+            size = data.get("avatarResolution", self.avatar_resolution)
+            if not isinstance(size, int) or size not in AVATAR_RESOLUTIONS:
+                raise ValueError("Choose an avatar resolution of 512, 640 or 768 pixels")
+            if "avatarResolution" in data:
+                changes["avatarResolution"] = size
+            provider = self.provider
+            saving_limits = False
+            if data.keys() & provider_keys:
+                model = data.get("model", provider.model)
+                info = validate_model(model, provider.models)
+                level = data.get("thinkingLevel", provider.thinking_level)
+                if "thinkingLevel" not in data and level not in info.levels:
+                    level = info.default
+                    message = f"Thinking level changed to {level}; the selected model requires it."
+                validate_level(info, level)
+                provider = Provider(
+                    model,
+                    provider.fixture,
+                    level,
+                    models=provider.models,
+                    max_output_tokens=data.get("maxOutputTokens", provider.max_output_tokens),
+                    input_token_limit=data.get("inputTokenLimit", provider.input_token_limit),
+                )
+                if "model" in data or "thinkingLevel" in data:
+                    changes.update(model=model, thinkingLevel=level)
+                limits = provider.token_settings()
+                saving_limits = bool(data.keys() & limits.keys())
+                if saving_limits:
+                    changes.update(limits)
             if "defaultAvatar" in data:
                 changes["default_avatar"] = data["defaultAvatar"]
                 message = "Default avatar saved; applies when the app next starts."
             self.avatars.save_preferences(changes)
+            self.avatar_resolution = size
             if saving_limits:
                 self.invalid_saved_limits = False
             self.provider = provider
@@ -323,6 +338,7 @@ class Conversation(Demonstration):
             "thinkingLevel": self.provider.thinking_level,
             **self.provider.token_settings(),
             "invalidSavedLimits": self.invalid_saved_limits,
+            "avatarResolution": self.avatar_resolution,
             "defaultAvatar": self.avatars.default_avatar(),
             "message": self.settings_message,
             "catalogMessage": self.catalog_message,
@@ -832,7 +848,13 @@ class Conversation(Demonstration):
                 self.provider.max_output_tokens,
                 rates=info.request_rates(input_bound),
             )
-            session = Turn(self.directory, self.fragment_frames, self.identity, question.strip())
+            session = Turn(
+                self.directory,
+                self.fragment_frames,
+                self.identity,
+                question.strip(),
+                self.avatar_resolution,
+            )
             session.provider = self.provider
             session.reservation = reservation
             session.request_id = request_id

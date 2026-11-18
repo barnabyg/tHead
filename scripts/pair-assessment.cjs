@@ -59,6 +59,18 @@ async function main() {
     expect.poll(async () => (await status()).state, { timeout: 180_000 }).toBe('idle');
   const ask = page.getByRole('button', { name: 'Ask', exact: true });
   const pair = page.getByLabel('Current avatar', { exact: true });
+  const details = page.locator('#session-details');
+  const setDiagnostic = async (label, fault) => {
+    if (await page.locator('#settings-page').isHidden()) {
+      await page.getByRole('button', { name: 'Settings', exact: true }).click();
+    }
+    if (!(await details.evaluate((element) => element.open))) {
+      await details.getByText('Session details', { exact: true }).click();
+    }
+    await page.getByLabel(label, { exact: true }).selectOption(fault);
+  };
+  const backToConversation = () =>
+    page.getByRole('button', { name: 'Back to conversation' }).click();
   let requests = 0;
   try {
     await page.goto(url);
@@ -131,8 +143,8 @@ async function main() {
     };
     const select = async (id, fault = '') => {
       await idle();
+      await setDiagnostic('Pair diagnostic', fault);
       await expect(pair).toBeEnabled();
-      await page.getByLabel('Pair diagnostic', { exact: true }).selectOption(fault);
       const before = await status();
       const began = performance.now();
       const accepted = page.waitForResponse((r) => new URL(r.url()).pathname === '/select');
@@ -165,6 +177,7 @@ async function main() {
         expect(result.ready).toBe(true);
       }
       save();
+      await backToConversation();
       return result;
     };
     if (process.argv.includes('--stop-only')) {
@@ -172,7 +185,8 @@ async function main() {
       report.mode = 'audible-stop-and-replacement';
       for (const id of ids) {
         if ((await status()).activePair !== id) await select(id);
-        await page.getByLabel('Diagnostic fault').selectOption('long');
+        await setDiagnostic('Diagnostic fault', 'long');
+        await backToConversation();
         const run = await submit('Exercise Stop during audible moving playback.');
         await page.waitForFunction(
           () => document.querySelector('#video').currentTime > 1 && outputRms() > 0.0001,
@@ -194,7 +208,8 @@ async function main() {
         expect(stopped.run.state).toBe('stopped');
         report.probes.push({ label: `after-audible-stop-${id}`, status: stopped });
         await expect(page.locator('#video')).not.toHaveAttribute('src');
-        await page.getByLabel('Diagnostic fault').selectOption('');
+        await setDiagnostic('Diagnostic fault', '');
+        await backToConversation();
         await complete('Replacement after audible Stop');
       }
       report.final = await status();
@@ -237,7 +252,7 @@ async function main() {
     await select(current);
     await complete('How do we detect one?');
     // Late preparation is retained across reset; pending switches are rejected.
-    await page.getByLabel('Pair diagnostic', { exact: true }).selectOption('pair-delay');
+    await setDiagnostic('Pair diagnostic', 'pair-delay');
     await expect(pair).toBeEnabled();
     await pair.selectOption(other);
     await expect.poll(async () => (await status()).state).toBe('selecting');

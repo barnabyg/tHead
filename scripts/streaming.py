@@ -28,6 +28,8 @@ from speech import SpeechVoice, Voice, segments
 from stream_media import Mux
 
 SAMPLES = 15360
+DEFAULT_AVATAR_RESOLUTION = 512
+AVATAR_RESOLUTIONS = (DEFAULT_AVATAR_RESOLUTION, 640, 768)
 
 
 class LoopbackServer(ThreadingHTTPServer):
@@ -44,7 +46,12 @@ class LoopbackServer(ThreadingHTTPServer):
 
 
 class Session:
-    def __init__(self, directory: Path, fragment_frames: int = 8) -> None:
+    def __init__(
+        self,
+        directory: Path,
+        fragment_frames: int = 8,
+        avatar_resolution: int = DEFAULT_AVATAR_RESOLUTION,
+    ) -> None:
         self.id = uuid.uuid4().hex
         self.directory = directory / self.id
         self.directory.mkdir(parents=True)
@@ -53,6 +60,8 @@ class Session:
         self.state = "queued"
         self.cancelled = threading.Event()
         self.parts = 0
+        self.avatar_resolution = avatar_resolution
+        self.defer_playback = avatar_resolution > DEFAULT_AVATAR_RESOLUTION
         self.fragment_seconds = fragment_frames / 25
         self.max_pending = 72 // fragment_frames
         self.played = 0.0
@@ -91,6 +100,8 @@ class Session:
                 "id": self.id,
                 "state": self.state,
                 "parts": self.parts,
+                "avatarResolution": self.avatar_resolution,
+                "deferPlayback": self.defer_playback,
                 "error": self.error,
                 "events": list(self.events),
             }
@@ -113,7 +124,10 @@ class Session:
             self.cancelled.wait(3)
         with self.condition:
             deadline = time.monotonic() + 300
-            while self.parts - 1 - int(self.played / self.fragment_seconds) >= self.max_pending:
+            while (
+                not self.defer_playback
+                and self.parts - 1 - int(self.played / self.fragment_seconds) >= self.max_pending
+            ):
                 if self.cancelled.is_set():
                     return
                 if time.monotonic() > deadline:
@@ -520,10 +534,9 @@ class Demonstration:
                 "transport-profile",
                 fragment_frames=self.fragment_frames,
                 fragment_seconds=session.fragment_seconds,
-                max_pending_fragments=session.max_pending,
+                max_pending_fragments=None if session.defer_playback else session.max_pending,
             )
             torch.cuda.reset_peak_memory_stats()
-            inference.get_base_data(pipeline, str(self.portrait_path), 42, False)
             params = inference.get_infer_params()
             if (
                 params["frame_num"],
@@ -532,9 +545,15 @@ class Demonstration:
                 params["sample_rate"],
                 params["height"],
                 params["width"],
-            ) != (33, 9, 25, 16000, 512, 512):
+            ) != (33, 9, 25, 16000, DEFAULT_AVATAR_RESOLUTION, DEFAULT_AVATAR_RESOLUTION):
                 raise RuntimeError("Pinned streaming profile changed")
-            session.event("portrait-ready", settings=params)
+            size = session.avatar_resolution
+            inference.infer_params.update(height=size, width=size)
+            try:
+                inference.get_base_data(pipeline, str(self.portrait_path), 42, False)
+            finally:
+                inference.infer_params.update(height=params["height"], width=params["width"])
+            session.event("portrait-ready", settings={**params, "height": size, "width": size})
             if session.fault == "media":
                 raise RuntimeError("Injected media failure")
             lock = json.loads((ROOT / "demo-lock.json").read_text(encoding="utf-8"))
@@ -545,6 +564,7 @@ class Demonstration:
                 session.directory / "ffmpeg.log",
                 session.cancelled,
                 self.fragment_frames,
+                size,
             )
             history: deque[float] = deque([0.0] * 128000, maxlen=128000)
             if session.progressive:
@@ -716,7 +736,9 @@ def handler(demo: Demonstration) -> type[BaseHTTPRequestHandler]:
                     return
                 index = int(query.get("index", ["-1"])[0])
                 with session.condition:
-                    if 0 <= index < session.parts:
+                    if session.defer_playback and session.state != "complete":
+                        self.reply(410 if session.state == "failed" else 202, b"{}")
+                    elif 0 <= index < session.parts:
                         self.reply(
                             200, (session.directory / f"{index}.mp4").read_bytes(), "video/mp4"
                         )

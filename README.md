@@ -112,6 +112,8 @@ between turns in Settings; built-in avatars remain permanent. Saved avatars surv
 [the avatar guide](docs/runtime/windows-avatars.md) for limits, storage and testing.
 Choose **Avatar at startup** in Settings to select the avatar used at startup. This
 preference survives restarts without switching the current conversation's avatar.
+Choose **Avatar resolution** for 512 × 512, 640 × 640 or 768 × 768. The two larger
+sizes finish rendering before playback starts.
 The app also saves your model, thinking level and advanced token limits locally in
 `%LOCALAPPDATA%\tHead\avatars.sqlite3`. Clearing browser data keeps these choices.
 
