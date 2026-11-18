@@ -56,7 +56,7 @@ in that guide and launch `conversation.ps1 -TestBackend -Budget <printed-path>`.
 Ask a question: expect a budget error, unchanged totals and no provider dispatch.
 For playable fixture media use `-FixtureProvider -Budget <printed-path>` instead.
 
-Wait for **Ready**. Enter a question or select **What is a black hole?** to fill the empty composer. Edit the question and choose **Ask** to send it.
+Wait for **Ready**. Type a question and choose **Ask** to send it.
 Expect local speech and moving video before a sufficiently long/delayed answer
 has finished generating. The transcript labels generated text separately from
 spoken playback. A short response can finish generating before playback starts.
@@ -87,7 +87,7 @@ From `C:/docs/git/tHead` on Windows with Python and PowerShell 7 installed, laun
 .\run.bat -TestBackend -Port 8765
 ```
 
-Open [the conversation](http://127.0.0.1:8765). Select the example and edit it. The transcript should stay empty until you choose **Ask**. When tHead accepts the question, the input should clear and the question should appear in the transcript. To check cancellation, open **Settings → Session details**, select **Delay provider stream**, then return to the conversation and ask a follow-up. Open **Settings** and choose **Stop**. On return, the transcript should show the interrupted turn. Narrow the window to phone width, then expand and reduce the portrait while keeping the composer in view. Audio and lip-sync checks use the native launcher below.
+Open [the conversation](http://127.0.0.1:8765). Check that the transcript and question box start empty. Type a question. The transcript should stay empty until you choose **Ask**. When tHead accepts the question, the input should clear and the question should appear in the transcript. Choose **New conversation** to check that the transcript clears. To check cancellation, open **Settings → Session details**, select **Delay provider stream**, then return to the conversation and ask another question. Open **Settings** and choose **Stop**. On return, the transcript should show the interrupted turn. Narrow the window to phone width, then expand and reduce the portrait while keeping the composer in view. Audio and lip-sync checks use the native launcher below.
 
 To manually check this UI from `C:/docs/git/tHead`, with the prerequisites and
 backend key above, run `./run.bat` in PowerShell 7. Open
@@ -305,7 +305,7 @@ pwsh -NoProfile -Command "Set-Location C:/docs/git/tHead; ./run.bat -TestBackend
 Open [the local app](http://127.0.0.1:8765), then Settings. Advanced token limits
 contains two fields. The defaults are 384 for Maximum output tokens and 8192 for
 Input token allowance. Save 128 and 512 respectively, reload the page and check
-that both values persist. Ask the example question. In **Settings → Session details**, the timing
+that both values persist. Type a question and choose **Ask**. In **Settings → Session details**, the timing
 diagnostics should show `max_output_tokens: 128` in the fixture provider-request
 event and the instruction to give the shortest answer that fully addresses the
 question. To assess actual answer length, use the normal launch command with the

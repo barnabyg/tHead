@@ -333,32 +333,6 @@
       padding: 0 26px;
       scrollbar-color: #4d6051 transparent;
     }
-    .empty-state {
-      height: 100%;
-      min-height: 120px;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      justify-content: center;
-      max-width: 360px;
-      margin: auto;
-      padding: 24px 0;
-    }
-    .empty-state h2 {
-      font-size: clamp(22px, 2.4vw, 34px);
-      font-weight: 500;
-      letter-spacing: -0.035em;
-      margin: 0 0 16px;
-    }
-    #example-question {
-      font-size: 14px;
-      font-weight: 500;
-      border-radius: 24px;
-      color: #d1e9c5;
-    }
-    .history:has(#transcript:not(:empty)) .empty-state {
-      display: none;
-    }
     #transcript {
       display: flex;
       flex-direction: column;
@@ -657,10 +631,6 @@
         </button>
         <section class="chat" aria-label="Conversation">
           <div class="history">
-            <div class="empty-state">
-              <h2>Where shall we begin?</h2>
-              <button type="button" id="example-question">What is a black hole?</button>
-            </div>
             <div
               id="transcript"
               role="log"
