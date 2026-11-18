@@ -37,9 +37,9 @@ The default is `gpt-6-luna` with reasoning disabled. Official documentation chec
 7 November 2026: [model](https://developers.openai.com/api/docs/models/gpt-6-luna),
 [Responses streaming](https://developers.openai.com/api/docs/guides/streaming-responses).
 The app uses the fixed standard OpenAI HTTPS endpoint, stateless Responses
-(`store: false`), no tools, a default of 384 maximum output tokens and instructions requesting
-two to four concise English sentences. There are no automatic retries; another
-submission is a new request. Provider errors are redacted to actionable states.
+(`store: false`), no tools and a default hard cap of 384 output tokens. The prompt
+asks for the shortest answer that fully addresses the question, in plain-text English.
+Submitting again starts a new request. Provider errors are redacted to actionable states.
 
 On **first use only**, add `-InitializeBudget` to the launch command to explicitly
 create `.runtime/conversation-budget.sqlite3`. Normal launches open this existing
@@ -243,12 +243,11 @@ without restarting. Real provider access, timing and answer quality remain manua
 
 ## Token limits
 
-In Settings, open **Response settings → Advanced token limits** to edit three whole-number values and save them together with **Save token limits**:
+In Settings, open **Response settings → Advanced token limits** to edit both values and save them together with **Save token limits**.
 
 | Setting | Default | Allowed range | Effect |
 | --- | ---: | ---: | --- |
 | Maximum output tokens | 384 | 16–32768 | Responses `max_output_tokens` hard cap, including reasoning; also used for the pre-request cost reservation. |
-| Answer token target | 240 | 1–32768 | Prompt instruction requesting the answer finish within this many tokens; must not exceed maximum output tokens. |
 | Input token allowance | 8192 | 512–131072 | Conservative UTF-8-based allowance for the current question, instructions and history; whole older exchanges are omitted to fit. |
 
 Changes apply to future questions. A response in progress keeps its captured limits and
@@ -264,12 +263,12 @@ command launches the no-cost CPU fixture without downloads, credentials or a GPU
 pwsh -NoProfile -Command "Set-Location C:/docs/git/tHead; ./run.bat -TestBackend -Port 8765"
 ```
 
-Open [the local app](http://127.0.0.1:8765), then Settings. On first use the limits are
-384, 240 and 8192. Select a model and thinking level, then save limits of 1024, 800
-and 512. Stop the server with Ctrl+C and run the same command again. Open Settings
-in a private browser window and check all five values. Try a target of 1025:
-expect an error and editable controls; correct it to 800 and save again. Ask a short
-question and a follow-up: Timing diagnostics should show `run.tokenLimits` with the saved
-values, `max_output_tokens: 1024` in the fixture provider-request event, and omitted older
-context. CPU fixture media is deliberately unplayable; check real answer length and
-speech using the normal launch command and an existing provider key/runtime.
+Open [the local app](http://127.0.0.1:8765), then Settings. Advanced token limits
+contains two fields. The defaults are 384 for Maximum output tokens and 8192 for
+Input token allowance. Save 128 and 512 respectively, reload the page and check
+that both values persist. Ask the example question. In Session details, the timing
+diagnostics should show `max_output_tokens: 128` in the fixture provider-request
+event and the instruction to give the shortest answer that fully addresses the
+question. To assess actual answer length, use the normal launch command with the
+native runtime and provider key, then compare a simple factual question with one
+that asks for several distinct explanations.

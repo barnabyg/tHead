@@ -24,14 +24,7 @@ from chatterbox_voice import ChatterboxVoice
 from model_catalog import FIXTURE_MODELS, MODEL, CatalogError, discover
 from pairs import DEFAULT_PAIR, Avatar
 from prepare import RUNTIME
-from provider import (
-    ANSWER_TOKEN_TARGET,
-    INPUT_BOUND,
-    OUTPUT_TOKENS,
-    Provider,
-    validate_level,
-    validate_model,
-)
+from provider import INPUT_BOUND, OUTPUT_TOKENS, Provider, validate_level, validate_model
 from shutdown import cleanup, join_worker
 from speech import SpeechVoice, Voice
 from streaming import Demonstration, LoopbackServer, Session, handler
@@ -188,7 +181,6 @@ class Conversation(Demonstration):
                 level,
                 models=models,
                 max_output_tokens=int(saved.get("maxOutputTokens", OUTPUT_TOKENS)),
-                answer_token_target=int(saved.get("answerTokenTarget", ANSWER_TOKEN_TARGET)),
                 input_token_limit=int(saved.get("inputTokenLimit", INPUT_BOUND)),
             )
         except ValueError:
@@ -285,7 +277,6 @@ class Conversation(Demonstration):
                 "thinkingLevel",
                 "defaultAvatar",
                 "maxOutputTokens",
-                "answerTokenTarget",
                 "inputTokenLimit",
             }:
                 raise ValueError("Unknown setting; reload Settings and retry")
@@ -307,9 +298,6 @@ class Conversation(Demonstration):
                 level,
                 models=self.provider.models,
                 max_output_tokens=data.get("maxOutputTokens", self.provider.max_output_tokens),
-                answer_token_target=data.get(
-                    "answerTokenTarget", self.provider.answer_token_target
-                ),
                 input_token_limit=data.get("inputTokenLimit", self.provider.input_token_limit),
             )
             changes: dict[str, Any] = {}

@@ -538,8 +538,8 @@ class ConversationTests(unittest.TestCase):
     def test_token_settings_capture_context_budget_and_validation(self) -> None:
         status = self.request("/status")
         identity = status["session"]
-        defaults = {"maxOutputTokens": 384, "answerTokenTarget": 240, "inputTokenLimit": 8192}
-        limits = {"maxOutputTokens": 1024, "answerTokenTarget": 800, "inputTokenLimit": 512}
+        defaults = {"maxOutputTokens": 384, "inputTokenLimit": 8192}
+        limits = {"maxOutputTokens": 128, "inputTokenLimit": 512}
         for key, value in defaults.items():
             self.assertEqual(status["settings"][key], value)
         run = self.ask(fault="llm-connect")
@@ -557,18 +557,18 @@ class ConversationTests(unittest.TestCase):
         self.assertEqual(done["contextOmitted"], 1)
         event = next(e for e in done["run"]["events"] if e["event"] == "provider-request")
         self.assertEqual(event["messages"], [{"role": "user", "content": "Follow-up"}])
-        self.assertEqual(event["configuration"]["max_output_tokens"], 1024)
-        self.assertIn("within 800 output tokens", event["instructions"])
+        self.assertEqual(event["configuration"]["max_output_tokens"], 128)
+        self.assertIn(
+            "Give the shortest answer that fully addresses the question.", event["instructions"]
+        )
         with closing(sqlite3.connect(Path(self.temporary.name) / "budget.sqlite3")) as database:
-            self.assertEqual(
-                database.execute("SELECT MAX(output_bound) FROM requests").fetchone()[0], 1024
-            )
+            output_bounds = database.execute("SELECT output_bound FROM requests ORDER BY rowid")
+            self.assertEqual(output_bounds.fetchall(), [(384,), (128,)])
         with self.assertRaises(urllib.error.HTTPError) as rejected:
             self.ask("x" * 1200)
         self.assertIn("input allowance", rejected.exception.read().decode())
         for key, invalid_values in (
-            ("maxOutputTokens", (0, 15, 32769, 1.5, "1024", True, None, 799)),
-            ("answerTokenTarget", (0, 32769, 1.5, "800", True, None, 1025)),
+            ("maxOutputTokens", (0, 15, 32769, 1.5, "128", True, None)),
             ("inputTokenLimit", (0, 511, 131073, 1.5, "512", True, None)),
         ):
             for invalid in invalid_values:
@@ -591,22 +591,27 @@ class ConversationTests(unittest.TestCase):
             self.assertEqual(self.request("/status")["settings"][key], value)
         self.assertEqual(run["tokenLimits"], defaults)
         self.stop_process()
+        db = Path(self.temporary.name) / "user-data/avatars.sqlite3"
+        with closing(sqlite3.connect(db)) as connection, connection:
+            connection.execute("INSERT INTO preferences VALUES ('answerTokenTarget', '800')")
         self.start_app()
         restored = self.request("/status")["settings"]
         self.assertEqual(restored["model"], "gpt-6.1-sol")
         self.assertEqual(restored["thinkingLevel"], "medium")
+        self.assertNotIn("answerTokenTarget", restored)
+        self.assertFalse(restored["invalidSavedLimits"])
         for key, value in limits.items():
             self.assertEqual(restored[key], value)
         self.stop_process()
         self.start_app(model="gpt-6-luna")
         status = self.request("/status")
         self.assertEqual(status["settings"]["thinkingLevel"], "none")
-        self.request("/settings", {"session": status["session"], "answerTokenTarget": 400})
+        self.request("/settings", {"session": status["session"], "maxOutputTokens": 400})
         self.stop_process()
         self.start_app()
         restored = self.request("/status")["settings"]
         self.assertEqual(restored["model"], "gpt-6.1-sol")
-        self.assertEqual(restored["answerTokenTarget"], 400)
+        self.assertEqual(restored["maxOutputTokens"], 400)
 
     def test_failed_combined_settings_write_preserves_previous_choices(self) -> None:
         status = self.request("/status")

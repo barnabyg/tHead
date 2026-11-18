@@ -993,7 +993,6 @@ test('response settings survive a server restart in a fresh browser profile', as
   await expect(page.getByLabel('Thinking level')).toBeEnabled();
   await page.getByText('Advanced token limits', { exact: true }).click();
   await page.getByLabel('Maximum output tokens').fill('768');
-  await page.getByLabel('Answer token target').fill('500');
   await page.getByLabel('Input token allowance').fill('2048');
   await page.getByRole('button', { name: 'Save token limits' }).click();
   await expect(page.locator('#settings-status')).toContainText('Saved');
@@ -1007,7 +1006,6 @@ test('response settings survive a server restart in a fresh browser profile', as
     await expect(fresh.getByLabel('Thinking level')).toHaveValue('high');
     await fresh.getByText('Advanced token limits', { exact: true }).click();
     await expect(fresh.getByLabel('Maximum output tokens')).toHaveValue('768');
-    await expect(fresh.getByLabel('Answer token target')).toHaveValue('500');
     await expect(fresh.getByLabel('Input token allowance')).toHaveValue('2048');
   } finally {
     await fresh.close();
@@ -1192,45 +1190,33 @@ test('token limits save together, survive refresh and control future requests an
   await openSettings(page);
   await page.getByText('Advanced token limits', { exact: true }).click();
   const output = page.getByLabel('Maximum output tokens', { exact: true });
-  const target = page.getByLabel('Answer token target', { exact: true });
   const input = page.getByLabel('Input token allowance', { exact: true });
   const save = page.getByRole('button', { name: 'Save token limits', exact: true });
   await expect(output).toHaveValue('384');
-  await expect(target).toHaveValue('240');
+  await expect(page.getByLabel('Answer token target', { exact: true })).toHaveCount(0);
   await expect(input).toHaveValue('8192');
   await backToConversation(page);
   await page.getByLabel('Diagnostic fault').selectOption('llm-connect');
   await page.getByRole('button', { name: 'Ask', exact: true }).click();
   await openSettings(page);
-  await output.fill('1024');
-  await target.fill('800');
+  await output.fill('128');
   await input.fill('512');
   // Periodic status refreshes must preserve an unsaved edit, including blurred fields.
   await page.getByRole('heading', { name: 'Settings', exact: true }).click();
   await page.waitForResponse('**/status');
-  await expect(output).toHaveValue('1024');
-  await expect(target).toHaveValue('800');
+  await expect(output).toHaveValue('128');
   await expect(input).toHaveValue('512');
   await save.click();
   await expect(page.locator('#settings-status')).toContainText('Saved');
   const active = await (await request.get(`${info.url}/status`)).json();
   expect(active.run.tokenLimits).toEqual({
     maxOutputTokens: 384,
-    answerTokenTarget: 240,
     inputTokenLimit: 8192,
   });
-  await target.fill('1025');
-  await save.click();
-  await expect(page.locator('#settings-status')).toContainText('must not exceed');
-  await expect(save).toBeEnabled();
-  await target.fill('800');
-  await save.click();
-  await expect(page.locator('#settings-status')).toContainText('Saved');
   await page.reload();
   await openSettings(page);
   await page.getByText('Advanced token limits', { exact: true }).click();
-  await expect(output).toHaveValue('1024');
-  await expect(target).toHaveValue('800');
+  await expect(output).toHaveValue('128');
   await expect(input).toHaveValue('512');
   await backToConversation(page);
   await expect
@@ -1245,15 +1231,16 @@ test('token limits save together, survive refresh and control future requests an
       return status.run.events.find((event) => event.event === 'provider-request')?.configuration
         .max_output_tokens;
     })
-    .toBe(1024);
+    .toBe(128);
   const next = await (await request.get(`${info.url}/status`)).json();
   expect(next.run.tokenLimits).toEqual({
-    maxOutputTokens: 1024,
-    answerTokenTarget: 800,
+    maxOutputTokens: 128,
     inputTokenLimit: 512,
   });
   const event = next.run.events.find((event) => event.event === 'provider-request');
-  expect(event.instructions).toContain('within 800 output tokens');
+  expect(event.instructions).toContain(
+    'Give the shortest answer that fully addresses the question.',
+  );
   expect(event.messages).toEqual([{ role: 'user', content: 'Follow-up' }]);
   expect(next.contextOmitted).toBe(1);
   await page.setViewportSize({ width: 390, height: 844 });
