@@ -79,6 +79,22 @@ fault controls (when enabled) remain in the same area. The transcript contains n
 separate usage disclosures. New conversation clears this turn list and transcript,
 while monthly budget accounting remains intact.
 
+### Read a text file
+
+From `C:/docs/git/tHead`, run this in PowerShell 7 with the native runtime prerequisites above.
+
+```powershell
+.\run.bat
+```
+
+File reading works without an OpenAI API key or budget ledger.
+
+1. Choose **Read file** next to **New conversation** and select a UTF-8 `.txt` file containing two short English sentences on separate lines.
+2. Check that the text appears with both lines intact and the current avatar begins speaking it. If the browser blocks autoplay, choose **Play audio/video**.
+3. Choose **Stop** during playback and **Read aloud** to restart from the beginning. After playback, choose **Back to chat** and check that your draft and earlier turns are still present.
+
+Files can contain up to 1,200 characters and use the local speech pipeline's two-minute audio limit. The file text stays on this PC and is excluded from chat history, model requests and usage accounting.
+
 ### Quick UI check
 
 From `C:/docs/git/tHead` on Windows with Python and PowerShell 7 installed, launch the local CPU fixture:

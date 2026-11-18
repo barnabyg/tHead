@@ -96,10 +96,13 @@
       grid-area: 1 / 2;
       z-index: 1;
       display: flex;
+      flex-wrap: wrap;
       justify-content: space-between;
+      align-content: center;
       align-items: center;
-      gap: 20px;
+      gap: 6px 20px;
       min-height: 96px;
+      container-type: inline-size;
     }
     .app:has(.workspace[hidden]) .topbar {
       grid-column: 1 / -1;
@@ -127,6 +130,7 @@
       flex-wrap: wrap;
       justify-content: flex-end;
       gap: 8px;
+      margin-inline-start: auto;
     }
     #settings-page,
     #voices-dialog {
@@ -333,13 +337,26 @@
       padding: 0 26px;
       scrollbar-color: #4d6051 transparent;
     }
-    #transcript {
+    #transcript:not([hidden]) {
       display: flex;
       flex-direction: column;
       gap: 20px;
     }
     #transcript:not(:empty) {
       padding: 24px 0;
+    }
+    #file-preview {
+      margin: 20px 0;
+    }
+    #text-file {
+      max-width: 100%;
+    }
+    #file-error:not(:empty) {
+      margin-top: 8px;
+      color: #e5cfa5;
+    }
+    .app:has(.workspace[hidden]) #read-file {
+      display: none;
     }
     .composer {
       flex-shrink: 0;
@@ -490,6 +507,15 @@
         width: min(var(--avatar-size), 100cqw, 100cqh);
       }
     }
+    @container (max-width: 500px) {
+      .topbar-actions {
+        gap: 4px;
+      }
+      .topbar button {
+        font-size: 12px;
+        padding-inline: 8px;
+      }
+    }
     @media (max-width: 760px) {
       .app {
         display: flex;
@@ -498,10 +524,6 @@
       }
       .topbar {
         min-height: 76px;
-        gap: 10px;
-      }
-      .topbar-actions {
-        max-width: 220px;
       }
       #settings-page,
       #voices-dialog {
@@ -512,10 +534,6 @@
       .brand {
         font-size: 21px;
         gap: 8px;
-      }
-      .topbar button {
-        font-size: 12px;
-        padding: 0.6rem 0.8rem;
       }
       .workspace {
         grid-template-columns: 64px minmax(0, 1fr) auto;
@@ -609,6 +627,9 @@
             Settings
           </button>
           <button type="button" id="reset" class="quiet">New conversation</button>
+          <button type="button" id="read-file" class="quiet" aria-controls="workspace-panel">
+            Read file
+          </button>
         </nav>
       </header>
       <main class="workspace">
@@ -629,7 +650,7 @@
         <button type="button" id="portrait-size" aria-controls="avatar-stage" aria-expanded="false">
           Expand portrait
         </button>
-        <section class="chat" aria-label="Conversation">
+        <section class="chat" id="workspace-panel" aria-label="Conversation">
           <div class="history">
             <div
               id="transcript"
@@ -637,19 +658,34 @@
               aria-live="polite"
               aria-label="Conversation transcript"
             ></div>
+            <p id="file-preview" class="message answer" hidden></p>
           </div>
           <div class="composer">
-            <p id="fixture-notice" class="turn-note" role="status" hidden>
-              Fixture mode. Replies are scripted. For generated answers, relaunch with run.bat.
-            </p>
-            <label for="text">Question</label>
-            <textarea
-              id="text"
-              maxlength="1200"
-              rows="2"
-              required
-              placeholder="Ask a question…"
-            ></textarea>
+            <div id="question-controls">
+              <p id="fixture-notice" class="turn-note" role="status" hidden>
+                Fixture mode. Replies are scripted. For generated answers, relaunch with run.bat.
+              </p>
+              <label for="text">Question</label>
+              <textarea
+                id="text"
+                maxlength="1200"
+                rows="2"
+                required
+                placeholder="Ask a question…"
+              ></textarea>
+            </div>
+            <div id="file-controls" hidden>
+              <label for="text-file">Text file</label>
+              <input
+                type="file"
+                id="text-file"
+                accept=".txt,text/plain"
+                aria-describedby="file-hint"
+                disabled
+              >
+              <p id="file-hint" class="turn-note">UTF-8 plain text, up to 1,200 characters.</p>
+              <p id="file-error" class="turn-note" role="status"></p>
+            </div>
             <div class="composer-actions">
               <div class="status-line">
                 <span class="status-dot" aria-hidden="true"></span>

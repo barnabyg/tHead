@@ -1120,6 +1120,116 @@ test('empty conversation opens without a starter prompt and keeps a typed draft'
   await expect(question).toHaveValue('How does a solar eclipse happen?');
 });
 
+test('Read file previews and plays local text while preserving chat and usage', async ({
+  page,
+  request,
+}, info) => {
+  await page.route('**/telemetry', async (route) => {
+    if (route.request().postDataJSON().event === 'ended')
+      await route.fulfill({ json: { ok: true } });
+    else await route.continue();
+  });
+  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await expect(page.locator('#status')).toHaveText('Playback ended');
+  const before = await settledStatus(request, info.url);
+  expect(before.pairSelectable).toBe(false);
+  await page.unroute('**/telemetry');
+  const question = page.getByLabel('Question', { exact: true });
+  await question.fill('Why is it black?');
+
+  const text = '<em>Hello</em> & welcome.\r\nThis is the second line.';
+  await page.getByRole('button', { name: 'Read file', exact: true }).click();
+  await expect(question).toBeHidden();
+  await expect(page.locator('#transcript')).toBeHidden();
+  const file = page.getByLabel('Text file', { exact: true });
+  await expect(file).toBeEnabled();
+  await file.setInputFiles({
+    name: 'reading.txt',
+    mimeType: 'text/plain',
+    buffer: Buffer.from(text),
+  });
+  await expect(page.locator('#file-preview')).toBeVisible();
+  await expect(page.locator('#file-preview')).toHaveJSProperty('textContent', text);
+  await expect(page.locator('#file-preview em')).toHaveCount(0);
+  await expect(page.locator('#video')).toHaveAttribute('src', /^blob:/);
+  await expect(page.locator('#status')).toHaveText('Playback ended');
+  const after = await settledStatus(request, info.url);
+  expect(after.session).toBe(before.session);
+  expect(after.transcript).toEqual(before.transcript);
+  expect(after.budget).toEqual(before.budget);
+  expect(after.run.events.some((event) => event.event === 'provider-request')).toBe(false);
+  expect(
+    after.run.events.filter((event) => event.event === 'tts-segment').map((event) => event.text),
+  ).toEqual(['<em>Hello</em> & welcome.', 'This is the second line.']);
+  expect(fs.existsSync(path.join(info.output, after.run.id, 'result.json'))).toBe(false);
+
+  await page.getByRole('button', { name: 'Back to chat', exact: true }).click();
+  await expect(question).toBeFocused();
+  await expect(question).toHaveValue('Why is it black?');
+  await expect(page.locator('#transcript')).toContainText('A black hole traps light.');
+});
+
+test('file reading validates text, works with Ask disabled and stops a delayed start', async ({
+  page,
+  request,
+}, info) => {
+  await page.route('**/status', async (route) => {
+    const response = await route.fetch();
+    const status = await response.json();
+    await route.fulfill({
+      response,
+      json: { ...status, configurationError: 'Chat is unavailable' },
+    });
+  });
+  await expect(page.getByRole('button', { name: 'Ask', exact: true })).toBeDisabled();
+  await page.getByRole('button', { name: 'Read file', exact: true }).click();
+  await expect(page.locator('#status')).toHaveText('Ready');
+  const file = page.getByLabel('Text file', { exact: true });
+  const choose = (buffer) =>
+    file.setInputFiles({ name: 'reading.txt', mimeType: 'text/plain', buffer });
+  await choose(Buffer.from(' \r\n'));
+  await expect(page.locator('#file-error')).toHaveText('Choose a file that contains text.');
+  await choose(Buffer.from([0xff]));
+  await expect(page.locator('#file-error')).toContainText('Save the file as UTF-8');
+  await choose(Buffer.from('a'.repeat(1201)));
+  await expect(page.locator('#file-error')).toContainText('up to 1,200 characters');
+  await expect(page.locator('#file-preview')).toBeHidden();
+  expect((await (await request.get(`${info.url}/status`)).json()).run).toBeNull();
+
+  const { promise: accepted, resolve: accept } = Promise.withResolvers();
+  const { promise: gate, resolve: release } = Promise.withResolvers();
+  await page.route(
+    '**/read',
+    async (route) => {
+      const response = await route.fetch();
+      accept();
+      await gate;
+      await route.fulfill({ response });
+    },
+    { times: 1 },
+  );
+  await choose(Buffer.from('A sentence to read.'));
+  try {
+    await accepted;
+    await page.getByRole('button', { name: 'Stop', exact: true }).click();
+    await expect
+      .poll(async () => (await (await request.get(`${info.url}/status`)).json()).run.state)
+      .toBe('stopped');
+  } finally {
+    release();
+  }
+  await expect(page.locator('#status')).toHaveText('Reading stopped.');
+  await expect(page.locator('#video')).not.toHaveAttribute('src', /^blob:/);
+  await page.getByRole('button', { name: 'Read aloud', exact: true }).click();
+  await expect(page.locator('#status')).toHaveText('Playback ended');
+  await page.getByRole('button', { name: 'New conversation', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Read file', exact: true })).toBeEnabled();
+  await expect(page.getByLabel('Question', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Read file', exact: true }).click();
+  await expect(file).toHaveValue('');
+  await expect(page.locator('#file-preview')).toBeEmpty();
+});
+
 test('Settings navigation preserves draft, transcript, context and budget with keyboard focus', async ({
   page,
   request,
