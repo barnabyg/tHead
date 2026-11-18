@@ -1258,7 +1258,12 @@ test('Settings navigation preserves draft, transcript, context and budget with k
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
       true,
     );
-    await page.getByRole('button', { name: 'Back to conversation' }).click();
+    const sessionDetails = page.getByText('Session details', { exact: true });
+    await sessionDetails.scrollIntoViewIfNeeded();
+    await expect(sessionDetails).toBeInViewport({ ratio: 1 });
+    const back = page.getByRole('button', { name: 'Back to conversation', exact: true });
+    await expect(back).toBeInViewport({ ratio: 1, timeout: 5000 });
+    await back.click();
     await expect(page.locator('.avatar-panel')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Settings', exact: true })).toBeFocused();
     await expect(page.getByLabel('Question', { exact: true })).toHaveValue('How do we detect one?');

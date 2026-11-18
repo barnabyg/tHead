@@ -138,11 +138,21 @@
       flex: 1;
       min-height: 0;
       margin-bottom: 22px;
-      overflow: auto;
-      padding: 24px;
       background: #1a221e;
       border: 1px solid #344139;
       border-radius: 22px;
+    }
+    #settings-page {
+      --settings-padding: 24px;
+      overflow: clip;
+    }
+    #settings-page:not([hidden]) {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+    }
+    #voices-dialog {
+      overflow: auto;
+      padding: 24px;
     }
     #voices-dialog input:not([type="checkbox"]) {
       width: min(100%, 560px);
@@ -165,9 +175,16 @@
     #settings-title {
       margin-top: 0;
     }
-    .settings-column {
-      max-width: 700px;
-      margin: 0 auto;
+    .settings-header,
+    #settings-content {
+      padding-inline: max(var(--settings-padding), (100% - 700px) / 2);
+    }
+    .settings-header {
+      padding-top: var(--settings-padding);
+    }
+    #settings-content {
+      overflow: auto;
+      padding-bottom: var(--settings-padding);
     }
     .settings-group {
       margin-top: 28px;
@@ -527,9 +544,14 @@
       }
       #settings-page,
       #voices-dialog {
-        padding: 16px;
         border-radius: 16px;
         margin-bottom: 0;
+      }
+      #settings-page {
+        --settings-padding: 16px;
+      }
+      #voices-dialog {
+        padding: 16px;
       }
       .brand {
         font-size: 21px;
@@ -701,9 +723,11 @@
         </section>
       </main>
       <main id="settings-page" aria-labelledby="settings-title" hidden>
-        <div class="settings-column">
+        <header class="settings-header">
           <h1 id="settings-title" tabindex="-1">Settings</h1>
           <button type="button" id="settings-back">Back to conversation</button>
+        </header>
+        <div id="settings-content">
           <section class="settings-group">
             <h2>Avatar and voice</h2>
             <label for="pair">Current avatar</label>
