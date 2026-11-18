@@ -648,7 +648,8 @@ start.onclick = async () => {
   const submittedAt = performance.now();
   const submittedUtc = new Date().toISOString();
   if (submitting) return;
-  if (conversation && !question.value.trim()) {
+  const submittedQuestion = conversation ? question.value : '';
+  if (conversation && !submittedQuestion.trim()) {
     question.setCustomValidity('Enter a question or choose the example.');
     question.reportValidity();
     return;
@@ -678,7 +679,7 @@ start.onclick = async () => {
       ? await post(
           '/ask',
           {
-            question: document.querySelector('#text').value,
+            question: submittedQuestion,
             session: sessionIdentity,
             request: requestId,
             fault: document.querySelector('#fault').value,
@@ -695,6 +696,7 @@ start.onclick = async () => {
       await post('/stop', { run: run.id });
       return;
     }
+    if (conversation && question.value === submittedQuestion) question.value = '';
     active = run;
     telemetry('submit-action', {
       clientMilliseconds: submittedAt,

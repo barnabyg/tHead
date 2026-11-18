@@ -29,7 +29,9 @@ async function main() {
     const stop = page.getByRole('button', { name: 'Stop', exact: true });
     const reset = page.getByRole('button', { name: 'New conversation' });
     const fault = page.getByLabel('Diagnostic fault');
-    const submit = async () => {
+    const questionInput = page.getByLabel('Question', { exact: true });
+    const submit = async (question) => {
+      await questionInput.fill(question);
       const accepted = page.waitForResponse(
         (response) =>
           new URL(response.url()).pathname === '/ask' && response.request().method() === 'POST',
@@ -42,13 +44,11 @@ async function main() {
     await expect(ask).toBeEnabled({ timeout: 180_000 });
     if (!(await status()).fixtureProvider) throw Error('Fixture provider required');
     await capture('initial');
-    await page.getByRole('button', { name: 'What is a black hole?' }).click();
     await page.getByText('Session details', { exact: true }).click();
     const successful = async (label) => {
       await fault.selectOption('');
-      await page.getByLabel('Question', { exact: true }).fill(label);
       await expect(ask).toBeEnabled({ timeout: 180_000 });
-      const id = await submit();
+      const id = await submit(label);
       await expect(page.locator('#status')).toHaveText('Playback ended', { timeout: 180_000 });
       await expect(ask).toBeEnabled({ timeout: 180_000 });
       expect((await status()).run.id).toBe(id);
@@ -63,7 +63,7 @@ async function main() {
       ['long', 'playing'],
     ]) {
       await fault.selectOption(probe);
-      const id = await submit();
+      const id = await submit(`Stop during ${event}`);
       await expect
         .poll(
           async () =>
@@ -101,7 +101,7 @@ async function main() {
       await successful(`Replacement after ${probe}-${event}`);
     }
     await fault.selectOption('tts-delay');
-    const resetId = await submit();
+    const resetId = await submit('Reset during speech preparation');
     await expect
       .poll(
         async () =>
@@ -115,7 +115,7 @@ async function main() {
     for (let repeat = 0; repeat < 2; repeat++) {
       for (const probe of ['llm', 'missing-completion', 'tts', 'media']) {
         await fault.selectOption(probe);
-        const id = await submit();
+        const id = await submit(`Exercise ${probe} failure`);
         await expect
           .poll(async () => ((await status()).run.id === id ? (await status()).run.state : null), {
             timeout: 180_000,
