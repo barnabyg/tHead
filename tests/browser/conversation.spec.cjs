@@ -2296,7 +2296,11 @@ test('complete answer, contextual follow-up and fresh conversation', async ({
   request,
 }, info) => {
   const question = page.getByLabel('Question', { exact: true });
+  const fixtureNotice = page.getByText(
+    'Fixture mode. Replies are scripted. For generated answers, relaunch with run.bat.',
+  );
   await backToConversation(page);
+  await expect(fixtureNotice).toBeVisible();
   await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await expect(page.locator('#video')).toHaveAttribute('src', /^blob:/);
   expect(await question.inputValue()).toBe('');
@@ -2316,15 +2320,20 @@ test('complete answer, contextual follow-up and fresh conversation', async ({
     .poll(async () => (await (await request.get(`${info.url}/status`)).json()).run.state)
     .toBe('complete');
   await backToConversation(page);
-  await question.pressSequentially('How do we detect one?');
+  await question.pressSequentially('Why is it black?');
   await backToConversation(page);
   await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
-  await expect(page.locator('#transcript')).toContainText(
-    'Earlier question: What is a black hole?',
+  const scriptedAnswer = 'A black hole traps light. We detect one by its effects on nearby matter.';
+  await expect(page.locator('#transcript .answer').last()).toHaveText(
+    `JFK: ${scriptedAnswer} Earlier question: What is a black hole?`,
   );
   const status = await (await request.get(`${info.url}/status`)).json();
   const dispatched = status.run.events.find((event) => event.event === 'provider-request');
-  expect(dispatched.messages.some((message) => message.role === 'assistant')).toBe(true);
+  expect(dispatched.messages).toEqual([
+    { role: 'user', content: 'What is a black hole?' },
+    { role: 'assistant', content: scriptedAnswer },
+    { role: 'user', content: 'Why is it black?' },
+  ]);
   await expect(page.locator('#status')).toHaveText('Playback ended');
   await page.getByRole('button', { name: 'New conversation' }).click();
   await expect(page.locator('#transcript')).toBeEmpty();
@@ -2338,6 +2347,13 @@ test('complete answer, contextual follow-up and fresh conversation', async ({
   await expect(page.locator('#transcript')).toContainText('A new topic');
   await expect(page.locator('#status')).toHaveText('Playback ended');
   await expect(page.locator('#transcript')).not.toContainText('Earlier question');
+  await expect(fixtureNotice).toBeVisible();
+
+  await page.route('**/status', async (route) => {
+    const response = await route.fetch();
+    await route.fulfill({ json: { ...(await response.json()), fixtureProvider: false } });
+  });
+  await expect(fixtureNotice).toBeHidden();
 });
 
 test('an accepted question preserves a follow-up drafted while submission is pending', async ({

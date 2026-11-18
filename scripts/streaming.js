@@ -10,6 +10,7 @@ let notice = '';
 let audioOutput = null;
 const conversation = document.querySelector('#conversation');
 const question = document.querySelector('#text');
+const fixtureNotice = document.querySelector('#fixture-notice');
 const stopButton = document.querySelector('#stop');
 const composerActions = document.querySelector('.action-buttons');
 const example = document.querySelector('#example-question');
@@ -861,6 +862,7 @@ setInterval(async () => {
     const status = await (await fetch('/status', { signal: AbortSignal.timeout(10000) })).json();
     if (ticket !== epoch) return;
     if (conversation) {
+      fixtureNotice.hidden = !status.fixtureProvider;
       window.renderVoiceLibrary?.(status, preparationTicket);
       if (status.settings && !savingSettings && configTicket === settingsRevision) {
         renderSettings(status.settings, status.avatars);

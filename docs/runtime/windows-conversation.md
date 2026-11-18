@@ -116,6 +116,13 @@ Media should become available while later text is delayed. CPU protocol checks u
 instead: visit the printed loopback URL; those diagnostic bytes cannot establish
 playable media or GPU behaviour.
 
+Both fixture modes show a notice above the question box. Replies are scripted and
+can repeat the black-hole answer with an “Earlier question” line. For generated
+answers, stop the fixture, launch `./run.bat` with the backend key and existing paid
+budget ledger, and open [the conversation](http://127.0.0.1:8765). Ask “What is a
+black hole?”, wait for the turn to finish, then ask “Why is it black?”. Expect a
+generated answer that explains why light cannot escape from inside the event horizon.
+
 The provider fixture uses `.runtime/conversation-fixture-budget.sqlite3` by default,
 separate from real accounting. Its usage/costs are simulated. The CPU fixture uses
 its output directory's ledger. An explicit `-Budget` path overrides these defaults.

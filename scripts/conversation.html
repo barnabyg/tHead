@@ -426,6 +426,10 @@
       border-top: 1px solid #344139;
       padding: 18px 24px 20px;
     }
+    #fixture-notice {
+      margin-bottom: 8px;
+      color: #e5cfa5;
+    }
     textarea {
       display: block;
       width: 100%;
@@ -665,6 +669,9 @@
             ></div>
           </div>
           <div class="composer">
+            <p id="fixture-notice" class="turn-note" role="status" hidden>
+              Fixture mode. Replies are scripted. For generated answers, relaunch with run.bat.
+            </p>
             <label for="text">Question</label>
             <textarea
               id="text"
