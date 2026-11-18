@@ -64,6 +64,7 @@ class Turn(Session):
         self.request_id = ""
         self.progressive = True
         self.pair = ""
+        self.avatar_name = ""
         self.text = ["conversation"]
         self.provider = Provider()
 
@@ -641,6 +642,7 @@ class Conversation(Demonstration):
                         "truncated": t.truncated,
                         "usage": t.usage,
                         "pair": t.pair,
+                        "avatarName": t.avatar_name,
                         "model": t.provider.model,
                         "thinkingLevel": t.provider.thinking_level,
                     }
@@ -768,6 +770,7 @@ class Conversation(Demonstration):
             session.reservation = reservation
             session.request_id = request_id
             session.pair = self.active_pair
+            session.avatar_name = self.selected_pair.name
             session.messages, session.input_bound, session.omitted = messages, input_bound, omitted
             session.fault = fault
             self.current = session

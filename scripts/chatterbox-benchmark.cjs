@@ -82,7 +82,7 @@ async function main() {
     if (await page.locator('#settings-page').isHidden())
       await page.getByRole('button', { name: 'Settings', exact: true }).click();
     const started = performance.now();
-    await page.getByLabel('Avatar', { exact: true }).selectOption(identity);
+    await page.getByLabel('Current avatar', { exact: true }).selectOption(identity);
     await expect
       .poll(
         async () => {
@@ -247,7 +247,9 @@ async function main() {
       fs.renameSync(asset, backup);
       try {
         await page.getByRole('button', { name: 'Settings', exact: true }).click();
-        await page.getByLabel('Avatar', { exact: true }).selectOption('chatterbox-nano-1089');
+        await page
+          .getByLabel('Current avatar', { exact: true })
+          .selectOption('chatterbox-nano-1089');
         await expect
           .poll(async () => (await status()).error, { intervals: [100] })
           .toContain(kind === 'missing-reference' ? 'Reference' : 'model');

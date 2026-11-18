@@ -99,7 +99,8 @@ async function main() {
       } catch (error) {
         turn.error = String(error);
         turn.failedExperience = true;
-        await page.getByRole('button', { name: 'Stop', exact: true }).click();
+        const stop = page.getByRole('button', { name: 'Stop', exact: true });
+        if (await stop.isVisible()) await stop.click();
       }
       save();
       process.stdout.write(`Turn ${index}: ${turn.seconds ?? turn.error ?? 'invalid'} seconds\n`);

@@ -61,6 +61,16 @@
       display: flex;
       flex-direction: column;
     }
+    label {
+      display: block;
+      font-size: 13px;
+      color: #c7d2c9;
+      margin-bottom: 8px;
+    }
+    summary {
+      cursor: pointer;
+      padding: 5px 0;
+    }
     dialog {
       width: min(560px, calc(100vw - 28px));
       max-height: calc(100dvh - 28px);
@@ -140,10 +150,45 @@
     #settings-title {
       margin-top: 0;
     }
-    .settings-controls {
-      margin-top: 24px;
+    .settings-column {
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    .settings-group {
+      margin-top: 28px;
+      border-top: 1px solid #344139;
+      padding-top: 20px;
+    }
+    .settings-group h2 {
+      font-size: 20px;
+      margin: 0 0 16px;
+    }
+    .settings-group label {
+      margin-top: 16px;
+      font-weight: 600;
+    }
+    .settings-group p {
+      color: #bac8be;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .settings-group p:empty {
+      margin: 0;
+    }
+    .advanced {
+      margin-top: 20px;
+      border-top: 1px solid #344139;
+    }
+    .advanced summary {
+      padding: 14px 0;
+      font-weight: 600;
     }
     #token-limits input {
+      border: 1px solid #4b5b4f;
+      border-radius: 8px;
+      padding: 0 12px;
+      background: #141d17;
+      color: inherit;
       display: block;
       width: min(100%, 280px);
       min-height: 44px;
@@ -203,18 +248,22 @@
     }
     #conversation {
       margin: 0;
-      color: #d0dbd2;
-      font-size: 13px;
-      line-height: 1.6;
+      font-size: clamp(20px, 2.5vw, 34px);
+      font-weight: 600;
+      letter-spacing: -0.035em;
+      line-height: 1.15;
+      overflow-wrap: anywhere;
+    }
+    .voice-caption {
+      font-size: 14px;
+      color: #b4c2b8;
+      margin: 4px 0 0;
+    }
+    #portrait-size {
+      display: none;
     }
     .avatar-settings {
       padding: 0 4px;
-    }
-    label {
-      display: block;
-      font-size: 13px;
-      color: #c7d2c9;
-      margin-bottom: 8px;
     }
     #voices-dialog label {
       display: block;
@@ -260,21 +309,17 @@
       margin: auto;
       padding: 24px 0;
     }
-    .empty-state .spark {
-      color: #bce7a2;
-      font-size: 32px;
+    .empty-state h2 {
+      font-size: clamp(22px, 2.4vw, 34px);
+      font-weight: 500;
+      letter-spacing: -0.035em;
+      margin: 0 0 16px;
     }
-    .empty-state h3 {
-      font-size: 27px;
-      font-weight: 450;
-      letter-spacing: -0.7px;
-      margin: 18px 0 10px;
-    }
-    .empty-state p {
-      color: #aebbb1;
+    #example-question {
       font-size: 14px;
-      line-height: 1.7;
-      margin: 0;
+      font-weight: 500;
+      border-radius: 24px;
+      color: #d1e9c5;
     }
     .history:has(#transcript:not(:empty)) .empty-state {
       display: none;
@@ -297,10 +342,10 @@
       gap: 10px;
     }
     .message {
-      max-width: 95%;
+      max-width: min(95%, 65ch);
       padding: 14px 16px;
       border-radius: 14px;
-      font-size: 14px;
+      font-size: 16px;
       line-height: 1.65;
       white-space: pre-wrap;
       overflow-wrap: anywhere;
@@ -308,7 +353,7 @@
     .message strong {
       display: block;
       margin-bottom: 5px;
-      font-size: 11px;
+      font-size: 13px;
       letter-spacing: 0.6px;
       color: #bce7a2;
     }
@@ -324,10 +369,15 @@
     }
     .turn-note {
       margin: 0;
-      font-size: 11px;
+      font-size: 13px;
       color: #a6b5a9;
       line-height: 1.6;
       overflow-wrap: anywhere;
+    }
+    .turn-note.interrupted {
+      border-inline-start: 2px solid #d5b983;
+      padding-inline-start: 10px;
+      color: #e5cfa5;
     }
     #turn-usage {
       padding-left: 24px;
@@ -389,11 +439,13 @@
       gap: 8px;
       flex-shrink: 0;
     }
+    .action-buttons button {
+      min-width: 90px;
+    }
     #start {
       color: #172216;
       background: #bce7a2;
       border-color: #bce7a2;
-      min-width: 90px;
     }
     #start:hover:enabled {
       background: #d2f2be;
@@ -406,10 +458,6 @@
       margin-top: 16px;
       color: #9dad9f;
       font-size: 12px;
-    }
-    summary {
-      cursor: pointer;
-      padding: 5px 0;
     }
     .utility-content {
       max-height: 24vh;
@@ -437,7 +485,7 @@
         min-height: 0;
       }
       .topbar {
-        min-height: 100px;
+        min-height: 76px;
         gap: 10px;
       }
       .topbar-actions {
@@ -457,40 +505,49 @@
       }
       .workspace {
         grid-template-columns: 1fr;
-        grid-template-rows: minmax(160px, 28dvh) minmax(0, 1fr);
+        grid-template-rows: auto minmax(0, 1fr);
         gap: 14px;
       }
       .avatar-panel {
-        flex-direction: row;
-        gap: 14px;
+        display: grid;
+        grid-template-columns: 64px minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 10px;
       }
       .avatar-stage {
-        flex: 0 0 42%;
-        border-radius: 16px;
+        height: 64px;
+        border-radius: 12px;
       }
       .avatar-settings {
-        flex: 1;
-        min-width: 0;
-        align-self: center;
-        max-height: 100%;
+        max-height: 6rem;
         overflow: auto;
+        padding: 0;
       }
-      #pair {
-        font-size: 12px;
-        padding: 0.6rem 0.3rem;
+      #portrait-notice:empty {
+        margin: 0;
+      }
+      #portrait-size {
+        display: block;
+        max-width: 90px;
+        padding: 6px 10px;
+        font-size: 13px;
+        background: transparent;
+      }
+      .avatar-panel:has([aria-expanded="true"]) {
+        grid-template-columns: minmax(0, 1fr) auto;
+      }
+      .avatar-panel:has([aria-expanded="true"]) .avatar-stage {
+        grid-column: 1 / -1;
+        height: clamp(76px, 23dvh, 220px);
+      }
+      .avatar-panel:has([aria-expanded="true"]) :is(#portrait, #video) {
+        object-fit: contain;
       }
       .chat {
         border-radius: 16px;
       }
       .history {
         padding: 0 16px;
-      }
-      .empty-state h3 {
-        font-size: 23px;
-        margin-top: 8px;
-      }
-      .empty-state .spark {
-        display: none;
       }
       .composer {
         padding: 12px 14px;
@@ -504,7 +561,7 @@
       }
       .action-buttons button {
         padding: 0.6rem 0.75rem;
-        min-width: 0;
+        min-width: 72px;
       }
       .utilities {
         margin-top: 8px;
@@ -538,31 +595,35 @@
           >
             Settings
           </button>
-          <button type="button" id="stop" class="quiet">Stop</button>
           <button type="button" id="reset" class="quiet">New conversation</button>
         </nav>
       </header>
       <main class="workspace">
         <aside class="avatar-panel" aria-label="Your conversation partner">
-          <div class="avatar-stage">
+          <div class="avatar-stage" id="avatar-stage">
             <img id="portrait" alt="Conversation avatar">
             <!-- biome-ignore lint/a11y/useMediaCaption: Generated transcript is not a word-timed caption track; review when aligned captions are available. -->
             <video id="video" playsinline></video>
           </div>
           <div class="avatar-settings">
-            <p id="conversation">Loading the configured portrait and local English voice.</p>
+            <h1 id="conversation">Preparing avatar…</h1>
+            <p class="voice-caption">Synthetic speech</p>
             <p id="portrait-notice" role="status">Loading portrait…</p>
           </div>
+          <button
+            type="button"
+            id="portrait-size"
+            aria-controls="avatar-stage"
+            aria-expanded="false"
+          >
+            Expand portrait
+          </button>
         </aside>
         <section class="chat" aria-label="Conversation">
           <div class="history">
             <div class="empty-state">
-              <span class="spark" aria-hidden="true">✳</span>
-              <h3>Where shall we begin?</h3>
-              <p>
-                Ask a question, explore an idea, or follow your curiosity. Your conversation starts
-                here.
-              </p>
+              <h2>Where shall we begin?</h2>
+              <button type="button" id="example-question">What is a black hole?</button>
             </div>
             <div
               id="transcript"
@@ -577,8 +638,9 @@
               id="text"
               maxlength="1200"
               rows="2"
-              placeholder="What are you curious about?"
-            >What is a black hole?</textarea>
+              required
+              placeholder="Ask a question…"
+            ></textarea>
             <div class="composer-actions">
               <div class="status-line">
                 <span class="status-dot" aria-hidden="true"></span>
@@ -586,6 +648,7 @@
               </div>
               <div class="action-buttons">
                 <button type="button" id="start" disabled>Ask</button>
+                <button type="button" id="stop" hidden>Stop</button>
               </div>
             </div>
             <button type="button" id="play" hidden>Play audio/video</button>
@@ -593,77 +656,86 @@
         </section>
       </main>
       <main id="settings-page" aria-labelledby="settings-title" hidden>
-        <h1 id="settings-title" tabindex="-1">Settings</h1>
-        <button type="button" id="settings-back">Back to conversation</button>
-        <div class="settings-controls">
-          <label for="pair">Avatar</label>
-          <select id="pair" disabled></select>
-          <p id="pair-status" aria-live="polite">Preparing avatar</p>
-          <button type="button" id="create-avatar">Create avatar</button>
-          <button type="button" id="edit-avatar" hidden>Edit avatar</button>
-          <button type="button" id="delete-avatar" hidden>Delete avatar</button>
-          <p id="avatar-result" role="status"></p>
-          <p id="avatar-storage-error" role="status"></p>
-          <label for="default-avatar">Default avatar</label>
-          <select id="default-avatar" disabled aria-describedby="default-avatar-help"></select>
-          <p id="default-avatar-help">
-            Used when the app starts. Changing this keeps the current conversation's avatar.
-          </p>
-          <button type="button" id="open-voices">Voices</button>
-          <label for="model">Model</label>
-          <select id="model" disabled aria-describedby="model-availability"></select>
-          <p id="model-availability"></p>
-          <label for="thinking-level">Thinking level</label>
-          <select id="thinking-level" disabled aria-describedby="thinking-help"></select>
-          <p id="thinking-help">
-            Higher thinking levels can explore answers more deeply but take longer. The response
-            limit still applies.
-          </p>
-          <form id="token-limits">
-            <label for="max-output-tokens">Maximum output tokens</label>
-            <input
-              id="max-output-tokens"
-              type="number"
-              min="16"
-              max="32768"
-              step="1"
-              required
-              disabled
-              aria-describedby="max-output-help"
-            >
-            <p id="max-output-help">Hard cap per response, including thinking tokens.</p>
-            <label for="answer-token-target">Answer token target</label>
-            <input
-              id="answer-token-target"
-              type="number"
-              min="1"
-              max="32768"
-              step="1"
-              required
-              disabled
-              aria-describedby="answer-target-help"
-            >
-            <p id="answer-target-help">
-              Requested answer length, not a hard cap. Must not exceed maximum output tokens.
+        <div class="settings-column">
+          <h1 id="settings-title" tabindex="-1">Settings</h1>
+          <button type="button" id="settings-back">Back to conversation</button>
+          <section class="settings-group">
+            <h2>Avatar and voice</h2>
+            <label for="pair">Current avatar</label>
+            <select id="pair" disabled></select>
+            <p id="pair-status" aria-live="polite">Preparing avatar</p>
+            <button type="button" id="create-avatar">Create avatar</button>
+            <button type="button" id="edit-avatar" hidden>Edit avatar</button>
+            <button type="button" id="delete-avatar" hidden>Delete avatar</button>
+            <p id="avatar-result" role="status"></p>
+            <p id="avatar-storage-error" role="status"></p>
+            <label for="default-avatar">Avatar at startup</label>
+            <select id="default-avatar" disabled aria-describedby="default-avatar-help"></select>
+            <p id="default-avatar-help">
+              Used when the app starts. Changing this keeps the current conversation's avatar.
             </p>
-            <label for="input-token-limit">Input token allowance</label>
-            <input
-              id="input-token-limit"
-              type="number"
-              min="512"
-              max="131072"
-              step="1"
-              required
-              disabled
-              aria-describedby="input-limit-help"
-            >
-            <p id="input-limit-help">
-              Conservative estimate for the question, instructions and history. Older exchanges are
-              omitted to fit.
+            <button type="button" id="open-voices">Voices</button>
+          </section>
+          <section class="settings-group">
+            <h2>Response settings</h2>
+            <label for="model">Model</label>
+            <select id="model" disabled aria-describedby="model-availability"></select>
+            <p id="model-availability"></p>
+            <label for="thinking-level">Thinking level</label>
+            <select id="thinking-level" disabled aria-describedby="thinking-help"></select>
+            <p id="thinking-help">
+              Higher thinking levels can explore answers more deeply but take longer. The response
+              limit still applies.
             </p>
-            <p>Token limits apply to the next question and reset when the app restarts.</p>
-            <button type="submit" id="save-token-limits" disabled>Save token limits</button>
-          </form>
+            <details class="advanced">
+              <summary>Advanced token limits</summary>
+              <form id="token-limits">
+                <label for="max-output-tokens">Maximum output tokens</label>
+                <input
+                  id="max-output-tokens"
+                  type="number"
+                  min="16"
+                  max="32768"
+                  step="1"
+                  required
+                  disabled
+                  aria-describedby="max-output-help"
+                >
+                <p id="max-output-help">Hard cap per response, including thinking tokens.</p>
+                <label for="answer-token-target">Answer token target</label>
+                <input
+                  id="answer-token-target"
+                  type="number"
+                  min="1"
+                  max="32768"
+                  step="1"
+                  required
+                  disabled
+                  aria-describedby="answer-target-help"
+                >
+                <p id="answer-target-help">
+                  Requested answer length, not a hard cap. Must not exceed maximum output tokens.
+                </p>
+                <label for="input-token-limit">Input token allowance</label>
+                <input
+                  id="input-token-limit"
+                  type="number"
+                  min="512"
+                  max="131072"
+                  step="1"
+                  required
+                  disabled
+                  aria-describedby="input-limit-help"
+                >
+                <p id="input-limit-help">
+                  Conservative estimate for the question, instructions and history. Older exchanges
+                  are omitted to fit.
+                </p>
+                <p>Token limits apply to the next question and reset when the app restarts.</p>
+                <button type="submit" id="save-token-limits" disabled>Save token limits</button>
+              </form>
+            </details>
+          </section>
           <p id="settings-status" role="status" aria-live="polite"></p>
         </div>
       </main>

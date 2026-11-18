@@ -1,7 +1,7 @@
 # Named avatars (extension after Phase 6)
 
 Issue #42 extends the original Phase 6 pair-selector scope. Historical measurements
-below retain their original labels. The selector is **Avatar**; built-ins are
+below retain their original labels. The selector is **Current avatar**; built-ins are
 **JFK** (`jfk-zira`, Zira) and **Grace** (`hopper-hazel`, Hazel). Avatar identity,
 name, portrait and voice are separate; multiple avatars can share a voice.
 
@@ -97,7 +97,7 @@ digital results from listening confirmation.
 
 ## Between-turn selection (#31)
 
-Open **Settings** and choose **Avatar** after playback ends or after Stop releases resources.
+Open **Settings** and choose **Current avatar** after playback ends or after Stop releases resources.
 The labelled active pair changes only when portrait and voice preparation finish;
 Ask and the selector remain disabled during preparation. Stop and New conversation
 remain usable. Switching keeps the transcript/context; New conversation clears

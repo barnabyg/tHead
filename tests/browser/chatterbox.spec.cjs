@@ -90,7 +90,7 @@ async function status(request, info) {
 async function select(page, request, info, identity) {
   if (await page.locator('#settings-page').isHidden())
     await page.getByRole('button', { name: 'Settings', exact: true }).click();
-  await page.getByLabel('Avatar', { exact: true }).selectOption(identity);
+  await page.getByLabel('Current avatar', { exact: true }).selectOption(identity);
   await expect
     .poll(async () => {
       const value = await status(request, info);
