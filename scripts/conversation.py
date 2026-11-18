@@ -24,7 +24,14 @@ from chatterbox_voice import ChatterboxVoice
 from model_catalog import FIXTURE_MODELS, MODEL, CatalogError, discover
 from pairs import DEFAULT_PAIR, Avatar
 from prepare import RUNTIME
-from provider import Provider, validate_level, validate_model
+from provider import (
+    ANSWER_TOKEN_TARGET,
+    INPUT_BOUND,
+    OUTPUT_TOKENS,
+    Provider,
+    validate_level,
+    validate_model,
+)
 from shutdown import cleanup, join_worker
 from speech import SpeechVoice, Voice
 from streaming import Demonstration, LoopbackServer, Session, handler
@@ -118,7 +125,7 @@ class Conversation(Demonstration):
         directory: Path,
         test_backend: bool = False,
         diagnostics: bool = False,
-        model: str = MODEL,
+        model: str | None = None,
         fixture: bool = False,
         budget_path: Path | None = None,
         initialize_budget: bool = False,
@@ -166,7 +173,27 @@ class Conversation(Demonstration):
         self.transcript: list[Turn] = []
         self.cancelled_requests: set[str] = set()
         offline = test_backend or fixture
-        self.provider = Provider(model, offline, models=FIXTURE_MODELS if offline else {})
+        models = FIXTURE_MODELS if offline else {}
+        saved = self.avatars.preferences()
+        startup_model = model or saved.get("model", MODEL)
+        level = saved.get("thinkingLevel") if startup_model == saved.get("model") else None
+        info = models.get(startup_model)
+        if info and level not in info.levels:
+            level = info.default
+        self.invalid_saved_limits = False
+        try:
+            self.provider = Provider(
+                startup_model,
+                offline,
+                level,
+                models=models,
+                max_output_tokens=int(saved.get("maxOutputTokens", OUTPUT_TOKENS)),
+                answer_token_target=int(saved.get("answerTokenTarget", ANSWER_TOKEN_TARGET)),
+                input_token_limit=int(saved.get("inputTokenLimit", INPUT_BOUND)),
+            )
+        except ValueError:
+            self.provider = Provider(startup_model, offline, level, models=models)
+            self.invalid_saved_limits = True
         self.catalog_message = "" if offline else "Loading OpenAI models and pricing…"
         self.catalog_worker: threading.Thread | None = None
         self.settings_message = ""
@@ -285,9 +312,19 @@ class Conversation(Demonstration):
                 ),
                 input_token_limit=data.get("inputTokenLimit", self.provider.input_token_limit),
             )
+            changes: dict[str, Any] = {}
+            if "model" in data or "thinkingLevel" in data:
+                changes.update(model=model, thinkingLevel=level)
+            limits = provider.token_settings()
+            saving_limits = bool(data.keys() & limits.keys())
+            if saving_limits:
+                changes.update(limits)
             if "defaultAvatar" in data:
-                self.avatars.set_default_avatar(data["defaultAvatar"])
+                changes["default_avatar"] = data["defaultAvatar"]
                 message = "Default avatar saved; applies when the app next starts."
+            self.avatars.save_preferences(changes)
+            if saving_limits:
+                self.invalid_saved_limits = False
             self.provider = provider
             self.settings_message = message
             return self.status()
@@ -297,6 +334,7 @@ class Conversation(Demonstration):
             "model": self.provider.model,
             "thinkingLevel": self.provider.thinking_level,
             **self.provider.token_settings(),
+            "invalidSavedLimits": self.invalid_saved_limits,
             "defaultAvatar": self.avatars.default_avatar(),
             "message": self.settings_message,
             "catalogMessage": self.catalog_message,
@@ -902,7 +940,7 @@ def main() -> None:
     parser.add_argument("--test-backend", action="store_true")
     parser.add_argument("--fixture-provider", action="store_true")
     parser.add_argument("--diagnostics", action="store_true")
-    parser.add_argument("--model", default=os.environ.get("THEAD_MODEL", MODEL))
+    parser.add_argument("--model", default=os.environ.get("THEAD_MODEL"))
     parser.add_argument("--budget", type=Path)
     parser.add_argument("--initialize-budget", action="store_true")
     parser.add_argument("--user-data", type=Path)

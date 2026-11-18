@@ -678,6 +678,7 @@
           </section>
           <section class="settings-group">
             <h2>Response settings</h2>
+            <p>Saved settings apply to your next question and survive app restarts.</p>
             <label for="model">Model</label>
             <select id="model" disabled aria-describedby="model-availability"></select>
             <p id="model-availability"></p>
@@ -735,7 +736,9 @@
                   Conservative estimate for the question, instructions and history. Older exchanges
                   are omitted to fit.
                 </p>
-                <p>Token limits apply to the next question and reset when the app restarts.</p>
+                <p id="token-limits-error" role="status" hidden>
+                  Saved limits were invalid. The defaults apply until you save new limits.
+                </p>
                 <button type="submit" id="save-token-limits" disabled>Save token limits</button>
               </form>
             </details>

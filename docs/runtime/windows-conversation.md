@@ -183,11 +183,13 @@ Named avatars are **JFK** and **Grace**. Use `-Avatar hopper-hazel` or
 
 ## Model selection in Settings
 
-**Model** changes apply to subsequent questions in the current server process,
-including after New conversation. An active turn retains its captured model,
-context and price reservation. Restarting uses `THEAD_MODEL`, otherwise the compatible default `gpt-6-luna`. Browser choices do
-not write environment variables or persist across restarts. Unknown startup models
-remain blocked by validation/pricing; choose an available model to recover.
+**Model** changes apply to subsequent questions. An active turn retains its captured
+model, context and price reservation. The server saves the selected model, thinking
+level, token limits and startup avatar in `%LOCALAPPDATA%\tHead\avatars.sqlite3`
+(or the directory selected with `-UserData`). Clearing browser data has no effect
+on these preferences. At startup, an explicit `--model` or `THEAD_MODEL` overrides the
+saved model. A fresh installation defaults to `gpt-6-luna`. If a saved model is no
+longer available, select an eligible model in Settings to resume.
 
 Settings fetches the models visible to the backend API key at startup and hourly while the
 server is running. The Model dropdown shows models with confirmed text input, text output,
@@ -215,8 +217,8 @@ model index. **Model default** delegates to the provider by omitting the reasoni
 parameter. It is the only option when supported levels cannot be established.
 Luna starts at `none` when its page confirms support, preserving the existing
 low-latency setting. For other models the app uses the documented default when known.
-The level lasts for the server process, survives New conversation and changes
-only future turns. Restart chooses the initial level for the startup model.
+The saved level applies to future turns and survives New conversation and app restarts.
+Starting with a different model override uses that model's initial level.
 Switching models retains a compatible level; moving from Luna's `none` to Sol
 visibly selects `medium` with an explanation. Unknown/unavailable models show a
 disabled level control. Validation never dispatches an unsupported combination.
@@ -250,8 +252,7 @@ In Settings, open **Response settings → Advanced token limits** to edit three 
 | Input token allowance | 8192 | 512–131072 | Conservative UTF-8-based allowance for the current question, instructions and history; whole older exchanges are omitted to fit. |
 
 Changes apply to future questions. A response in progress keeps its captured limits and
-reservation. Limits survive page reloads, model switches and New conversation, and reset
-to their defaults when the server restarts, matching the model/thinking settings. Invalid
+reservation. Limits survive page reloads, model switches, New conversation and app restarts. Invalid
 values leave all settings unchanged. A question that cannot fit the input allowance is
 rejected before reserving cost or calling the provider. The existing 4096-character answer,
 two-minute speech and three-minute provider safeguards still apply independently.
@@ -263,8 +264,10 @@ command launches the no-cost CPU fixture without downloads, credentials or a GPU
 pwsh -NoProfile -Command "Set-Location C:/docs/git/tHead; ./run.bat -TestBackend -Port 8765"
 ```
 
-Open [the local app](http://127.0.0.1:8765), then Settings. Check defaults of 384, 240 and
-8192. Save 1024, 800 and 512; reload and check the values remain. Try a target of 1025:
+Open [the local app](http://127.0.0.1:8765), then Settings. On first use the limits are
+384, 240 and 8192. Select a model and thinking level, then save limits of 1024, 800
+and 512. Stop the server with Ctrl+C and run the same command again. Open Settings
+in a private browser window and check all five values. Try a target of 1025:
 expect an error and editable controls; correct it to 800 and save again. Ask a short
 question and a follow-up: Timing diagnostics should show `run.tokenLimits` with the saved
 values, `max_output_tokens: 1024` in the fixture provider-request event, and omitted older

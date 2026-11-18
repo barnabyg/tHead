@@ -112,6 +112,8 @@ between turns in Settings; built-in avatars remain permanent. Saved avatars surv
 [the avatar guide](docs/runtime/windows-avatars.md) for limits, storage and testing.
 Choose **Avatar at startup** in Settings to select the avatar used at startup. This
 preference survives restarts without switching the current conversation's avatar.
+The app also saves your model, thinking level and advanced token limits locally in
+`%LOCALAPPDATA%\tHead\avatars.sqlite3`. Clearing browser data keeps these choices.
 
 The [isolated Chatterbox evaluation](docs/runtime/chatterbox-evaluation.md) provides
 an opt-in pinned reference-audio audition and [FlashHead integration harness](docs/runtime/chatterbox-integration.md).
