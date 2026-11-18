@@ -494,6 +494,21 @@ async function openSettings(page) {
   }
 }
 
+async function openSessionDetails(page) {
+  await openSettings(page);
+  const details = page.locator('#session-details');
+  if (!(await details.evaluate((element) => element.open))) {
+    await details.getByText('Session details', { exact: true }).click();
+  }
+}
+
+async function selectDiagnostic(page, label, fault) {
+  const inConversation = await page.locator('.workspace').isVisible();
+  await openSessionDetails(page);
+  await page.getByLabel(label, { exact: true }).selectOption(fault);
+  if (inConversation) await backToConversation(page);
+}
+
 async function settledStatus(request, url) {
   let status;
   // Playback can end before reservation settlement and the final transcript save.
@@ -920,7 +935,6 @@ test.beforeEach(async ({ page }, info) => {
   await expect(
     page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }),
   ).toBeEnabled();
-  await page.getByText('Session details', { exact: true }).click();
 });
 
 for (const custom of [false, true]) {
@@ -1010,6 +1024,49 @@ test('response settings survive a server restart in a fresh browser profile', as
   } finally {
     await fresh.close();
   }
+});
+
+test('avatar resolution sizes the portrait and video and survives restarting the app', async ({
+  page,
+}, info) => {
+  await page.setViewportSize({ width: 1280, height: 768 });
+  const portrait = page.locator('#portrait');
+  const video = page.locator('#video');
+  const stage = page.locator('#avatar-stage');
+  const resolution = page.getByLabel('Avatar resolution', { exact: true });
+  await expect(portrait).toHaveCSS('width', '512px');
+  for (const size of [640, 768]) {
+    await openSettings(page);
+    await resolution.selectOption(String(size));
+    await expect(page.locator('#settings-status')).toContainText('Saved');
+    await backToConversation(page);
+    await expect(portrait).toHaveCSS('width', `${size}px`);
+    await expect(video).toHaveCSS('height', `${size}px`);
+  }
+  await expect(portrait).toBeInViewport({ ratio: 1 });
+  expect(await stage.evaluate((element) => element.scrollHeight)).toBe(768);
+  expect(await stage.evaluate((element) => element.clientHeight)).toBe(768);
+  const frame = await portrait.boundingBox();
+  for (const selector of ['.brand', '#conversation', '.voice-caption']) {
+    expect((await page.locator(selector).boundingBox()).x).toBeGreaterThanOrEqual(
+      frame.x + frame.width,
+    );
+  }
+  await page.setViewportSize({ width: 1024, height: 760 });
+  await expect(portrait).toHaveCSS('width', '768px');
+  await stage.evaluate((element) => element.scrollTo(element.scrollWidth, element.scrollHeight));
+  expect(await stage.evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
+  expect(await stage.evaluate((element) => element.scrollLeft)).toBeGreaterThan(0);
+  await expect(page.getByRole('button', { name: 'Ask', exact: true })).toBeInViewport({ ratio: 1 });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole('button', { name: 'Expand portrait' }).click();
+  await expect(portrait).toBeInViewport({ ratio: 1 });
+  await expect(page.getByRole('button', { name: 'Ask', exact: true })).toBeInViewport();
+  await stopFixture(info);
+  await startFixture(info);
+  await page.goto(info.url);
+  await openSettings(page);
+  await expect(resolution).toHaveValue('768');
 });
 
 test('default avatar reports a failed save and restores the saved choice', async ({
@@ -1125,7 +1182,7 @@ test('model settings validate exact identifiers and switch contextual turns with
     expect((await rejected.json()).error).toContain('model');
   }
   await backToConversation(page);
-  await page.getByLabel('Diagnostic fault').selectOption('llm-connect');
+  await selectDiagnostic(page, 'Diagnostic fault', 'llm-connect');
   await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await openSettings(page);
   await page.getByLabel('Model', { exact: true }).selectOption('gpt-6.1-sol');
@@ -1140,7 +1197,7 @@ test('model settings validate exact identifiers and switch contextual turns with
       async () => (await (await request.get(`${info.url}/status`)).json()).run.usage.estimated_usd,
     )
     .toBe(0.000025);
-  await page.getByLabel('Diagnostic fault').selectOption('');
+  await selectDiagnostic(page, 'Diagnostic fault', '');
   await page.getByLabel('Question', { exact: true }).fill('How do we detect one?');
   await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await expect
@@ -1196,7 +1253,7 @@ test('token limits save together, survive refresh and control future requests an
   await expect(page.getByLabel('Answer token target', { exact: true })).toHaveCount(0);
   await expect(input).toHaveValue('8192');
   await backToConversation(page);
-  await page.getByLabel('Diagnostic fault').selectOption('llm-connect');
+  await selectDiagnostic(page, 'Diagnostic fault', 'llm-connect');
   await page.getByRole('button', { name: 'Ask', exact: true }).click();
   await openSettings(page);
   await output.fill('128');
@@ -1309,7 +1366,7 @@ test('thinking compatibility, active capture and provider rejection recover with
   await page.getByLabel('Thinking level', { exact: true }).selectOption('high');
   await expect(page.locator('#settings-status')).toContainText('Saved');
   await backToConversation(page);
-  await page.getByLabel('Diagnostic fault').selectOption('llm-connect');
+  await selectDiagnostic(page, 'Diagnostic fault', 'llm-connect');
   await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await openSettings(page);
   await page.getByLabel('Thinking level', { exact: true }).selectOption('low');
@@ -1323,7 +1380,7 @@ test('thinking compatibility, active capture and provider rejection recover with
     page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }),
   ).toBeEnabled();
   await page.unroute('**/segment?*');
-  await page.getByLabel('Diagnostic fault').selectOption('llm-settings');
+  await selectDiagnostic(page, 'Diagnostic fault', 'llm-settings');
   await page.getByLabel('Question', { exact: true }).fill('Test the rejected settings');
   await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await expect(page.locator('#status')).toContainText('change Settings and retry');
@@ -1333,7 +1390,7 @@ test('thinking compatibility, active capture and provider rejection recover with
       await route.fulfill({ path: 'tests/fixtures/browser.mp4', contentType: 'video/mp4' });
     else await route.fulfill({ status: 204, body: '' });
   });
-  await page.getByLabel('Diagnostic fault').selectOption('');
+  await selectDiagnostic(page, 'Diagnostic fault', '');
   await page.getByLabel('Question', { exact: true }).fill('Recovery follow-up');
   await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await expect
@@ -1705,12 +1762,12 @@ test('PNG creation and saved avatar preparation errors recover without losing he
     (await request.get(`${info.url}/portrait?avatar=${saved.id}`)).headers()['content-type'],
   ).toBe('image/png');
   await expect(page.getByLabel('Current avatar', { exact: true }).locator('option')).toHaveCount(3);
-  await page.getByLabel('Pair diagnostic', { exact: true }).selectOption('pair-voice-missing');
+  await selectDiagnostic(page, 'Pair diagnostic', 'pair-voice-missing');
   await openSettings(page);
   await page.getByLabel('Current avatar', { exact: true }).selectOption(saved.id);
   await expect(page.locator('#pair-status')).toContainText('PNG avatar preparation failed');
   expect((await (await request.get(`${info.url}/status`)).json()).activePair).toBe('jfk-zira');
-  await page.getByLabel('Pair diagnostic', { exact: true }).selectOption('');
+  await selectDiagnostic(page, 'Pair diagnostic', '');
   await openSettings(page);
   await page.getByLabel('Current avatar', { exact: true }).selectOption('jfk-zira');
   await expect(
@@ -1830,7 +1887,7 @@ test('portrait stays visible through preparation, playback, Stop, reset and pair
   expect(response.headers()['content-type']).toBe('image/jpeg');
   expect(await response.body()).toEqual(fs.readFileSync('tests/fixtures/portrait.jpg'));
   expect((await request.get(`${info.url}/portrait?pair=../../README.md`)).status()).toBe(400);
-  await page.getByLabel('Diagnostic fault').selectOption('llm-delay');
+  await selectDiagnostic(page, 'Diagnostic fault', 'llm-delay');
   await backToConversation(page);
   await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await expect(portrait).toHaveCSS('opacity', '1');
@@ -1841,7 +1898,7 @@ test('portrait stays visible through preparation, playback, Stop, reset and pair
   await page.getByRole('button', { name: 'New conversation' }).click();
   await expect(portrait).toHaveClass('loaded');
   await expect(page.locator('#transcript')).toBeEmpty();
-  await page.getByLabel('Diagnostic fault').selectOption('');
+  await selectDiagnostic(page, 'Diagnostic fault', '');
   await expect(
     page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }),
   ).toBeEnabled();
@@ -1858,7 +1915,7 @@ test('portrait stays visible through preparation, playback, Stop, reset and pair
   await expect(
     page.getByRole('img', { name: 'Grace portrait', exact: true, includeHidden: true }),
   ).toHaveClass('loaded');
-  await page.getByLabel('Pair diagnostic', { exact: true }).selectOption('pair-prepare');
+  await selectDiagnostic(page, 'Pair diagnostic', 'pair-prepare');
   await openSettings(page);
   await page.getByLabel('Current avatar', { exact: true }).selectOption('jfk-zira');
   await expect(page.locator('#pair-status')).toContainText('failed');
@@ -1870,7 +1927,6 @@ test('portrait stays visible through preparation, playback, Stop, reset and pair
 test('compact layout keeps portrait and composer on screen while the transcript scrolls', async ({
   page,
 }) => {
-  await page.getByText('Session details', { exact: true }).click();
   await page.setViewportSize({ width: 390, height: 844 });
   const toggle = page.getByRole('button', { name: 'Expand portrait' });
   const compact = await page.locator('.avatar-stage').boundingBox();
@@ -1901,10 +1957,7 @@ test('compact layout keeps portrait and composer on screen while the transcript 
     await page.locator('.history').evaluate((element) => {
       element.scrollTop = 0;
     });
-    const panel = await page.locator('.avatar-panel').boundingBox();
-    const settings = await page.locator('.avatar-settings').boundingBox();
-    expect(settings.y).toBeGreaterThanOrEqual(panel.y);
-    expect(settings.y + settings.height).toBeLessThanOrEqual(panel.y + panel.height);
+    await expect(page.locator('.avatar-settings')).toBeInViewport({ ratio: 1 });
     await expect(page.locator('#portrait')).toBeInViewport({ ratio: 1 });
     await expect(ask).toBeInViewport({ ratio: 1 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
@@ -2015,7 +2068,7 @@ test('switch both directions between turns, reject busy selection, retain contex
   expect(followup.run.pair).toBe('hopper-hazel');
   await expect(page.locator('.answer strong')).toHaveText(['JFK:', 'Grace:']);
   expect(followup.run.answer).toContain('Earlier question: What is a black hole?');
-  await page.getByLabel('Diagnostic fault').selectOption('llm-delay');
+  await selectDiagnostic(page, 'Diagnostic fault', 'llm-delay');
   await expect(ask).toBeEnabled();
   await backToConversation(page);
   await page.getByLabel('Question', { exact: true }).fill('An interrupted follow-up');
@@ -2050,7 +2103,7 @@ test('reset during loading retains choice, reject overlapping selection and expi
   await expect(page.locator('#status')).toHaveText('Playback ended');
   const before = await settledStatus(request, info.url);
   expect(before.budget.estimated_usd).toBeGreaterThan(0);
-  await page.getByLabel('Pair diagnostic', { exact: true }).selectOption('pair-delay');
+  await selectDiagnostic(page, 'Pair diagnostic', 'pair-delay');
   await expect(pair).toBeEnabled();
   await openSettings(page);
   await pair.selectOption('hopper-hazel');
@@ -2103,7 +2156,7 @@ for (const fault of [
     await expect(page.locator('#status')).toHaveText('Playback ended');
     const before = await settledStatus(request, info.url);
     expect(before.budget.estimated_usd).toBeGreaterThan(0);
-    await page.getByLabel('Pair diagnostic', { exact: true }).selectOption(fault);
+    await selectDiagnostic(page, 'Pair diagnostic', fault);
     await expect(pair).toBeEnabled();
     await openSettings(page);
     await pair.selectOption('hopper-hazel');
@@ -2116,7 +2169,7 @@ for (const fault of [
     expect(failed.ready).toBe(false);
     expect(failed.budget.estimated_usd).toBe(before.budget.estimated_usd);
     expect(failed.transcript).toEqual(before.transcript);
-    await page.getByLabel('Pair diagnostic', { exact: true }).selectOption('');
+    await selectDiagnostic(page, 'Pair diagnostic', '');
     await openSettings(page);
     await pair.selectOption('jfk-zira');
     await expect(ask).toBeEnabled();
@@ -2157,7 +2210,7 @@ test('late old media and delayed failed selection cannot revive playback after r
   await received;
   await page.getByRole('button', { name: 'Stop', exact: true }).click();
   await expect(pair).toBeEnabled();
-  await page.getByLabel('Pair diagnostic', { exact: true }).selectOption('pair-delay-fail');
+  await selectDiagnostic(page, 'Pair diagnostic', 'pair-delay-fail');
   await openSettings(page);
   await pair.selectOption('hopper-hazel');
   await expect(page.locator('#pair-status')).toContainText('Preparing Grace');
@@ -2170,7 +2223,7 @@ test('late old media and delayed failed selection cannot revive playback after r
   expect(failed.selectedPair).toBe('hopper-hazel');
   expect(failed.activePair).toBe('jfk-zira');
   expect(failed.run).toBeNull();
-  await page.getByLabel('Pair diagnostic', { exact: true }).selectOption('');
+  await selectDiagnostic(page, 'Pair diagnostic', '');
   await openSettings(page);
   await pair.selectOption('jfk-zira');
   await expect(ask).toBeEnabled();
@@ -2316,9 +2369,8 @@ test('Session details combines turn usage, failures and interruptions without re
   request,
 }, info) => {
   const ask = page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true });
-  const details = page
-    .locator('details')
-    .filter({ has: page.getByText('Session details', { exact: true }) });
+  const details = page.locator('#settings-page #session-details');
+  await expect(details).toBeHidden();
   const turns = details
     .getByRole('list', { name: 'Usage by conversation turn' })
     .getByRole('listitem');
@@ -2329,6 +2381,7 @@ test('Session details combines turn usage, failures and interruptions without re
     await backToConversation(page);
     await ask.click();
     await expect(page.locator('#status')).toHaveText('Playback ended');
+    await openSessionDetails(page);
     await expect(turns.nth(index)).toContainText(`Turn ${index + 1}: ${question}`);
     await expect(turns.nth(index)).toContainText(
       'complete — Tokens: 100 input / 25 output (10 reasoning, included in output); estimated USD',
@@ -2342,22 +2395,24 @@ test('Session details combines turn usage, failures and interruptions without re
   await expect(details.getByLabel('Pair diagnostic', { exact: true })).toBeVisible();
 
   await expect(ask).toBeEnabled();
-  await page.getByLabel('Diagnostic fault').selectOption('llm-delay');
+  await selectDiagnostic(page, 'Diagnostic fault', 'llm-delay');
   await backToConversation(page);
   await page.getByLabel('Question', { exact: true }).fill('Interrupted question');
   await backToConversation(page);
   await ask.click();
+  await openSessionDetails(page);
   await expect(turns.nth(2)).toContainText('Turn 3: Interrupted question');
   await page.getByRole('button', { name: 'Stop', exact: true }).click();
   await expect(turns.nth(2)).toContainText('Interrupted — Tokens: unknown input / unknown output');
   await expect(turns.nth(2)).toContainText('conservative allowance; final usage unavailable');
 
   await expect(ask).toBeEnabled();
-  await page.getByLabel('Diagnostic fault').selectOption('llm');
+  await selectDiagnostic(page, 'Diagnostic fault', 'llm');
   await backToConversation(page);
   await page.getByLabel('Question', { exact: true }).fill('Failed question');
   await backToConversation(page);
   await ask.click();
+  await openSessionDetails(page);
   await expect(turns.nth(3)).toContainText('Turn 4: Failed question');
   await expect(turns.nth(3)).toContainText('failed — Tokens: unknown input / unknown output');
   await expect(turns.nth(3)).toContainText('conservative allowance; final usage unavailable');
@@ -2404,7 +2459,7 @@ test('Stop cancels an accepted request whose start reply is delayed', async ({
     await gate;
     await route.fulfill({ response });
   });
-  await page.getByLabel('Diagnostic fault').selectOption('llm-delay');
+  await selectDiagnostic(page, 'Diagnostic fault', 'llm-delay');
   await backToConversation(page);
   await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await accept;
@@ -2430,7 +2485,7 @@ test('repeated Stop across delayed stages retains questions and excludes interru
     ['tts-delay', 'tts-start'],
   ]) {
     await expect(ask).toBeEnabled();
-    await page.getByLabel('Diagnostic fault').selectOption(fault);
+    await selectDiagnostic(page, 'Diagnostic fault', fault);
     await backToConversation(page);
     await page.getByLabel('Question', { exact: true }).fill(`Interrupted during ${fault}`);
     await ask.click();
@@ -2448,7 +2503,7 @@ test('repeated Stop across delayed stages retains questions and excludes interru
     expect(stopped.run.events.some((event) => event.event === 'resources-released')).toBe(true);
     const question = stopped.transcript.at(-1).question;
     const spent = stopped.budget.estimated_usd;
-    await page.getByLabel('Diagnostic fault').selectOption('');
+    await selectDiagnostic(page, 'Diagnostic fault', '');
     await backToConversation(page);
     await page.getByLabel('Question', { exact: true }).fill(`Replacement after ${fault}`);
     await backToConversation(page);
@@ -2467,7 +2522,7 @@ test('repeated Stop across delayed stages retains questions and excludes interru
 test('busy reset rejects late text and safe rendering keeps provider markup literal', async ({
   page,
 }) => {
-  await page.getByLabel('Diagnostic fault').selectOption('tts-delay');
+  await selectDiagnostic(page, 'Diagnostic fault', 'tts-delay');
   await backToConversation(page);
   await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await expect(page.locator('#transcript')).toContainText('You: What is a black hole?');
@@ -2476,7 +2531,7 @@ test('busy reset rejects late text and safe rendering keeps provider markup lite
   await expect(
     page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }),
   ).toBeEnabled();
-  await page.getByLabel('Diagnostic fault').selectOption('markup');
+  await selectDiagnostic(page, 'Diagnostic fault', 'markup');
   await backToConversation(page);
   await page.getByLabel('Question', { exact: true }).fill('Show literal markup');
   await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
@@ -2492,7 +2547,7 @@ test('provider, TTS and media failures recover, then budget rejection prevents d
   await page.unroute('**/segment?*');
   const question = page.getByLabel('Question', { exact: true });
   for (const fault of ['llm', 'missing-completion', 'tts', 'media']) {
-    await page.getByLabel('Diagnostic fault').selectOption(fault);
+    await selectDiagnostic(page, 'Diagnostic fault', fault);
     await backToConversation(page);
     await question.fill(`Exercise ${fault} failure`);
     await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
@@ -2508,7 +2563,7 @@ test('provider, TTS and media failures recover, then budget rejection prevents d
         await route.fulfill({ path: 'tests/fixtures/browser.mp4', contentType: 'video/mp4' });
       else await route.fulfill({ status: 204, body: '' });
     });
-    await page.getByLabel('Diagnostic fault').selectOption('');
+    await selectDiagnostic(page, 'Diagnostic fault', '');
     await backToConversation(page);
     await question.fill(`Retry after ${fault} failure`);
     await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
@@ -2539,7 +2594,7 @@ test('provider, TTS and media failures recover, then budget rejection prevents d
     ],
     { timeout: 30_000 },
   );
-  await page.getByLabel('Diagnostic fault').selectOption('');
+  await selectDiagnostic(page, 'Diagnostic fault', '');
   const before = await (await request.get(`${info.url}/status`)).json();
   await backToConversation(page);
   await question.fill('This question exceeds the remaining budget');

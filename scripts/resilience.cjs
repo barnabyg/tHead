@@ -29,6 +29,15 @@ async function main() {
     const stop = page.getByRole('button', { name: 'Stop', exact: true });
     const reset = page.getByRole('button', { name: 'New conversation' });
     const fault = page.getByLabel('Diagnostic fault');
+    const details = page.locator('#session-details');
+    const setFault = async (probe) => {
+      await page.getByRole('button', { name: 'Settings', exact: true }).click();
+      if (!(await details.evaluate((element) => element.open))) {
+        await details.getByText('Session details', { exact: true }).click();
+      }
+      await fault.selectOption(probe);
+      await page.getByRole('button', { name: 'Back to conversation' }).click();
+    };
     const questionInput = page.getByLabel('Question', { exact: true });
     const submit = async (question) => {
       await questionInput.fill(question);
@@ -44,9 +53,8 @@ async function main() {
     await expect(ask).toBeEnabled({ timeout: 180_000 });
     if (!(await status()).fixtureProvider) throw Error('Fixture provider required');
     await capture('initial');
-    await page.getByText('Session details', { exact: true }).click();
     const successful = async (label) => {
-      await fault.selectOption('');
+      await setFault('');
       await expect(ask).toBeEnabled({ timeout: 180_000 });
       const id = await submit(label);
       await expect(page.locator('#status')).toHaveText('Playback ended', { timeout: 180_000 });
@@ -62,7 +70,7 @@ async function main() {
       ['buffer-delay', 'buffer-delay'],
       ['long', 'playing'],
     ]) {
-      await fault.selectOption(probe);
+      await setFault(probe);
       const id = await submit(`Stop during ${event}`);
       await expect
         .poll(
@@ -100,7 +108,7 @@ async function main() {
       await capture(`released-${probe}-${event}`);
       await successful(`Replacement after ${probe}-${event}`);
     }
-    await fault.selectOption('tts-delay');
+    await setFault('tts-delay');
     const resetId = await submit('Reset during speech preparation');
     await expect
       .poll(
@@ -114,7 +122,7 @@ async function main() {
     await successful('Fresh topic after busy reset');
     for (let repeat = 0; repeat < 2; repeat++) {
       for (const probe of ['llm', 'missing-completion', 'tts', 'media']) {
-        await fault.selectOption(probe);
+        await setFault(probe);
         const id = await submit(`Exercise ${probe} failure`);
         await expect
           .poll(async () => ((await status()).run.id === id ? (await status()).run.state : null), {

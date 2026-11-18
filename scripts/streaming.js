@@ -47,6 +47,7 @@ let resetting = 0;
 const settingsButton = document.querySelector('#settings');
 const settingsPage = document.querySelector('#settings-page');
 const conversationPage = document.querySelector('.workspace');
+const app = conversationPage?.closest('.app');
 settingsButton?.addEventListener('click', () => {
   settingsButton.after(stopButton);
   settingsPage.hidden = false;
@@ -64,6 +65,7 @@ document.querySelector('#settings-back')?.addEventListener('click', () => {
 const modelSelector = document.querySelector('#model');
 const thinkingSelector = document.querySelector('#thinking-level');
 const defaultAvatarSelector = document.querySelector('#default-avatar');
+const avatarResolutionSelector = document.querySelector('#avatar-resolution');
 const tokenLimitsForm = document.querySelector('#token-limits');
 const tokenInputs = {
   maxOutputTokens: document.querySelector('#max-output-tokens'),
@@ -75,6 +77,11 @@ let savingSettings = false;
 let settingsRevision = 0;
 let modelCatalog = '';
 let thinkingCatalog = '';
+function sizeAvatar() {
+  if (!avatarResolutionSelector) return;
+  const size = active && !active.ended ? active.avatarResolution : avatarResolutionSelector.value;
+  app.style.setProperty('--avatar-size', `${size}px`);
+}
 function renderSettings(settings, avatars) {
   if (avatars) {
     const catalog = JSON.stringify(avatars);
@@ -85,6 +92,9 @@ function renderSettings(settings, avatars) {
   }
   defaultAvatarSelector.value = settings.defaultAvatar;
   defaultAvatarSelector.disabled = false;
+  avatarResolutionSelector.value = settings.avatarResolution;
+  avatarResolutionSelector.disabled = false;
+  sizeAvatar();
   const catalog = JSON.stringify([settings.models, settings.model]);
   if (catalog !== modelCatalog) {
     const included = settings.models.filter((model) => model.available);
@@ -140,6 +150,7 @@ async function saveSettings(change) {
   modelSelector.disabled = true;
   thinkingSelector.disabled = true;
   defaultAvatarSelector.disabled = true;
+  avatarResolutionSelector.disabled = true;
   for (const input of Object.values(tokenInputs)) {
     if (input) input.disabled = true;
   }
@@ -155,6 +166,7 @@ async function saveSettings(change) {
     feedback.textContent = String(error);
   } finally {
     savingSettings = false;
+    avatarResolutionSelector.disabled = false;
     for (const input of Object.values(tokenInputs)) {
       if (input) input.disabled = false;
     }
@@ -178,6 +190,9 @@ thinkingSelector?.addEventListener('change', () =>
 );
 defaultAvatarSelector?.addEventListener('change', () =>
   saveSettings({ defaultAvatar: defaultAvatarSelector.value }),
+);
+avatarResolutionSelector?.addEventListener('change', () =>
+  saveSettings({ avatarResolution: Number(avatarResolutionSelector.value) }),
 );
 const pairSelector = document.querySelector('#pair');
 const avatarEditor = document.querySelector('#avatar-editor');
@@ -493,6 +508,7 @@ for (const event of ['playing', 'waiting', 'stalled', 'ended', 'error']) {
     if (event === 'ended') {
       statusText.textContent = 'Playback ended';
       if (active) active.ended = true;
+      sizeAvatar();
     }
     if (event === 'error') statusText.textContent = `Playback failed: ${video.error?.message}`;
     if (event === 'error' && active) {
@@ -521,6 +537,7 @@ setInterval(() => {
 function release() {
   const run = active;
   active = null;
+  sizeAvatar();
   run?.controller?.abort();
   video.pause();
   video.classList.remove('presenting');
@@ -697,18 +714,24 @@ start.onclick = async () => {
     }
     if (conversation && question.value === submittedQuestion) question.value = '';
     active = run;
+    sizeAvatar();
     telemetry('submit-action', {
       clientMilliseconds: submittedAt,
       utc: submittedUtc,
       request: requestId,
     });
-    statusText.textContent = clip === 'text' ? 'Preparing speech…' : 'Generating';
+    statusText.textContent = run.deferPlayback
+      ? `Rendering at ${run.avatarResolution} × ${run.avatarResolution}…`
+      : clip === 'text'
+        ? 'Preparing speech…'
+        : 'Generating';
     run.controller = new AbortController();
     const media = new MediaSource();
     run.url = URL.createObjectURL(media);
     video.src = run.url;
     await waitEvent(media, 'sourceopen', run.controller.signal);
-    const codec = 'video/mp4; codecs="avc1.42C01E, mp4a.40.2"';
+    const avc = run.avatarResolution === 768 ? 'avc1.42C01F' : 'avc1.42C01E';
+    const codec = `video/mp4; codecs="${avc}, mp4a.40.2"`;
     if (!MediaSource.isTypeSupported(codec))
       throw Error('This browser lacks H.264/AAC MediaSource support');
     const buffer = media.addSourceBuffer(codec);
@@ -746,7 +769,7 @@ start.onclick = async () => {
       });
       if (active !== run) return;
       if (response.status === 202) {
-        await sleep(50);
+        await sleep(run.deferPlayback ? 250 : 50);
         continue;
       }
       if (response.status === 204) {

@@ -23,7 +23,8 @@ class Mux:
         output: Callable[[bytes], None],
         log: Path,
         cancelled: threading.Event,
-        fragment_frames: int = 8,
+        fragment_frames: int,
+        size: int,
     ) -> None:
         self.output = output
         self.error: Exception | None = None
@@ -62,7 +63,7 @@ class Mux:
                     "-pixel_format",
                     "rgb24",
                     "-video_size",
-                    "512x512",
+                    f"{size}x{size}",
                     "-framerate",
                     "25",
                     "-i",

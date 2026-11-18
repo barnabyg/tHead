@@ -67,7 +67,11 @@ and after playback, Stop or New conversation. Moving video replaces the still
 portrait only once a decoded frame is available. Switching avatar/voice updates
 the portrait after successful preparation; a failed switch retains the active
 avatar. The conversation scrolls independently so the avatar stays on screen,
-including in the compact mobile layout. **Expand portrait** opens a larger view on narrow screens. **Reduce portrait** restores the compact view during playback. Session details combines monthly budget totals and a numbered usage list for the
+including in the compact mobile layout. On desktop, the avatar uses the full
+window height. The tHead logo, app actions, avatar name and speech label sit
+beside it. **Expand portrait** opens a larger view on narrow screens, and
+**Reduce portrait** restores the compact view during playback.
+**Settings → Session details** combines monthly budget totals and a numbered usage list for the
 current conversation. Each entry identifies the question and turn state with input/output
 tokens and estimated USD cost when available. Interrupted/failed turns retain their
 conservative allowance if final usage is missing. Timing diagnostics and diagnostic
@@ -83,7 +87,7 @@ From `C:/docs/git/tHead` on Windows with Python and PowerShell 7 installed, laun
 .\run.bat -TestBackend -Port 8765
 ```
 
-Open [the conversation](http://127.0.0.1:8765). Select the example and edit it. The transcript should stay empty until you choose **Ask**. When tHead accepts the question, the input should clear and the question should appear in the transcript. To check cancellation, expand **Session details**, select **Delay provider stream**, and ask a follow-up. Open **Settings** and choose **Stop**. On return, the transcript should show the interrupted turn. Narrow the window to phone width, then expand and reduce the portrait while keeping the composer in view. Audio and lip-sync checks use the native launcher below.
+Open [the conversation](http://127.0.0.1:8765). Select the example and edit it. The transcript should stay empty until you choose **Ask**. When tHead accepts the question, the input should clear and the question should appear in the transcript. To check cancellation, open **Settings → Session details**, select **Delay provider stream**, then return to the conversation and ask a follow-up. Open **Settings** and choose **Stop**. On return, the transcript should show the interrupted turn. Narrow the window to phone width, then expand and reduce the portrait while keeping the composer in view. Audio and lip-sync checks use the native launcher below.
 
 To manually check this UI from `C:/docs/git/tHead`, with the prerequisites and
 backend key above, run `./run.bat` in PowerShell 7. Open
@@ -96,18 +100,19 @@ and return: the draft and transcript must remain. Open Settings during playback:
 expect uninterrupted playback, a disabled Avatar selector and usable Stop/New conversation.
 Repeat at 320 px width; controls must fit and keyboard focus must move to the
 Settings heading on entry and the Settings action on return. Resize to a narrow window and scroll a long transcript:
-the portrait and question controls should remain available. Open Session details after two questions: expect separate numbered usage entries
+the portrait and question controls should remain available. Open **Settings → Session details** after two questions and check for separate numbered usage entries
 alongside monthly totals and diagnostics. Stop another response, then start a new
 conversation: expect the turn list to clear while budget totals remain accurate.
-At desktop and narrow widths, expect no text over the portrait/video, no header
-tagline and no conversation header bar or blank strip above the transcript. Real speech quality and lip sync still require
-the existing GPU/manual listening checks.
+On desktop, check that the app controls and avatar name are to the right of the
+image and that the conversation composer stays accessible. Use the native
+launcher for speech quality and lip-sync checks.
 
 For a controlled stream without paid calls, use the same command with
 `-FixtureProvider -Diagnostics -InitializeBudget` on first fixture use. This uses
 real local TTS/GPU/media but replaces
-the external text provider. Choose “Delay provider stream”; media should become
-available while later text is delayed. CPU protocol checks use `-TestBackend`
+the external text provider. Select 512 × 512 and choose **Delay provider stream**
+in **Settings → Session details**. Return to the conversation and ask a question.
+Media should become available while later text is delayed. CPU protocol checks use `-TestBackend`
 instead: visit the printed loopback URL; those diagnostic bytes cannot establish
 playable media or GPU behaviour.
 
@@ -208,7 +213,34 @@ launch the application in PowerShell 7. Add `-InitializeBudget` on first use.
 Open **Settings**. Check the Model dropdown and expand **Excluded models**. Select a
 different eligible model and inspect **Thinking level**. Checking Settings is free.
 To verify a paid turn, return to the conversation, ask a short question and check
-the model and estimated cost in Session details.
+the model and estimated cost in **Settings → Session details**.
+
+## Avatar resolution
+
+In **Settings → Avatar and voice**, choose **Avatar resolution**. tHead saves the
+selection for future replies and app restarts. On desktop, the portrait and video
+display at the selected pixel size. If the square extends beyond the avatar area,
+scroll inside that area to see the rest. The preview scales to fit in narrow or
+very short windows. A reply already in progress keeps the resolution it started with.
+
+Playback streams during generation at 512 × 512. At 640 × 640 and 768 × 768, tHead
+renders and encodes the full reply before playback begins. Longer replies take
+longer to start at those sizes. **Stop** is available while the reply renders.
+
+From `C:/docs/git/tHead`, with the native runtime prerequisites above, run this
+no-cost check in PowerShell 7:
+
+```powershell
+./run.bat -FixtureProvider -InitializeBudget
+```
+
+Open Settings, select 768 × 768, then return to the conversation. At a browser
+viewport of 1280 × 768 or larger, the entire portrait should fit without
+scrolling. Ask the black-hole question and check that the portrait stays visible
+during rendering and that playback ends normally. Repeat at 640 × 640 and
+512 × 512 and check that the image gets smaller each time. In a shorter desktop
+window, scroll inside the avatar area to see the full frame while keeping the
+composer in view. Restart and check that the last resolution is saved.
 
 ## Thinking level
 
@@ -233,7 +265,7 @@ Reported reasoning tokens are shown as a subset of output, never added again to
 cost. Interrupted or failed calls without final usage retain their reservation.
 
 Using the same `./run.bat` command above, choose two supported thinking levels
-and ask at each. Session details shows each turn's captured model and Thinking
+and ask at each. **Settings → Session details** shows each turn's captured model and Thinking
 value (also `run.thinkingLevel` in Timing diagnostics), rather than inferring the
 setting from answer length or delay. Change level during a response and verify
 only the next turn changes. Switch from Luna/none to Sol: expect medium and a
@@ -266,7 +298,7 @@ pwsh -NoProfile -Command "Set-Location C:/docs/git/tHead; ./run.bat -TestBackend
 Open [the local app](http://127.0.0.1:8765), then Settings. Advanced token limits
 contains two fields. The defaults are 384 for Maximum output tokens and 8192 for
 Input token allowance. Save 128 and 512 respectively, reload the page and check
-that both values persist. Ask the example question. In Session details, the timing
+that both values persist. Ask the example question. In **Settings → Session details**, the timing
 diagnostics should show `max_output_tokens: 128` in the fixture provider-request
 event and the instruction to give the shortest answer that fully addresses the
 question. To assess actual answer length, use the normal launch command with the
