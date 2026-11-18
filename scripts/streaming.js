@@ -56,6 +56,7 @@ settingsButton?.addEventListener('click', () => {
   settingsPage.hidden = false;
   conversationPage.hidden = true;
   settingsButton.setAttribute('aria-expanded', 'true');
+  document.querySelector('#settings-content').scrollTop = 0;
   document.querySelector('#settings-title').focus();
 });
 settingsBack?.addEventListener('click', () => {
