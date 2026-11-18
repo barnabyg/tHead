@@ -30,7 +30,7 @@ class ConversationTests(unittest.TestCase):
         self.addCleanup(self.stop_process)
         self.start_app()
 
-    def start_app(self, pair: str | None = None) -> None:
+    def start_app(self, pair: str | None = None, model: str | None = None) -> None:
         # Fixed task-owned executable and loopback server, isolated output and ephemeral port.
         self.process = subprocess.Popen(  # nosec B603
             [
@@ -42,6 +42,7 @@ class ConversationTests(unittest.TestCase):
                 self.temporary.name,
                 "--test-backend",
                 *(["--pair", pair] if pair else []),
+                *(["--model", model] if model else []),
             ],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
@@ -591,8 +592,65 @@ class ConversationTests(unittest.TestCase):
         self.assertEqual(run["tokenLimits"], defaults)
         self.stop_process()
         self.start_app()
-        for key, value in defaults.items():
-            self.assertEqual(self.request("/status")["settings"][key], value)
+        restored = self.request("/status")["settings"]
+        self.assertEqual(restored["model"], "gpt-6.1-sol")
+        self.assertEqual(restored["thinkingLevel"], "medium")
+        for key, value in limits.items():
+            self.assertEqual(restored[key], value)
+        self.stop_process()
+        self.start_app(model="gpt-6-luna")
+        status = self.request("/status")
+        self.assertEqual(status["settings"]["thinkingLevel"], "none")
+        self.request("/settings", {"session": status["session"], "answerTokenTarget": 400})
+        self.stop_process()
+        self.start_app()
+        restored = self.request("/status")["settings"]
+        self.assertEqual(restored["model"], "gpt-6.1-sol")
+        self.assertEqual(restored["answerTokenTarget"], 400)
+
+    def test_failed_combined_settings_write_preserves_previous_choices(self) -> None:
+        status = self.request("/status")
+        db = Path(self.temporary.name) / "user-data/avatars.sqlite3"
+        with closing(sqlite3.connect(db)) as connection, connection:
+            connection.execute(
+                "CREATE TRIGGER reject_default AFTER INSERT ON preferences "
+                "WHEN NEW.key='default_avatar' BEGIN SELECT RAISE(ABORT, 'disk failure'); END"
+            )
+        with self.assertRaises(urllib.error.HTTPError) as error:
+            self.request(
+                "/settings",
+                {
+                    "session": status["session"],
+                    "model": "gpt-6.1-sol",
+                    "defaultAvatar": "hopper-hazel",
+                    "inputTokenLimit": 600,
+                },
+            )
+        self.assertIn("storage unavailable", error.exception.read().decode())
+        self.assertEqual(self.request("/status")["settings"], status["settings"])
+        self.stop_process()
+        self.start_app()
+        self.assertEqual(self.request("/status")["settings"], status["settings"])
+
+    def test_invalid_saved_limits_can_be_repaired_without_losing_saved_model(self) -> None:
+        status = self.request("/status")
+        self.request("/settings", {"session": status["session"], "model": "gpt-6.1-sol"})
+        self.stop_process()
+        db = Path(self.temporary.name) / "user-data/avatars.sqlite3"
+        with closing(sqlite3.connect(db)) as connection, connection:
+            connection.execute("INSERT INTO preferences VALUES ('maxOutputTokens', 'invalid')")
+        self.start_app()
+        status = self.request("/status")
+        self.assertTrue(status["settings"]["invalidSavedLimits"])
+        self.assertEqual(status["settings"]["maxOutputTokens"], 384)
+        self.assertEqual(status["model"], "gpt-6.1-sol")
+        saved = self.request("/settings", {"session": status["session"], "maxOutputTokens": 768})
+        self.assertFalse(saved["settings"]["invalidSavedLimits"])
+        self.stop_process()
+        self.start_app()
+        settings = self.request("/status")["settings"]
+        self.assertFalse(settings["invalidSavedLimits"])
+        self.assertEqual(settings["maxOutputTokens"], 768)
 
     def test_streamed_answer_and_progressive_speech(self) -> None:
         for question in ("", " \n", "x" * 1201):

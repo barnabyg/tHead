@@ -172,17 +172,32 @@ class AvatarStore:
             return DEFAULT_PAIR
 
     def set_default_avatar(self, identity: Any) -> None:
-        if not isinstance(identity, str):
-            raise ValueError("Choose an available default avatar")
-        self.get(identity)
+        self.save_preferences({"default_avatar": identity})
+
+    def preferences(self) -> dict[str, str]:
         if self.error:
-            raise ValueError(self.error)
+            return {}
         try:
             with self.connect() as connection:
-                connection.execute(
-                    "INSERT INTO preferences (key, value) VALUES ('default_avatar', ?) "
+                return dict(connection.execute("SELECT key, value FROM preferences"))
+        except sqlite3.Error as error:
+            self.error = self.recovery(error)
+            return {}
+
+    def save_preferences(self, changes: dict[str, Any]) -> None:
+        if self.error:
+            raise ValueError(self.error)
+        if "default_avatar" in changes:
+            identity = changes["default_avatar"]
+            if not isinstance(identity, str):
+                raise ValueError("Choose an available default avatar")
+            self.get(identity)
+        try:
+            with self.connect() as connection:
+                connection.executemany(
+                    "INSERT INTO preferences (key, value) VALUES (?, ?) "
                     "ON CONFLICT(key) DO UPDATE SET value=excluded.value",
-                    (identity,),
+                    changes.items(),
                 )
         except sqlite3.Error as error:
             raise ValueError(self.recovery(error)) from error

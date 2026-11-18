@@ -128,6 +128,7 @@ function renderSettings(settings, avatars) {
     input.disabled = false;
   }
   if (saveTokenLimits) saveTokenLimits.disabled = false;
+  document.querySelector('#token-limits-error').hidden = !settings.invalidSavedLimits;
   document.querySelector('#model-availability').textContent =
     settings.catalogMessage ||
     settings.models.find((model) => model.id === settings.model)?.error ||

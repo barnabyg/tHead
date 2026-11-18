@@ -982,6 +982,38 @@ for (const custom of [false, true]) {
   });
 }
 
+test('response settings survive a server restart in a fresh browser profile', async ({
+  page,
+  browser,
+}, info) => {
+  await openSettings(page);
+  await page.getByLabel('Model', { exact: true }).selectOption('gpt-6.1-sol');
+  await expect(page.getByLabel('Thinking level')).toHaveValue('medium');
+  await page.getByLabel('Thinking level').selectOption('high');
+  await expect(page.getByLabel('Thinking level')).toBeEnabled();
+  await page.getByText('Advanced token limits', { exact: true }).click();
+  await page.getByLabel('Maximum output tokens').fill('768');
+  await page.getByLabel('Answer token target').fill('500');
+  await page.getByLabel('Input token allowance').fill('2048');
+  await page.getByRole('button', { name: 'Save token limits' }).click();
+  await expect(page.locator('#settings-status')).toContainText('Saved');
+  await stopFixture(info);
+  await startFixture(info);
+  const fresh = await browser.newPage();
+  try {
+    await fresh.goto(info.url);
+    await openSettings(fresh);
+    await expect(fresh.getByLabel('Model', { exact: true })).toHaveValue('gpt-6.1-sol');
+    await expect(fresh.getByLabel('Thinking level')).toHaveValue('high');
+    await fresh.getByText('Advanced token limits', { exact: true }).click();
+    await expect(fresh.getByLabel('Maximum output tokens')).toHaveValue('768');
+    await expect(fresh.getByLabel('Answer token target')).toHaveValue('500');
+    await expect(fresh.getByLabel('Input token allowance')).toHaveValue('2048');
+  } finally {
+    await fresh.close();
+  }
+});
+
 test('default avatar reports a failed save and restores the saved choice', async ({
   page,
   request,
