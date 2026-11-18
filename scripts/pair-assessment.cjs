@@ -58,7 +58,7 @@ async function main() {
   const idle = async () =>
     expect.poll(async () => (await status()).state, { timeout: 180_000 }).toBe('idle');
   const ask = page.getByRole('button', { name: 'Ask', exact: true });
-  const pair = page.getByLabel('Avatar', { exact: true });
+  const pair = page.getByLabel('Current avatar', { exact: true });
   let requests = 0;
   try {
     await page.goto(url);

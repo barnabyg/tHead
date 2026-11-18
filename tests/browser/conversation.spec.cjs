@@ -463,7 +463,7 @@ test('edit saved avatar retains identity and unchanged portrait across restart',
     })
   ).json();
   await openSettings(page);
-  await page.getByLabel('Avatar', { exact: true }).selectOption(created.id);
+  await page.getByLabel('Current avatar', { exact: true }).selectOption(created.id);
   await expect(page.locator('#pair-status')).toContainText('Active: Editable');
   await page.getByRole('button', { name: 'Edit avatar', exact: true }).click();
   await expect(page.getByLabel('Avatar name', { exact: true })).toHaveValue('Editable');
@@ -661,7 +661,7 @@ test('cancel editing and deletion; confirmed selected deletion falls back perman
     })
   ).json();
   await openSettings(page);
-  await page.getByLabel('Avatar', { exact: true }).selectOption(created.id);
+  await page.getByLabel('Current avatar', { exact: true }).selectOption(created.id);
   await expect(page.locator('#pair-status')).toContainText('Active: Delete me');
   await page.getByRole('button', { name: 'Edit avatar', exact: true }).click();
   await page.getByLabel('Avatar name', { exact: true }).fill('Discarded');
@@ -683,7 +683,7 @@ test('cancel editing and deletion; confirmed selected deletion falls back perman
   );
   await expect(page.locator('#pair-status')).toContainText('Active: JFK');
   expect(fs.existsSync(path.join(info.output, 'imported-portrait.png'))).toBe(false);
-  await expect(page.getByLabel('Avatar', { exact: true }).locator('option')).toHaveCount(2);
+  await expect(page.getByLabel('Current avatar', { exact: true }).locator('option')).toHaveCount(2);
   await expect(page.getByRole('button', { name: 'Delete avatar', exact: true })).toBeHidden();
   status = await (await request.get(`${info.url}/status`)).json();
   expect(status.transcript).toEqual(initial.transcript);
@@ -720,7 +720,7 @@ test('editing validates replacement images and failed writes preserve the old po
     })
   ).json();
   await openSettings(page);
-  await page.getByLabel('Avatar', { exact: true }).selectOption(created.id);
+  await page.getByLabel('Current avatar', { exact: true }).selectOption(created.id);
   await expect(page.locator('#pair-status')).toContainText('Active: Replace portrait');
   await page.getByRole('button', { name: 'Edit avatar', exact: true }).click();
   await page
@@ -915,6 +915,8 @@ test.beforeEach(async ({ page }, info) => {
     else await route.fulfill({ status: 204, body: '' });
   });
   await page.goto(info.url);
+  await expect(page.getByLabel('Question', { exact: true })).toHaveValue('');
+  await page.getByRole('button', { name: 'What is a black hole?' }).click();
   await expect(
     page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }),
   ).toBeEnabled();
@@ -943,12 +945,12 @@ for (const custom of [false, true]) {
       name = 'My default';
     }
     await openSettings(page);
-    const selector = page.getByLabel('Default avatar', { exact: true });
+    const selector = page.getByLabel('Avatar at startup', { exact: true });
     await expect(selector).toHaveValue('jfk-zira');
     await expect(selector.locator(`option[value="${identity}"]`)).toHaveText(name);
     await selector.selectOption(identity);
     await expect(page.locator('#settings-status')).toContainText('app next starts');
-    await expect(page.getByLabel('Avatar', { exact: true })).toHaveValue('jfk-zira');
+    await expect(page.getByLabel('Current avatar', { exact: true })).toHaveValue('jfk-zira');
     const saved = await (await request.get(`${info.url}/status`)).json();
     expect(saved.activeAvatar).toBe(before.activeAvatar);
     expect(saved.transcript).toEqual(before.transcript);
@@ -959,10 +961,10 @@ for (const custom of [false, true]) {
     await stopFixture(info);
     await startFixture(info);
     await page.goto(info.url);
-    await expect(page.locator('#conversation')).toContainText(`Active avatar: ${name}`);
+    await expect(page.locator('#conversation')).toHaveText(name);
     await openSettings(page);
     await expect(selector).toHaveValue(identity);
-    await page.getByLabel('Avatar', { exact: true }).selectOption('jfk-zira');
+    await page.getByLabel('Current avatar', { exact: true }).selectOption('jfk-zira');
     await expect(page.locator('#pair-status')).toContainText('Active: JFK');
     await expect(selector).toHaveValue(identity);
     if (custom) {
@@ -975,7 +977,7 @@ for (const custom of [false, true]) {
       await stopFixture(info);
       await startFixture(info);
       await page.goto(info.url);
-      await expect(page.locator('#conversation')).toContainText('Active avatar: JFK');
+      await expect(page.locator('#conversation')).toHaveText('JFK');
     }
   });
 }
@@ -996,7 +998,7 @@ test('default avatar reports a failed save and restores the saved choice', async
     { timeout: 30_000 },
   );
   await openSettings(page);
-  const selector = page.getByLabel('Default avatar', { exact: true });
+  const selector = page.getByLabel('Avatar at startup', { exact: true });
   await selector.selectOption('hopper-hazel');
   await expect(page.locator('#settings-status')).toContainText('storage unavailable');
   await expect(selector).toHaveValue('jfk-zira');
@@ -1004,6 +1006,28 @@ test('default avatar reports a failed save and restores the saved choice', async
   const after = await (await request.get(`${info.url}/status`)).json();
   expect(after.settings.defaultAvatar).toBe('jfk-zira');
   expect(after.activeAvatar).toBe(before.activeAvatar);
+});
+
+test('empty composer accepts an editable example without dispatching a question', async ({
+  page,
+  request,
+}, info) => {
+  await page.reload();
+  const question = page.getByLabel('Question', { exact: true });
+  await expect(question).toHaveValue('');
+  await expect(question).toHaveAttribute('placeholder', 'Ask JFK a question…');
+  await expect(page.locator('#status')).toHaveText('Ready');
+  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await expect(question).toBeFocused();
+  await page.getByRole('button', { name: 'What is a black hole?' }).click();
+  await expect(question).toBeFocused();
+  await expect(question).toHaveValue('What is a black hole?');
+  expect((await (await request.get(`${info.url}/status`)).json()).transcript).toEqual([]);
+  await openSettings(page);
+  await page.getByLabel('Current avatar', { exact: true }).selectOption('hopper-hazel');
+  await backToConversation(page);
+  await expect(question).toHaveAttribute('placeholder', 'Ask Grace a question…');
+  await expect(question).toHaveValue('What is a black hole?');
 });
 
 test('Settings navigation preserves draft, transcript, context and budget with keyboard focus', async ({
@@ -1018,7 +1042,7 @@ test('Settings navigation preserves draft, transcript, context and budget with k
   const before = await (await request.get(`${info.url}/status`)).json();
   for (const width of [1280, 320]) {
     await page.setViewportSize({ width, height: 844 });
-    await expect(page.getByLabel('Avatar', { exact: true })).toBeHidden();
+    await expect(page.getByLabel('Current avatar', { exact: true })).toBeHidden();
     const workspace = await page.locator('.workspace').boundingBox();
     await page.getByRole('button', { name: 'Settings', exact: true }).focus();
     await page.keyboard.press('Enter');
@@ -1029,8 +1053,8 @@ test('Settings navigation preserves draft, transcript, context and budget with k
     expect(settings.x).toBe(workspace.x);
     expect(settings.width).toBe(workspace.width);
     expect(settings.height).toBeGreaterThan(0);
-    await expect(page.getByLabel('Avatar', { exact: true })).toHaveValue('jfk-zira');
-    await expect(page.getByLabel('Avatar', { exact: true })).toBeInViewport({ ratio: 1 });
+    await expect(page.getByLabel('Current avatar', { exact: true })).toHaveValue('jfk-zira');
+    await expect(page.getByLabel('Current avatar', { exact: true })).toBeInViewport({ ratio: 1 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
       true,
     );
@@ -1107,6 +1131,7 @@ test('token limits save together, survive refresh and control future requests an
   request,
 }, info) => {
   await openSettings(page);
+  await page.getByText('Advanced token limits', { exact: true }).click();
   const output = page.getByLabel('Maximum output tokens', { exact: true });
   const target = page.getByLabel('Answer token target', { exact: true });
   const input = page.getByLabel('Input token allowance', { exact: true });
@@ -1144,6 +1169,7 @@ test('token limits save together, survive refresh and control future requests an
   await expect(page.locator('#settings-status')).toContainText('Saved');
   await page.reload();
   await openSettings(page);
+  await page.getByText('Advanced token limits', { exact: true }).click();
   await expect(output).toHaveValue('1024');
   await expect(target).toHaveValue('800');
   await expect(input).toHaveValue('512');
@@ -1281,7 +1307,7 @@ test('Settings keeps active-turn controls usable and preserves playback', async 
   const before = await (await request.get(`${info.url}/status`)).json();
   const source = await page.locator('#video').getAttribute('src');
   await openSettings(page);
-  await expect(page.getByLabel('Avatar', { exact: true })).toBeDisabled();
+  await expect(page.getByLabel('Current avatar', { exact: true })).toBeDisabled();
   await expect(page.locator('#video')).toHaveAttribute('src', source);
   await expect(page.locator('#video')).toHaveJSProperty('paused', false);
   await backToConversation(page);
@@ -1315,7 +1341,7 @@ test('create a named avatar without changing selection or making a provider requ
   await page.getByRole('button', { name: 'Save avatar', exact: true }).click();
   await expect(page.getByRole('status').filter({ hasText: 'Created My avatar' })).toBeVisible();
   await expect(
-    page.getByLabel('Avatar', { exact: true }).locator('option', { hasText: 'My avatar' }),
+    page.getByLabel('Current avatar', { exact: true }).locator('option', { hasText: 'My avatar' }),
   ).toHaveCount(1);
   const saved = await (await request.get(`${info.url}/status`)).json();
   expect(saved.activePair).toBe(before.activePair);
@@ -1324,7 +1350,7 @@ test('create a named avatar without changing selection or making a provider requ
   const avatar = saved.avatars.find((item) => item.name === 'My avatar');
   expect(avatar.voice).toBe('hazel');
   await openSettings(page);
-  await page.getByLabel('Avatar', { exact: true }).selectOption(avatar.id);
+  await page.getByLabel('Current avatar', { exact: true }).selectOption(avatar.id);
   await expect(page.locator('#pair-status')).toContainText('Active: My avatar');
   await backToConversation(page);
   await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
@@ -1386,7 +1412,7 @@ test('avatar editor explains square cropping before upload and flags non-square 
   expect(await (await request.get(`${info.url}/portrait?avatar=${avatar.id}`)).body()).toEqual(
     Buffer.from(portrait, 'base64'),
   );
-  await page.getByLabel('Avatar', { exact: true }).selectOption(avatar.id);
+  await page.getByLabel('Current avatar', { exact: true }).selectOption(avatar.id);
   await expect(page.locator('#pair-status')).toContainText('Active: Tall portrait');
   await page.getByRole('button', { name: 'Edit avatar', exact: true }).click();
   await expect(warning).toContainText('1854 × 2670');
@@ -1519,13 +1545,14 @@ test('saved portrait survives source removal, failed save and restart; corrupt s
   await stopFixture(info);
   await startFixture(info);
   await page.goto(info.url);
-  await expect(page.getByLabel('Avatar', { exact: true }).locator('option')).toHaveCount(3);
+  await expect(page.getByLabel('Current avatar', { exact: true }).locator('option')).toHaveCount(3);
   await openSettings(page);
-  await page.getByLabel('Avatar', { exact: true }).selectOption(saved.id);
+  await page.getByLabel('Current avatar', { exact: true }).selectOption(saved.id);
   await expect(page.locator('#pair-status')).toContainText('Active: Persistent avatar');
   const portrait = await request.get(`${info.url}/portrait?avatar=${saved.id}`);
   expect(await portrait.body()).toEqual(fs.readFileSync('tests/fixtures/portrait.jpg'));
   await backToConversation(page);
+  await page.getByRole('button', { name: 'What is a black hole?' }).click();
   await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await expect(page.locator('#status')).toHaveText('Playback ended');
   await backToConversation(page);
@@ -1544,7 +1571,7 @@ test('saved portrait survives source removal, failed save and restart; corrupt s
   await expect(
     page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }),
   ).toBeEnabled();
-  await expect(page.getByLabel('Avatar', { exact: true }).locator('option')).toHaveCount(2);
+  await expect(page.getByLabel('Current avatar', { exact: true }).locator('option')).toHaveCount(2);
 });
 
 test('creating and cancelling during playback preserve active media and context', async ({
@@ -1576,10 +1603,10 @@ test('creating and cancelling during playback preserve active media and context'
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog')).not.toBeVisible();
   await page.getByRole('button', { name: 'Stop', exact: true }).click();
-  await expect(page.getByLabel('Avatar', { exact: true })).toBeEnabled();
+  await expect(page.getByLabel('Current avatar', { exact: true })).toBeEnabled();
   const saved = after.avatars.find((item) => item.name === 'During playback');
   await openSettings(page);
-  await page.getByLabel('Avatar', { exact: true }).selectOption(saved.id);
+  await page.getByLabel('Current avatar', { exact: true }).selectOption(saved.id);
   await expect(page.locator('#pair-status')).toContainText('Active: During playback');
   await backToConversation(page);
   await page.getByLabel('Question', { exact: true }).fill('How do we detect one?');
@@ -1619,15 +1646,15 @@ test('PNG creation and saved avatar preparation errors recover without losing he
   expect(
     (await request.get(`${info.url}/portrait?avatar=${saved.id}`)).headers()['content-type'],
   ).toBe('image/png');
-  await expect(page.getByLabel('Avatar', { exact: true }).locator('option')).toHaveCount(3);
+  await expect(page.getByLabel('Current avatar', { exact: true }).locator('option')).toHaveCount(3);
   await page.getByLabel('Pair diagnostic', { exact: true }).selectOption('pair-voice-missing');
   await openSettings(page);
-  await page.getByLabel('Avatar', { exact: true }).selectOption(saved.id);
+  await page.getByLabel('Current avatar', { exact: true }).selectOption(saved.id);
   await expect(page.locator('#pair-status')).toContainText('PNG avatar preparation failed');
   expect((await (await request.get(`${info.url}/status`)).json()).activePair).toBe('jfk-zira');
   await page.getByLabel('Pair diagnostic', { exact: true }).selectOption('');
   await openSettings(page);
-  await page.getByLabel('Avatar', { exact: true }).selectOption('jfk-zira');
+  await page.getByLabel('Current avatar', { exact: true }).selectOption('jfk-zira');
   await expect(
     page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }),
   ).toBeEnabled();
@@ -1652,10 +1679,12 @@ test('PNG creation and saved avatar preparation errors recover without losing he
   expect(healthy.status()).toBe(200);
   const healthyId = (await healthy.json()).id;
   await expect(
-    page.getByLabel('Avatar', { exact: true }).locator('option', { hasText: 'Healthy avatar' }),
+    page
+      .getByLabel('Current avatar', { exact: true })
+      .locator('option', { hasText: 'Healthy avatar' }),
   ).toHaveCount(1);
   await openSettings(page);
-  await page.getByLabel('Avatar', { exact: true }).selectOption(healthyId);
+  await page.getByLabel('Current avatar', { exact: true }).selectOption(healthyId);
   await expect(page.locator('#pair-status')).toContainText('Active: Healthy avatar');
 });
 
@@ -1674,7 +1703,7 @@ for (const editing of [false, true]) {
     const created = await (await request.post(`${info.url}/avatars`, { data })).json();
     await openSettings(page);
     if (editing) {
-      await page.getByLabel('Avatar', { exact: true }).selectOption(created.id);
+      await page.getByLabel('Current avatar', { exact: true }).selectOption(created.id);
       await expect(page.locator('#pair-status')).toContainText('Active: Preserved avatar');
     }
     await page
@@ -1764,15 +1793,15 @@ test('portrait stays visible through preparation, playback, Stop, reset and pair
   await expect(page.locator('#status')).toHaveText('Playback ended');
   await expect(page.locator('#video')).toHaveCSS('opacity', '0');
   await expect(portrait).toHaveClass('loaded');
-  await expect(page.getByLabel('Avatar', { exact: true })).toBeEnabled();
+  await expect(page.getByLabel('Current avatar', { exact: true })).toBeEnabled();
   await openSettings(page);
-  await page.getByLabel('Avatar', { exact: true }).selectOption('hopper-hazel');
+  await page.getByLabel('Current avatar', { exact: true }).selectOption('hopper-hazel');
   await expect(
     page.getByRole('img', { name: 'Grace portrait', exact: true, includeHidden: true }),
   ).toHaveClass('loaded');
   await page.getByLabel('Pair diagnostic', { exact: true }).selectOption('pair-prepare');
   await openSettings(page);
-  await page.getByLabel('Avatar', { exact: true }).selectOption('jfk-zira');
+  await page.getByLabel('Current avatar', { exact: true }).selectOption('jfk-zira');
   await expect(page.locator('#pair-status')).toContainText('failed');
   await expect(
     page.getByRole('img', { name: 'Grace portrait', exact: true, includeHidden: true }),
@@ -1784,6 +1813,17 @@ test('compact layout keeps portrait and composer on screen while the transcript 
 }) => {
   await page.getByText('Session details', { exact: true }).click();
   await page.setViewportSize({ width: 390, height: 844 });
+  const toggle = page.getByRole('button', { name: 'Expand portrait' });
+  const compact = await page.locator('.avatar-stage').boundingBox();
+  await toggle.click();
+  await expect(page.getByRole('button', { name: 'Reduce portrait' })).toHaveAttribute(
+    'aria-expanded',
+    'true',
+  );
+  expect((await page.locator('.avatar-stage').boundingBox()).height).toBeGreaterThan(
+    compact.height,
+  );
+  await page.getByRole('button', { name: 'Reduce portrait' }).click();
   const ask = page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true });
   for (let index = 0; index < 3; index++) {
     await expect(ask).toBeEnabled();
@@ -1823,9 +1863,9 @@ test('missing portrait gives a useful fallback and another avatar can recover', 
   await page.reload();
   await expect(page.locator('#portrait-notice')).toContainText('Rerun the launch command');
   await expect(page.locator('#portrait')).not.toHaveClass('loaded');
-  await expect(page.getByLabel('Avatar', { exact: true })).toBeEnabled();
+  await expect(page.getByLabel('Current avatar', { exact: true })).toBeEnabled();
   await openSettings(page);
-  await page.getByLabel('Avatar', { exact: true }).selectOption('hopper-hazel');
+  await page.getByLabel('Current avatar', { exact: true }).selectOption('hopper-hazel');
   await expect(
     page.getByRole('img', { name: 'Grace portrait', exact: true, includeHidden: true }),
   ).toHaveClass('loaded');
@@ -1888,7 +1928,7 @@ test('switch both directions between turns, reject busy selection, retain contex
   request,
 }, info) => {
   const ask = page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true });
-  const pair = page.getByLabel('Avatar', { exact: true });
+  const pair = page.getByLabel('Current avatar', { exact: true });
   await expect(pair).toHaveValue('jfk-zira');
   await backToConversation(page);
   await ask.click();
@@ -1911,6 +1951,7 @@ test('switch both directions between turns, reject busy selection, retain contex
   await expect(page.locator('#status')).toHaveText('Playback ended');
   const followup = await (await request.get(`${info.url}/status`)).json();
   expect(followup.run.pair).toBe('hopper-hazel');
+  await expect(page.locator('.answer strong')).toHaveText(['JFK:', 'Grace:']);
   expect(followup.run.answer).toContain('Earlier question: What is a black hole?');
   await page.getByLabel('Diagnostic fault').selectOption('llm-delay');
   await expect(ask).toBeEnabled();
@@ -1935,12 +1976,12 @@ test('switch both directions between turns, reject busy selection, retain contex
   expect(fresh.activePair).toBe('jfk-zira');
 });
 
-test('reset and Stop during loading retain choice, reject overlapping selection and expire old media', async ({
+test('reset during loading retains choice, reject overlapping selection and expire old media', async ({
   page,
   request,
 }, info) => {
   const ask = page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true });
-  const pair = page.getByLabel('Avatar', { exact: true });
+  const pair = page.getByLabel('Current avatar', { exact: true });
   await backToConversation(page);
   await ask.click();
   await expect(page.locator('#status')).toHaveText('Playback ended');
@@ -1961,7 +2002,7 @@ test('reset and Stop during loading retain choice, reject overlapping selection 
   expect(stale.status()).toBe(410);
   await page.getByRole('button', { name: 'New conversation' }).click();
   await expect(page.locator('#transcript')).toBeEmpty();
-  await page.getByRole('button', { name: 'Stop', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Stop', exact: true })).toBeHidden();
   await expect(ask).toBeEnabled();
   await expect(pair).toHaveValue('hopper-hazel');
   const ready = await (await request.get(`${info.url}/status`)).json();
@@ -1992,7 +2033,7 @@ for (const fault of [
     request,
   }, info) => {
     const ask = page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true });
-    const pair = page.getByLabel('Avatar', { exact: true });
+    const pair = page.getByLabel('Current avatar', { exact: true });
     await backToConversation(page);
     await ask.click();
     await expect(page.locator('#status')).toHaveText('Playback ended');
@@ -2031,7 +2072,7 @@ test('late old media and delayed failed selection cannot revive playback after r
   request,
 }, info) => {
   const ask = page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true });
-  const pair = page.getByLabel('Avatar', { exact: true });
+  const pair = page.getByLabel('Current avatar', { exact: true });
   let releaseMedia;
   let receivedMedia;
   const mediaGate = new Promise((resolve) => {
@@ -2089,7 +2130,7 @@ test('reset acknowledgement gates the next selection and response', async ({ pag
   });
   await page.getByRole('button', { name: 'New conversation' }).click();
   await accepted;
-  const pair = page.getByLabel('Avatar', { exact: true });
+  const pair = page.getByLabel('Current avatar', { exact: true });
   const ask = page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true });
   try {
     expect(await pair.isDisabled()).toBe(true);
@@ -2113,7 +2154,7 @@ test('selection waits for backend playback completion acknowledgement', async ({
     if (route.request().postDataJSON().event === 'ended') await gate;
     await route.continue();
   });
-  const pair = page.getByLabel('Avatar', { exact: true });
+  const pair = page.getByLabel('Current avatar', { exact: true });
   await backToConversation(page);
   await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await expect(page.locator('#status')).toHaveText('Playback ended');
@@ -2133,7 +2174,7 @@ test('selection waits for backend playback completion acknowledgement', async ({
   await expect(page.locator('#pair-status')).toContainText('Active: Grace');
 });
 
-test('complete answer, contextual follow-up, idle Stop and fresh conversation', async ({
+test('complete answer, contextual follow-up and fresh conversation', async ({
   page,
   request,
 }, info) => {
@@ -2150,7 +2191,7 @@ test('complete answer, contextual follow-up, idle Stop and fresh conversation', 
   await expect(
     page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }),
   ).toBeEnabled();
-  await page.getByRole('button', { name: 'Stop', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Stop', exact: true })).toBeHidden();
   await expect
     .poll(async () => (await (await request.get(`${info.url}/status`)).json()).run.state)
     .toBe('complete');
@@ -2308,7 +2349,7 @@ test('repeated Stop across delayed stages retains questions and excludes interru
       })
       .toBe(true);
     await page.getByRole('button', { name: 'Stop', exact: true }).click();
-    await page.getByRole('button', { name: 'Stop', exact: true }).click();
+    await expect(page.getByRole('button', { name: 'Stop', exact: true })).toBeHidden();
     await expect(ask).toBeEnabled();
     const stopped = await (await request.get(`${info.url}/status`)).json();
     expect(stopped.run.state).toBe('stopped');

@@ -42,6 +42,8 @@ async function main() {
     await expect(ask).toBeEnabled({ timeout: 180_000 });
     if (!(await status()).fixtureProvider) throw Error('Fixture provider required');
     await capture('initial');
+    await page.getByRole('button', { name: 'What is a black hole?' }).click();
+    await page.getByText('Session details', { exact: true }).click();
     const successful = async (label) => {
       await fault.selectOption('');
       await page.getByLabel('Question', { exact: true }).fill(label);
@@ -82,7 +84,7 @@ async function main() {
       }
       await capture(`before-stop-${probe}-${event}`);
       await stop.click();
-      await stop.click();
+      await expect(stop).toBeHidden();
       await expect(ask).toBeEnabled({ timeout: 180_000 });
       // Polling continues until the separate digital-silence callback arrives when applicable.
       if (event === 'playing')

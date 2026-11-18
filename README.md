@@ -76,7 +76,7 @@ from physical-speaker and perceptual validation.
 
 [Selectable avatar/voice pairs](docs/runtime/windows-pairs.md) add JFK/Zira
 (the default) and Grace Hopper/Hazel. Use `-Pair hopper-hazel` at launch or choose
-**Avatar** in **Settings** between turns in the browser. Switching preserves context;
+**Current avatar** in **Settings** between turns in the browser. Switching preserves context;
 preparation failures identify the requested pair and allow recovery. The
 [Phase 6 handoff](docs/runtime/phase-6-assessment.md) records native timing,
 switching/recovery evidence, user listening/viewing confirmation and limitations.
@@ -110,7 +110,7 @@ Use **Create avatar** in **Settings** to save a named local JPEG/PNG
 portrait with an available English voice. Edit or delete user-created avatars
 between turns in Settings; built-in avatars remain permanent. Saved avatars survive restarts. See
 [the avatar guide](docs/runtime/windows-avatars.md) for limits, storage and testing.
-Choose **Default avatar** in Settings to select the avatar used at startup. This
+Choose **Avatar at startup** in Settings to select the avatar used at startup. This
 preference survives restarts without switching the current conversation's avatar.
 
 The [isolated Chatterbox evaluation](docs/runtime/chatterbox-evaluation.md) provides

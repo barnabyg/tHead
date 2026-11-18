@@ -2,9 +2,9 @@
 
 For named avatars and legacy pair aliases, see [the avatar guide](windows-pairs.md).
 The default is **JFK**; **Grace** is also built in.
-Open the full-screen **Settings** page to choose the current **Avatar** by name. Use **Back to conversation**
+Open the full-screen **Settings** page to choose **Current avatar** by name. Use **Back to conversation**
 to return without losing your draft, transcript, context, playback or accounting.
-**Stop** and **New conversation** remain available on both pages. Avatar changes
+**Ask** changes to **Stop** while a response is in progress. In Settings, **Stop** moves to the header. Avatar changes
 remain disabled until the current response ends; preparation errors appear beside
 the selector and can be recovered by choosing a healthy avatar.
 Use **Create avatar** beside the selector in Settings to add your own portrait and voice.
@@ -56,7 +56,7 @@ in that guide and launch `conversation.ps1 -TestBackend -Budget <printed-path>`.
 Ask a question: expect a budget error, unchanged totals and no provider dispatch.
 For playable fixture media use `-FixtureProvider -Budget <printed-path>` instead.
 
-Wait for idle, ask “What is a black hole?”, and read the incremental answer.
+Wait for **Ready**. Enter a question or select **What is a black hole?** to fill the empty composer. Edit the question and choose **Ask** to send it.
 Expect local speech and moving video before a sufficiently long/delayed answer
 has finished generating. The transcript labels generated text separately from
 spoken playback. A short response can finish generating before playback starts.
@@ -67,13 +67,23 @@ and after playback, Stop or New conversation. Moving video replaces the still
 portrait only once a decoded frame is available. Switching avatar/voice updates
 the portrait after successful preparation; a failed switch retains the active
 avatar. The conversation scrolls independently so the avatar stays on screen,
-including in the compact mobile layout. Session details combines monthly budget totals and a numbered usage list for the
+including in the compact mobile layout. **Expand portrait** opens a larger view on narrow screens. **Reduce portrait** restores the compact view during playback. Session details combines monthly budget totals and a numbered usage list for the
 current conversation. Each entry identifies the question and turn state with input/output
 tokens and estimated USD cost when available. Interrupted/failed turns retain their
 conservative allowance if final usage is missing. Timing diagnostics and diagnostic
 fault controls (when enabled) remain in the same area. The transcript contains no
 separate usage disclosures. New conversation clears this turn list and transcript,
 while monthly budget accounting remains intact.
+
+### Quick UI check
+
+From `C:/docs/git/tHead` on Windows with Python and PowerShell 7 installed, launch the local CPU fixture:
+
+```powershell
+.\run.bat -TestBackend -Port 8765
+```
+
+Open [the conversation](http://127.0.0.1:8765). Select the example and edit it. The transcript should stay empty until you choose **Ask**. To check cancellation, expand **Session details**, select **Delay provider stream**, and ask your question. Open **Settings** and choose **Stop**. On return, the transcript should show the interrupted turn. Narrow the window to phone width, then expand and reduce the portrait while keeping the composer in view. Audio and lip-sync checks use the native launcher below.
 
 To manually check this UI from `C:/docs/git/tHead`, with the prerequisites and
 backend key above, run `./run.bat` in PowerShell 7. Open
@@ -233,7 +243,7 @@ without restarting. Real provider access, timing and answer quality remain manua
 
 ## Token limits
 
-Settings exposes three whole-number values, saved together with **Save token limits**:
+In Settings, open **Response settings → Advanced token limits** to edit three whole-number values and save them together with **Save token limits**:
 
 | Setting | Default | Allowed range | Effect |
 | --- | ---: | ---: | --- |

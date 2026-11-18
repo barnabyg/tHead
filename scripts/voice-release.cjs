@@ -141,7 +141,8 @@ async function main() {
     await expect.poll(async () => (await status()).state, { intervals: [100] }).toBe('idle');
   };
   const stop = async () => {
-    await page.getByRole('button', { name: 'Stop', exact: true }).click();
+    const button = page.getByRole('button', { name: 'Stop', exact: true });
+    if (await button.isVisible()) await button.click();
     await waitIdle();
   };
   const settings = async () => {
@@ -151,9 +152,9 @@ async function main() {
   };
   const select = async (identity) => {
     await settings();
-    await expect(page.getByLabel('Avatar', { exact: true })).toBeEnabled();
+    await expect(page.getByLabel('Current avatar', { exact: true })).toBeEnabled();
     const started = performance.now();
-    await page.getByLabel('Avatar', { exact: true }).selectOption(identity);
+    await page.getByLabel('Current avatar', { exact: true }).selectOption(identity);
     await expect
       .poll(
         async () => {

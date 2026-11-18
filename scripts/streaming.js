@@ -9,6 +9,22 @@ let submitting = false;
 let notice = '';
 let audioOutput = null;
 const conversation = document.querySelector('#conversation');
+const question = document.querySelector('#text');
+const stopButton = document.querySelector('#stop');
+const composerActions = document.querySelector('.action-buttons');
+const example = document.querySelector('#example-question');
+example?.addEventListener('click', () => {
+  question.value = example.textContent;
+  question.setCustomValidity('');
+  question.focus();
+});
+question?.addEventListener('input', () => question.setCustomValidity(''));
+const portraitSize = document.querySelector('#portrait-size');
+portraitSize?.addEventListener('click', () => {
+  const expanded = portraitSize.getAttribute('aria-expanded') === 'false';
+  portraitSize.setAttribute('aria-expanded', String(expanded));
+  portraitSize.textContent = expanded ? 'Reduce portrait' : 'Expand portrait';
+});
 const portrait = document.querySelector('#portrait');
 portrait?.addEventListener('load', () => {
   portrait.classList.add('loaded');
@@ -32,6 +48,7 @@ const settingsButton = document.querySelector('#settings');
 const settingsPage = document.querySelector('#settings-page');
 const conversationPage = document.querySelector('.workspace');
 settingsButton?.addEventListener('click', () => {
+  settingsButton.after(stopButton);
   settingsPage.hidden = false;
   conversationPage.hidden = true;
   settingsButton.setAttribute('aria-expanded', 'true');
@@ -40,6 +57,7 @@ settingsButton?.addEventListener('click', () => {
 document.querySelector('#settings-back')?.addEventListener('click', () => {
   settingsPage.hidden = true;
   conversationPage.hidden = false;
+  composerActions.append(stopButton);
   settingsButton.setAttribute('aria-expanded', 'false');
   settingsButton.focus();
 });
@@ -516,7 +534,19 @@ function observeVideo(run) {
     video.requestVideoFrameCallback(next);
   });
 }
-document.querySelector('#stop').onclick = async () => {
+function updateTurnAction() {
+  if (!conversation) return;
+  const busy = Boolean(pendingRequest || (active && !active.ended));
+  const focused = document.activeElement;
+  start.hidden = busy;
+  stopButton.hidden = !busy;
+  if (focused === start && busy) stopButton.focus();
+  if (focused === stopButton && !busy) {
+    if (conversationPage.hidden) settingsButton.focus();
+    else question.focus();
+  }
+}
+stopButton.onclick = async () => {
   stopping++;
   start.disabled = true;
   if (pairSelector) pairSelector.disabled = true;
@@ -528,7 +558,7 @@ document.querySelector('#stop').onclick = async () => {
   telemetry('stop-action');
   release();
   observeSilence(run, before, beforeRms);
-  statusText.textContent = 'Stopped; waiting for inference resources if needed';
+  statusText.textContent = 'Response stopped.';
   notice = statusText.textContent;
   const cancellations = [];
   if (run && !run.ended)
@@ -607,13 +637,22 @@ start.onclick = async () => {
   const submittedAt = performance.now();
   const submittedUtc = new Date().toISOString();
   if (submitting) return;
+  if (conversation && !question.value.trim()) {
+    question.setCustomValidity('Enter a question or choose the example.');
+    question.reportValidity();
+    return;
+  }
   submitting = true;
   notice = '';
   const ticket = ++epoch;
   const requestId = crypto.randomUUID();
   const requestController = new AbortController();
   pendingController = requestController;
-  if (conversation) pendingRequest = requestId;
+  if (conversation) {
+    pendingRequest = requestId;
+    statusText.textContent = 'Preparing your answer…';
+    updateTurnAction();
+  }
   const previous = release();
   if (previous && !previous.ended) await post('/stop', { run: previous.id }).catch(() => {});
   start.disabled = true;
@@ -651,7 +690,7 @@ start.onclick = async () => {
       utc: submittedUtc,
       request: requestId,
     });
-    statusText.textContent = clip === 'text' ? 'Preparing local speech and avatar' : 'Generating';
+    statusText.textContent = clip === 'text' ? 'Preparing speech…' : 'Generating';
     run.controller = new AbortController();
     const media = new MediaSource();
     run.url = URL.createObjectURL(media);
@@ -762,6 +801,7 @@ start.onclick = async () => {
     if (pendingRequest === requestId) pendingRequest = null;
     if (pendingController === requestController) pendingController = null;
     submitting = false;
+    updateTurnAction();
   }
 };
 play.onclick = () => {
@@ -833,9 +873,9 @@ setInterval(async () => {
         status.state === 'selecting' || status.state === 'loading'
           ? `Preparing ${status.pairs.find((item) => item.id === status.selectedPair)?.name}…`
           : status.error || `Active: ${pair?.name || 'none'}${status.ready ? ' — Ready' : ''}`;
-      conversation.textContent = pair
-        ? `Active avatar: ${pair.name}. Synthetic speech.`
-        : 'Preparing avatar';
+      const avatarName = pair?.name || 'Preparing avatar…';
+      if (conversation.textContent !== avatarName) conversation.textContent = avatarName;
+      question.placeholder = pair ? `Ask ${pair.name} a question…` : 'Ask a question…';
       if (sessionIdentity && status.session !== sessionIdentity) {
         epoch++;
         release();
@@ -865,11 +905,7 @@ setInterval(async () => {
           entry.className = 'exchange';
           for (const [role, text, kind] of [
             ['You', turn.question, 'question'],
-            [
-              status.avatars.find((item) => item.id === turn.pair)?.name || 'Avatar',
-              turn.answer,
-              'answer',
-            ],
+            [turn.avatarName, turn.answer, 'answer'],
           ]) {
             if (!text) continue;
             const message = document.createElement('div');
@@ -879,10 +915,18 @@ setInterval(async () => {
             message.append(label, document.createTextNode(text));
             entry.append(message);
           }
-          const note = document.createElement('p');
-          note.className = 'turn-note';
-          note.textContent = `${turn.state === 'stopped' ? 'Interrupted' : turn.state}${turn.truncated ? ' (output limit reached)' : ''} — Generated text may not all have been spoken.`;
-          entry.append(note);
+          const interrupted = turn.state === 'stopped' || turn.state === 'failed';
+          if (interrupted || turn.truncated) {
+            const note = document.createElement('p');
+            note.className = 'turn-note interrupted';
+            const reason = turn.state === 'failed' ? 'Response failed.' : 'Interrupted.';
+            const details = [];
+            if (interrupted) details.push(reason);
+            if (turn.truncated) details.push('Answer reached the output limit.');
+            if (interrupted && turn.answer) details.push('Some text may not have been spoken.');
+            note.textContent = details.join(' ');
+            entry.append(note);
+          }
           const usageEntry = document.createElement('li');
           const heading = document.createElement('strong');
           heading.textContent = `Turn ${index + 1}: ${turn.question}`;
@@ -922,9 +966,23 @@ setInterval(async () => {
       resetting ||
       !!(active && !active.ended) ||
       !!status.configurationError;
-    if (!active)
-      statusText.textContent =
-        status.configurationError || status.error || notice || `Model: ${status.state}`;
+    updateTurnAction();
+    if (!active && !pendingRequest) {
+      const stateLabels = {
+        idle: 'Ready',
+        loading: 'Preparing avatar…',
+        selecting: 'Switching avatar…',
+        generating: 'Preparing response…',
+        'voice-maintenance': 'Updating voices…',
+      };
+      const message =
+        status.configurationError ||
+        status.error ||
+        notice ||
+        (conversation && stateLabels[status.state]) ||
+        `Model: ${status.state}`;
+      if (statusText.textContent !== message) statusText.textContent = message;
+    }
     report.textContent = JSON.stringify(status, null, 2);
   } catch (error) {
     statusText.textContent = String(error);

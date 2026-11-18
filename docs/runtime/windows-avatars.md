@@ -57,10 +57,10 @@ create duplicate names.
 
 ## Default avatar
 
-In **Settings**, choose **Default avatar** to save the avatar used on the next app
+In **Settings**, choose **Avatar at startup** to save the avatar used on the next app
 start. Both built-in and user-created avatars are available. Saving confirms the
 change without switching the current avatar, clearing context or changing the
-budget. The existing **Avatar** dropdown still switches only the current session.
+budget. The existing **Current avatar** dropdown still switches only the current session.
 An explicit `-Avatar` / `--avatar` / `--pair`, `THEAD_AVATAR` or `THEAD_PAIR` launch
 option takes precedence without overwriting the saved preference. Without a saved
 preference, or if its avatar is deleted, startup falls back to **JFK**.
@@ -71,10 +71,10 @@ Manual check from `C:/docs/git/tHead`, using the prerequisites above:
 pwsh -NoProfile -File ./scripts/conversation.ps1 -FixtureProvider -InitializeBudget
 ```
 
-Open Settings and set **Default avatar** to **Grace** or a saved avatar. Expect a
-saved confirmation while **Avatar** and the current conversation stay unchanged.
+Open Settings and set **Avatar at startup** to **Grace** or a saved avatar. Expect a
+saved confirmation while **Current avatar** and the current conversation stay unchanged.
 Stop the launcher with Ctrl+C, then run the same command again: the chosen
-default should be active. Switching **Avatar** to JFK should keep **Default avatar**
+default should be active. Switching **Current avatar** to JFK should keep **Avatar at startup**
 unchanged. Delete a user-created default and restart: JFK should be active.
 
 ## Edit and delete
