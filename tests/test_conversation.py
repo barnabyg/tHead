@@ -428,10 +428,9 @@ class ConversationTests(unittest.TestCase):
         self.assertEqual(status["settings"]["model"], "gpt-6-luna")
         self.assertEqual(
             [model["id"] for model in status["settings"]["models"]],
-            ["gpt-6.1-sol", "gpt-6-luna"],
+            ["gpt-6.1-sol", "gpt-6-luna", "fixture-auto", "fixture-unpriced"],
         )
-        self.assertTrue(all(model["available"] for model in status["settings"]["models"]))
-        self.assertFalse(any(model["error"] for model in status["settings"]["models"]))
+        self.assertFalse(status["settings"]["models"][-1]["available"])
         run = self.ask(fault="llm-connect")
         changed = self.request("/settings", {"session": status["session"], "model": "gpt-6.1-sol"})
         self.assertEqual(changed["model"], "gpt-6.1-sol")
@@ -448,7 +447,7 @@ class ConversationTests(unittest.TestCase):
         self.assertEqual(request["configuration"]["model"], "gpt-6.1-sol")
         self.assertEqual(request["configuration"]["reasoning"], {"effort": "medium"})
 
-        for model in ("gpt-6.1-lunar", "unknown", 123):
+        for model in ("gpt-6.1-lunar", "unknown", "fixture-unpriced", 123):
             with self.assertRaises(urllib.error.HTTPError):
                 self.request("/settings", {"session": status["session"], "model": model})
         self.assertEqual(self.request("/status")["model"], "gpt-6.1-sol")

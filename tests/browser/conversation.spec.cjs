@@ -1083,6 +1083,7 @@ test('model settings validate exact identifiers and switch contextual turns with
   await expect(page.getByLabel('Model', { exact: true }).locator('option')).toHaveText([
     'gpt-6.1-sol',
     'gpt-6-luna',
+    'fixture-auto',
   ]);
   await expect(page.locator('#model-availability')).toBeEmpty();
   const initial = await (await request.get(`${info.url}/status`)).json();
@@ -1124,6 +1125,32 @@ test('model settings validate exact identifiers and switch contextual turns with
     done.run.events.find((event) => event.event === 'provider-request').configuration.model,
   ).toBe('gpt-6.1-sol');
   await expect(page.locator('#turn-usage')).toContainText('gpt-6.1-sol');
+});
+
+test('a newly listed model can use provider-default thinking and its own reserved rates', async ({
+  page,
+  request,
+}, info) => {
+  await openSettings(page);
+  const models = page.getByLabel('Model', { exact: true });
+  await expect(models.locator('option[value="fixture-unpriced"]')).toHaveCount(0);
+  await page.getByText('Excluded models (1)', { exact: true }).click();
+  await expect(page.locator('#excluded-models li')).toHaveText(
+    'fixture-unpriced — Standard text pricing unconfirmed',
+  );
+  await models.selectOption('fixture-auto');
+  await expect(page.getByLabel('Thinking level').locator('option:checked')).toHaveText(
+    'Model default',
+  );
+  await backToConversation(page);
+  await page.getByRole('button', { name: 'Ask', exact: true }).click();
+  await expect(page.locator('#status')).toHaveText('Playback ended');
+  const { run } = await (await request.get(`${info.url}/status`)).json();
+  expect(run.events.find((event) => event.event === 'provider-request').configuration).toEqual({
+    model: 'fixture-auto',
+    max_output_tokens: 384,
+  });
+  expect(run.usage.estimated_usd).toBe(0.00015);
 });
 
 test('token limits save together, survive refresh and control future requests and context', async ({

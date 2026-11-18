@@ -189,34 +189,32 @@ context and price reservation. Restarting uses `THEAD_MODEL`, otherwise the comp
 not write environment variables or persist across restarts. Unknown startup models
 remain blocked by validation/pricing; choose an available model to recover.
 
-Settings lists `gpt-6.1-sol` and `gpt-6-luna`, with Luna selected by default.
-The app never silently falls back. Other accounts may lack Sol access; a redacted
-provider error asks you to check model access or select another available model.
+Settings fetches the models visible to the backend API key at startup and hourly while the
+server is running. The Model dropdown shows models with confirmed text input, text output,
+Responses streaming and Standard text pricing. Open **Excluded models** to inspect the
+remaining IDs and the reason each is unavailable. New eligible models appear automatically.
+A failed inventory or pricing fetch blocks paid dispatch and retries after one minute.
+Fixture launches use an offline model list.
 
-The guard reserves worst-case cache-write input and total output rates:
-Sol USD 2.50 / 10 per million tokens, legacy Luna USD 0.125 / 0.50.
-See the official [Sol model](https://developers.openai.com/api/docs/models/gpt-6.1-sol)
-and [Luna model](https://developers.openai.com/api/docs/models/gpt-6-luna) pricing.
-Session details identifies each turn's captured model and cost; Timing diagnostics
-also shows `run.model`. No credentials are included.
+From `C:/docs/git/tHead`, with the backend API key and native runtime prerequisites above,
+launch the application in PowerShell 7. Add `-InitializeBudget` on first use.
 
-For manual verification, from `C:/docs/git/tHead` in PowerShell 7, use the single
-preparation-and-launch command `./run.bat` with the prerequisites above (first use
-adds `-InitializeBudget`). Open Settings, choose Sol, return and ask a question,
-then a contextual follow-up. Verify Sol on both turns in Session details. During
-a response choose legacy Luna; the current turn must retain Sol and the next use
-Luna. Settings must show only Sol and Luna, with no unavailable-model warning.
-Account access, real-provider output, GPU speech and lip sync require this manual
-check; automated fixtures cost nothing.
+```powershell
+./run.bat
+```
+
+Open **Settings**. Check the Model dropdown and expand **Excluded models**. Select a
+different eligible model and inspect **Thinking level**. Checking Settings is free.
+To verify a paid turn, return to the conversation, ask a short question and check
+the model and estimated cost in Session details.
 
 ## Thinking level
 
-Settings shows the effective **Thinking level**. Higher effort may improve depth
-but increases response time. Sol supports `low`, `medium`, `high`, `xhigh`, `max`;
-legacy Luna also supports `none`. All map directly to Responses
-`reasoning: {effort: <level>}`. Sol initially uses its documented `medium`
-default; legacy Luna keeps the application's existing `none` default, overriding
-the provider default. There is no new startup environment variable or flag.
+The app reads explicit reasoning levels from the model page or its entry in the official
+model index. **Model default** delegates to the provider by omitting the reasoning
+parameter. It is the only option when supported levels cannot be established.
+Luna starts at `none` when its page confirms support, preserving the existing
+low-latency setting. For other models the app uses the documented default when known.
 The level lasts for the server process, survives New conversation and changes
 only future turns. Restart chooses the initial level for the startup model.
 Switching models retains a compatible level; moving from Luna's `none` to Sol

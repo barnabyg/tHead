@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import argparse
 import base64
+import copy
 import hashlib
+import http.client
 import os
 import re
 import threading
@@ -15,21 +17,14 @@ from pathlib import Path
 from typing import Any
 
 from avatars import AvatarStore, decode_portrait, user_data_directory, voice_catalogue
-from budget import PRICES, Budget, BudgetError
+from budget import Budget, BudgetError
 from chatterbox_engine import ChatterboxEngine
 from chatterbox_setup import SpeechPreparation
 from chatterbox_voice import ChatterboxVoice
+from model_catalog import FIXTURE_MODELS, MODEL, CatalogError, discover
 from pairs import DEFAULT_PAIR, Avatar
 from prepare import RUNTIME
-from provider import (
-    MODEL,
-    MODEL_DEFAULTS,
-    MODEL_ERRORS,
-    MODEL_LEVELS,
-    Provider,
-    validate_level,
-    validate_model,
-)
+from provider import Provider, validate_level, validate_model
 from shutdown import cleanup, join_worker
 from speech import SpeechVoice, Voice
 from streaming import Demonstration, LoopbackServer, Session, handler
@@ -170,7 +165,10 @@ class Conversation(Demonstration):
         self.identity = uuid.uuid4().hex
         self.transcript: list[Turn] = []
         self.cancelled_requests: set[str] = set()
-        self.provider = Provider(model, test_backend or fixture)
+        offline = test_backend or fixture
+        self.provider = Provider(model, offline, models=FIXTURE_MODELS if offline else {})
+        self.catalog_message = "" if offline else "Loading OpenAI models and pricing…"
+        self.catalog_worker: threading.Thread | None = None
         self.settings_message = ""
         self.budget: Budget | None = None
         self.budget_error = ""
@@ -182,6 +180,36 @@ class Conversation(Demonstration):
         except BudgetError as error:
             self.budget_error = str(error)
         super().__init__(inputs, directory, test_backend, 8, True, diagnostics or fixture)
+
+        if not offline and os.environ.get("OPENAI_API_KEY"):
+            self.catalog_worker = threading.Thread(target=self.refresh_models, daemon=True)
+            self.catalog_worker.start()
+        elif not offline:
+            self.catalog_message = "Set OPENAI_API_KEY in the backend and restart"
+
+    def refresh_models(self) -> None:
+        while not self.shutdown.is_set():
+            delay = self.refresh_catalog()
+            self.shutdown.wait(delay)
+
+    def refresh_catalog(self) -> int:
+        try:
+            models = discover(os.environ.get("OPENAI_API_KEY", ""), self.shutdown)
+            message = "" if models else "OpenAI returned no available models"
+        except (ValueError, OSError, http.client.HTTPException) as error:
+            models = {}
+            detail = str(error) if isinstance(error, CatalogError) else "Could not read catalog"
+            message = f"OpenAI model refresh failed. {detail}. Retrying in one minute."
+        with self.condition:
+            # Active turns retain their provider, settings and reserved rates.
+            provider = copy.copy(self.provider)
+            provider.models = models
+            info = models.get(provider.model)
+            if info and info.rates and provider.thinking_level not in info.levels:
+                provider.thinking_level = info.default
+            self.provider = provider
+            self.catalog_message = message
+        return 3600 if models else 60
 
     def close(self, server: LoopbackServer) -> None:
         # Signal owners before joining them, without holding the application lock
@@ -200,6 +228,7 @@ class Conversation(Demonstration):
             for name in ("active.wav", "active.tmp")
         ]
         cleanup(
+            ("model catalog", lambda: join_worker(self.catalog_worker, 60)),
             ("voice library", self.voice_library.close),
             ("HTTP server", server.server_close),
             ("voice storage", self.voice_store.close),
@@ -233,17 +262,23 @@ class Conversation(Demonstration):
                 "inputTokenLimit",
             }:
                 raise ValueError("Unknown setting; reload Settings and retry")
-            model = validate_model(data.get("model", self.provider.model))
+            if set(data) == {"session", "defaultAvatar"}:
+                self.avatars.set_default_avatar(data["defaultAvatar"])
+                self.settings_message = "Default avatar saved; applies when the app next starts."
+                return self.status()
+            model = data.get("model", self.provider.model)
+            info = validate_model(model, self.provider.models)
             level = data.get("thinkingLevel", self.provider.thinking_level)
             message = ""
-            if "thinkingLevel" not in data and level not in MODEL_LEVELS[model]:
-                level = MODEL_DEFAULTS[model]
+            if "thinkingLevel" not in data and level not in info.levels:
+                level = info.default
                 message = f"Thinking level changed to {level}; the selected model requires it."
-            validate_level(model, level)
+            validate_level(info, level)
             provider = Provider(
                 model,
                 self.provider.fixture,
                 level,
+                models=self.provider.models,
                 max_output_tokens=data.get("maxOutputTokens", self.provider.max_output_tokens),
                 answer_token_target=data.get(
                     "answerTokenTarget", self.provider.answer_token_target
@@ -264,15 +299,16 @@ class Conversation(Demonstration):
             **self.provider.token_settings(),
             "defaultAvatar": self.avatars.default_avatar(),
             "message": self.settings_message,
+            "catalogMessage": self.catalog_message,
             "models": [
                 {
                     "id": model,
-                    "available": not error,
-                    "error": error,
-                    "levels": MODEL_LEVELS.get(model, ()),
-                    "defaultLevel": MODEL_DEFAULTS.get(model),
+                    "available": bool(info.rates),
+                    "error": info.error,
+                    "levels": info.levels,
+                    "defaultLevel": info.default,
                 }
-                for model, error in MODEL_ERRORS.items()
+                for model, info in self.provider.models.items()
             ],
         }
 
@@ -653,10 +689,11 @@ class Conversation(Demonstration):
                 result["run"] = None
             if not budget["usable"]:
                 result["configurationError"] = budget["error"]
-            elif self.provider.model not in PRICES:
-                result["configurationError"] = (
-                    "Unknown model pricing; choose an available model in Settings"
-                )
+            elif not result["configurationError"]:
+                try:
+                    validate_model(self.provider.model, self.provider.models)
+                except ValueError as error:
+                    result["configurationError"] = self.catalog_message or str(error)
             return result
 
     def reset(self, identity: str) -> dict[str, Any]:
@@ -756,14 +793,18 @@ class Conversation(Demonstration):
                 raise ValueError("Set OPENAI_API_KEY in the backend and restart")
             if len(self.transcript) >= 100:
                 raise ValueError("Session reached 100 turns; start a New conversation")
-            validate_level(self.provider.model, self.provider.thinking_level)
+            info = validate_model(self.provider.model, self.provider.models)
+            validate_level(info, self.provider.thinking_level)
             messages, input_bound, omitted = self.context(question.strip())
             if not self.budget:
                 raise ValueError(self.budget_error)
             # The only application provider-request boundary. Every explicit retry
             # enters here and receives its own durable reservation before dispatch.
             reservation = self.budget.reserve(
-                self.provider.model, input_bound, self.provider.max_output_tokens
+                self.provider.model,
+                input_bound,
+                self.provider.max_output_tokens,
+                rates=info.request_rates(input_bound),
             )
             session = Turn(self.directory, self.fragment_frames, self.identity, question.strip())
             session.provider = self.provider

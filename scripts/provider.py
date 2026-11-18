@@ -11,36 +11,25 @@ import time
 from collections.abc import Iterator
 from typing import Any
 
-MODEL = "gpt-6-luna"
+from model_catalog import DEFAULT_EFFORT, FIXTURE_MODELS, MODEL, ModelInfo
+
 OUTPUT_TOKENS = 384
 ANSWER_TOKEN_TARGET = 240
 INPUT_BOUND = 8192
-# Official model identifiers verified 2026-11-08; see runtime documentation.
-MODEL_ERRORS = {
-    "gpt-6.1-sol": "",
-    "gpt-6-luna": "",
-}
-
-MODEL_LEVELS = {
-    "gpt-6.1-sol": ("low", "medium", "high", "xhigh", "max"),
-    "gpt-6-luna": ("none", "low", "medium", "high", "xhigh", "max"),
-}
-MODEL_DEFAULTS = {"gpt-6.1-sol": "medium", "gpt-6-luna": "none"}
 
 
-def validate_level(model: str, level: Any) -> str:
-    validate_model(model)
-    if not isinstance(level, str) or level not in MODEL_LEVELS[model]:
-        raise ValueError("Unsupported thinking level for this model; choose a level in Settings")
-    return level
-
-
-def validate_model(model: Any) -> str:
-    if not isinstance(model, str) or model not in MODEL_ERRORS:
+def validate_model(model: Any, models: dict[str, ModelInfo]) -> ModelInfo:
+    if not isinstance(model, str) or model not in models:
         raise ValueError("Unknown model; choose an available model in Settings")
-    if MODEL_ERRORS[model]:
-        raise ValueError(MODEL_ERRORS[model])
-    return model
+    info = models[model]
+    if info.error or not info.rates:
+        raise ValueError(info.error or "Model pricing unavailable")
+    return info
+
+
+def validate_level(info: ModelInfo, level: Any) -> None:
+    if not isinstance(level, str) or level not in info.levels:
+        raise ValueError("Unsupported thinking level for this model; choose a level in Settings")
 
 
 class Provider:
@@ -50,6 +39,7 @@ class Provider:
         fixture: bool = False,
         thinking_level: str | None = None,
         *,
+        models: dict[str, ModelInfo] | None = None,
         max_output_tokens: int = OUTPUT_TOKENS,
         answer_token_target: int = ANSWER_TOKEN_TARGET,
         input_token_limit: int = INPUT_BOUND,
@@ -64,12 +54,15 @@ class Provider:
         if answer_token_target > max_output_tokens:
             raise ValueError("Answer token target must not exceed maximum output tokens")
         self.model = model
+        self.models = FIXTURE_MODELS if models is None else models
         self.fixture = fixture
         self.max_output_tokens = max_output_tokens
         self.answer_token_target = answer_token_target
         self.input_token_limit = input_token_limit
         self.thinking_level = (
-            MODEL_DEFAULTS.get(model, "none") if thinking_level is None else thinking_level
+            self.models.get(model, ModelInfo()).default
+            if thinking_level is None
+            else thinking_level
         )
 
     @property
@@ -90,14 +83,18 @@ class Provider:
     def configuration(self) -> dict[str, Any]:
         return {
             "model": self.model,
-            "reasoning": {"effort": self.thinking_level},
+            **(
+                {"reasoning": {"effort": self.thinking_level}}
+                if self.thinking_level != DEFAULT_EFFORT
+                else {}
+            ),
             "max_output_tokens": self.max_output_tokens,
         }
 
     def stream(
         self, messages: list[dict[str, str]], cancelled: threading.Event, fault: str = ""
     ) -> Iterator[dict[str, Any]]:
-        validate_level(self.model, self.thinking_level)
+        validate_level(validate_model(self.model, self.models), self.thinking_level)
         if self.fixture:
             yield from self.synthetic(messages, cancelled, fault)
             return
