@@ -780,6 +780,8 @@ def handler(demo: Demonstration) -> type[BaseHTTPRequestHandler]:
                     result = {"ok": True}
                 elif self.path == "/experimental" and getattr(demo, "experimental_enabled", False):
                     result = demo.command(self.path, data)
+                elif self.path == "/read" and demo.page == "conversation.html":
+                    result = demo.command(self.path, data)
                 elif self.path in (
                     "/ask",
                     "/reset",

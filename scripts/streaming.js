@@ -8,11 +8,18 @@ let epoch = 0;
 let submitting = false;
 let notice = '';
 let audioOutput = null;
+let playbackStatus = null;
 const conversation = document.querySelector('#conversation');
 const question = document.querySelector('#text');
 const fixtureNotice = document.querySelector('#fixture-notice');
 const stopButton = document.querySelector('#stop');
 const composerActions = document.querySelector('.action-buttons');
+const readFileButton = document.querySelector('#read-file');
+const filePicker = document.querySelector('#text-file');
+const filePreview = document.querySelector('#file-preview');
+const fileError = document.querySelector('#file-error');
+const fileTextLimit = 1200;
+let readingFile = false;
 question?.addEventListener('input', () => question.setCustomValidity(''));
 const portraitSize = document.querySelector('#portrait-size');
 portraitSize?.addEventListener('click', () => {
@@ -41,6 +48,7 @@ let stopping = 0;
 let resetting = 0;
 const settingsButton = document.querySelector('#settings');
 const settingsPage = document.querySelector('#settings-page');
+const settingsBack = document.querySelector('#settings-back');
 const conversationPage = document.querySelector('.workspace');
 const app = conversationPage?.closest('.app');
 settingsButton?.addEventListener('click', () => {
@@ -50,12 +58,65 @@ settingsButton?.addEventListener('click', () => {
   settingsButton.setAttribute('aria-expanded', 'true');
   document.querySelector('#settings-title').focus();
 });
-document.querySelector('#settings-back')?.addEventListener('click', () => {
+settingsBack?.addEventListener('click', () => {
   settingsPage.hidden = true;
   conversationPage.hidden = false;
   composerActions.append(stopButton);
   settingsButton.setAttribute('aria-expanded', 'false');
   settingsButton.focus();
+});
+function setReadingMode(enabled) {
+  readingFile = enabled;
+  readFileButton.textContent = enabled ? 'Back to chat' : 'Read file';
+  document
+    .querySelector('#workspace-panel')
+    .setAttribute('aria-label', enabled ? 'Read file' : 'Conversation');
+  document.querySelector('#transcript').hidden = enabled;
+  document.querySelector('#question-controls').hidden = enabled;
+  document.querySelector('#file-controls').hidden = !enabled;
+  filePreview.hidden = !enabled || !filePreview.textContent;
+  start.textContent = enabled ? 'Read aloud' : 'Ask';
+  settingsBack.textContent = enabled ? 'Back to file reader' : 'Back to conversation';
+  updateTurnAction();
+}
+readFileButton?.addEventListener('click', () => {
+  if (active?.ended) release();
+  notice = '';
+  statusText.textContent = '';
+  setReadingMode(!readingFile);
+  if (readingFile) filePicker.focus();
+  else question.focus();
+});
+filePicker?.addEventListener('change', async () => {
+  const file = filePicker.files[0];
+  const ticket = epoch;
+  fileError.textContent = '';
+  filePreview.textContent = '';
+  filePreview.hidden = true;
+  updateTurnAction();
+  if (!file) return;
+  try {
+    if (file.size > fileTextLimit * 4 + 3) throw Error('Choose a file of up to 1,200 characters.');
+    const bytes = await file.arrayBuffer();
+    let text;
+    try {
+      text = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+    } catch {
+      throw Error('Save the file as UTF-8 plain text and try again.');
+    }
+    if (ticket !== epoch || filePicker.files[0] !== file) return;
+    if (text.includes('\0')) throw Error('Choose a plain-text file.');
+    if (!text.trim()) throw Error('Choose a file that contains text.');
+    if ([...text].length > fileTextLimit) throw Error('Choose a file of up to 1,200 characters.');
+    filePreview.textContent = text;
+    filePreview.hidden = !readingFile;
+    updateTurnAction();
+    if (readingFile) start.click();
+  } catch (error) {
+    if (ticket !== epoch || filePicker.files[0] !== file) return;
+    fileError.textContent = error.message;
+    filePicker.value = '';
+  }
 });
 const modelSelector = document.querySelector('#model');
 const thinkingSelector = document.querySelector('#thinking-level');
@@ -385,6 +446,10 @@ document.querySelector('#reset')?.addEventListener('click', async () => {
   const run = active;
   release();
   observeSilence(run, before, beforeRms);
+  filePicker.value = '';
+  filePreview.textContent = '';
+  fileError.textContent = '';
+  setReadingMode(false);
   document.querySelector('#turn-usage').replaceChildren();
   document.querySelector('#transcript').replaceChildren();
   delete document.querySelector('#transcript').dataset.rendered;
@@ -557,14 +622,25 @@ function observeVideo(run) {
   });
 }
 function updateTurnAction() {
+  const focused = document.activeElement;
+  const unavailable =
+    !(playbackStatus?.ready && playbackStatus.state === 'idle') ||
+    submitting ||
+    selecting ||
+    stopping ||
+    resetting ||
+    Boolean(active && !active.ended);
+  start.disabled = unavailable || (!readingFile && !!playbackStatus?.configurationError);
   if (!conversation) return;
   const busy = Boolean(pendingRequest || (active && !active.ended));
-  const focused = document.activeElement;
-  start.hidden = busy;
+  filePicker.disabled = unavailable;
+  readFileButton.disabled = busy || Boolean(resetting);
+  start.hidden = busy || (readingFile && !filePreview.textContent);
   stopButton.hidden = !busy;
-  if (focused === start && busy) stopButton.focus();
+  if ((focused === start || focused === filePicker) && busy) stopButton.focus();
   if (focused === stopButton && !busy) {
     if (conversationPage.hidden) settingsButton.focus();
+    else if (readingFile) readFileButton.focus();
     else question.focus();
   }
 }
@@ -580,7 +656,7 @@ stopButton.onclick = async () => {
   telemetry('stop-action');
   release();
   observeSilence(run, before, beforeRms);
-  statusText.textContent = 'Response stopped.';
+  statusText.textContent = readingFile ? 'Reading stopped.' : 'Response stopped.';
   notice = statusText.textContent;
   const cancellations = [];
   if (run && !run.ended)
@@ -658,9 +734,10 @@ async function feed(run, clip, delayed) {
 start.onclick = async () => {
   const submittedAt = performance.now();
   const submittedUtc = new Date().toISOString();
-  if (submitting) return;
-  const submittedQuestion = conversation ? question.value : '';
-  if (conversation && !submittedQuestion.trim()) {
+  if (submitting || start.disabled) return;
+  const fileReading = readingFile;
+  const submittedText = fileReading ? filePreview.textContent : question?.value;
+  if (conversation && !fileReading && !submittedText.trim()) {
     question.setCustomValidity('Enter a question.');
     question.reportValidity();
     return;
@@ -673,7 +750,7 @@ start.onclick = async () => {
   pendingController = requestController;
   if (conversation) {
     pendingRequest = requestId;
-    statusText.textContent = 'Preparing your answer…';
+    statusText.textContent = fileReading ? 'Preparing speech…' : 'Preparing your answer…';
     updateTurnAction();
   }
   const previous = release();
@@ -688,12 +765,13 @@ start.onclick = async () => {
     const mode = document.querySelector('#mode').value;
     const run = conversation
       ? await post(
-          '/ask',
+          fileReading ? '/read' : '/ask',
           {
-            question: submittedQuestion,
             session: sessionIdentity,
             request: requestId,
-            fault: document.querySelector('#fault').value,
+            ...(fileReading
+              ? { text: submittedText }
+              : { question: submittedText, fault: document.querySelector('#fault').value }),
           },
           AbortSignal.any([requestController.signal, AbortSignal.timeout(30000)]),
         )
@@ -707,7 +785,7 @@ start.onclick = async () => {
       await post('/stop', { run: run.id });
       return;
     }
-    if (conversation && question.value === submittedQuestion) question.value = '';
+    if (conversation && !fileReading && question.value === submittedText) question.value = '';
     active = run;
     sizeAvatar();
     telemetry('submit-action', {
@@ -751,7 +829,12 @@ start.onclick = async () => {
       requested = false;
     const deadline = performance.now() + 600000;
     while (active === run) {
-      if (performance.now() > deadline) throw Error('Response exceeded ten minutes; ask again');
+      if (performance.now() > deadline)
+        throw Error(
+          fileReading
+            ? 'Reading exceeded ten minutes; try a shorter file'
+            : 'Response exceeded ten minutes; ask again',
+        );
       if (
         video.buffered.length &&
         video.buffered.end(video.buffered.length - 1) - video.currentTime > 2.88
@@ -989,14 +1072,7 @@ setInterval(async () => {
     document.querySelector('#diagnostics').hidden = !status.diagnostics;
     if (!status.speechEnabled && document.querySelector('#clip').value === 'text')
       document.querySelector('#clip').value = 'six';
-    start.disabled =
-      !(status.ready && status.state === 'idle') ||
-      submitting ||
-      selecting ||
-      stopping ||
-      resetting ||
-      !!(active && !active.ended) ||
-      !!status.configurationError;
+    playbackStatus = status;
     updateTurnAction();
     if (!active && !pendingRequest) {
       const stateLabels = {
@@ -1007,7 +1083,7 @@ setInterval(async () => {
         'voice-maintenance': 'Updating voices…',
       };
       const message =
-        status.configurationError ||
+        (!readingFile && status.configurationError) ||
         status.error ||
         notice ||
         (conversation && stateLabels[status.state]) ||

@@ -26,7 +26,7 @@ from pairs import DEFAULT_PAIR, Avatar
 from prepare import RUNTIME
 from provider import INPUT_BOUND, OUTPUT_TOKENS, Provider, validate_level, validate_model
 from shutdown import cleanup, join_worker
-from speech import SpeechVoice, Voice
+from speech import SpeechVoice, Voice, segments
 from streaming import (
     AVATAR_RESOLUTIONS,
     DEFAULT_AVATAR_RESOLUTION,
@@ -49,7 +49,32 @@ PAIR_FAULTS = {
 }
 
 
-class Turn(Session):
+class ConversationRun(Session):
+    def __init__(
+        self,
+        directory: Path,
+        fragment_frames: int,
+        conversation: str,
+        avatar_resolution: int,
+    ) -> None:
+        super().__init__(directory, fragment_frames, avatar_resolution)
+        self.conversation = conversation
+        self.request_id = ""
+        self.progressive = True
+
+    def save(self) -> None:
+        # User text and speech events remain in memory only.
+        pass
+
+    def snapshot(self) -> dict[str, Any]:
+        return {
+            **super().snapshot(),
+            "session": self.conversation,
+            "request": self.request_id,
+        }
+
+
+class Turn(ConversationRun):
     def __init__(
         self,
         directory: Path,
@@ -58,8 +83,7 @@ class Turn(Session):
         question: str,
         avatar_resolution: int,
     ) -> None:
-        super().__init__(directory, fragment_frames, avatar_resolution)
-        self.conversation = conversation
+        super().__init__(directory, fragment_frames, conversation, avatar_resolution)
         self.question = question
         self.answer = ""
         self.messages = [{"role": "user", "content": question}]
@@ -68,26 +92,18 @@ class Turn(Session):
         self.input_bound = 0
         self.omitted = 0
         self.reservation = ""
-        self.request_id = ""
-        self.progressive = True
         self.pair = ""
         self.avatar_name = ""
         self.text = ["conversation"]
         self.provider = Provider()
 
-    def save(self) -> None:
-        # Conversation text and transcript events remain in memory only.
-        pass
-
     def snapshot(self) -> dict[str, Any]:
         return {
             **super().snapshot(),
-            "session": self.conversation,
             "answer": self.answer,
             "truncated": self.truncated,
             "usage": dict(self.usage),
             "inputBound": self.input_bound,
-            "request": self.request_id,
             "pair": self.pair,
             "model": self.provider.model,
             "thinkingLevel": self.provider.thinking_level,
@@ -117,6 +133,10 @@ class Conversation(Demonstration):
                 str(data.get("avatar", data.get("pair", ""))),
                 str(data.get("fault", "")),
             )
+        if path == "/read":
+            return self.read_text(
+                str(data.get("session", "")), data.get("text"), str(data.get("request", ""))
+            ).snapshot()
         return self.ask(
             str(data.get("session", "")),
             data.get("question"),
@@ -727,7 +747,10 @@ class Conversation(Demonstration):
                     for t in self.transcript
                 ],
             }
-            if isinstance(self.current, Turn) and self.current.conversation != self.identity:
+            if (
+                isinstance(self.current, ConversationRun)
+                and self.current.conversation != self.identity
+            ):
                 result["run"] = None
             if not budget["usable"]:
                 result["configurationError"] = budget["error"]
@@ -762,7 +785,7 @@ class Conversation(Demonstration):
                 raise ValueError("Start a New conversation before further requests")
             self.cancelled_requests.add(request_id)
             current = self.current
-            if isinstance(current, Turn) and current.request_id == request_id:
+            if isinstance(current, ConversationRun) and current.request_id == request_id:
                 self.stop(current.id)
             return {"ok": True}
 
@@ -789,6 +812,43 @@ class Conversation(Demonstration):
             retained += 1
         return messages, bound(messages), len(self.transcript) - retained
 
+    def require_run_ready(self, identity: str, request_id: str) -> None:
+        # Call while holding the application condition, before accepting a run.
+        if identity != self.identity:
+            raise ValueError("Session was lost or reset; reload the conversation")
+        if not re.fullmatch(r"[a-f0-9-]{32,36}", request_id):
+            raise ValueError("Expected response request identity")
+        if request_id in self.cancelled_requests:
+            raise ValueError("Response was cancelled before dispatch")
+        if (
+            not self.ready
+            or self.state != "idle"
+            or self.voice_library.state in ("previewing", "cancelling")
+        ):
+            raise ValueError("Wait for readiness and resource release")
+        if self.selected_pair.voice.startswith("voice-"):
+            self.voice_library.require_available()
+            record = self.voice_store.read(self.selected_pair.voice)
+            if not record["available"]:
+                raise ValueError(record["error"])
+
+    def read_text(self, identity: str, text: Any, request_id: str) -> ConversationRun:
+        phrases = segments(text)
+        if "\x00" in text:
+            raise ValueError("Choose a plain-text file")
+        text.encode("utf-8")
+        with self.condition:
+            self.require_run_ready(identity, request_id)
+            session = ConversationRun(
+                self.directory, self.fragment_frames, self.identity, self.avatar_resolution
+            )
+            session.text = phrases
+            session.request_id = request_id
+            self.current = session
+            self.state = "generating"
+            self.condition.notify_all()
+            return session
+
     def ask(self, identity: str, question: Any, fault: str = "", request_id: str = "") -> Turn:
         if not isinstance(question, str) or not question.strip() or len(question) > 1200:
             raise ValueError("Enter a question of 1–1200 characters")
@@ -814,23 +874,7 @@ class Conversation(Demonstration):
         ):
             raise ValueError("Unknown diagnostic; launch with --diagnostics")
         with self.condition:
-            if identity != self.identity:
-                raise ValueError("Session was lost or reset; reload the conversation")
-            if not re.fullmatch(r"[a-f0-9-]{32,36}", request_id):
-                raise ValueError("Expected response request identity")
-            if request_id in self.cancelled_requests:
-                raise ValueError("Response was cancelled before dispatch")
-            if (
-                not self.ready
-                or self.state != "idle"
-                or self.voice_library.state in ("previewing", "cancelling")
-            ):
-                raise ValueError("Wait for readiness and resource release")
-            if self.selected_pair.voice.startswith("voice-"):
-                self.voice_library.require_available()
-                record = self.voice_store.read(self.selected_pair.voice)
-                if not record["available"]:
-                    raise ValueError(record["error"])
+            self.require_run_ready(identity, request_id)
             if not self.provider.fixture and not os.environ.get("OPENAI_API_KEY"):
                 raise ValueError("Set OPENAI_API_KEY in the backend and restart")
             if len(self.transcript) >= 100:
