@@ -1638,8 +1638,14 @@ test('creating and cancelling during playback preserve active media and context'
   request,
 }, info) => {
   await backToConversation(page);
+  const video = page.locator('#video');
+  // Keep the short fixture playing until Stop, even on a slow CI worker.
+  await video.evaluate((element) => {
+    element.loop = true;
+  });
   await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
-  await expect(page.locator('#video')).toHaveClass('presenting');
+  await expect(video).toHaveClass('presenting');
+  const source = await video.getAttribute('src');
   const before = await (await request.get(`${info.url}/status`)).json();
   await openSettings(page);
   await page.getByRole('button', { name: 'Create avatar', exact: true }).click();
@@ -1661,7 +1667,12 @@ test('creating and cancelling during playback preserve active media and context'
   await page.getByRole('button', { name: 'Create avatar', exact: true }).click();
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog')).not.toBeVisible();
+  await expect(video).toHaveAttribute('src', source);
+  await expect(video).toHaveJSProperty('paused', false);
   await page.getByRole('button', { name: 'Stop', exact: true }).click();
+  await video.evaluate((element) => {
+    element.loop = false;
+  });
   await expect(page.getByLabel('Current avatar', { exact: true })).toBeEnabled();
   const saved = after.avatars.find((item) => item.name === 'During playback');
   await openSettings(page);
