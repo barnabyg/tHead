@@ -88,25 +88,35 @@ function renderSettings(settings, avatars) {
   defaultAvatarSelector.disabled = false;
   const catalog = JSON.stringify([settings.models, settings.model]);
   if (catalog !== modelCatalog) {
-    modelSelector.replaceChildren(
-      ...settings.models.map((model) => {
-        const option = new Option(model.id + (model.available ? '' : ' — unavailable'), model.id);
-        option.disabled = !model.available;
-        return option;
+    const included = settings.models.filter((model) => model.available);
+    const excluded = settings.models.filter((model) => !model.available);
+    const details = document.querySelector('#excluded-models');
+    details.hidden = !excluded.length;
+    details.querySelector('summary').textContent = `Excluded models (${excluded.length})`;
+    details.querySelector('ul').replaceChildren(
+      ...excluded.map((model) => {
+        const item = document.createElement('li');
+        item.textContent = `${model.id} — ${model.error}`;
+        return item;
       }),
     );
-    if (!settings.models.some((model) => model.id === settings.model)) {
-      modelSelector.add(new Option(`${settings.model} — unsupported`, settings.model));
+    modelSelector.replaceChildren(...included.map((model) => new Option(model.id, model.id)));
+    if (!included.some((model) => model.id === settings.model)) {
+      const current = new Option(`${settings.model} — unavailable`, settings.model);
+      current.disabled = true;
+      modelSelector.add(current);
     }
     modelCatalog = catalog;
   }
   modelSelector.value = settings.model;
-  modelSelector.disabled = false;
+  modelSelector.disabled = !settings.models.some((model) => model.available);
   const levels = settings.models.find((model) => model.id === settings.model)?.levels || [];
   const levelCatalog = JSON.stringify(levels);
   if (levelCatalog !== thinkingCatalog) {
     thinkingSelector.replaceChildren(
-      ...(levels.length ? levels : ['Unavailable']).map((level) => new Option(level, level)),
+      ...(levels.length ? levels : ['Unavailable']).map(
+        (level) => new Option(level === 'default' ? 'Model default' : level, level),
+      ),
     );
     thinkingCatalog = levelCatalog;
   }
@@ -118,10 +128,10 @@ function renderSettings(settings, avatars) {
     input.disabled = false;
   }
   if (saveTokenLimits) saveTokenLimits.disabled = false;
-  document.querySelector('#model-availability').textContent = settings.models
-    .filter((model) => !model.available)
-    .map((model) => model.error)
-    .join('. ');
+  document.querySelector('#model-availability').textContent =
+    settings.catalogMessage ||
+    settings.models.find((model) => model.id === settings.model)?.error ||
+    '';
 }
 async function saveSettings(change) {
   if (savingSettings) return;

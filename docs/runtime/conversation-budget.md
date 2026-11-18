@@ -7,22 +7,24 @@ local. The application sends no tools, audio or image requests to the provider.
 
 ## Prices and bounds
 
-Pricing was checked on **2026-11-07** against the official
-[GPT-6 Luna model page](https://developers.openai.com/api/docs/models/gpt-6-luna).
-The configured model is `gpt-6-luna`. Standard input is USD 0.10 per million tokens;
-output is USD 0.50; cached reads are USD 0.01 and cache writes USD 0.125. To avoid
-underestimating writes, the guard prices **all input at USD 0.125 per million tokens**,
-including conversation context. It never assumes a cached-input discount. Use the fixed
-standard OpenAI endpoint; regional/premium/batch service pricing is outside this adapter.
-Recheck the source and update `scripts/budget.py` before changing model, endpoint,
-service tier or price assumptions. An unknown model is rejected before dispatch.
+The backend reads OpenAI's [Standard text pricing tables](https://developers.openai.com/api/docs/pricing.md)
+and matches the exact model ID to its [model documentation](https://developers.openai.com/api/docs/models).
+It rounds USD per million tokens up to integer nanodollars per token. Within each context band,
+it budgets every input token at the highest published input, cached-read or cache-write rate,
+including longer cache retention. The guard uses short-context rates when the model page
+documents a cutoff covering the bounded request. Otherwise it uses the higher of the
+short- and long-context rates. Fixture prices stay fixed for repeatable offline tests.
+
+Missing, malformed or ambiguous pricing blocks the model. The application uses the
+standard OpenAI endpoint and processing tier. Each turn retains its reserved rates
+through settlement, including across a catalog refresh.
 
 Every paid attempt must first reserve its bounded full input and maximum output.
 The caller must include instructions, message framing and retained conversation context
 in its input upper bound, and pass the same output cap to the provider. Each retry needs
 a new reservation. No automatic retries are supplied by the ledger. Money is calculated
 as integer nanodollars, avoiding floating-point rounding at the acceptance boundary.
-For example, 1000 input and 400 output tokens reserve USD 0.000325. A completed
+With the offline Luna fixture, 1000 input and 400 output tokens reserve USD 0.000325. A completed
 100-input/20-output-token request is estimated at USD 0.0000225.
 
 ## Durable accounting
@@ -78,6 +80,4 @@ UTC rollover, unknown model rejection, corrupt/missing accounting and concurrent
 connections from multiple Budget instances in threads. Cross-process contention and
 changes to the published price table have not been independently exercised.
 
-Sol model selection uses USD 2.50 input / 10 output per million tokens, including
-the conservative cache-write allowance; active turns retain their original model
-and reservation when Settings changes. See [model selection](windows-conversation.md#model-selection-in-settings).
+See [model selection](windows-conversation.md#model-selection-in-settings) for the live catalog and manual verification.

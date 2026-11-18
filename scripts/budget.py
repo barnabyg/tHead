@@ -12,11 +12,10 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import quote
 
+from model_catalog import FIXTURE_MODELS, Rates
+
 NANODOLLARS = 1_000_000_000
 LIMIT = 40 * NANODOLLARS
-# Standard text/cache-write pricing verified 2026-11-08; no cache, batch or regional discounts.
-# Source/assumptions and review condition: docs/runtime/conversation-budget.md.
-PRICES = {"gpt-6-luna": (125, 500), "gpt-6.1-sol": (2500, 10000)}
 
 
 class BudgetError(ValueError):
@@ -125,12 +124,16 @@ class Budget:
         ).fetchone()
         return int(result[0]), int(result[1]), int(result[2]), int(result[3])
 
-    def reserve(self, model: str, input_bound: int, output_bound: int) -> str:
-        if model not in PRICES:
+    def reserve(
+        self, model: str, input_bound: int, output_bound: int, *, rates: Rates | None = None
+    ) -> str:
+        if rates is None and model in FIXTURE_MODELS:
+            rates = FIXTURE_MODELS[model].rates
+        if rates is None:
             raise BudgetError("Unknown model pricing; select a documented priced model")
         if any(type(value) is not int or value < 0 for value in (input_bound, output_bound)):
             raise BudgetError("Token allowances must be nonnegative integers")
-        input_rate, output_rate = PRICES[model]
+        input_rate, output_rate = rates
         allowance = input_bound * input_rate + output_bound * output_rate
         if allowance > LIMIT or allowance <= 0:
             raise BudgetError("Request allowance exceeds the monthly application budget")
