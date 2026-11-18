@@ -83,7 +83,7 @@ From `C:/docs/git/tHead` on Windows with Python and PowerShell 7 installed, laun
 .\run.bat -TestBackend -Port 8765
 ```
 
-Open [the conversation](http://127.0.0.1:8765). Select the example and edit it. The transcript should stay empty until you choose **Ask**. To check cancellation, expand **Session details**, select **Delay provider stream**, and ask your question. Open **Settings** and choose **Stop**. On return, the transcript should show the interrupted turn. Narrow the window to phone width, then expand and reduce the portrait while keeping the composer in view. Audio and lip-sync checks use the native launcher below.
+Open [the conversation](http://127.0.0.1:8765). Select the example and edit it. The transcript should stay empty until you choose **Ask**. When tHead accepts the question, the input should clear and the question should appear in the transcript. To check cancellation, expand **Session details**, select **Delay provider stream**, and ask a follow-up. Open **Settings** and choose **Stop**. On return, the transcript should show the interrupted turn. Narrow the window to phone width, then expand and reduce the portrait while keeping the composer in view. Audio and lip-sync checks use the native launcher below.
 
 To manually check this UI from `C:/docs/git/tHead`, with the prerequisites and
 backend key above, run `./run.bat` in PowerShell 7. Open

@@ -1337,6 +1337,7 @@ test('thinking compatibility, active capture and provider rejection recover with
   ).toBeEnabled();
   await page.unroute('**/segment?*');
   await page.getByLabel('Diagnostic fault').selectOption('llm-settings');
+  await page.getByLabel('Question', { exact: true }).fill('Test the rejected settings');
   await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await expect(page.locator('#status')).toContainText('change Settings and retry');
   await page.route('**/segment?*', async (route) => {
@@ -1858,6 +1859,7 @@ test('portrait stays visible through preparation, playback, Stop, reset and pair
     page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }),
   ).toBeEnabled();
   await backToConversation(page);
+  await page.getByLabel('Question', { exact: true }).fill('A new question after reset');
   await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await expect(page.locator('#video')).toHaveClass('presenting');
   await expect(page.locator('#status')).toHaveText('Playback ended');
@@ -1966,6 +1968,9 @@ test('bounded 100-turn session trims context, rejects turn 101 and resets', asyn
   await backToConversation(page);
   await ask.click();
   await expect(page.locator('#status')).toContainText('100 turns');
+  await expect(page.getByLabel('Question', { exact: true })).toHaveValue(
+    'This turn must be rejected',
+  );
   const rejected = await (await request.get(`${info.url}/status`)).json();
   expect(rejected.transcript).toHaveLength(100);
   expect(rejected.budget.estimated_usd).toBe(before.budget.estimated_usd);
@@ -2026,6 +2031,7 @@ test('switch both directions between turns, reject busy selection, retain contex
   await page.getByLabel('Diagnostic fault').selectOption('llm-delay');
   await expect(ask).toBeEnabled();
   await backToConversation(page);
+  await page.getByLabel('Question', { exact: true }).fill('An interrupted follow-up');
   await ask.click();
   await page.getByRole('button', { name: 'Stop', exact: true }).click();
   await expect(pair).toBeEnabled();
@@ -2081,6 +2087,7 @@ test('reset during loading retains choice, reject overlapping selection and expi
   expect(ready.budget.reserved_usd).toBe(0);
   expect(ready.activePair).toBe('hopper-hazel');
   await backToConversation(page);
+  await page.getByLabel('Question', { exact: true }).fill('A new question for Grace');
   await ask.click();
   await expect(page.locator('#status')).toHaveText('Playback ended');
   const after = await (await request.get(`${info.url}/status`)).json();
@@ -2248,8 +2255,11 @@ test('complete answer, contextual follow-up and fresh conversation', async ({
   page,
   request,
 }, info) => {
+  const question = page.getByLabel('Question', { exact: true });
   await backToConversation(page);
   await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
+  await expect(page.locator('#video')).toHaveAttribute('src', /^blob:/);
+  expect(await question.inputValue()).toBe('');
   await expect(page.locator('#transcript')).toContainText('A black hole traps light.');
   await expect(page.locator('#status')).toHaveText('Playback ended');
   const measured = (await (await request.get(`${info.url}/status`)).json()).run.events;
@@ -2266,7 +2276,7 @@ test('complete answer, contextual follow-up and fresh conversation', async ({
     .poll(async () => (await (await request.get(`${info.url}/status`)).json()).run.state)
     .toBe('complete');
   await backToConversation(page);
-  await page.getByLabel('Question', { exact: true }).fill('How do we detect one?');
+  await question.pressSequentially('How do we detect one?');
   await backToConversation(page);
   await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await expect(page.locator('#transcript')).toContainText(
@@ -2288,6 +2298,30 @@ test('complete answer, contextual follow-up and fresh conversation', async ({
   await expect(page.locator('#transcript')).toContainText('A new topic');
   await expect(page.locator('#status')).toHaveText('Playback ended');
   await expect(page.locator('#transcript')).not.toContainText('Earlier question');
+});
+
+test('an accepted question preserves a follow-up drafted while submission is pending', async ({
+  page,
+}) => {
+  let acknowledge;
+  const gate = new Promise((resolve) => {
+    acknowledge = resolve;
+  });
+  await page.route('**/ask', async (route) => {
+    const response = await route.fetch();
+    await gate;
+    await route.fulfill({ response });
+  });
+  const question = page.getByLabel('Question', { exact: true });
+  try {
+    await page.getByRole('button', { name: 'Ask', exact: true }).click();
+    await expect(page.locator('#transcript')).toContainText('You: What is a black hole?');
+    await question.fill('How do we detect one?');
+  } finally {
+    acknowledge();
+  }
+  await expect(page.locator('#video')).toHaveAttribute('src', /^blob:/);
+  await expect(question).toHaveValue('How do we detect one?');
 });
 
 test('Session details combines turn usage, failures and interruptions without resetting budget', async ({
@@ -2411,6 +2445,7 @@ test('repeated Stop across delayed stages retains questions and excludes interru
     await expect(ask).toBeEnabled();
     await page.getByLabel('Diagnostic fault').selectOption(fault);
     await backToConversation(page);
+    await page.getByLabel('Question', { exact: true }).fill(`Interrupted during ${fault}`);
     await ask.click();
     await expect
       .poll(async () => {
@@ -2456,6 +2491,7 @@ test('busy reset rejects late text and safe rendering keeps provider markup lite
   ).toBeEnabled();
   await page.getByLabel('Diagnostic fault').selectOption('markup');
   await backToConversation(page);
+  await page.getByLabel('Question', { exact: true }).fill('Show literal markup');
   await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await expect(page.locator('#transcript')).toContainText("<script>alert('text')</script>");
   await expect(page.locator('#transcript script')).toHaveCount(0);
@@ -2467,9 +2503,11 @@ test('provider, TTS and media failures recover, then budget rejection prevents d
 }, info) => {
   // Here use the real diagnostic media endpoint, including its injected failures.
   await page.unroute('**/segment?*');
+  const question = page.getByLabel('Question', { exact: true });
   for (const fault of ['llm', 'missing-completion', 'tts', 'media']) {
     await page.getByLabel('Diagnostic fault').selectOption(fault);
     await backToConversation(page);
+    await question.fill(`Exercise ${fault} failure`);
     await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
     await expect
       .poll(async () => (await (await request.get(`${info.url}/status`)).json()).run.state)
@@ -2485,6 +2523,7 @@ test('provider, TTS and media failures recover, then budget rejection prevents d
     });
     await page.getByLabel('Diagnostic fault').selectOption('');
     await backToConversation(page);
+    await question.fill(`Retry after ${fault} failure`);
     await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
     await expect(page.locator('#status')).toHaveText('Playback ended');
     await expect(
@@ -2516,8 +2555,10 @@ test('provider, TTS and media failures recover, then budget rejection prevents d
   await page.getByLabel('Diagnostic fault').selectOption('');
   const before = await (await request.get(`${info.url}/status`)).json();
   await backToConversation(page);
+  await question.fill('This question exceeds the remaining budget');
   await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await expect(page.locator('#status')).toContainText('budget');
+  await expect(question).toHaveValue('This question exceeds the remaining budget');
   const after = await (await request.get(`${info.url}/status`)).json();
   expect(after.transcript.length).toBe(before.transcript.length);
   expect(after.run.id).toBe(before.run.id);
