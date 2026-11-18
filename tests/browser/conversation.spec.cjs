@@ -930,8 +930,9 @@ test.beforeEach(async ({ page }, info) => {
     else await route.fulfill({ status: 204, body: '' });
   });
   await page.goto(info.url);
-  await expect(page.getByLabel('Question', { exact: true })).toHaveValue('');
-  await page.getByRole('button', { name: 'What is a black hole?' }).click();
+  const question = page.getByLabel('Question', { exact: true });
+  await expect(question).toHaveValue('');
+  await question.fill('What is a black hole?');
   await expect(
     page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }),
   ).toBeEnabled();
@@ -1095,7 +1096,7 @@ test('default avatar reports a failed save and restores the saved choice', async
   expect(after.activeAvatar).toBe(before.activeAvatar);
 });
 
-test('empty composer accepts an editable example without dispatching a question', async ({
+test('empty conversation opens without a starter prompt and keeps a typed draft', async ({
   page,
   request,
 }, info) => {
@@ -1103,18 +1104,20 @@ test('empty composer accepts an editable example without dispatching a question'
   const question = page.getByLabel('Question', { exact: true });
   await expect(question).toHaveValue('');
   await expect(question).toHaveAttribute('placeholder', 'Ask JFK a question…');
+  await expect(page.getByRole('heading', { name: 'Where shall we begin?' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'What is a black hole?' })).toHaveCount(0);
   await expect(page.locator('#status')).toHaveText('Ready');
   await page.getByRole('button', { name: 'Ask', exact: true }).click();
   await expect(question).toBeFocused();
-  await page.getByRole('button', { name: 'What is a black hole?' }).click();
-  await expect(question).toBeFocused();
-  await expect(question).toHaveValue('What is a black hole?');
+  await expect(question).toHaveJSProperty('validationMessage', 'Enter a question.');
+  await question.fill('How does a solar eclipse happen?');
+  await expect(question).toHaveJSProperty('validationMessage', '');
   expect((await (await request.get(`${info.url}/status`)).json()).transcript).toEqual([]);
   await openSettings(page);
   await page.getByLabel('Current avatar', { exact: true }).selectOption('hopper-hazel');
   await backToConversation(page);
   await expect(question).toHaveAttribute('placeholder', 'Ask Grace a question…');
-  await expect(question).toHaveValue('What is a black hole?');
+  await expect(question).toHaveValue('How does a solar eclipse happen?');
 });
 
 test('Settings navigation preserves draft, transcript, context and budget with keyboard focus', async ({
@@ -1656,7 +1659,7 @@ test('saved portrait survives source removal, failed save and restart; corrupt s
   const portrait = await request.get(`${info.url}/portrait?avatar=${saved.id}`);
   expect(await portrait.body()).toEqual(fs.readFileSync('tests/fixtures/portrait.jpg'));
   await backToConversation(page);
-  await page.getByRole('button', { name: 'What is a black hole?' }).click();
+  await page.getByLabel('Question', { exact: true }).fill('What is a black hole?');
   await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await expect(page.locator('#status')).toHaveText('Playback ended');
   await backToConversation(page);
@@ -2296,7 +2299,11 @@ test('complete answer, contextual follow-up and fresh conversation', async ({
   request,
 }, info) => {
   const question = page.getByLabel('Question', { exact: true });
+  const fixtureNotice = page.getByText(
+    'Fixture mode. Replies are scripted. For generated answers, relaunch with run.bat.',
+  );
   await backToConversation(page);
+  await expect(fixtureNotice).toBeVisible();
   await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
   await expect(page.locator('#video')).toHaveAttribute('src', /^blob:/);
   expect(await question.inputValue()).toBe('');
@@ -2316,15 +2323,20 @@ test('complete answer, contextual follow-up and fresh conversation', async ({
     .poll(async () => (await (await request.get(`${info.url}/status`)).json()).run.state)
     .toBe('complete');
   await backToConversation(page);
-  await question.pressSequentially('How do we detect one?');
+  await question.pressSequentially('Why is it black?');
   await backToConversation(page);
   await page.getByRole('button', { name: 'Ask', exact: true, includeHidden: true }).click();
-  await expect(page.locator('#transcript')).toContainText(
-    'Earlier question: What is a black hole?',
+  const scriptedAnswer = 'A black hole traps light. We detect one by its effects on nearby matter.';
+  await expect(page.locator('#transcript .answer').last()).toHaveText(
+    `JFK: ${scriptedAnswer} Earlier question: What is a black hole?`,
   );
   const status = await (await request.get(`${info.url}/status`)).json();
   const dispatched = status.run.events.find((event) => event.event === 'provider-request');
-  expect(dispatched.messages.some((message) => message.role === 'assistant')).toBe(true);
+  expect(dispatched.messages).toEqual([
+    { role: 'user', content: 'What is a black hole?' },
+    { role: 'assistant', content: scriptedAnswer },
+    { role: 'user', content: 'Why is it black?' },
+  ]);
   await expect(page.locator('#status')).toHaveText('Playback ended');
   await page.getByRole('button', { name: 'New conversation' }).click();
   await expect(page.locator('#transcript')).toBeEmpty();
@@ -2338,6 +2350,13 @@ test('complete answer, contextual follow-up and fresh conversation', async ({
   await expect(page.locator('#transcript')).toContainText('A new topic');
   await expect(page.locator('#status')).toHaveText('Playback ended');
   await expect(page.locator('#transcript')).not.toContainText('Earlier question');
+  await expect(fixtureNotice).toBeVisible();
+
+  await page.route('**/status', async (route) => {
+    const response = await route.fetch();
+    await route.fulfill({ json: { ...(await response.json()), fixtureProvider: false } });
+  });
+  await expect(fixtureNotice).toBeHidden();
 });
 
 test('an accepted question preserves a follow-up drafted while submission is pending', async ({
