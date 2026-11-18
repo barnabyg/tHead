@@ -67,7 +67,6 @@ const defaultAvatarSelector = document.querySelector('#default-avatar');
 const tokenLimitsForm = document.querySelector('#token-limits');
 const tokenInputs = {
   maxOutputTokens: document.querySelector('#max-output-tokens'),
-  answerTokenTarget: document.querySelector('#answer-token-target'),
   inputTokenLimit: document.querySelector('#input-token-limit'),
 };
 const saveTokenLimits = document.querySelector('#save-token-limits');
